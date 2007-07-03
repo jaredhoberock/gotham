@@ -1,0 +1,8 @@
+#exec open('../../../build.py')
+
+includes = ['/home/jared/dev/src']
+env = Environment(CPPPATH = includes)
+
+# create a library
+sources = ['Lambertian.cpp']
+env.Library('shading', sources)

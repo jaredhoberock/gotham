@@ -1,0 +1,12 @@
+exec open('../../../build.py')
+
+env = getCommonEnvironment()
+
+# add boost & python dependencies
+env.Append(LIBS = 'boost_python')
+env.Append(CPPPATH = getIncludes()['python'])
+
+# create a shared library
+env.SharedLibrary('hello', 'hello.cpp', SHLIBPREFIX = '')
+env.SharedLibrary('gotham', 'Gotham.cpp', SHLIBPREFIX = '')
+
