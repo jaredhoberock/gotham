@@ -34,19 +34,20 @@ except:
   exit()
 
 # standard includes
-compileMe  = ''
-compileMe += '#include "Lambertian.h"\n'
-compileMe += '#include "Material.h"\n'
-
-# create a class
+compileMe  = '''
+#include "Lambertian.h"
+#include "Material.h"
+'''
 compileMe += 'class %s : public Material\n' % basename
 compileMe += '{\n'
+compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % basename
 compileMe += shaderString
 compileMe += '};\n'
 
 # create shared library export
 compileMe += 'extern "C" Material * createMaterial(void)\n'
 compileMe += '{\n'
+compileMe += '  //std::cerr << "createMaterial(): Entered." << std::endl;\n'
 compileMe += '  return new %s();\n' % basename
 compileMe += '}\n'
 
@@ -56,7 +57,9 @@ dir = tempfile.mkdtemp()
 cpppath = dir + '/' + basename + '.cpp'
 makefile = '''
 includes = ['/home/jared/dev/src', '/home/jared/dev/src/gotham/shading']
-env = Environment(CPPPATH = includes, SHLIBPREFIX = '')
+libs = ['shading']
+libpath = ['.']
+env = Environment(CPPPATH = includes, LIBS = libs, LIBPATH = libpath, SHLIBPREFIX = '')
 sources = ['%s']
 env.SharedLibrary('%s', sources)''' % (cpppath, basename)
 

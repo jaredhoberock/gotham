@@ -5,13 +5,12 @@
 
 #include "Gotham.h"
 
-#include <GL/glew.h>
-#include <QGLViewer/qglviewer.h>
-#include <viewermain/main.h>
-#include <commonviewer/CommonViewer.h>
-#include <QtGui/QKeyEvent>
-
 #include "../shading/Material.h"
+#include "../shading/MaterialViewer.h"
+#pragma warning(push)
+#pragma warning(disable : 4311 4312)
+#include <Qt/qapplication.h>
+#pragma warning(pop)
 
 #ifndef WIN32
 #include <dlfcn.h>
@@ -69,18 +68,26 @@ void Gotham
 {
   std::cerr << "Gotham::render(): Entered." << std::endl;
 
+  QApplication application(0,0);
+
   // start a viewer
-  viewerMain<CommonViewer<QGLViewer, QKeyEvent> >(0, 0);
+  MaterialViewer v;
+  v.setMaterial(mCurrentMaterial);
+  v.show();
+
+  application.exec();
 } // end Gotham::render()
 
 bool Gotham
   ::material(const char *name)
 {
-  // deal with paths here?
+  std::cerr << "Gotham::loadMaterial(): about to load." << std::endl;
   Material *m = loadMaterial(name);
+  std::cerr << "Gotham::loadMaterial(): after load." << std::endl;
   if(m)
   {
-    mCurrentMaterial.reset(m);
+    std::cerr << "Gotham::material(): able to load Material " << m->getName() << std::endl;
+    mCurrentMaterial = m;
     return true;
   } // end if
 
@@ -113,8 +120,9 @@ Material *Gotham
       result = createMaterial();
     } // end if
 
-    // close the dll
-    dlclose(handle);
+    // XXX figure out when its safe to close the dll
+    //// close the dll
+    //dlclose(handle);
   } // end else
 #endif // WIN32
 

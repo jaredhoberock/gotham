@@ -9,7 +9,6 @@
 #include <vector>
 #include <gpcpu/floatmxn.h>
 #include "../shading/Material.h"
-#include <boost/shared_ptr.hpp>
 
 class Gotham
 {
@@ -71,7 +70,7 @@ class Gotham
 
     /*! The current material.
      */
-    boost::shared_ptr<Material> mCurrentMaterial;
+    Material *mCurrentMaterial;
 }; // end Gotham
 
 #include "Gotham.inl"

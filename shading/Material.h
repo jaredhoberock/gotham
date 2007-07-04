@@ -13,6 +13,7 @@ class Material
 {
   public:
     virtual ScatteringFunction *evaluate(const DifferentialGeometry &dg) const = 0;
+    virtual const char *getName(void) const = 0;
 }; // end Material
 
 #endif // MATERIAL_H

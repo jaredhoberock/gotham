@@ -4,7 +4,7 @@ import os
 
 class Gotham2(Gotham):
   # standard shaderpaths
-  shaderpaths = ["/home/jared/dev/src/gotham/shading"]
+  shaderpaths = [".","/home/jared/dev/src/gotham/shading"]
 
   def material(self, name):
     # add .so to the end if it doesn't exist
@@ -14,6 +14,8 @@ class Gotham2(Gotham):
       ext = '.so'
     elif os.name == 'nt':
       ext = '.dll'
+    elif os.name == 'mac':
+      ext = '.dylib'
     else:
       raise ValueError, "Unknown operating system!" 
     if filename[-3:] != ext:
