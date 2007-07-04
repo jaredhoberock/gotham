@@ -9,6 +9,7 @@
 #include <vector>
 #include <gpcpu/floatmxn.h>
 #include "../shading/Material.h"
+#include <boost/shared_ptr.hpp>
 
 class Gotham
 {
@@ -18,6 +19,10 @@ class Gotham
     /*! Null constructor calls init().
      */
     Gotham(void);
+
+    /*! Null destructor does nothing.
+     */
+    virtual ~Gotham(void);
 
     /*! This method sets the initial graphics state.
      */
@@ -42,15 +47,31 @@ class Gotham
      */
     void render(void);
 
-    /*! This method sets the current Material.
+    /*! This method loads sets the named Material
+     *  as the current Material.  If the Material can not be found,
+     *  the current Material is not altered.
      *  \param name The name of the Material.
+     *  \return true if the Material could be successfully set;
+     *          false, otherwise.
      */
-    void material(const char *name);
+    bool material(const char *name);
+
+    /*! This method loads a Material from a shared library.
+     *  \param path The path to the shared library.
+     *  \return A pointer to the newly created Material if
+     *          the shared library could be successfully loaded;
+     *          false, otherwise.
+     */
+    static Material *loadMaterial(const char *path);
 
   private:
     /*! The matrix stack.
      */
     std::vector<Matrix> mMatrixStack;
+
+    /*! The current material.
+     */
+    boost::shared_ptr<Material> mCurrentMaterial;
 }; // end Gotham
 
 #include "Gotham.inl"
