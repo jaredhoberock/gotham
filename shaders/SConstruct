@@ -1,0 +1,14 @@
+# XXX fix this path issue
+bld = Builder(action = '/home/jared/dev/src/gotham/shaders/pbslc.py $SOURCE')
+env = Environment(BUILDERS = {'Material' : bld},
+                  suffix = '.so',
+                  src_suffix = '.pbsl')
+
+env.Material('light.so'      , 'light.pbsl')
+env.Material('matte.so'      , 'matte.pbsl')
+env.Material('perspective.so', 'perspective.pbsl')
+env.Material('showclampn.so' , 'showclampn.pbsl')
+env.Material('shown.so'      , 'shown.pbsl')
+env.Material('showp.so'      , 'showp.pbsl')
+env.Material('showuv.so'     , 'showuv.pbsl')
+

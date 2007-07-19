@@ -220,7 +220,8 @@ BOOST_PYTHON_MODULE(%s)
   makefile = '''
 includes = ['/home/jared/dev/src', '/home/jared/dev/src/gotham/shading', '/usr/include/python2.5']
 libs = ['shading', 'geometry', 'boost_python']
-libpath = ['../geometry','../shading']
+# fix these path issues
+libpath = ['/home/jared/dev/src/gotham/geometry','/home/jared/dev/src/gotham/shading']
 env = Environment(CPPPATH = includes,
                   CPPFLAGS = '-O3',
                   LIBS = libs,
