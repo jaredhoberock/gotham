@@ -1,0 +1,8 @@
+includes = ['/home/jared/dev/src']
+env = Environment(CPPPATH = includes,
+                  tools = ['default', 'intelc'],
+                  CPPFLAGS = '-O3')
+
+# create a library 
+sources = ['BoundingBox.cpp', 'Mappings.cpp', 'Ray.cpp', 'Transform.cpp']
+env.Library('geometry', sources)
