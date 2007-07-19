@@ -1,0 +1,10 @@
+includes = ['/home/jared/dev/src/']
+env = Environment(CPPPATH = includes,
+                  tools = ['default', 'intelc'],
+                  CPPFLAGS = '-O3')
+
+# create a library
+sources = ['DebugRenderer.cpp',
+           'LightDebugRenderer.cpp']
+env.Library('renderers', sources)
+

@@ -11,7 +11,7 @@
 /*! \typedef ParametricCoordinates
  *  \brief Shorthand for now.
  */
-typedef float2 ParametricCoordinates;
+typedef gpcpu::float2 ParametricCoordinates;
 
 #endif // PARAMETRIC_COORDINATES_H
 

@@ -1,0 +1,5 @@
+scattering(Spectrum Kd)
+{
+  F = new Lambertian(Kd);
+} // end scattering()
+

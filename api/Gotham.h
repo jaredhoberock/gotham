@@ -7,14 +7,18 @@
 #define GOTHAM_H
 
 #include <vector>
-#include <gpcpu/floatmxn.h>
+#include <list>
+#include "../geometry/Transform.h"
 #include "../shading/Material.h"
+#include "../primitives/SurfacePrimitive.h"
+#include "../primitives/PrimitiveList.h"
+#include "../primitives/SurfacePrimitiveList.h"
+#include "../renderers/Renderer.h"
+#include <boost/shared_ptr.hpp>
 
 class Gotham
 {
   public:
-    typedef float4x4 Matrix;
-
     /*! Null constructor calls init().
      */
     Gotham(void);
@@ -36,41 +40,112 @@ class Gotham
      */
     void popMatrix(void);
 
+    /*! This method transforms the top of the Matrix stack
+     *  by the given translation.
+     *  \param tx The x coordinate of the translation vector.
+     *  \param ty The y coordinate of the translation vector.
+     *  \param tz The z coordinate of the translation vector.
+     */
+    void translate(const float tx, const float ty, const float tz);
+
+    /*! This method transforms the top of the Matrix stack
+     *  by the given rotation.
+     *  \param degrees The angle of rotation; in degrees.
+     *  \param rx The x coordinate of the axis of rotation.
+     *  \param ry The y coordinate of the axis of rotation.
+     *  \param rz The z coordinate of the axis of rotation.
+     */
+    void rotate(const float degrees, const float rx, const float ry, const float rz);
+
+    /*! This method scales the top of the Matrix stack
+     *  by the given scale.
+     *  \param sx The scale in the x dimension.
+     *  \param sy The scale in the y dimension.
+     *  \param sz The scale in the z dimension.
+     */
+    void scale(const float sx, const float sy, const float sz);
+
+    /*! This method multiplies the top of the Matrix stack
+     *  by the given Matrix.
+     *  \param m A row-major order Matrix.
+     */
+    void multMatrix(const std::vector<float> &m);
+
+    /*! This method loads the given Matrix into the top of the
+     *  Matrix stack.
+     *  \param m The row-order Matrix to load.
+     */
+    void loadMatrix(const std::vector<float> &m);
+
+    /*! This method returns the top of the Matrix stack.
+     *  \param m The top of the Matrix stack is returned here.
+     */
+    void getMatrix(std::vector<float> &m);
+
+    /*! This method starts a render.
+     *  \param width The width of the image to render.
+     *  \param height The height of the image to render.
+     */
+    void render(const unsigned int width,
+                const unsigned int height);
+
+    /*! This method sets the given Material
+     *  as the current Material.
+     *  \param m The Material.
+     */
+    void material(Material *m);
+
+    /*! This method creates a new triangle Mesh by
+     *  transforming the given geometry against the current
+     *  Matrix.
+     *  \param vertices A list of triangle vertices.
+     *  \param triangles A list of vertex index triples.
+     */
+    void mesh(std::vector<float> &vertices,
+              std::vector<unsigned int> &triangles);
+
+  private:
+    typedef Transform Matrix;
+
     /*! This method loads the given Matrix into the Matrix
      *  on top of the matrix stack.
      *  \param m The Matrix to load.
      */
     void loadMatrix(const Matrix &m);
 
-    /*! This method starts a render.
+    /*! This method multiplies the top of the Matrix stack
+     *  by the given Matrix.
+     *  \param m The Matrix to multiply by.
      */
-    void render(void);
+    void multMatrix(const Matrix &m);
 
-    /*! This method loads sets the named Material
-     *  as the current Material.  If the Material can not be found,
-     *  the current Material is not altered.
-     *  \param name The name of the Material.
-     *  \return true if the Material could be successfully set;
-     *          false, otherwise.
-     */
-    bool material(const char *name);
-
-    /*! This method loads a Material from a shared library.
-     *  \param path The path to the shared library.
-     *  \return A pointer to the newly created Material if
-     *          the shared library could be successfully loaded;
-     *          false, otherwise.
-     */
-    static Material *loadMaterial(const char *path);
-
-  private:
     /*! The matrix stack.
      */
     std::vector<Matrix> mMatrixStack;
 
     /*! The current material.
      */
-    Material *mCurrentMaterial;
+    boost::shared_ptr<Material> mCurrentMaterial;
+
+    /*! A list of SurfacePrimitives.
+     */
+    boost::shared_ptr<PrimitiveList<> > mPrimitives;
+
+    /*! A list of SurfacePrimitives whose Materials
+     *  identify themselves as emitters.
+     *  XXX Perhaps this should be a list of Primitives?
+     */
+    boost::shared_ptr<SurfacePrimitiveList> mEmitters;
+
+    /*! A list of SurfacePrimitives whose Materials
+     *  identify themselves as sensors.
+     *  XXX Perhaps this should be a list of Primitives?
+     */
+    boost::shared_ptr<SurfacePrimitiveList> mSensors;
+
+    /*! The Renderer.
+     */
+    boost::shared_ptr<Renderer> mRenderer;
 }; // end Gotham
 
 #include "Gotham.inl"

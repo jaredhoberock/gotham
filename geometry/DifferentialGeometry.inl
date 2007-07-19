@@ -13,9 +13,9 @@ DifferentialGeometry
 
 DifferentialGeometry
   ::DifferentialGeometry(const Point &p,
-                         const float3 &dpdu, const float3 &dpdv,
-                         const float3 &dndu, const float3 &dndv,
-                         const ParametricCoordinates &uv, const Shape *s)
+                         const Vector3 &dpdu, const Vector3 &dpdv,
+                         const Vector3 &dndu, const Vector3 &dndv,
+                         const ParametricCoordinates &uv, const Surface *s)
 {
   setPoint(p);
   setPointPartials(dpdu, dpdv);
@@ -24,17 +24,17 @@ DifferentialGeometry
   setSurface(s);
 
   // compute the normal from its partials
-  setNormalVector(dndu.cross(dndv).normalize());
+  setNormal(dndu.cross(dndv).normalize());
 } // end DifferentialGeometry::DifferentialGeometry()
 
 DifferentialGeometry
   ::DifferentialGeometry(const Point &p, const Normal &n,
-                         const float3 &dpdu, const float3 &dpdv,
-                         const float3 &dndu, const float3 &dndv,
-                         const ParametricCoordinates &uv, const Shape *s)
+                         const Vector3 &dpdu, const Vector3 &dpdv,
+                         const Vector3 &dndu, const Vector3 &dndv,
+                         const ParametricCoordinates &uv, const Surface *s)
 {
   setPoint(p);
-  setNormalVector(n);
+  setNormal(n);
   setPointPartials(dpdu, dpdv);
   setNormalVectorPartials(dndu, dndv);
   setParametricCoordinates(uv);
@@ -47,6 +47,12 @@ void DifferentialGeometry
   mPoint = p;
 } // end DifferentialGeometry::setPoint()
 
+Point &DifferentialGeometry
+  ::getPoint(void)
+{
+  return mPoint;
+} // end DifferentialGeometry::getPoint()
+
 const Point &DifferentialGeometry
   ::getPoint(void) const
 {
@@ -54,16 +60,22 @@ const Point &DifferentialGeometry
 } // end DifferentialGeometry::getPoint()
 
 void DifferentialGeometry
-  ::setNormalVector(const Normal &n)
+  ::setNormal(const Normal &n)
 {
-  mNormalVector = n;
-} // end DifferentialGeometry::setNormalVector()
+  mNormal= n;
+} // end DifferentialGeometry::setNormal()
+
+Normal &DifferentialGeometry
+  ::getNormal(void)
+{
+  return mNormal;
+} // end DifferentialGeometry::getNormal()
 
 const Normal &DifferentialGeometry
-  ::getNormalVector(void) const
+  ::getNormal(void) const
 {
-  return mNormalVector;
-} // end DifferentialGeometry::getNormalVector()
+  return mNormal;
+} // end DifferentialGeometry::getNormal()
 
 void DifferentialGeometry
   ::setParametricCoordinates(const ParametricCoordinates &uv)
@@ -78,50 +90,50 @@ const ParametricCoordinates &DifferentialGeometry
 } // end DifferentialGeometry::getParametricCoordinates()
 
 void DifferentialGeometry
-  ::setSurface(const Shape *s)
+  ::setSurface(const Surface *s)
 {
   mSurface = s;
 } // end DifferentialGeometry::setSurface()
 
-const Shape *DifferentialGeometry
+const Surface *DifferentialGeometry
   ::getSurface(void) const
 {
   return mSurface;
 } // end DifferentialGeometry::getSurface()
 
 void DifferentialGeometry
-  ::setPointPartials(const float3 &dpdu, const float3 &dpdv)
+  ::setPointPartials(const Vector3 &dpdu, const Vector3 &dpdv)
 {
   mPointPartials[0] = dpdu;
   mPointPartials[1] = dpdv;
 } // end DifferentialGeometry::setPointPartials()
 
-const float3 *DifferentialGeometry
+const Vector3 *DifferentialGeometry
   ::getPointPartials(void) const
 {
   return mPointPartials;
 } // end DifferentialGeometry::getPointPartials()
 
-float3 *DifferentialGeometry
+Vector3 *DifferentialGeometry
   ::getPointPartials(void)
 {
   return mPointPartials;
 } // end DifferentialGeometry::getPointPartials()
 
 void DifferentialGeometry
-  ::setNormalVectorPartials(const float3 &dndu, const float3 &dndv)
+  ::setNormalVectorPartials(const Vector3 &dndu, const Vector3 &dndv)
 {
   mNormalVectorPartials[0] = dndu;
   mNormalVectorPartials[1] = dndv;
 } // end DifferentialGeometry::setNormalVectorPartials()
 
-const float3 *DifferentialGeometry
+const Vector3 *DifferentialGeometry
   ::getNormalVectorPartials(void) const
 {
   return mNormalVectorPartials;
 } // end DifferentialGeometry::getNormalVectorPartials()
 
-float3 *DifferentialGeometry
+Vector3 *DifferentialGeometry
   ::getNormalVectorPartials(void)
 { 
   return mNormalVectorPartials;

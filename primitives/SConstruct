@@ -1,0 +1,12 @@
+includes = ['/home/jared/dev/src/']
+env = Environment(CPPPATH = includes,
+                  tools = ['default', 'intelc'],
+                  CPPFLAGS = '-O3')
+
+# create a library
+sources = ['Primitive.cpp',
+           'Scene.cpp',
+           'SurfacePrimitive.cpp',
+           'SurfacePrimitiveList.cpp']
+env.Library('primitives', sources)
+

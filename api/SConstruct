@@ -2,11 +2,26 @@ exec open('../../../build.py')
 
 env = getCommonEnvironment()
 
-# add boost & python dependencies
-env.Append(LIBS = 'boost_python')
+# add dependencies
+env.Append(LIBS = ['boost_python'])
+env.Append(LIBS = ['boost_thread'])
+
+env.Append(LIBS = ['renderers'])
+env.Append(LIBS = ['rasterizers'])
+env.Append(LIBS = ['primitives'])
+env.Append(LIBS = ['surfaces'])
+env.Append(LIBS = ['shading'])
+env.Append(LIBS = ['geometry'])
+
+env.Append(LIBPATH = ['../geometry',
+                      '../primitives',
+                      '../rasterizers',
+                      '../renderers',
+                      '../surfaces',
+                      '../shading'])
+
 env.Append(CPPPATH = getIncludes()['python'])
 
 # create a shared library
-env.SharedLibrary('hello', 'hello.cpp', SHLIBPREFIX = '')
-env.SharedLibrary('gotham', 'Gotham.cpp', SHLIBPREFIX = '')
+env.SharedLibrary('gotham', ['Gotham.cpp', '../Camera.cpp'], SHLIBPREFIX = '')
 

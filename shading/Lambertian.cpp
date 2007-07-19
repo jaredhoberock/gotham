@@ -13,9 +13,10 @@ Lambertian
 } // end Lambertian::Lambertian()
 
 Spectrum Lambertian
-  ::evaluate(const Vector3 &wi,
-             const Vector3 &wo) const
+  ::evaluate(const Vector3 &wo,
+             const DifferentialGeometry &dg,
+             const Vector3 &wi) const
 {
-  return areSameHemisphere(wi,wo) ? mAlbedoOverPi : Spectrum::black();
+  return areSameHemisphere(wi,dg.getNormal(),wo) ? mAlbedoOverPi : Spectrum::black();
 } // end Lambertian::evaluate()
 

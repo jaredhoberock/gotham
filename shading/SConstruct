@@ -1,8 +1,16 @@
 #exec open('../../../build.py')
 
 includes = ['/home/jared/dev/src']
-env = Environment(CPPPATH = includes)
+env = Environment(CPPPATH = includes,
+                  tools = ['default', 'intelc'],
+                  CPPFLAGS = '-O3')
 
 # create a library
-sources = ['Lambertian.cpp']
-env.Library('shading', sources)
+sources = ['FunctionAllocator.cpp',
+           'HemisphericalEmission.cpp',
+           'Lambertian.cpp',
+           'Material.cpp',
+           'PerspectiveSensor.cpp',
+           'ScatteringDistributionFunction.cpp']
+env.SharedLibrary('shading', sources)
+

@@ -1,0 +1,9 @@
+sensor(float aspect, float fovy, Point center, Vector right, Vector up, Vector look)
+{
+  float near = 1.0f / tan(0.5f * fovy);
+
+  // compute the origin of the film plane
+  Point o = center + near * look - aspect * right - up;
+  S = new PerspectiveSensor(aspect, o, right, up);
+}
+

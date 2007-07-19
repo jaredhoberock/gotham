@@ -1,0 +1,5 @@
+emission(Spectrum Ke)
+{
+  E = new HemisphericalEmission(Ke);
+} // end emission()
+

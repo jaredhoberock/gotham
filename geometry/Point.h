@@ -11,13 +11,13 @@
 /*! \class Point
  *  \brief A Point is a 3-vector.
  */
-class Point : public float3
+class Point : public gpcpu::float3
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef float3 Parent;
+    typedef gpcpu::float3 Parent;
 
     /*! Null constructor calls the parent.
      */

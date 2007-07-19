@@ -1,7 +1,0 @@
-main(void)
-{
-  Spectrum green(0.1f, 0.8f, 0.1f);
-  Spectrum albedo = green;
-  return new Lambertian(albedo);
-} // end matte()
-

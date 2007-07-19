@@ -7,18 +7,19 @@
 #define NORMAL_H
 
 #include <gpcpu/Vector.h>
+#include "Vector.h"
 
 /*! \class Normal
  *  \brief A Normal is a float3.
  */
 class Normal
-  : public float3
+  : public gpcpu::float3
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef float3 Parent;
+    typedef gpcpu::float3 Parent;
 
     /*! \fn Normal
      *  \brief Null constructor calls the Parent.
@@ -28,7 +29,7 @@ class Normal
     /*! \fn Normal
      *  \brief Constructor accepts a float3.
      */
-    inline Normal(const float3 &n):Parent(n){;}
+    inline Normal(const gpcpu::float3 &n):Parent(n){;}
 
     /*! \fn Normal
      *  \brief Constructor accepts three elements of the Normal.
@@ -43,7 +44,7 @@ class Normal
      *  \return A Normal parallel to this Normal in the same hemisphere
      *          as v.
      */
-    inline Normal sameHemisphere(const float3 &v) const
+    inline Normal sameHemisphere(const Vector &v) const
     {
       if(dot(v) < 0) return -*this;
       return *this;

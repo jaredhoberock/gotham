@@ -1,0 +1,7 @@
+includes = ['/home/jared/dev/src/']
+env = Environment(CPPPATH = includes)
+
+# create a library
+sources = ['MeshRasterizer.cpp', 'SceneRasterizer.cpp']
+env.Library('rasterizers', sources)
+
