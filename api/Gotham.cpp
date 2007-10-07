@@ -6,21 +6,30 @@
 #include "Gotham.h"
 #include <boost/shared_ptr.hpp>
 
+#include "../shading/exportShading.h"
 #include "../shading/Material.h"
+#include "../shading/DefaultMaterial.h"
+#include "../shading/stdshader.h"
 #include "../surfaces/Mesh.h"
+#include "../surfaces/SmallMesh.h"
+#include "../surfaces/Sphere.h"
 #include "../primitives/SurfacePrimitive.h"
+#include "../primitives/PrimitiveBSP.h"
 #include "../viewers/RenderViewer.h"
-#include "../renderers/DebugRenderer.h"
-#include "../renderers/LightDebugRenderer.h"
-#include "../films/RandomAccessFilm.h"
+#include "../renderers/RendererApi.h"
+#include "../films/RenderFilm.h"
+#include "../rasterizables/RasterizableScene.h"
+#include "../rasterizables/RasterizablePrimitiveList.h"
+#include "../rasterizables/RasterizableSurfacePrimitive.h"
+#include "../rasterizables/RasterizableMesh.h"
+#include "../rasterizables/RasterizableSphere.h"
+#include "../primitives/UnshadowedScene.h"
 #pragma warning(push)
 #pragma warning(disable : 4311 4312)
 #include <Qt/qapplication.h>
 #pragma warning(pop)
 
-#ifndef WIN32
-#include <dlfcn.h>
-#endif // WIN32
+using namespace boost;
 
 Gotham
   ::Gotham(void)
@@ -31,24 +40,35 @@ Gotham
 Gotham
   ::~Gotham(void)
 {
-  std::cerr << "Gotham::~Gotham()." << std::endl;
+  ;
 } // end Gotham::~Gotham()
 
 void Gotham
   ::init(void)
 {
+  // XXX HACK this is completely retarded, but
+  //     noise() won't get exported to gotham.lib
+  //     unless we actually use it somewhere in the code that gets compiled
+  //     into the dll
+  //     thanks msvc!
+  float x = gotham::noise(0,0,0);
+
   // clear the Matrix stack
   mMatrixStack.clear();
 
   // push an identity Matrix
   mMatrixStack.push_back(Matrix::identity());
 
-  // by default, we create a DebugRenderer
-  //mRenderer.reset(new DebugRenderer());
-  mRenderer.reset(new LightDebugRenderer());
+  // clear the attribute stack
+  mAttributeStack.clear();
+
+  // push default attributes
+  AttributeMap attr;
+  mAttributeStack.resize(1);
+  getDefaultAttributes(mAttributeStack.back());
 
   // create the PrimitiveList
-  mPrimitives.reset(new PrimitiveList<>());
+  mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
 
   // create the emitters list
   mEmitters.reset(new SurfacePrimitiveList());
@@ -70,9 +90,11 @@ void Gotham
   {
     mMatrixStack.pop_back();
   } // end if
-  else
+
+  if(mMatrixStack.empty())
   {
     std::cerr << "Gotham::popMatrix(): Warning, matrix stack empty!" << std::endl;
+    mMatrixStack.push_back(Matrix::identity());
   } // end else
 } // end Gotham::popMatrix()
 
@@ -140,20 +162,25 @@ void Gotham
   ::render(const unsigned int width,
            const unsigned int height)
 {
-  QApplication application(0,0);
-
   // create a new Scene
-  boost::shared_ptr<Scene> s(new Scene());
+  AttributeMap::const_iterator a = mAttributeStack.back().find("scene::castshadows");
+  shared_ptr<Scene> s;
+  if(any_cast<std::string>(a->second) == std::string("false"))
+  {
+    s.reset(new RasterizableScene<UnshadowedScene>());
+  } // end if
+  else
+  {
+    s.reset(new RasterizableScene<Scene>());
+  } // end else
 
-  RenderViewer v;
-  v.resize(width, height);
-
-  // give it the primitives
-  s->setPrimitive(mPrimitives);
-
-  // finalize emitters & sensors
+  // finalize all primitives
+  mPrimitives->finalize();
   mEmitters->finalize();
   mSensors->finalize();
+
+  // hand over the primitives
+  s->setPrimitive(mPrimitives);
 
   // give the lights to the scene
   s->setEmitters(mEmitters);
@@ -161,19 +188,85 @@ void Gotham
   // give the sensors to the scene
   s->setSensors(mSensors);
 
+  // create a new Renderer
+  mRenderer.reset(RendererApi::renderer(mAttributeStack.back()));
+
+  // name of the output?
+  std::string outfile = "";
+  a = mAttributeStack.back().find("renderer::outfile");
+  if(a != mAttributeStack.back().end())
+  {
+    any val = a->second;
+    outfile = any_cast<std::string>(val).c_str();
+  } // end if
+
   // give everything to the Renderer
   mRenderer->setScene(s);
-  shared_ptr<RandomAccessFilm> film(new RandomAccessFilm(width,height));
+  shared_ptr<RenderFilm> film(new RenderFilm(width,height,outfile));
   mRenderer->setFilm(film);
 
-  // everything to the viewer
-  v.setScene(s);
-  v.setImage(film);
-  v.setRenderer(mRenderer);
+  // headless render?
+  bool headless = false;
+  a = mAttributeStack.back().find("viewer");
+  if(a != mAttributeStack.back().end())
+  {
+    any val = a->second;
+    headless = (any_cast<std::string>(val) != std::string("true"));
+  } // end if
 
-  v.show();
+  if(!headless)
+  {
+    int zero = 0;
+    QApplication application(zero,0);
 
-  application.exec();
+    RenderViewer v;
+    v.resize(width, height);
+
+    // everything to the viewer
+    v.setScene(s);
+    v.setImage(film);
+    v.setRenderer(mRenderer);
+
+    v.setSnapshotFileName(mRenderer->getRenderParameters().c_str());
+
+    // try to tell the viewer where to look
+    // bail out otherwise
+    try
+    {
+      float fovy = atof(any_cast<std::string>(mAttributeStack.back()["viewer::fovy"]).c_str());
+      float eyex = atof(any_cast<std::string>(mAttributeStack.back()["viewer::eyex"]).c_str());
+      float eyey = atof(any_cast<std::string>(mAttributeStack.back()["viewer::eyey"]).c_str());
+      float eyez = atof(any_cast<std::string>(mAttributeStack.back()["viewer::eyez"]).c_str());
+      float upx  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::upx"]).c_str());
+      float upy  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::upy"]).c_str());
+      float upz  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::upz"]).c_str());
+      float lookx  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::lookx"]).c_str());
+      float looky  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::looky"]).c_str());
+      float lookz  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::lookz"]).c_str());
+
+      // convert degrees to radians
+      float fovyRadians = fovy * PI / 180.0f;
+      v.camera()->setFieldOfView(fovyRadians);
+      v.camera()->setAspectRatio(float(width)/float(height));
+      v.camera()->setPosition(qglviewer::Vec(eyex,eyey,eyez));
+      v.camera()->setUpVector(qglviewer::Vec(upx,upy,upz));
+      v.camera()->setViewDirection(qglviewer::Vec(lookx,looky,lookz));
+    } // end try
+    catch(...)
+    {
+      ;
+    } // end catch
+
+    v.show();
+
+    application.exec();
+  } // end if
+  else
+  {
+    // start rendering
+    Renderer::ProgressCallback callback;
+    mRenderer->render(callback);
+  } // end else
 
   return;
 } // end Gotham::render()
@@ -181,12 +274,48 @@ void Gotham
 void Gotham
   ::material(Material *m)
 {
-  mCurrentMaterial = boost::shared_ptr<Material>(m);
+  mAttributeStack.back()["material"] = shared_ptr<Material>(m);
 } // end Gotham::material)
 
 void Gotham
-    ::mesh(std::vector<float> &vertices,
-           std::vector<unsigned int> &faces)
+  ::sphere(const float cx,
+           const float cy,
+           const float cz,
+           const float radius)
+{
+  // XXX should we scale the radius?
+  Point c(cx,cy,cz);
+  c = mMatrixStack.back()(c);
+
+  shared_ptr<Surface> surface(new RasterizableSphere(c, radius));
+  shared_ptr<Material> m = any_cast<shared_ptr<Material> >(mAttributeStack.back()["material"]);
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
+} // end Gotham::sphere()
+
+void Gotham
+  ::surfacePrimitive(SurfacePrimitive *prim)
+{
+  // name the primitive
+  prim->setName(any_cast<std::string>(mAttributeStack.back()["name"]));
+
+  shared_ptr<SurfacePrimitive> surfacePrim(prim);
+  shared_ptr<Primitive> plainPrim = static_pointer_cast<Primitive,SurfacePrimitive>(surfacePrim);
+  mPrimitives->push_back(plainPrim);
+
+  if(prim->getMaterial()->isEmitter())
+  {
+    mEmitters->push_back(surfacePrim);
+  } // end if
+
+  if(prim->getMaterial()->isSensor())
+  {
+    mSensors->push_back(surfacePrim);
+  } // end if
+} // end Gotham::surfacePrimitive()
+
+void Gotham
+  ::mesh(std::vector<float> &vertices,
+         std::vector<unsigned int> &faces)
 {
   std::vector<Point> points;
   std::vector<Mesh::Triangle> triangles;
@@ -207,69 +336,115 @@ void Gotham
     triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
   } // end for i
 
-  // XXX create a common primitive() or surfacePrimitive() call to pass
-  //     to here
-  Mesh *mesh = new Mesh(points, triangles);
-  boost::shared_ptr<Surface> surface(mesh);
-  boost::shared_ptr<SurfacePrimitive> surfacePrim(new SurfacePrimitive(surface, mCurrentMaterial));
-  boost::shared_ptr<Primitive> prim = static_pointer_cast<Primitive,SurfacePrimitive>(surfacePrim);
-  mPrimitives->push_back(prim);
-
-  if(mCurrentMaterial->isEmitter())
+  Mesh *mesh = 0;
+  if(faces.size() > 15)
   {
-    mEmitters->push_back(surfacePrim);
+    mesh = new RasterizableMesh<Mesh>(points, triangles);
   } // end if
-
-  if(mCurrentMaterial->isSensor())
+  else
   {
-    mSensors->push_back(surfacePrim);
-  } // end if
+    mesh = new RasterizableMesh<SmallMesh>(points, triangles);
+  } // end else
+
+  shared_ptr<Surface> surface(mesh);
+  shared_ptr<Material> m = any_cast<shared_ptr<Material> >(mAttributeStack.back()["material"]);
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m)); 
 } // end Gotham::mesh()
 
-// wrapper for Gotham::material()
-void Gotham_material(Gotham &g, std::auto_ptr<Material> m)
+void Gotham
+  ::mesh(std::vector<float> &vertices,
+         std::vector<float> &parametrics,
+         std::vector<unsigned int> &faces)
 {
-  g.material(m.get());
-  m.release();
-} // end Gotham_material()
+  std::vector<Point> points;
+  std::vector<ParametricCoordinates> parms;
+  std::vector<Mesh::Triangle> triangles;
+  for(unsigned int i = 0;
+      i != vertices.size();
+      i += 3)
+  {
+    points.push_back(Point(vertices[i], vertices[i+1], vertices[i+2]));
 
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-using namespace boost::python;
-BOOST_PYTHON_MODULE(gotham)
+    // transform by the matrix on the top of the stack
+    points.back() = mMatrixStack.back()(points.back());
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != parametrics.size();
+      i += 2)
+  {
+    parms.push_back(ParametricCoordinates(parametrics[i], parametrics[i+1]));
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != faces.size();
+      i += 3)
+  {
+    triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
+  } // end for i
+
+  Mesh *mesh = 0;
+  if(faces.size() > 15)
+  {
+    mesh = new RasterizableMesh<Mesh>(points, parms, triangles);
+  } // end if
+  else
+  {
+    mesh = new RasterizableMesh<SmallMesh>(points, parms, triangles);
+  } // end else
+
+  shared_ptr<Surface> surface(mesh);
+  shared_ptr<Material> m = any_cast<shared_ptr<Material> >(mAttributeStack.back()["material"]);
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m)); 
+} // end Gotham::mesh()
+
+void Gotham
+  ::getDefaultAttributes(AttributeMap &attr) const
 {
-  // tell boost which multMatrix we mean
-  typedef void (Gotham::*multMatrix_vector)(const std::vector<float>&);
+  attr.clear();
 
-  // tell boost which loadMatrix we mean
-  typedef void (Gotham::*loadMatrix_vector)(const std::vector<float>&);
+  any toAdd = std::string("kajiya");
+  attr["path::sampler"] = toAdd;
 
-  // tell boost which getMatrix we mean
-  typedef void (Gotham::*getMatrix_vector)(const std::vector<float>&);
+  toAdd = std::string("4");
+  attr["path::maxlength"] = toAdd;
 
-  class_<Gotham>("Gotham")
-    .def("pushMatrix", &Gotham::pushMatrix)
-    .def("popMatrix", &Gotham::popMatrix)
-    .def("translate", &Gotham::translate)
-    .def("rotate", &Gotham::rotate)
-    .def("scale", &Gotham::scale)
-    .def("multMatrix", multMatrix_vector(&Gotham::multMatrix))
-    .def("loadMatrix", loadMatrix_vector(&Gotham::loadMatrix))
-    .def("getMatrix", getMatrix_vector(&Gotham::getMatrix))
-    .def("mesh", &Gotham::mesh)
-    .def("render", &Gotham::render)
-    .def("material", Gotham_material)
-    ;
+  toAdd = std::string("4");
+  attr["renderer::spp"] = toAdd;
 
-  class_<Material, std::auto_ptr<Material> >("Material")
-    ;
+  toAdd = std::string("true");
+  attr["viewer"] = toAdd;
 
-  class_<std::vector<float> >("vector_float")
-    .def(vector_indexing_suite<std::vector<float> >())
-    ;
+  toAdd = std::string("gotham.exr");
+  attr["renderer::outfile"] = toAdd;
 
-  class_<std::vector<uint> >("vector_uint")
-    .def(vector_indexing_suite<std::vector<unsigned int> >())
-    ;
-} // end gotham
+  toAdd = std::string("");
+  attr["name"] = toAdd;
+
+  toAdd = shared_ptr<Material>(new DefaultMaterial());
+  attr["material"] = toAdd;
+
+  toAdd = std::string("true");
+  attr["scene::castshadows"] = toAdd;
+} // end Gotham::getDefaultAttributes()
+
+void Gotham
+  ::attribute(const std::string &name,
+              const std::string &val)
+{
+  any toAdd = val;
+  mAttributeStack.back()[name] = toAdd;
+} // end Gotham::attribute()
+
+void Gotham
+  ::pushAttributes(void)
+{
+  mAttributeStack.push_back(mAttributeStack.back());
+} // end Gotham::pushAttributes()
+
+void Gotham
+  ::popAttributes(void)
+{
+  mAttributeStack.pop_back();
+} // end Gotham::popAttributes()
 

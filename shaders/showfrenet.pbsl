@@ -1,0 +1,6 @@
+scattering(void)
+{
+  Spectrum s(T.norm(), B.norm(), N.norm());
+  F = new Lambertian(s);
+} // end scattering()
+

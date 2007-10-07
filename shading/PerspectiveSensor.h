@@ -24,12 +24,14 @@ class PerspectiveSensor
 
     /*! Constructor accepts an aspect ratio, field of view,
      *  and window origin.
+     *  \param response A constant response to radiance.
      *  \param aspect Sets mAspectRatio.
      *  \param origin Sets mWindowOrigin.
      *  \param right Sets mRight.
      *  \param up Sets mUp.
      */
-    PerspectiveSensor(const float aspect,
+    PerspectiveSensor(const Spectrum &response,
+                      const float aspect,
                       const Point &origin,
                       const Vector3 &right,
                       const Vector3 &up);
@@ -46,6 +48,7 @@ class PerspectiveSensor
      *  \param dg The DifferentialGeometry at the Point on the sensor.
      *  \return The sensor response to incoming radiance from ws.
      */
+    using Parent::evaluate;
     virtual Spectrum evaluate(const Vector &ws,
                               const DifferentialGeometry &dg) const;
     
@@ -58,15 +61,32 @@ class PerspectiveSensor
      *  \param ws The direction of sensing is returned here.
      *  \param pdf The value of the solid angle pdf at (u0,u1) is
      *             returned here.
+     *  \param delta This is set to false.
      *  \return The sensor response to incoming radiance from ws
      *          is returned here.
      */
+    using Parent::sample;
     virtual Spectrum sample(const DifferentialGeometry &dg,
                             const float u0,
                             const float u1,
                             const float u2,
                             Vector3 &ws,
-                            float &pdf) const;
+                            float &pdf,
+                            bool &delta) const;
+
+    /*! This method inverts this PerspectiveSensor's mapping
+     *  from a direction to the unit square.
+     *  \param w The direction of interest.
+     *  \param dg the DifferentialGeometry at the Point of interest.
+     *  \param u0 The first coordinate of the corresponding point in the unit
+     *            square is returned here.
+     *  \param u1 The second coordinate of the corresponding point in the unit
+     *            square is returned here.
+     */
+    virtual void invert(const Vector &w,
+                        const DifferentialGeometry &dg,
+                        float &u0,
+                        float &u1) const;
 
     /*! This method evaluates the solid angle pdf of the
      *  sensing direction of interest.
@@ -74,8 +94,19 @@ class PerspectiveSensor
      *  \param dg The DifferentialGeometry at the Point of interest.
      *  \return The solid angle pdf of ws.
      */
+    using Parent::evaluatePdf;
     virtual float evaluatePdf(const Vector3 &ws,
                               const DifferentialGeometry &dg) const;
+
+    /*! This method returns mRight.
+     *  \return mRight.
+     */
+    Vector getRight(void) const;
+
+    /*! This method returns mUp.
+     *  \return mUp.
+     */
+    Vector getUp(void) const;
 
   protected:
     /*! This method samples the surface area of the window.
@@ -123,6 +154,10 @@ class PerspectiveSensor
      *  XXX would love to get around the need for this
      */
     Vector3 mUp;
+
+    /*! The response to radiance.
+     */
+    Spectrum mResponse;
 }; // end PerspectiveSensor
 
 #endif // PERSPECTIVE_SENSOR_H

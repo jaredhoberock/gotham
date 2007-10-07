@@ -1,8 +1,21 @@
-includes = ['/home/jared/dev/src']
-env = Environment(CPPPATH = includes,
-                  tools = ['default', 'intelc'],
-                  CPPFLAGS = '-O3')
+import os
+import glob
+exec open('../build-env.py')
+
+# find all .cpps in the current directory
+sources = []
+pattern = os.path.join(os.getcwd(), "*.cpp")
+for fullpath in glob.glob(pattern):
+  basename = os.path.basename(fullpath)
+  sources.append(basename)
+
+# find all .cpps in the current directory
+sources = []
+pattern = os.path.join(os.getcwd(), "*.cpp")
+for fullpath in glob.glob(pattern):
+  basename = os.path.basename(fullpath)
+  sources.append(basename)
 
 # create a library 
-sources = ['Path.cpp']
-env.Library('path', sources)
+GothamLibrary('path', sources)
+

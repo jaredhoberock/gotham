@@ -6,6 +6,8 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
+#include "exportPrimitives.h"
+
 class BoundingBox;
 class Ray;
 class Intersection;
@@ -80,6 +82,27 @@ class Primitive
      *  \note The default implementation of Primitive::intersect() always trivially returns false.
      */
     inline virtual bool intersect(const Ray &r) const;
+
+    /*! This method sets this Primitive's name.
+     *  \param name Sets mName.
+     */
+    inline void setName(const std::string &name);
+
+    /*! This method returns the name of this Primitive.
+     *  \return mName.
+     */
+    inline const std::string &getName(void) const;
+
+    /*! This method provides a means of doing last minute
+     *  tasks immediately prior to beginning a render.
+     *  \note The default implementation does nothing.
+     */
+    inline virtual void finalize(void);
+
+  protected:
+    /*! A name, possibly the null string, associated with this Primitive.
+     */
+    std::string mName;
 }; // end class Primitive
 
 #include "Primitive.inl"

@@ -12,7 +12,7 @@
 #include "Vector.h"
 #include "Normal.h"
 #include "ParametricCoordinates.h"
-class Surface;
+class SurfacePrimitive;
 
 /*! \class DifferentialGeometry
  *  \brief DifferentialGeometry encapsulates the description
@@ -39,7 +39,8 @@ class DifferentialGeometry
     inline DifferentialGeometry(const Point &p,
                                 const Vector3 &dpdu, const Vector3 &dpdv,
                                 const Vector3 &dndu, const Vector3 &dndv,
-                                const ParametricCoordinates &uv, const Surface *s);
+                                const ParametricCoordinates &uv,
+                                const SurfacePrimitive *s);
 
     /*! Constructor accepts a Point, Normal, Point and Normal partials, ParametricCoordinates, and a Surface.
      *  \param p Sets mPoint.
@@ -55,7 +56,8 @@ class DifferentialGeometry
     inline DifferentialGeometry(const Point &p, const Normal &n,
                                 const Vector3 &dpdu, const Vector3 &dpdv,
                                 const Vector3 &dndu, const Vector3 &dndv,
-                                const ParametricCoordinates &uv, const Surface *s);
+                                const ParametricCoordinates &uv,
+                                const SurfacePrimitive *s);
 
     /*! This method sets mPoint.
      *  \param p Sets mPoint.
@@ -97,15 +99,20 @@ class DifferentialGeometry
      */
     inline const ParametricCoordinates &getParametricCoordinates(void) const;
 
+    /*! This method returns a reference to mParametricCoordinates.
+     *  \return mParametricCoordinates.
+     */
+    inline ParametricCoordinates &getParametricCoordinates(void);
+
     /*! This method sets mSurface.
      *  \param s Sets mSurface.
      */
-    inline void setSurface(const Surface *s);
+    inline void setSurface(const SurfacePrimitive *s);
 
     /*! This method returns mSurface.
      *  \return mSurface
      */
-    inline const Surface *getSurface(void) const;
+    inline const SurfacePrimitive *getSurface(void) const;
 
     /*! This method sets mPointPartials.
      *  \param dpdu Sets mPointPartials[0].
@@ -139,6 +146,26 @@ class DifferentialGeometry
      */
     inline Vector3 *getNormalVectorPartials(void);
 
+    /*! This method sets mTangent.
+     *  \param t Sets mTangent.
+     */
+    inline void setTangent(const Vector &t);
+
+    /*! This method returns mTangent.
+     *  \return mTangent.
+     */
+    inline const Vector &getTangent(void) const;
+
+    /*! This method sets mBinormal.
+     *  \param b Sets mBinormal.
+     */
+    inline void setBinormal(const Vector &b);
+
+    /*! This method returns mBinormal.
+     *  \return mBinormal.
+     */
+    inline const Vector &getBinormal(void) const;
+
   protected:
     /*! The Point on mSurface this DifferentialGeometry object describes.
      *  This Point is in world coordinates.
@@ -150,13 +177,23 @@ class DifferentialGeometry
      */
     Normal mNormal;
 
+    /*! The tangent vector is a unit vector which points along mPointPartials[0].
+     */
+    Vector mTangent;
+
+    /*! The binormal vector is a unit vector which is orthogonal to
+     *  to mNormal and mTangent.
+     */
+    Vector mBinormal;
+
     /*! The ParametricCoordinates of Surface mSurface at Point mPoint.
      */
     ParametricCoordinates mParametricCoordinates;
 
     /*! The surface whose geometry we are describing.
+     *  XXX this does not belong here
      */
-    const Surface *mSurface;
+    const SurfacePrimitive *mSurface;
 
     /*! The partial derivatives of mPoint with respect to
      *  mParametricCoordinates[0] and mParametricCoordinates[1],

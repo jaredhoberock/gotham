@@ -3,6 +3,7 @@
  *  \brief Defines the interface to a class
  *         representing a light path.
  */
+
 #ifndef PATH_H
 #define PATH_H
 
@@ -10,13 +11,15 @@
 #include "../geometry/Normal.h"
 #include "../geometry/Vector.h"
 #include "../geometry/DifferentialGeometry.h"
+#include "../shading/ScatteringDistributionFunction.h"
 #include <spectrum/Spectrum.h>
 #include <boost/array.hpp>
 
-class ScatteringDistributionFunction;
+class FunctionAllocator;
 class SurfacePrimitive;
 class SurfacePrimitiveList;
 class Scene;
+class RussianRoulette;
 
 /*! \struct PathVertex
  *  \brief A PathVertex describes surface properties
@@ -30,23 +33,39 @@ struct PathVertex
 
   /*! init method sets the members of this
    *  PathVertex.
+   *  \param surface Sets mSurface.
    *  \param dg Sets mDg.
+   *  \param emission Sets mEmission.
+   *  \param scattering Sets mScattering.
+   *  \param sensor Sets mSensor.
    *  \param f Sets mThroughput.
    *  \param accumulatedPdf Sets mAccumulatedPdf.
    *  \param pdf Sets mPdf.
+   *  \param delta Sets mFromDelta.
+   *  \param component Sets mFromComponent.
    */
-  void init(const DifferentialGeometry &dg,
+  void init(const SurfacePrimitive *surface,
+            const DifferentialGeometry &dg,
+            const ScatteringDistributionFunction *emission,
+            const ScatteringDistributionFunction *integrand,
+            const ScatteringDistributionFunction *sensor,
             const Spectrum &f,
             const float accumulatedPdf,
-            const float pdf);
+            const float pdf,
+            const bool delta,
+            const ScatteringDistributionFunction::ComponentIndex component);
 
   // DifferentialGeometry describes the intersection point
   DifferentialGeometry mDg;
 
-  // The integrand at the intersection point:
-  // either a bidirectional or unidirectional scattering
-  // distribution function.
-  const ScatteringDistributionFunction *mIntegrand;
+  // The emission function at the intersection point:
+  const ScatteringDistributionFunction *mEmission;
+
+  // The scattering function at the intersection point:
+  const ScatteringDistributionFunction *mScattering;
+
+  // The sensor function at the intersection point:
+  const ScatteringDistributionFunction *mSensor;
 
   // A pointer to the surface at the intersection point.
   const SurfacePrimitive *mSurface;
@@ -81,18 +100,36 @@ struct PathVertex
   // accumulated throughput at this PathVertex
   // on the Path
   Spectrum mThroughput;
+
+  // true if this PathVertex was sampled from a Dirac
+  // delta distribution; false, otherwise.
+  bool mFromDelta;
+
+  // this is set to the index of the component this PathVertex
+  // was sampled from the previous ScatteringDistributionFunction
+  ScatteringDistributionFunction::ComponentIndex mFromComponent;
 }; // end PathVertex
 
+#define PATH_LENGTH 20
+
 class Path
-  : public boost::array<PathVertex, 6>
+  : public boost::array<PathVertex, PATH_LENGTH>
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef boost::array<PathVertex, 6> Parent;
+    typedef boost::array<PathVertex, PATH_LENGTH> Parent;
 
     static const unsigned int NULL_VERTEX = UINT_MAX;
+
+    /*! Null constructor does nothing.
+     */
+    Path(void);
+
+    /*! This method clears this Path.
+     */
+    void clear(void);
 
     /*! This method:
      *  - inserts a PathVertex at the given index by sampling from a
@@ -107,14 +144,35 @@ class Path
      *  \param u3 A real number in [0,1).
      *  \note This method assumes that the new PathVertex begins a new
      *        eye or light path, depending on the value of emission.
+     *  \return i if a new PathVertex could be inserted; NULL_VERTEX, otherwise.
      */
-    void insert(const unsigned int i,
-                const SurfacePrimitiveList *surfaces,
-                const bool emission,
-                const float u0,
-                const float u1,
-                const float u2,
-                const float u3);
+    unsigned int insert(const unsigned int i,
+                        const SurfacePrimitiveList *surfaces,
+                        const bool emission,
+                        const float u0,
+                        const float u1,
+                        const float u2,
+                        const float u3);
+
+    /*! This method:
+     *  - inserts a PathVertex at the given index by sampling from a SurfacePrimitive.
+     *  \param i The index at which to insert the PathVertex.
+     *  \param surfaces The SurfacePrimitiveList to sample from.
+     *  \param emission If this is true, the new PathVertex is initialized
+     *                  with an EmissionFunction; otherwise, a SensorFunction.
+     *  \param u0 A real number in [0,1).
+     *  \param u1 A real number in [0,1).
+     *  \param u2 A real number in [0,1).
+     *  \note This method assumes that the new PathVertex begins a new
+     *        eye or light path, depending on the value of emission.
+     *  \return i if a new PathVertex could be inserted; NULL_VERTEX, otherwise.
+     */
+    unsigned int insert(const unsigned int i,
+                        const SurfacePrimitive *prim,
+                        const bool emission,
+                        const float u0,
+                        const float u1,
+                        const float u2);
 
     /*! This method:
      *  - inserts a PathVertex before or after the given index by
@@ -139,7 +197,97 @@ class Path
                         const float u1,
                         const float u2);
 
-  protected:
+    /*! This method:
+     *  - inserts a PathVertex before or after the given index by
+     *    sampling the previous PathVertex's integrand and applying Russian roulette.
+     *  \param previous The index of the previous vertex.
+     *  \param scene A pointer to the Scene containing this Path.
+     *  \param after Whether or not to insert the new PathVertex before
+     *               or after previous.
+     *  \param scatter Whether or not to perform bidirectional scattering
+     *                 or unidirectional emission.
+     *  \param u0 A real number in [0,1).
+     *  \param u1 A second real number in [0,1).
+     *  \param u2 A third real number in [0,1).
+     *  \param u3 A fourth real number in [0,1).
+     *  \param roulette A Russian roulette function for computing whether or not
+     *                  to extend the Path.
+     *  \return The index of the newly inserted PathVertex if an intersection
+     *          is found; NULL_VERTEX, otherwise.
+     */
+    unsigned int insertRussianRoulette(const unsigned int previous,
+                                       const Scene *scene,
+                                       const bool after,
+                                       const bool scatter,
+                                       const float u0,
+                                       const float u1,
+                                       const float u2,
+                                       const float u3,
+                                       const RussianRoulette *roulette);
+    
+    /*! This variant of the insert() method attempts to append (or prepend) a new PathVertex
+     *  using Russian roulette.  If Russian roulette decides not to insert a new vertex, the
+     *  previous vertex's pdf is multiplied by the termination probability.
+     *  \param previous The index of the previous vertex.
+     *  \param scene A pointer to the Scene containing this Path.
+     *  \param after Whether or not to insert the new PathVertex before
+     *               or after previous.
+     *  \param scatter Whether or not to perform bidirectional scattering
+     *                 or unidirectional emission.
+     *  \param u0 A real number in [0,1).
+     *  \param u1 A second real number in [0,1).
+     *  \param u2 A third real number in [0,1).
+     *  \param u3 A fourth real number in [0,1).
+     *  \param roulette A Russian roulette function for computing whether or not
+     *                  to extend the Path.
+     *  \return The index of the newly inserted PathVertex if an intersection
+     *          is found; NULL_VERTEX, otherwise.
+     */
+    unsigned int insertRussianRouletteWithTermination(const unsigned int previous,
+                                                      const Scene *scene,
+                                                      const bool after,
+                                                      const bool scatter,
+                                                      const float u0,
+                                                      const float u1,
+                                                      const float u2,
+                                                      const float u3,
+                                                      const RussianRoulette *roulette);
+
+
+    template<typename RNG>
+      bool construct(const Scene *scene,
+                     const unsigned int eyeSubpathLength,
+                     const unsigned int lightSubpathLength,
+                     const float p0,
+                     const float p1,
+                     const float p2,
+                     RNG &rng);
+
+    Spectrum computeThroughputAssumeVisibility(const unsigned int eyeSubpathLength,
+                                               const PathVertex &e,
+                                               const unsigned int lightSubpathLength,
+                                               const PathVertex &l) const;
+    
+    void connect(PathVertex &v0,
+                 PathVertex &v1);
+
+    const gpcpu::uint2 &getSubpathLengths(void) const;
+
+    // XXX this probably belonds somewhere else
+    static float computeG(const Normal &n0,
+                          const Vector &w,
+                          const Normal &n1,
+                          const float d2);
+
+    /*! This method does a safe copy of this Path into a destination
+     *  using a FunctionAllocator.
+     *  \param dst The destination Path to clone into.
+     *  \param allocator A FunctionAllocator for allocating space for ScatteringDistributionFunctions.
+     *  \return true if this Path could be successfully cloned; false, if an allocation failed.
+     */
+    bool clone(Path &dst, FunctionAllocator &allocator) const;
+
+  //protected:
     // XXX pass prev as a PathVertex reference
     // XXX dir & pdf need not be passed as parameters:
     //     pass them in the new PathVertex
@@ -148,7 +296,9 @@ class Path
                         const bool after,
                         const Vector &dir,
                         const Spectrum &f,
-                        float pdf);
+                        float pdf,
+                        const bool delta,
+                        const ScatteringDistributionFunction::ComponentIndex component);
 
     // XXX pass prev as a PathVertex reference
     // XXX dir & pdf need not be passed as parameters:
@@ -160,12 +310,29 @@ class Path
                         const Vector &dir,
                         const Spectrum &f,
                         const float pdf,
+                        const bool delta,
+                        const ScatteringDistributionFunction::ComponentIndex component,
+                        const SurfacePrimitive *surface,
+                        const ScatteringDistributionFunction *emission,
+                        const ScatteringDistributionFunction *scattering,
+                        const ScatteringDistributionFunction *sensor,
                         const DifferentialGeometry &dg);
 
     // This tuple the length of the eye and
     // light subpaths, respectively.
     gpcpu::uint2 mSubpathLengths;
+
+  private:
+    /*! Since ScatteringDistributionFunctions are allocated in a weird way,
+     *  disallow copies.
+     */
+    Path(const Path &p);
+    Path &operator=(const Path &p);
 }; // end Path
+
+#undef PATH_LENGTH
+
+#include "Path.inl"
 
 #endif // PATH_H
 

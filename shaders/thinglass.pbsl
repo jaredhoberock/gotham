@@ -1,0 +1,5 @@
+scattering(Spectrum Kr, Spectrum Kt)
+{
+  F = thinGlass(1.5f, Kr, Kt);
+} // end scattering()
+

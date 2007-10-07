@@ -30,6 +30,7 @@ class Lambertian
      *  \return mAlbedo / PI if wi & wo are in the same hemisphere;
      *          0, otherwise.
      */
+    using Parent::evaluate;
     Spectrum evaluate(const Vector3 &wo,
                       const DifferentialGeometry &dg,
                       const Vector3 &wi) const;

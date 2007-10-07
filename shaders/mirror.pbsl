@@ -1,0 +1,5 @@
+scattering(Spectrum Kr)
+{
+  F = new SpecularReflection(Kr, 2.485f);
+} // end scattering
+

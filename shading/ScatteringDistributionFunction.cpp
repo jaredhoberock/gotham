@@ -6,6 +6,9 @@
 #include "ScatteringDistributionFunction.h"
 #include "../geometry/Mappings.h"
 
+// initialize the pool
+FunctionAllocator ScatteringDistributionFunction::mPool = FunctionAllocator();
+
 Spectrum ScatteringDistributionFunction
   ::evaluate(const Vector3 &wo,
              const DifferentialGeometry &dg,
@@ -32,7 +35,18 @@ float ScatteringDistributionFunction
                 const DifferentialGeometry &dg,
                 const Vector3 &wi) const
 {
-  return std::max(0.0f, dg.getNormal().dot(wi)) * INV_PI;
+  return Mappings::evaluateCosineHemispherePdf(wi, dg.getNormal());
+} // end ScatteringDistributionFunction::evaluatePdf()
+
+float ScatteringDistributionFunction
+  ::evaluatePdf(const Vector3 &wo,
+                const DifferentialGeometry &dg,
+                const Vector3 &wi,
+                const bool delta,
+                const ComponentIndex component) const
+{
+  // just ignore delta & component and evaluate the other method
+  return evaluatePdf(wo,dg,wi);
 } // end ScatteringDistributionFunction::evaluatePdf()
 
 Spectrum ScatteringDistributionFunction
@@ -42,9 +56,13 @@ Spectrum ScatteringDistributionFunction
            const float u1,
            const float u2,
            Vector3 &wi,
-           float &pdf) const
+           float &pdf,
+           bool &delta,
+           ComponentIndex &component) const
 {
-  Mappings::unitSquareToCosineHemisphere(u0, u1, dg.getPointPartials()[0], dg.getPointPartials()[1], dg.getNormal(), wi, pdf);
+  delta = false;
+  component = 0;
+  Mappings::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), wi, pdf);
   return evaluate(wo, dg, wi);
 } // end ScatteringDistributionFunction::sample()
 
@@ -54,16 +72,56 @@ Spectrum ScatteringDistributionFunction
            const float u1,
            const float u2,
            Vector3 &w,
-           float &pdf) const
+           float &pdf,
+           bool &delta) const
 {
-  Mappings::unitSquareToCosineHemisphere(u0, u1, dg.getPointPartials()[0], dg.getPointPartials()[1], dg.getNormal(), w, pdf);
+  delta = false;
+  Mappings::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), w, pdf);
   return evaluate(w, dg);
 } // end ScatteringDistributionFunction::sample()
+
+void ScatteringDistributionFunction
+  ::invert(const Vector &w,
+           const DifferentialGeometry &dg,
+           float &u0,
+           float &u1) const
+{
+  Mappings::cosineHemisphereToUnitSquare(w, dg.getTangent(), dg.getBinormal(), dg.getNormal(), u0, u1);
+} // end ScatteringDistributionFunction::invert()
 
 float ScatteringDistributionFunction
   ::evaluatePdf(const Vector &w,
                 const DifferentialGeometry &dg) const
 {
-  return std::max(0.0f, dg.getNormal().dot(w)) * INV_PI;
+  return Mappings::evaluateCosineHemispherePdf(w, dg.getNormal());
 } // end ScatteringDistributionFunctionr::evaluatePdf()
+
+bool ScatteringDistributionFunction
+  ::isSpecular(void) const
+{
+  return false;
+} // end ScatteringDistributionFunction::isSpecular()
+
+ScatteringDistributionFunction *ScatteringDistributionFunction
+  ::clone(FunctionAllocator &allocator) const
+{
+  ScatteringDistributionFunction *result = static_cast<ScatteringDistributionFunction*>(allocator.malloc());
+  if(result != 0)
+  {
+    // the default implementation does a dumb copy
+    memcpy(result, this, sizeof(FunctionAllocator::Block));
+  } // end if
+
+  return result;
+} // end ScatteringDistributionFunction::clone()
+
+float ScatteringDistributionFunction
+  ::evaluateGeometricTerm(const float nDotWo,
+                          const float nDotWi,
+                          const float nDotWh,
+                          const float woDotWh)
+{
+  float invWoDotWh = 1.0f / woDotWh;
+  return std::min(1.0f, std::min(2.0f * nDotWh * nDotWo * invWoDotWh, 2.0f * nDotWh * nDotWi * invWoDotWh));
+} // end ScatteringDistributionFunction::evaluateGeometricTerm()
 

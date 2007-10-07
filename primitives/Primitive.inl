@@ -5,6 +5,7 @@
 
 Primitive
   ::Primitive(void)
+    :mName("")
 {
   ;
 } // end Primitive::Primitive()
@@ -45,4 +46,22 @@ bool Primitive
 {
   return false;
 } // end Primitive::intersect()
+
+const std::string &Primitive
+  ::getName(void) const
+{
+  return mName;
+} // end Primitive::getName()
+
+void Primitive
+  ::setName(const std::string &name)
+{
+  mName = name;
+} // end Primitive::setName()
+
+void Primitive
+  ::finalize(void)
+{
+  ;
+} // end Primitive::finalize()
 

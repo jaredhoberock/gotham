@@ -5,30 +5,67 @@
 
 #include "FunctionAllocator.h"
 #include "ScatteringDistributionFunction.h"
+#include "CompositeDistributionFunction.h"
 #include "Lambertian.h"
 #include "HemisphericalEmission.h"
 #include "PerspectiveSensor.h"
+#include "SpecularReflection.h"
+#include "SpecularTransmission.h"
+#include "PerfectGlass.h"
+#include "ThinGlass.h"
+#include "TransparentTransmission.h"
+#include "PhongReflection.h"
+#include "PhongTransmission.h"
+#include "AshikhminShirleyReflection.h"
+#include "Fresnel.h"
 #include <vector>
+#include <boost/static_assert.hpp>
+#include <assert.h>
 
-template<unsigned int size>
-  struct Accomodator
+FunctionAllocator
+  ::FunctionAllocator(void)
 {
-  unsigned char mFill[size];
-}; // end Accomodator
+  typedef Accomodator<64> Block;
+  // assert that any known ScatteringDistributionFunction will fit into a Block
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerspectiveSensor));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(Lambertian));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(HemisphericalEmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularReflection));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularTransmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PhongReflection));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PhongTransmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(CompositeDistributionFunction));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(TransparentTransmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerfectGlass));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(ThinGlass));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(AshikhminShirleyReflection));
 
-// pre-allocate a huge number of slots
-std::vector<Accomodator<sizeof(PerspectiveSensor)> > gStorage;
+  // assert that either Fresnel will fit into a block
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelDielectric));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelConductor));
+
+  reserve(32678);
+} // end FunctionAllocator::FunctionAllocator()
+
+FunctionAllocator
+  ::FunctionAllocator(const size_t n)
+{
+  reserve(n);
+} // end FunctionAllocator::FunctionAllocator()
+
+void FunctionAllocator
+  ::reserve(const size_t n)
+{
+  mStorage.reserve(n);
+} // end FunctionAllocator::reserve()
 
 void *FunctionAllocator
   ::malloc(void)
 {
-  // XXX don't call this each time
-  gStorage.reserve(32678);
-
-  if(gStorage.size() < gStorage.capacity())
+  if(mStorage.size() < mStorage.capacity())
   {
-    gStorage.resize(gStorage.size() + 1);
-    return &gStorage.back();
+    mStorage.resize(mStorage.size() + 1);
+    return &mStorage.back();
   } // end if
 
   return 0;
@@ -37,6 +74,6 @@ void *FunctionAllocator
 void FunctionAllocator
   ::freeAll(void)
 {
-  gStorage.clear();
+  mStorage.clear();
 } // end FunctionAllocator::freeAll()
 

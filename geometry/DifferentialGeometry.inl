@@ -15,7 +15,8 @@ DifferentialGeometry
   ::DifferentialGeometry(const Point &p,
                          const Vector3 &dpdu, const Vector3 &dpdv,
                          const Vector3 &dndu, const Vector3 &dndv,
-                         const ParametricCoordinates &uv, const Surface *s)
+                         const ParametricCoordinates &uv,
+                         const SurfacePrimitive *s)
 {
   setPoint(p);
   setPointPartials(dpdu, dpdv);
@@ -31,7 +32,8 @@ DifferentialGeometry
   ::DifferentialGeometry(const Point &p, const Normal &n,
                          const Vector3 &dpdu, const Vector3 &dpdv,
                          const Vector3 &dndu, const Vector3 &dndv,
-                         const ParametricCoordinates &uv, const Surface *s)
+                         const ParametricCoordinates &uv,
+                         const SurfacePrimitive *s)
 {
   setPoint(p);
   setNormal(n);
@@ -89,13 +91,19 @@ const ParametricCoordinates &DifferentialGeometry
   return mParametricCoordinates;
 } // end DifferentialGeometry::getParametricCoordinates()
 
+ParametricCoordinates &DifferentialGeometry
+  ::getParametricCoordinates(void)
+{
+  return mParametricCoordinates;
+} // end DifferentialGeometry::getParametricCoordinates()
+
 void DifferentialGeometry
-  ::setSurface(const Surface *s)
+  ::setSurface(const SurfacePrimitive *s)
 {
   mSurface = s;
 } // end DifferentialGeometry::setSurface()
 
-const Surface *DifferentialGeometry
+const SurfacePrimitive *DifferentialGeometry
   ::getSurface(void) const
 {
   return mSurface;
@@ -138,4 +146,29 @@ Vector3 *DifferentialGeometry
 { 
   return mNormalVectorPartials;
 } // end DifferentialGeometry::getNormalVectorPartials()
+
+void DifferentialGeometry
+  ::setTangent(const Vector &t)
+{
+  mTangent = t;
+} // end DifferentialGeometry::setTangent()
+
+const Vector &DifferentialGeometry
+  ::getTangent(void) const
+{
+  return mTangent;
+} // end DifferentialGeometry::getTangent()
+
+void DifferentialGeometry
+  ::setBinormal(const Vector &b)
+{
+  mBinormal = b;
+} // end DifferentialGeometry::setBinormal()
+
+const Vector &DifferentialGeometry
+  ::getBinormal(void) const
+{
+  return mBinormal;
+} // end DifferentialGeometry::getBinormal()
+
 

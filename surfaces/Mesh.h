@@ -39,6 +39,15 @@ class Mesh
     Mesh(const std::vector<Point> &vertices,
          const std::vector<Triangle> &triangles);
 
+    /*! Constructor takes a list of positions, parametric positions, and a list of Triangles.
+     *  \param vertices A list of vertex positions.
+     *  \param parametrics A list of parametric vertex positions.
+     *  \param triangles A list of triangles.
+     */
+    Mesh(const std::vector<Point> &vertices,
+         const std::vector<ParametricCoordinates> &parametrics,
+         const std::vector<Triangle> &triangles);
+
     /*! Null destructor does nothing.
      */
     virtual ~Mesh(void);
@@ -103,9 +112,9 @@ class Mesh
        *  \param maxT The parametric value along the Ray where it exits the bsp cell.
        *  \return true if the ray hits a triangle before maxT; false, otherwise.
        */
-      bool operator()(const Point &anchor, const Point &dir,
-                      const Triangle **begin, const Triangle **end,
-                      float minT, float maxT);
+      inline bool operator()(const Point &anchor, const Point &dir,
+                             const Triangle **begin, const Triangle **end,
+                             float minT, float maxT);
 
       /*! The parametric ray value at the last hit.
        */
@@ -124,6 +133,29 @@ class Mesh
       const Mesh *mMesh;
     }; // end class TriangleIntersector
 
+    /*! \class TriangleShadower
+     *  \brief Functor for intersecting a shadow ray against a triangular Face.
+     */
+    struct TriangleShadower
+    {
+      /*! operator()() method performs ray intersection with a triangle.
+       *  \param anchor The anchor of the Ray.
+       *  \param dir The direction of the Ray.
+       *  \param begin Pointer to the first triangle to intersect against.
+       *  \param end Pointer to the end of the triangle list to intersect against.
+       *  \param minT The parametric value along the Ray where it enters the bsp cell.
+       *  \param maxT The parametric value along the Ray where it exits the bsp cell.
+       *  \return true if the ray hits a triangle before maxT; false, otherwise.
+       */
+      inline bool operator()(const Point &anchor, const Point &dir,
+                             const Triangle **begin, const Triangle **end,
+                             float minT, float maxT);
+
+      /*! A pointer to the Mesh containing the triangles we're shadowing against.
+       */
+      const Mesh *mMesh;
+    }; // end TriangleShadower
+
     /*! This method samples a point from a uniform distribution over the
      *  surface area of this Mesh.
      *  \param u1 A number in [0,1).
@@ -138,6 +170,34 @@ class Mesh
                                    DifferentialGeometry &dg,
                                    float &pdf) const;
 
+    /*! This method gets the DifferentialGeometry at the given
+     *  barycentric coordinates in a Triangle of this Mesh.
+     *  \param tri The Triangle of interest.
+     *  \param p The 3D Point on tri.
+     *  \param ng The geometric Normal at p.
+     *  \param b1 The first barycentric coordinate.
+     *  \param b2 The second barycentric coordinate.
+     *  \dg The DifferentialGeometry at (b1,b2) inside tri is
+     *      returned here.
+     */
+    void getDifferentialGeometry(const Triangle &tri,
+                                 const Point &p,
+                                 const Normal &ng,
+                                 const float b1,
+                                 const float b2,
+                                 DifferentialGeometry &dg) const;
+
+    /*! This method returns the ParametricCoordinates for the given Triangle.
+     *  \param t The Triangle of interest.
+     *  \param uv0 The ParametricCoordinates of the first vertex are returned here.
+     *  \param uv1 The ParametricCoordinates of the second vertex are returned here.
+     *  \param uv2 The ParametricCoordinates of the third vertex are returned here.
+     */
+    inline void getParametricCoordinates(const Triangle &tri,
+                                         ParametricCoordinates &uv0,
+                                         ParametricCoordinates &uv1,
+                                         ParametricCoordinates &uv2) const;
+
     /*! This method evaluates the surface area pdf at a
      *  DifferentialGeometry of interest.
      *  \param dg The DifferentialGeometry describing the Point of interest.
@@ -150,6 +210,11 @@ class Mesh
      */
     virtual float getSurfaceArea(void) const;
 
+    /*! This method returns the surface area of this Mesh.
+     *  \return mOneOverSurfaceArea
+     */
+    virtual float getInverseSurfaceArea(void) const;
+
   protected:
     /*! This method builds the acceleration structure.
      */
@@ -161,33 +226,28 @@ class Mesh
      *  \param f The Triangle to intersect.
      *  \param m The Mesh owning f.
      *  \param t If an intersection occurs, the intersection point is returned here.
-     *  \param dg If an intersection occurs, the DifferentialGeometry at the intersection point is returned here.
-     *  \return true if r intersects f; false, otherwise.
-     */
-    static bool intersect(const Point &o,
-                          const Vector &dir,
-                          const Triangle &f,
-                          const Mesh &m,
-                          float &t,
-                          DifferentialGeometry &dg);
-
-    /*! This static method intersects a Triangle in a Mesh.
-     *  \param o The origin of the Ray to test for intersection.
-     *  \param d The direction of the Ray to test for intersection.
-     *  \param f The Triangle to intersect.
-     *  \param m The Mesh owning f.
-     *  \param t If an intersection occurs, the intersection point is returned here.
      *  \param b1 The first barycentric coordinate of the intersection is returned here.
      *  \param b2 The second barycentric coordinate of the intersection is returned here.
      *  \return true if r intersects f; false, otherwise.
      */
-    static bool intersect(const Point &o,
-                          const Vector &dir,
-                          const Triangle &f,
-                          const Mesh &m,
-                          float &t,
-                          float &b1,
-                          float &b2);
+    inline static bool intersect(const Point &o,
+                                 const Vector &dir,
+                                 const Triangle &f,
+                                 const Mesh &m,
+                                 float &t,
+                                 float &b1,
+                                 float &b2);
+
+    inline static bool intersectWaldBikker(const Point &o,
+                                           const Vector &dir,
+                                           const Triangle &f,
+                                           const Mesh &m,
+                                           const float minT,
+                                           const float maxT,
+                                           float &t,
+                                           float &b1,
+                                           float &b2);
+                                           
 
     /*! \typedef KDTree
      *  \brief Shorthand.
@@ -218,7 +278,23 @@ class Mesh
     /*! One over the surface area of this Mesh.
      */
     float mOneOverSurfaceArea;
+
+    struct WaldBikkerData
+    {
+      gpcpu::float3 mN;
+      gpcpu::float2 mBn;
+      gpcpu::float2 mCn;
+      int mDominantAxis:3;
+      int mUAxis:3;
+      int mVAxis:3;
+    }; // end WaldBikkerData
+
+    std::vector<WaldBikkerData> mWaldBikkerTriangleData;
+
+    void buildWaldBikkerData(void);
 }; // end Mesh
+
+#include "Mesh.inl"
 
 #endif // MESH_H
 

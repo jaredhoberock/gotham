@@ -19,7 +19,7 @@ class SurfacePrimitiveList;
 class Scene
 {
   public:
-    /*! Null constructor sets mRaysCast to 0.
+    /*! Null constructor calls resetStatistics().
      */
     inline Scene(void);
 
@@ -28,14 +28,10 @@ class Scene
      */
     inline Scene(boost::shared_ptr<Primitive> p);
 
-    /*! Destructor deletes mPrimitive if it is not 0.
-     */
-    ~Scene(void);
-
     /*! This method returns the BoundingBox of mPrimitive.
      *  \param b A BoundingBox bounding mPrimitive is returned here.
      */
-    virtual void getBoundingBox(BoundingBox &b) const;
+    inline virtual void getBoundingBox(BoundingBox &b) const;
 
     /*! This method computes the first intersection between the given Ray and this scene, if one exists.
      *  \param r The Ray to intersect.
@@ -44,13 +40,13 @@ class Scene
      *  \return true if an intersection exists; false, otherwise.
      *  \note If r is found to intersect this Scene, r's parametric bounds are appropriately updated to accomodate the intersection.
      */
-    bool intersect(Ray &r, Primitive::Intersection &inter) const;
+    inline virtual bool intersect(Ray &r, Primitive::Intersection &inter) const;
 
     /*! This method computes whether or not an intersection between the given Ray and this scene exists.
      *  \param r The Ray to intersect.
      *  \return true if an intersection exists; false, otherwise.
      */
-    bool intersect(const Ray &r) const;
+    inline virtual bool intersect(const Ray &r) const;
 
     /*! This method sets mPrimitive.
      *  \param g Sets mPrimitive.
@@ -78,9 +74,19 @@ class Scene
      */
     inline long unsigned int getRaysCast(void) const;
 
-    /*! This method resets mRaysCast.
+    /*! This method returns mShadowRaysCast.
+     *  \return mShadowRaysCast.
      */
-    inline void resetRaysCast(void);
+    inline long unsigned int getShadowRaysCast(void) const;
+
+    /*! This method returns mBlockedShadowRays.
+     *  \return mBlockedShadowRays.
+     */
+    inline long unsigned int getBlockedShadowRays(void) const;
+
+    /*! This method resets this Scene's statistics.
+     */
+    inline void resetStatistics(void);
 
     /*! This method returns a const pointer to the
      *  emitters list.
@@ -113,6 +119,14 @@ class Scene
     /*! This counts the number of Rays intersected against this Scene.
      */
     mutable long unsigned int mRaysCast;
+
+    /*! This counts the number of shadow Rays intersected against this Scene.
+     */
+    mutable long unsigned int mShadowRaysCast;
+
+    /*! This counts the number of shadow Rays intersected against this Scene that were blocked.
+     */
+    mutable long unsigned int mBlockedShadowRays;
 }; // end class Scene
 
 #include "Scene.inl"

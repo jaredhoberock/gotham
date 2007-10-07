@@ -1,0 +1,5 @@
+scattering(Spectrum Kr, float eta, float uexponent, float vexponent)
+{
+  F = new AshikhminShirleyReflection(Kr, eta, uexponent, vexponent);
+} // end scattering
+

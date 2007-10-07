@@ -10,6 +10,7 @@
 #include "../primitives/Scene.h"
 #include "Rasterizer.h"
 #include "MeshRasterizer.h"
+#include "SurfacePrimitiveListRasterizer.h"
 
 // FIXME: just rasterizes meshes for now
 class SceneRasterizer
@@ -31,6 +32,7 @@ class SceneRasterizer
 
   protected:
     std::vector<MeshRasterizer> mMeshRasterizers;
+    std::vector<SurfacePrimitiveListRasterizer> mListRasterizers;
 }; // end SceneRasterizer
 
 #endif // SCENE_RASTERIZER_H

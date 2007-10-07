@@ -1,7 +1,15 @@
-includes = ['/home/jared/dev/src/']
-env = Environment(CPPPATH = includes)
+import os
+import glob
 
-# create a library
-sources = ['MeshRasterizer.cpp', 'SceneRasterizer.cpp']
-env.Library('rasterizers', sources)
+exec open('../build-env.py')
+
+# find all .cpps in the current directory
+sources = []
+pattern = os.path.join(os.getcwd(), "*.cpp")
+for fullpath in glob.glob(pattern):
+  basename = os.path.basename(fullpath)
+  sources.append(basename)
+
+# create a library 
+GothamLibrary('rasterizers', sources)
 

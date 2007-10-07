@@ -12,11 +12,13 @@ PerspectiveSensor
 } // end PerspectiveSensor::PerspectiveSensor()
 
 PerspectiveSensor
-  ::PerspectiveSensor(const float aspect,
+  ::PerspectiveSensor(const Spectrum &response,
+                      const float aspect,
                       const Point &origin,
                       const Vector3 &right,
                       const Vector3 &up)
-    :mAspectRatio(aspect),
+    :mResponse(response),
+     mAspectRatio(aspect),
      mWindowOrigin(origin),
      mInverseWindowSurfaceArea(1.0f/(2.0f*2.0f*aspect)),
      mRight(right),
@@ -40,8 +42,10 @@ Spectrum PerspectiveSensor
            const float u1,
            const float u2,
            Vector3 &ws,
-           float &pdf) const
+           float &pdf,
+           bool &delta) const
 {
+  delta = false;
   Point q;
   sampleWindow(u0,u1,
                mRight,
@@ -56,8 +60,34 @@ Spectrum PerspectiveSensor
   // compute surface area pdf to solid angle pdf
   pdf *= d2;
 
-  return Spectrum::white();
+  // divide the response by the dot product to remove the vignette effect
+  return mResponse / dg.getNormal().dot(ws);
 } // end PerspectiveSensor::sample()
+
+void PerspectiveSensor
+  ::invert(const Vector &w,
+           const DifferentialGeometry &dg,
+           float &u0,
+           float &u1) const
+{
+  // a ray from the dg in direction w intersects the window at
+  // time t
+  // remember that the normal points in the -look direction
+  float t =
+    -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
+    -dg.getNormal().dot(w);
+
+  // compute q the intersection with the ray and the plane
+  Point q = dg.getPoint() + t * w;
+
+  // this is the inverse operation of sampleFilmPlane():
+  // get the film plane coordinates of q
+  q -= mWindowOrigin;
+  q *= 0.5f;
+
+  u0 = q.dot(mRight) / mAspectRatio;
+  u1 = q.dot(mUp);
+} // end PerspectiveSensor::invert()
 
 void PerspectiveSensor
   ::sampleWindow(const float u,
@@ -79,16 +109,17 @@ float PerspectiveSensor
                 const DifferentialGeometry &dg) const
 {
   // intersect a ray through dg in direction ws with the sensor window
-  float t = dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
-            dg.getNormal().dot(ws);
+  // remember that the normal points in the -look direction
+  float t = -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
+            -dg.getNormal().dot(ws);
 
   // compute q the intersection with the ray and the window
   Point q = dg.getPoint() + t * ws;
   Point coords = q - mWindowOrigin;
   coords *= 0.5f;
 
-  float u = coords.dot(dg.getPointPartials()[0]) / mAspectRatio;
-  float v = coords.dot(dg.getPointPartials()[1]);
+  float u = coords.dot(mRight) / mAspectRatio;
+  float v = coords.dot(mUp);
 
   // if the ray does not pass through the window,
   // then there is zero probability of having generated it
@@ -106,7 +137,20 @@ Spectrum PerspectiveSensor
   ::evaluate(const Vector &ws,
              const DifferentialGeometry &dg) const
 {
-  // evaluate the pdf at ws, and if it is not zero, return white
-  return evaluatePdf(ws, dg) > 0 ? Spectrum::white() : Spectrum::black();
+  // evaluate the pdf at ws, and if it is not zero, return mResponse
+  // divide by dot product to remove the vignetting effect
+  return evaluatePdf(ws, dg) > 0 ? (mResponse / dg.getNormal().absDot(ws)) : Spectrum::black();
 } // end PerspectiveSensor::evaluate()
+
+Vector PerspectiveSensor
+  ::getRight(void) const
+{
+  return mRight;
+} // end PerspectiveSensor::getRight()
+
+Vector PerspectiveSensor
+  ::getUp(void) const
+{
+  return mUp;
+} // end PerspectiveSensor::getUp()
 

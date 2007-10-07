@@ -1,5 +1,11 @@
-emission(Spectrum Ke)
+emission(Spectrum power)
 {
-  E = new HemisphericalEmission(Ke);
+  Spectrum radiosity = invArea * power;
+  E = new HemisphericalEmission(radiosity);
 } // end emission()
+
+scattering(void)
+{
+  F = new Lambertian(Spectrum::white());
+} // end scattering()
 

@@ -1,0 +1,5 @@
+scattering(Spectrum Kr, float eta, float exponent)
+{
+  F = new PhongReflection(Kr, eta, exponent);
+} // end scattering
+

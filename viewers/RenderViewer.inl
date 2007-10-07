@@ -3,20 +3,21 @@
  *  \brief Inline file for RenderViewer.h.
  */
 
-#include <GL/glew.h>
 #include "RenderViewer.h"
 #include <qstring.h>
+#include "../renderers/MetropolisRenderer.h"
+#include "../renderers/EnergyRedistributionRenderer.h"
 
 #include <boost/thread/thread.hpp>
 using boost::thread;
 using namespace boost;
 
-void RenderViewer
-  ::drawProgress(const unsigned int i)
+RenderViewer
+  ::RenderViewer(void)
+    :Parent()
 {
-  //std::cerr << "RenderViewer::drawProgress(): sample " << i << std::endl;
-  std::cerr << "\rRenderViewer::drawProgress(): sample " << i;
-} // end RenderViewer::drawProgress()
+  ;
+} // end RenderViewer::RenderViewer()
 
 void RenderViewer
   ::draw(void)
@@ -31,12 +32,33 @@ void RenderViewer
                   0,
                   GL_RGB, data);
 
-    Program &p = mTexture2DRectProgram;
+    float progressScale = static_cast<float>(mProgress.expected_count()) / mProgress.count();
+
+    // choose which program to use
+    Program &p = mDoTonemap ? mTexture2DRectTonemapProgram : mTexture2DRectGammaProgram;
+
+    p.bind();
+
+    // compensate for progress if we're doing metropolis
+    if(!mDoTonemap
+       && dynamic_cast<const MetropolisRenderer*>(mRenderer.get())
+       && dynamic_cast<const EnergyRedistributionRenderer*>(mRenderer.get()) == 0)
+    {
+      p.setUniform1f("scale", powf(2.0f, mExposure) * progressScale);
+    } // end if
+    else
+    {
+      p.setUniform1f("scale", powf(2.0f, mExposure));
+    } // end else
+
+    p.setUniform1f("gamma", mGamma);
+    p.setUniform1f("Ywa", mImage->getMaximumLuminance());
+
+    printGLError(__FILE__, __LINE__);
+
+    p.unbind();
 
     glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
-
-    // XXX this crashes on ubuntu?
-    //glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
 
     drawTexture(mTexture, p);
     glPopAttrib();
@@ -65,16 +87,21 @@ void RenderViewer
   mTexture.create();
 
   mDrawPreview = true;
+  mExposure = 0.0f;
+  mGamma = 1.0f;
+
+  mDoTonemap = false;
 } // end RenderViewer::init()
 
 void RenderViewer
-  ::keyPressEvent(QKeyEvent *e)
+  ::keyPressEvent(KeyEvent *e)
 {
   switch(e->key())
   {
     case Qt::Key_R:
     {
       startRender();
+      mDrawPreview = false;
       updateGL();
       break;
     } // end case Qt::Key_R
@@ -85,6 +112,80 @@ void RenderViewer
       updateGL();
       break;
     } // end case Qt::Key_P
+
+    case '(':
+    {
+      mGamma -= 0.1f;
+      mGamma = std::max(mGamma, 0.1f);
+
+      char msg[32];
+      sprintf(msg, "Gamma: %f", mGamma);
+      displayMessage(msg);
+      updateGL();
+      break;
+    } // end case (
+
+    case ')':
+    {
+      mGamma += 0.1f;
+
+      char msg[32];
+      sprintf(msg, "Gamma: %f", mGamma);
+      displayMessage(msg);
+      updateGL();
+      break;
+    } // end case )
+
+    case '{':
+    {
+      mExposure -= 1.0f;
+
+      char msg[32];
+      sprintf(msg, "Exposure: %f", mExposure);
+      displayMessage(msg);
+      updateGL();
+      break;
+    } // end case '{'
+
+    case '[':
+    {
+      mExposure -= 0.1f;
+
+      char msg[32];
+      sprintf(msg, "Exposure: %f", mExposure);
+      displayMessage(msg);
+      updateGL();
+      break;
+    } // end case '['
+
+    case '}':
+    {
+      mExposure += 1.0f;
+
+      char msg[32];
+      sprintf(msg, "Exposure: %f", mExposure);
+      displayMessage(msg);
+      updateGL();
+      break;
+    } // end case '}'
+
+    case ']':
+    {
+      mExposure += 0.1f;
+
+      char msg[32];
+      sprintf(msg, "Exposure: %f", mExposure);
+      displayMessage(msg);
+      updateGL();
+      break;
+    } // end case ']'
+
+    case 'T':
+    {
+      mDoTonemap = !mDoTonemap;
+      updateGL();
+      break;
+    } // end case 'T'
 
     default:
     {
@@ -136,27 +237,6 @@ class RenderThunk
   Renderer::ProgressCallback *mProgress;
 };
 
-void RenderViewer::DrawProgress
-  ::operator()(const unsigned int i)
-{
-  unsigned int rowWidth = 80;
-  unsigned int maxStars = rowWidth - 12;
-  unsigned int stars = (maxStars*i) / mTotalWork;
-
-  std::string progressString("\rprogress: [");
-  for(int i = 0; i < stars; ++i)
-    progressString += "+";
-  for(int i = stars; i < maxStars; ++i)
-    progressString += " ";
-  progressString += "]";
-
-  if(stars == maxStars)
-    progressString += "\n";
-
-  std::cerr << progressString;
-  boost::thread::yield();
-}
-
 void RenderViewer
   ::postSelection(const QPoint &p)
 {
@@ -164,13 +244,7 @@ void RenderViewer
 } // end RenderViewer::postSelection()
 
 void RenderViewer
-  ::setCamera(shared_ptr<Camera> c)
-{
-  mCamera = c;
-} // end RenderViewer::setCamera()
-
-void RenderViewer
-  ::setImage(shared_ptr<RandomAccessFilm> i)
+  ::setImage(shared_ptr<RenderFilm> i)
 {
   mImage = i;
 } // end RenderViewer::setImage()
@@ -184,13 +258,6 @@ void RenderViewer
 void RenderViewer
   ::startRender(void)
 {
-  DrawProgress temp;
-  temp.mViewer = this;
-  // XXX fix this
-  temp.mTotalWork = width() * height();
-
-  mProgress = temp;
-
   // XXX make RenderThunk refer to a shared_ptr
   RenderThunk render = RenderThunk(mRenderer.get(), &mProgress);
   boost::thread renderThread(render);

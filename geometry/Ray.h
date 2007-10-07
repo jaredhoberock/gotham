@@ -35,6 +35,12 @@ class Ray
      */
     inline Ray(const Point &a, const Vector &d);
 
+    /*! Constructor accepts two Points.
+     *  \param p0 The origin.
+     *  \param p1 The destination.
+     */
+    inline Ray(const Point &p0, const Point &p1);
+
     /*! Constructor accepts an anchor and direction.
      *  \param a Sets mAnchor.
      *  \param d Sets mDirection.

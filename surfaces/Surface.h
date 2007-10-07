@@ -73,6 +73,12 @@ class Surface
      *  \note This method must be implemented in a derived class.
      */
     virtual float getSurfaceArea(void) const = 0;
+
+    /*! This method returns the inverse surface area of this Surface.
+     *  \return The reciprocal of surface area of this Surface.
+     *  \note This method must be implemented in a derived class.
+     */
+    virtual float getInverseSurfaceArea(void) const = 0;
 }; // end Surface
 
 #endif // SURFACE_H

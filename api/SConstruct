@@ -1,27 +1,67 @@
-exec open('../../../build.py')
+#exec open('../../../build.py')
+#
+#env = getCommonEnvironment()
+import os
 
-env = getCommonEnvironment()
+exec open('../build-env.py')
+env = GothamReleaseEnvironment()
 
 # add dependencies
-env.Append(LIBS = ['boost_python'])
-env.Append(LIBS = ['boost_thread'])
+
+# with msvc, boost figures out which libraries to link
+if os.name == 'posix':
+  env.Append(LIBS = ['boost_python'])
+  env.Append(LIBS = ['boost_thread'])
 
 env.Append(LIBS = ['renderers'])
+env.Append(LIBS = ['rasterizables'])
 env.Append(LIBS = ['rasterizers'])
+env.Append(LIBS = ['importance'])
+env.Append(LIBS = ['mutators'])
+env.Append(LIBS = ['path'])
 env.Append(LIBS = ['primitives'])
 env.Append(LIBS = ['surfaces'])
-env.Append(LIBS = ['shading'])
+# don't link libshading as a static library
+#env.Append(LIBS = ['shading'])
 env.Append(LIBS = ['geometry'])
 
+# openexr libraries
+env.Append(LIBS = ['Iex'])
+env.Append(LIBS = ['IlmImf'])
+env.Append(LIBS = ['Imath'])
+env.Append(LIBS = ['Half'])
+env.Append(LIBS = ['z'])
+
+# qt libraries
+env.Append(LIBS = ['QtCore'])
+env.Append(LIBS = ['QtXml'])
+env.Append(LIBS = ['QtGui'])
+env.Append(LIBS = ['QtOpenGL'])
+
+# gl libraries
+env.Append(LIBS = ['GL'])
+env.Append(LIBS = ['GLU'])
+env.Append(LIBS = ['GLEW'])
+env.Append(LIBS = ['QGLViewer'])
+
 env.Append(LIBPATH = ['../geometry',
+                      '../importance',
+                      '../path',
+                      '../mutators',
                       '../primitives',
+                      '../rasterizables',
                       '../rasterizers',
                       '../renderers',
                       '../surfaces',
                       '../shading'])
 
-env.Append(CPPPATH = getIncludes()['python'])
+#env.Append(CPPPATH = getIncludes()['python'])
 
 # create a shared library
-env.SharedLibrary('gotham', ['Gotham.cpp', '../Camera.cpp'], SHLIBPREFIX = '')
+# XXX this is pretty ugly, but it forces scons to accept the fact
+#     that I want to include libshading.so in the list of sources.
+#     We have to do this because we want to include libshading.so in this
+#     shared library rather than link to it dynamically.
+env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME'] = 1
+env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', '../shading/libshading.so'], SHLIBPREFIX = '')
 

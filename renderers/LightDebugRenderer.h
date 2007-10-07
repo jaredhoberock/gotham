@@ -27,13 +27,14 @@ class LightDebugRenderer
      *  \param f Sets mFilm.
      */
     LightDebugRenderer(boost::shared_ptr<const Scene>  s,
-                       boost::shared_ptr<RandomAccessFilm> f);
+                       boost::shared_ptr<RenderFilm> f);
 
+  protected:
     /*! This method renders mScene to mFilm.
      *  \param progress A callback, which will be periodically
      *         called throughout the rendering process.
      */
-    virtual void render(ProgressCallback &progress);
+    virtual void kernel(ProgressCallback &progress);
 }; // end LightDebugRenderer
 
 #endif // LIGHT_DEBUG_RENDERER_H

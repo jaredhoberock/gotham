@@ -1,0 +1,11 @@
+emission(float f)
+{
+  float x = P[0] + 1.0f;
+  x *= 0.5f;
+  float y = P[1] + 1.0f;
+  y *= 0.5f;
+
+  float z = 0.5f * (sinf(f*(x*x + y*y)) + 1.0f);
+  E = new HemisphericalEmission(Spectrum(z,z,z));
+} // end emission()
+

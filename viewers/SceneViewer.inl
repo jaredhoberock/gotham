@@ -4,8 +4,11 @@
  */
 
 #include "SceneViewer.h"
-#include "../Camera.h"
+#include "../rasterizables/Rasterizable.h"
 #include <pricksie/geometry/BoundingBox.h>
+#include "../primitives/SurfacePrimitiveList.h"
+#include "../geometry/DifferentialGeometry.h"
+#include "../shading/PerspectiveSensor.h"
 #include <fstream>
 #include <qfiledialog.h>
 
@@ -22,6 +25,35 @@ void SceneViewer
   mScene->getBoundingBox(b);
   setSceneBoundingBox(qglviewer::Vec(b[0]),
                       qglviewer::Vec(b[1]));
+
+  //// try to set the camera
+  //const SurfacePrimitiveList *sensors = mScene->getSensors();
+  //if(sensors != 0 && sensors->size() > 0)
+  //{
+  //  const SurfacePrimitive *surf = 0;
+  //  float pdf;
+  //  DifferentialGeometry dg;
+  //  sensors->sampleSurfaceArea(0.5f, 0.5f, 0.5f, 0.5f,
+  //                             &surf, dg, pdf);
+
+  //  ScatteringDistributionFunction *f = surf->getMaterial()->evaluateSensor(dg);
+
+  //  PerspectiveSensor *ps = dynamic_cast<PerspectiveSensor*>(f);
+  //  if(ps != 0)
+  //  {
+  //    Vector right, up;
+  //    right = ps->getRight();
+  //    up = ps->getUp();
+  //    Vector look = -right.cross(up);
+
+  //    // use the differential geometry to try to position the camera
+  //    camera()->setPosition(qglviewer::Vec(dg.getPoint()));
+  //    camera()->setUpVector(qglviewer::Vec(up));
+  //    camera()->setViewDirection(qglviewer::Vec(look));
+  //  } // end if
+
+  //  ScatteringDistributionFunction::mPool.freeAll();
+  //} // end if
 } // end SceneViewer::setScene()
 
 void SceneViewer
@@ -35,29 +67,11 @@ void SceneViewer
   ::draw(void)
 {
   mRasterizeScene();
+  Rasterizable *r = dynamic_cast<Rasterizable*>(mScene.get());
+  if(r != 0)
+  {
+    r->rasterize();
+  } // end if
 } // end SceneViewer::draw()
 
-void SceneViewer
-  ::getCamera(Camera &camera) const
-{
-  Vector3 up(QGLViewer::camera()->upVector()[0],
-             QGLViewer::camera()->upVector()[1],
-             QGLViewer::camera()->upVector()[2]);
-  Vector3 look(QGLViewer::camera()->viewDirection()[0],
-               QGLViewer::camera()->viewDirection()[1],
-               QGLViewer::camera()->viewDirection()[2]);
-  Point eye(QGLViewer::camera()->position()[0],
-             QGLViewer::camera()->position()[1],
-             QGLViewer::camera()->position()[2]);
-  float fovy = QGLViewer::camera()->fieldOfView();
-
-  // create a Camera
-  camera = Camera(static_cast<float>(width()) / static_cast<float>(height()),
-                  fovy,
-                  //0.02f,
-                  0,
-                  eye,
-                  look,
-                  up);
-} // end SceneViewer::getCamera()
 

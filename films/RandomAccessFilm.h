@@ -49,6 +49,15 @@ class RandomAccessFilm
     inline Pixel &pixel(const float u,
                         const float v);
 
+    /*! This method returns a const reference to the pixel
+     *  at location (u,v)
+     *  \param u A parameteric coordinate in [0,1).
+     *  \param v A parameteric coordinate in [0,1).
+     *  \return A reference to the pixel at (u,v)
+     */
+    inline const Pixel &pixel(const float u,
+                              const float v) const;
+
     /*! This method returns a reference to the pixel
      *  at raster location (px,py).
      *  \param px A raster coordinate in [0,mWidth).

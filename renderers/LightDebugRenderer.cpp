@@ -9,8 +9,9 @@
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../primitives/SurfacePrimitiveList.h"
-#include "../films/RandomAccessFilm.h"
+#include "../films/RenderFilm.h"
 #include "../shading/Material.h"
+#include "../shading/FunctionAllocator.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../primitives/SurfacePrimitive.h"
 #include <boost/random/lagged_fibonacci.hpp>
@@ -27,14 +28,14 @@ LightDebugRenderer
 
 LightDebugRenderer
   ::LightDebugRenderer(shared_ptr<const Scene> s,
-                       shared_ptr<RandomAccessFilm> f)
+                       shared_ptr<RenderFilm> f)
     :Parent(s,f)
 {
   ;
 } // end LightDebugRenderer::LightDebugRenderer()
 
 void LightDebugRenderer
-  ::render(ProgressCallback &progress)
+  ::kernel(ProgressCallback &progress)
 {
   float2 step(1.0f / mFilm->getWidth(),
               1.0f / mFilm->getHeight());
@@ -53,13 +54,13 @@ void LightDebugRenderer
   Vector3 d;
   Normal n;
   float sensorSurfaceAreaPdf;
+  bool sensorDelta;
   float sensorSolidAnglePdf;
   float lightPdf;
   Primitive::Intersection inter;
   float2 uv(0,0); 
-  unsigned int i = 0;
-  unsigned int tenPercentSamples = mFilm->getWidth() * mFilm->getHeight() / 10;
 
+  progress.restart(mFilm->getWidth() * mFilm->getHeight());
   for(unsigned int y = 0;
       y < mFilm->getHeight();
       ++y, uv[1] += step[1])
@@ -77,7 +78,7 @@ void LightDebugRenderer
       ScatteringDistributionFunction &s = *sensor->getMaterial()->evaluateSensor(dgSensor);
 
       // sample a sensing direction
-      Spectrum sensorResponse = s.sample(dgSensor, uv[0], uv[1], 0.5f, d, sensorSolidAnglePdf);
+      Spectrum sensorResponse = s.sample(dgSensor, uv[0], uv[1], 0.5f, d, sensorSolidAnglePdf, sensorDelta);
       r = Ray(dgSensor.getPoint(), d);
 
       Spectrum L(0.1f,0.1f,0.1f);
@@ -118,19 +119,12 @@ void LightDebugRenderer
       } // end if
 
       mFilm->raster(x,y) = L;
-      ++i;
-
-      if(i % tenPercentSamples == 0)
-      {
-        progress(i);
-      } // end if
 
       // purge all malloc'd memory for this sample
       ScatteringDistributionFunction::mPool.freeAll();
+
+      ++progress;
     } // end for x
   } // end for y
-
-  // finish off progress
-  progress(i);
-} // end LightDebugRenderer::render()
+} // end LightDebugRenderer::kernel()
 

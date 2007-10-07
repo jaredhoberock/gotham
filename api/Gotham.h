@@ -4,7 +4,7 @@
  */
 
 #ifndef GOTHAM_H
-#define GOTHAM_H
+#define GOTHAM_H 
 
 #include <vector>
 #include <list>
@@ -15,10 +15,16 @@
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../renderers/Renderer.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/any.hpp>
 
 class Gotham
 {
   public:
+    /*! \typedef AttributeMap
+     *  \brief Shorthand.
+     */
+    typedef std::map<std::string, boost::any> AttributeMap;
+
     /*! Null constructor calls init().
      */
     Gotham(void);
@@ -104,6 +110,43 @@ class Gotham
     void mesh(std::vector<float> &vertices,
               std::vector<unsigned int> &triangles);
 
+    /*! This method creates a new triangle Mesh by
+     *  transforming the given geometry against the current
+     *  Matrix.
+     *  \param vertices A list of triangle vertex positions.
+     *  \param parametrics A list of parametric triangle vertex positions.
+     *  \param triangles A list of vertex index triples.
+     */
+    void mesh(std::vector<float> &vertices,
+              std::vector<float> &parametrics,
+              std::vector<unsigned int> &triangles);
+
+    /*! This method creates a new Sphere.
+     *  \param cx The x-coordinate of the center of the Sphere.
+     *  \param cy The y-coordinate of the center of the Sphere.
+     *  \param cz The z-coordinate of the center of the Sphere.
+     *  \param radius The radius of the Sphere.
+     */
+    void sphere(const float cx,
+                const float cy,
+                const float cz,
+                const float radius);
+
+    /*! This method sets the given named attribute.
+     *  \param name The name of the attribute to set.
+     *  \param val The value to set to.
+     */
+    void attribute(const std::string &name, const std::string &val);
+
+    /*! This method pushes a copy of the current attributes to the top of
+     *  the attributes stack.
+     */
+    void pushAttributes(void);
+
+    /*! This method pops the top of the attributes stack.
+     */
+    void popAttributes(void);
+
   private:
     typedef Transform Matrix;
 
@@ -119,13 +162,24 @@ class Gotham
      */
     void multMatrix(const Matrix &m);
 
+    /*! This method returns an AttributeMap filled with default
+     *  attributes.
+     *  \param attr A set of default attributes is returned here.
+     */
+    void getDefaultAttributes(AttributeMap &attr) const;
+
+    /*! This method accepts a new SurfacePrimitive to add to the current Scene.
+     *  \param prim The new SurfacePrimitive.
+     */
+    void surfacePrimitive(SurfacePrimitive *prim);
+
     /*! The matrix stack.
      */
     std::vector<Matrix> mMatrixStack;
 
-    /*! The current material.
+    /*! The attribute stack.
      */
-    boost::shared_ptr<Material> mCurrentMaterial;
+    std::vector<AttributeMap> mAttributeStack;
 
     /*! A list of SurfacePrimitives.
      */

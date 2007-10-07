@@ -7,15 +7,16 @@
 
 Scene
   ::Scene(void)
-    :mPrimitive(),mRaysCast(0)
+    :mPrimitive()
 {
-  ;
+  resetStatistics();
 } // end Scene::Scene()
 
 Scene
   ::Scene(boost::shared_ptr<Primitive> p)
-    :mPrimitive(),mRaysCast(0)
+    :mPrimitive()
 {
+  resetStatistics();
   setPrimitive(p);
 } // end Scene::Scene()
 
@@ -37,10 +38,24 @@ long unsigned int Scene
   return mRaysCast;
 } // end Scene::getRaysCast()
 
+long unsigned int Scene
+  ::getShadowRaysCast(void) const
+{
+  return mShadowRaysCast;
+} // end Scene::getShadowRaysCast()
+
+long unsigned int Scene
+  ::getBlockedShadowRays(void) const
+{
+  return mBlockedShadowRays;
+} // end Scene::getBlockedShadowRays()
+
 void Scene
-  ::resetRaysCast(void)
+  ::resetStatistics(void)
 {
   mRaysCast = 0;
+  mShadowRaysCast = 0;
+  mBlockedShadowRays = 0;
 } // end Scene::resetRaysCast()
 
 void Scene
@@ -66,4 +81,27 @@ const SurfacePrimitiveList *Scene
 {
   return mSensors.get();
 } // end Scene::getSensors()
+
+bool Scene
+  ::intersect(Ray &r, Primitive::Intersection &inter) const
+{
+  ++mRaysCast;
+  return getPrimitive()->intersect(r,inter);
+} // end Scene::intersect()
+
+bool Scene
+  ::intersect(const Ray &r) const
+{
+  ++mRaysCast;
+  ++mShadowRaysCast;
+  bool result = getPrimitive()->intersect(r);
+  mBlockedShadowRays += result;
+  return result;
+} // end Scene::intersect()
+
+void Scene
+  ::getBoundingBox(BoundingBox &b) const
+{
+  return mPrimitive->getBoundingBox(b);
+} // end Scene::getBoundingBox()
 

@@ -12,13 +12,25 @@ SurfacePrimitiveList
   mSurfaceArea = 0;
 } // end SurfacePrimitiveList::SurfacePrimitiveList()
 
-void SurfacePrimitiveList
+bool SurfacePrimitiveList
   ::sampleSurfaceArea(const float u,
                       const SurfacePrimitive **prim,
                       float &pdf) const
 {
-  *prim = mSurfaceAreaPdf(u, pdf);
+  if(!mSurfaceAreaPdf.empty())
+  {
+    *prim = mSurfaceAreaPdf(u, pdf);
+    return true;
+  } // end if
+
+  return false;
 } // end SurfacePrimitive::sampleSurfaceArea()
+
+float SurfacePrimitiveList
+  ::evaluateSurfaceAreaPdf(const SurfacePrimitive *prim) const
+{
+  return mSurfaceAreaPdf.evaluatePdf(prim);
+} // end SurfacePrimitiveList::evaluateSurfaceAreaPdf()
 
 void SurfacePrimitiveList
   ::push_back(boost::shared_ptr<SurfacePrimitive> &p)
@@ -31,6 +43,7 @@ void SurfacePrimitiveList
 void SurfacePrimitiveList
   ::finalize(void)
 {
+  Parent::finalize();
   buildSurfaceAreaPdf();
 } // end SurfacePrimitive::finalize()
 
@@ -51,7 +64,7 @@ void SurfacePrimitiveList
                         area.begin(), area.end());
 } // end SurfacePrimitiveList::buildSurfaceAreaPdf()
 
-void SurfacePrimitiveList
+bool SurfacePrimitiveList
   ::sampleSurfaceArea(const float u0,
                       const float u1,
                       const float u2,
@@ -61,11 +74,24 @@ void SurfacePrimitiveList
                       float &pdf) const
 {
   // sample a Surface
-  sampleSurfaceArea(u0, surf, pdf);
+  if(sampleSurfaceArea(u0, surf, pdf))
+  {
+    // sample from surf
+    float temp;
+    (*surf)->sampleSurfaceArea(u1,u2,u3,dg,temp);
+    pdf *= temp;
+    return true;
+  } // end if
 
-  // sample from surf
-  float temp;
-  (*surf)->sampleSurfaceArea(u1,u2,u3,dg,temp);
-  pdf *= temp;
+  return false;
 } // end SurfacePrimitiveList::sampleSurfaceArea()
+
+float SurfacePrimitiveList
+  ::evaluateSurfaceAreaPdf(const SurfacePrimitive *surf,
+                           const DifferentialGeometry &dg) const
+{
+  float result = evaluateSurfaceAreaPdf(surf);
+  result *= surf->evaluateSurfaceAreaPdf(dg);
+  return result;
+} // end SurfacePrimitiveList::evaluateSurfaceAreaPdf()
 

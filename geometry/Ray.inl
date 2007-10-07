@@ -31,6 +31,12 @@ Ray
 } // end Ray::Ray()
 
 Ray
+  ::Ray(const Point &p0, const Point &p1)
+{
+  set(p0,p1);
+} // end Ray::Ray()
+
+Ray
   ::Ray(const Point &a, const Vector3 &d, const float mint, const float maxt)
     :mAnchor(a),mDirection(d),mInverseDirection(1.0f / d[0], 1.0f / d[1], 1.0f / d[2])
 {

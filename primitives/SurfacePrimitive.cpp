@@ -38,6 +38,7 @@ bool SurfacePrimitive
     return false;
   } // end if
 
+  dg.setSurface(this);
   inter.setPrimitive(this);
 
   // update the Ray's maximum t
@@ -58,11 +59,23 @@ const Surface *SurfacePrimitive
   return mSurface.get();
 } // end SurfaceType::getSurface()
 
+void SurfacePrimitive
+  ::getSurface(boost::shared_ptr<Surface> &s) const
+{
+  s = mSurface;
+} // end SurfacePrimitive::getSurface()
+
 float SurfacePrimitive
   ::getSurfaceArea(void) const
 {
   return mSurface->getSurfaceArea();
 } // end SurfacePrimitive::getSurfaceArea()
+
+float SurfacePrimitive
+  ::getInverseSurfaceArea(void) const
+{
+  return mSurface->getInverseSurfaceArea();
+} // end SurfacePrimitive::getInverseSurfaceArea()
 
 void SurfacePrimitive
   ::sampleSurfaceArea(const float u0,
@@ -71,6 +84,14 @@ void SurfacePrimitive
                       DifferentialGeometry &dg,
                       float &pdf) const
 {
-  return mSurface->sampleSurfaceArea(u0,u1,u2,dg,pdf);
+  mSurface->sampleSurfaceArea(u0,u1,u2,dg,pdf);
+  dg.setSurface(this);
 } // end SurfacePrimitive::sampleSurfaceArea()
+
+float SurfacePrimitive
+  ::evaluateSurfaceAreaPdf(const DifferentialGeometry &dg) const
+{
+  float result = mSurface->evaluateSurfaceAreaPdf(dg);
+  return result;
+} // end SurfacePrimitive::evaluatesurfaceAreaPdf()
 

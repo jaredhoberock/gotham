@@ -1,16 +1,17 @@
-#exec open('../../../build.py')
+import os
+import glob
 
-includes = ['/home/jared/dev/src']
-env = Environment(CPPPATH = includes,
-                  tools = ['default', 'intelc'],
-                  CPPFLAGS = '-O3')
+exec open('../build-env.py')
 
-# create a library
-sources = ['FunctionAllocator.cpp',
-           'HemisphericalEmission.cpp',
-           'Lambertian.cpp',
-           'Material.cpp',
-           'PerspectiveSensor.cpp',
-           'ScatteringDistributionFunction.cpp']
-env.SharedLibrary('shading', sources)
+# find all .cpps in the current directory
+sources = []
+pattern = os.path.join(os.getcwd(), "*.cpp")
+for fullpath in glob.glob(pattern):
+  basename = os.path.basename(fullpath)
+  sources.append(basename)
+
+# we need to build the shading library as
+# a shared library so its symbols will be available
+# to shaders
+GothamSharedLibrary('shading', sources)
 

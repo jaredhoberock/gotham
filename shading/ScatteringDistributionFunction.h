@@ -7,11 +7,11 @@
 #ifndef SCATTERING_DISTRIBUTION_FUNCTION_H
 #define SCATTERING_DISTRIBUTION_FUNCTION_H
 
-#include <spectrum/Spectrum.h>
 #include "../geometry/Vector.h"
 #include "../geometry/Normal.h"
 #include "../geometry/DifferentialGeometry.h"
 #include "FunctionAllocator.h"
+#include <spectrum/Spectrum.h>
 
 #ifndef PI
 #define PI 3.14159265f 
@@ -21,9 +21,18 @@
 #define INV_PI (1.0f / PI)
 #endif // INV_PI
 
+#ifndef INV_TWOPI
+#define INV_TWOPI (1.0f / (2.0f * PI))
+#endif // INV_TWOPI
+
 class ScatteringDistributionFunction
 {
   public:
+    /*! \typedef ComponentIndex
+     *  \brief Shorthand.
+     */
+    typedef size_t ComponentIndex;
+
     /*! All child classes must implement this method which evaluates a
      *  bidirectional scattering event in an outgoing direction of interest
      *  given a direction of incidence.
@@ -76,6 +85,10 @@ class ScatteringDistributionFunction
      *  \param u2 A third real number in [0,1).
      *  \param wi The direction of scattering is returned here.
      *  \param pdf The value of the pdf at (u0,u1,u2) is returned here.
+     *  \param delta This is set to true if wi was sampled from a delta
+     *               distribution; false, otherwise.
+     *  \param component This is set to the index of the component function which
+     *                   generated wi.
      *  \return The bidirectional scattering from wi to wo is returned here.
      */
     virtual Spectrum sample(const Vector3 &wo,
@@ -84,7 +97,9 @@ class ScatteringDistributionFunction
                             const float u1,
                             const float u2,
                             Vector3 &wi,
-                            float &pdf) const;
+                            float &pdf,
+                            bool &deltaDistribution,
+                            ComponentIndex &component) const;
 
     /*! All child classes must implement this method which returns the value of
      *  this ScatteringDistributionFunction's pdf given a wo, DifferentialGeometry, and wi.
@@ -97,14 +112,49 @@ class ScatteringDistributionFunction
                               const DifferentialGeometry &dg,
                               const Vector3 &wi) const;
 
+    /*! This method evaluates the value of this ScatteringDistributionFunction's pdf given a
+     *  wo, DifferentialGeometry, and wi.
+     *  This method is included to allow bidirectional path tracing's computation of
+     *  MIS weights to work with composite scattering functions.
+     *  \param wo A Vector pointing towards the direction of scattering.
+     *  \param dg The DifferentialGeometry at the scattering Point of interest.
+     *  \param wi A Vector pointing towards the direction of incidence.
+     *  \param delta Whether or not (wo,dg,wi) is known to be a delta function (specular bounce).
+     *         If so, this method will include the probability of choosing a specular
+     *         bounce into the returned pdf.
+     *  \param component The index of the component the bounce (wo,dg,wi) is known to be sampled
+     *         from.  Important for specular bounces.
+     *  \note The default implementation of this method ignores delta and returns
+     *        evaluatePdf(wo,dg,wi).
+     */
+    virtual float evaluatePdf(const Vector &wo,
+                              const DifferentialGeometry &dg,
+                              const Vector &wi,
+                              const bool delta,
+                              const ComponentIndex component) const;
+
     /*! This method evaluates the solid angle pdf of the
-     *  sensing direction of interest.
-     *  \param w The sensing direction of interest.
+     *  direction of interest.
+     *  \param w The direction of interest.
      *  \param dg The DifferentialGeometry at the Point of interest.
      *  \return The solid angle pdf of w.
      */
     virtual float evaluatePdf(const Vector3 &w,
                               const DifferentialGeometry &dg) const;
+
+    /*! This method inverts this ScatteringDistributionFunction's mapping
+     *  from a direction to the unit square.
+     *  \param w The direction of interest.
+     *  \param dg the DifferentialGeometry at the Point of interest.
+     *  \param u0 The first coordinate of the corresponding point in the unit
+     *            square is returned here.
+     *  \param u1 The second coordinate of the corresponding point in the unit
+     *            square is returned here.
+     */
+    virtual void invert(const Vector &w,
+                        const DifferentialGeometry &dg,
+                        float &u0,
+                        float &u1) const;
 
     /*! All child classes must implement this method which samples this
      *  ScatteringDistributionFunction given a DifferentialGeometry,
@@ -115,6 +165,8 @@ class ScatteringDistributionFunction
      *  \param u2 A third real number in [0,1).
      *  \param w The direction of scattering is returned here.
      *  \param pdf The value of the pdf at (u0,u1,u2) is returned here.
+     *  \param delta This is set to true if wi was sampled from a delta
+     *               distribution; false, otherwise.
      *  \return The unidirectional scattering to w is returned here.
      */
     virtual Spectrum sample(const DifferentialGeometry &dg,
@@ -122,7 +174,8 @@ class ScatteringDistributionFunction
                             const float u1,
                             const float u2,
                             Vector3 &w,
-                            float &pdf) const;
+                            float &pdf,
+                            bool &delta) const;
 
     /*! This static method evaluates whether or not an incident and exitant direction
      *  are in the same hemisphere with respect to the Normal direction.
@@ -136,11 +189,42 @@ class ScatteringDistributionFunction
                                          const Normal &n,
                                          const Vector3 &wi);
 
+    inline static bool areSameHemisphere(const float coso,
+                                         const float cosi);
+
+    /*! This method indicates whether or not this ScatteringDistributionFunction
+     *  is completely described by one or more Dirac delta functions.
+     *  \return true if this ScatteringDistributionFunction is completely described as a
+     *          sum of one or more Dirac delta functions; false, otherwise.
+     *  \note The default implementation of this method returns false.
+     */
+    virtual bool isSpecular(void) const;
+
     static FunctionAllocator mPool;
 
     /*! Overload the new operator.
      */
     void *operator new(unsigned int size);
+
+    /*! This method clones this ScatteringDistributionFunction.
+     *  \param allocator The FunctionAllocator to allocate from.
+     *  \return a pointer to a newly-allocated clone of this ScatteringDistributionFunction; 0,
+     *          if no memory could be allocated.
+     */
+    virtual ScatteringDistributionFunction *clone(FunctionAllocator &allocator) const;
+
+  protected:
+    /*! This method evaluates the geometric term common to microfacet scattering models.
+     *  \param nDotWo
+     *  \param nDotWi
+     *  \param nDotWh
+     *  \param woDotWh
+     *  \return The geometric term.
+     */
+    static float evaluateGeometricTerm(const float nDotWo,
+                                       const float nDotWi,
+                                       const float nDotWh,
+                                       const float woDotWh);
 }; // end ScatteringDistributionFunction
 
 #include "ScatteringDistributionFunction.inl"

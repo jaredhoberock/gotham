@@ -39,6 +39,11 @@ class SurfacePrimitive
      */
     const Surface *getSurface(void) const;
 
+    /*! This method returns a shared pointer to mSurface.
+     *  \param s mSurface is returned here.
+     */
+    void getSurface(boost::shared_ptr<Surface> &s) const;
+
     /*! This method returns the world space bounding box of mSurface.
      *  \param b Set to mShape->getBoundingBox().
      */
@@ -64,7 +69,14 @@ class SurfacePrimitive
      *  \return mSurface->getSurfaceArea()
      *  XXX Should we include this?
      */
-    virtual float getSurfaceArea(void) const;
+    float getSurfaceArea(void) const;
+
+    /*! This method returns the inverse surface area of this SurfacePrimitive's
+     *  Surface.
+     *  \return mSurface->getInverseSurfaceArea()
+     *  XXX Should we include this?
+     */
+    float getInverseSurfaceArea(void) const;
 
     /*! This method samples this SurfacePrimitive's surface area.
      *  \param u0 A real number in [0,1).
@@ -80,6 +92,14 @@ class SurfacePrimitive
                            const float u2,
                            DifferentialGeometry &dg,
                            float &pdf) const;
+
+    /*! This method evaluates the surface area pdf of choosing the
+     *  given point on this SurfacePrimitive.
+     *  \param dg The DifferentialGeometry at the point of interest.
+     *  \return The surface area measure pdf of choosing dg on this
+     *          SurfacePrimitive.
+     */
+    virtual float evaluateSurfaceAreaPdf(const DifferentialGeometry &dg) const;
 
   protected:
     /*! A SurfacePrimitive keeps a pointer to a Surface.

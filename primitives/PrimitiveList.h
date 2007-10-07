@@ -17,7 +17,7 @@ class Ray;
 template<typename PrimitiveType = Primitive>
   class PrimitiveList
     : public Primitive,
-      protected std::vector<boost::shared_ptr<PrimitiveType> >
+      public std::vector<boost::shared_ptr<PrimitiveType> >
 {
   public:
     typedef Primitive Parent0;

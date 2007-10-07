@@ -27,6 +27,13 @@ RandomAccessFilm::Pixel &RandomAccessFilm
   return Parent1::element(u,v);
 } // end RandomAccessFilm::pixel()
 
+const RandomAccessFilm::Pixel &RandomAccessFilm
+  ::pixel(const float u,
+          const float v) const
+{
+  return Parent1::element(u,v);
+} // end RandomAccessFilm::pixel()
+
 RandomAccessFilm::Pixel &RandomAccessFilm
   ::raster(const unsigned int px,
            const unsigned int py)

@@ -10,7 +10,14 @@ bool ScatteringDistributionFunction
                       const Normal &n,
                       const Vector3 &wi)
 {
-  return wo.dot(n) * wi.dot(n) > 0;
+  return areSameHemisphere(wo.dot(n), wi.dot(n));
+} // end ScatteringDistributionFunction::areSameHemisphere()
+
+bool ScatteringDistributionFunction
+  ::areSameHemisphere(const float coso,
+                      const float cosi)
+{
+  return (coso > 0) == (cosi > 0); 
 } // end ScatteringDistributionFunction::areSameHemisphere()
 
 Spectrum ScatteringDistributionFunction

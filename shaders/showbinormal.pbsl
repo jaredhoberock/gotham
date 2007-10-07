@@ -1,0 +1,6 @@
+scattering(void)
+{
+  Spectrum b(fabs(B[0]), fabs(B[1]), fabs(B[2]));
+  return new Lambertian(b);
+} // end scattering()
+

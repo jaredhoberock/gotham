@@ -7,6 +7,12 @@
 #ifndef SCENE_VIEWER_H
 #define SCENE_VIEWER_H
 
+// glew.h will #include <windows.h>
+#ifdef WIN32
+#define NOMINMAX
+#define WINDOWS_LEAN_AND_MEAN
+#endif // WIN32
+
 #include <GL/glew.h>
 #include <QGLViewer/qglviewer.h>
 #include <QKeyEvent>
@@ -14,8 +20,6 @@
 #include "../primitives/Scene.h"
 #include "../rasterizers/SceneRasterizer.h"
 #include <boost/shared_ptr.hpp>
-
-class Camera;
 
 class SceneViewer
   : public CommonViewer<QGLViewer,QKeyEvent>
@@ -38,8 +42,6 @@ class SceneViewer
     inline virtual void init(void);
 
   protected:
-    inline virtual void getCamera(Camera &cam) const;
-
     boost::shared_ptr<Scene> mScene;
     SceneRasterizer mRasterizeScene;
 }; // end SceneViewer

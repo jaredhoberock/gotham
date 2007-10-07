@@ -48,8 +48,7 @@ def parseFunction(name, source):
   for c in searchMeForBody[1:]:
     if c == '{':
       depth += 1
-    elif c == '}':
-      depth -= 1
+    elif c == '}': depth -= 1
     if depth == 0:
       break
     body += c
@@ -58,13 +57,31 @@ def parseFunction(name, source):
   return (parametersList, body)
 
 
+def makeShaderParameterCode(parameterType, parameterName):
+  # declare the parameter
+  result = '%s %s;\n' % (parameterType, parameterName)
+  # make a setter method for it
+  if parameterType == "Vector" or parameterType == "Point" or parameterType == "Spectrum":
+    result += 'void set_%s(const float x, const float y, const float z){%s = %s(x,y,z);}\n' % (parameterName, parameterName, parameterType)
+  elif parameterType == "float":
+    result += 'void set_%s(const %s &v){%s = v;}\n' % (parameterName, parameterType, parameterName)
+  else:
+    print "Error: Unknown type %s for parameter %s." % (parameterType, parameterName)
+    exit()
+  return result
+
+
 def compile(filename):
   globalVariables = '''
 const Point &P = dg.getPoint();
 const Normal &N = dg.getNormal();
+const Vector &T = dg.getTangent();
+const Vector &B = dg.getBinormal();
 const ParametricCoordinates &UV = dg.getParametricCoordinates();
 const Vector3 &dpdu = dg.getPointPartials()[0];
 const Vector3 &dpdv = dg.getPointPartials()[1];
+      float area = dg.getSurface()->getSurfaceArea();
+      float invArea = dg.getSurface()->getInverseSurfaceArea();
   '''
   
   # open the file
@@ -147,13 +164,7 @@ virtual bool isSensor(void) const
   
   # standard includes
   compileMe = '''
-#include "Lambertian.h"
-#include "Material.h"
-#include "HemisphericalEmission.h"
-#include "PerspectiveSensor.h"
-#include <spectrum/Spectrum.h>
-#include "../geometry/Point.h"
-#include "../geometry/Vector.h"
+#include "stdshader.h"
 '''
   
   # XXX put the preamble just before the class definition
@@ -168,14 +179,11 @@ virtual bool isSensor(void) const
   compileMe += sensorString
   # add parameters
   for param in scatteringParametersList:
-    compileMe += param[0] + ' ' + param[1] + ';\n'
-    compileMe += 'void set_%s(const %s &v){%s = v;}\n' % (param[1], param[0], param[1])
+    compileMe += makeShaderParameterCode(param[0], param[1])
   for param in emissionParametersList:
-    compileMe += param[0] + ' ' + param[1] + ';\n'
-    compileMe += 'void set_%s(const %s &v){%s = v;}\n' % (param[1], param[0], param[1])
+    compileMe += makeShaderParameterCode(param[0], param[1])
   for param in sensorParametersList:
-    compileMe += param[0] + ' ' + param[1] + ';\n'
-    compileMe += 'void set_%s(const %s &v){%s = v;}\n' % (param[1], param[0], param[1])
+    compileMe += makeShaderParameterCode(param[0], param[1])
   compileMe += '};\n'
   
   # create shared library export
@@ -192,19 +200,13 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(%s)
 {
   def("createMaterial", createMaterial, return_value_policy<manage_new_object>());
-  class_<Vector>("Vector", init<float,float,float>());
-  class_<Point>("Point", init<float,float,float>());
-  class_<Spectrum>("Spectrum", init<float,float,float>());
   class_<%s, bases<Material> >("%s")
   ''' % (basename,basename,basename)
   for param in scatteringParametersList:
-    compileMe += '    .def_readwrite("%s", &%s::%s)\n' % (param[1], basename, param[1])
     compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], basename, param[1])
   for param in emissionParametersList:
-    compileMe += '    .def_readwrite("%s", &%s::%s)\n' % (param[1], basename, param[1])
     compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], basename, param[1])
   for param in sensorParametersList:
-    compileMe += '    .def_readwrite("%s", &%s::%s)\n' % (param[1], basename, param[1])
     compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], basename, param[1])
   compileMe += '    ;\n'
   
@@ -215,21 +217,62 @@ BOOST_PYTHON_MODULE(%s)
   
   # create temp files
   dir = tempfile.mkdtemp()
-  
+
   cpppath = dir + '/' + basename + '.cpp'
+
+  # replace all \ with /
+  # XXX for some reason scons messes up if we don't do this
+  #     \ in the dir are interpreted as escape characters
+  cpppath = cpppath.replace('\\', '/')
+
+  # XXX fix this include ugliness
+  #     ideally, there's a canonical installation of gotham somewhere
+  #     with an include directory. point to that.
   makefile = '''
-includes = ['/home/jared/dev/src', '/home/jared/dev/src/gotham/shading', '/usr/include/python2.5']
-libs = ['shading', 'geometry', 'boost_python']
+import os
+if os.name == 'posix':
+  includes = ['/home/jared/dev/src', '/home/jared/dev/src/gotham/shading', '/usr/include/python2.5']
+elif os.name == 'nt':
+  includes = ['c:/dev/src', 'c:/dev/include', 'c:/dev/src/gotham/shading', 'c:/Python25/include']
+if os.name == 'posix':
+  # remember gotham doesn't have the 'lib-' prefix
+  libs = [File('/home/jared/dev/src/gotham/api/gotham.so'), 'boost_python']
+elif os.name == 'nt':
+  # on windows, we need to link to the import library
+  libs = ['gotham']
 # fix these path issues
-libpath = ['/home/jared/dev/src/gotham/geometry','/home/jared/dev/src/gotham/shading']
-env = Environment(CPPPATH = includes,
-                  CPPFLAGS = '-O3',
-                  LIBS = libs,
-                  LIBPATH = libpath,
-                  SHLIBPREFIX = '',
-                  tools = ['default', 'intelc'])
+if os.name == 'posix':
+  libpath = ['/home/jared/dev/src/gotham/api']
+elif os.name == 'nt':
+  libpath = ['c:/dev/src/gotham/api', 'c:/dev/lib', 'c:/Python25/libs']
+env = None
+if os.name == 'posix':
+  env = Environment(CPPPATH = includes,
+                    CPPFLAGS = '-O3',
+                    LIBS = libs,
+                    LIBPATH = libpath,
+                    SHLIBPREFIX = '',
+                    tools = ['default', 'intelc'])
+elif os.name == 'nt':
+  env = Environment(CPPPATH = includes,
+                    CPPFLAGS = ['/Ox', '/EHsc', '/MD', '/DIMPORTDLL=1'],
+                    LIBS = libs,
+                    LIBPATH = libpath,
+                    SHLIBPREFIX = '',
+                    SHLIBSUFFIX = '.pyd',
+                    WINDOWS_INSERT_MANIFEST = True)
 sources = ['%s']
-env.SharedLibrary('%s', sources)
+result = env.SharedLibrary('%s', sources)
+if os.name == 'nt':
+  # we must explicitly embed the "manifest" after building the dll
+  # from http://www.scons.org/wiki/EmbedManifestIntoTarget 
+  env.AddPostAction(result, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+  # delete the manifest file
+  env.AddPostAction(result, 'del.exe ${TARGET}.manifest')
+  # delete the import library - we don't need it
+  env.AddPostAction(result, 'del.exe ${TARGET.filebase}.lib')
+  # delete the .exp library
+  env.AddPostAction(result, 'del.exe ${TARGET.filebase}.exp')
 ''' % (cpppath, basename)
   
   cppfile = open(cpppath, 'w')
@@ -241,7 +284,12 @@ env.SharedLibrary('%s', sources)
   sconstruct.close()
   
   # call scons
-  command = 'scons -Q -f %s' % dir + '/' + 'SConstruct' 
+  # XXX cygwin has a fit if you call it scons when its name is scons.bat
+  #     fix this nonsense
+  if os.name == 'posix':
+    command = 'scons -Q -f %s' % dir + '/' + 'SConstruct' 
+  elif os.name == 'nt':
+    command = 'c:/Python25/scons.bat -Q -f %s' % dir + '/' + 'SConstruct' 
   os.system(command)
   
   # kill the tempfiles

@@ -29,7 +29,10 @@ def mul(A, x):
 
 class Gotham2(Gotham):
   # standard shaderpaths
-  shaderpaths = [".","/home/jared/dev/src/gotham/shaders"]
+  if os.name == 'posix':
+    shaderpaths = [".","/home/jared/dev/src/gotham/shaders"]
+  elif os.name == 'nt':
+    shaderpaths = [".","c:/dev/src/gotham/shaders"]
 
   def material(self, name, *parms):
     # XXX this is getting ugly
@@ -45,22 +48,19 @@ class Gotham2(Gotham):
       for i in range(0, len(parms), 2):
         p = parms[i]
         val = parms[i+1]
-        parm = None
         try:
-          parm = getattr(m, p)
+          setMethod = getattr(m, 'set_' + p)
+          try:
+            # first try to set it as if it were a 3-vector
+            setMethod(val[0], val[1], val[2])
+          except:
+            try:
+              # try a scalar instead
+              setMethod(val)
+            except:
+              print 'Warning: %s has unknown type; material parameter left undefined.'
         except:
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
-        if isinstance(parm, module.Spectrum):
-          # convert from tuple to Spectrum
-          val = module.Spectrum(val[0],val[1],val[2])
-        elif isinstance(parm, module.Point):
-          # convert from tuple to Point
-          val = module.Point(val[0],val[1],val[2])
-        elif isinstance(parm, module.Vector):
-          # convert from tuple to Vector
-          val = module.Vector(val[0], val[1], val[2])
-        # set the parameter
-        getattr(m, 'set_' + p)(val)
       del module
       Gotham.material(self, m)
       result = True
@@ -70,38 +70,47 @@ class Gotham2(Gotham):
     sys.path = oldpath
     return result
 
-  def mesh(self, vertices, faces):
-    # validate vertices
-    if (len(vertices) % 3) != 0:
-      raise ValueError, "Vertex list not a multiple of 3!"
+  def mesh(self, *args):
+    # validate arguments
+    if (len(args) != 2 and len(args) != 3):
+      raise ValueError, "mesh() expects either two (points,indices) or three (points,parms,indices) arguments."
     # convert to vectors
-    vertvec = vector_float()
-    vertvec[:] = vertices
+    points = args[0]
+    pointsvec = vector_float()
+    pointsvec[:] = points
+    if len(args) == 2:
+      faces = args[1]
+    else:
+      faces = args[2]
     # validate faces
     if (len(faces) % 3) != 0:
       raise ValueError, "Triangle list not a multiple of 3!"
     i = 0
     for v in faces:
-      if v >= len(vertices):
+      if v >= len(points) / 3:
         raise ValueError, "Triangle %d refers to non-vertex!" % (i/3)
       i += 1
     facesvec = vector_uint()
     facesvec[:] = faces
-    Gotham.mesh(self, vertvec, facesvec)
+    if len(args) == 3:
+      parmsvec = vector_float()
+      parmsvec[:] = args[1]
+      Gotham.mesh(self, pointsvec, parmsvec, facesvec)
+    else:
+      Gotham.mesh(self, pointsvec, facesvec)
 
   def multMatrix(self, m):
     matrix = vector_float()
-    for i in range(0,16):
-      matrix.push_back(m[i])
+    matrix[:] = m
     Gotham.multMatrix(self, matrix)
 
   def loadMatrix(self, m):
     matrix = vector_float()
-    for i in range(0,16):
-      matrix.push_back(m[i])
+    matrix[:] = m
     Gotham.loadMatrix(self, matrix)
 
-  def render(self, (width,height) = (600,480)):
+  def render(self, (width,height) = (600,480), spp = 4):
+    Gotham.attribute(self, "renderer::spp", str(spp))
     Gotham.render(self, width, height)
 
   def lookAt(self, eye, center, up):
@@ -123,13 +132,21 @@ class Gotham2(Gotham):
     Gotham.translate(self, eye[0], eye[1], eye[2])
     Gotham.multMatrix(self, M)
 
+  def pointlight(self, position, power):
+    Gotham.pushAttributes(self)
+    Gotham2.material(self, 'light', 'power', power)
+    radius = 0.0005
+    Gotham.sphere(self, position[0], position[1], position[2], radius)
+    Gotham.popAttributes(self)
+
   def camera(self, aspect, fovy, apertureRadius):
     # create a small rectangle for the aperture
     # centered at the 'eye' point
     epsilon = 0.0005
     apertureRadius += epsilon
-    # the aperture starts out as a unit square
-    points = [-0.5, -0.5, 0,  0.5, -0.5, 0,  0.5, 0.5, 0,  -0.5, 0.5, 0]
+    # the aperture starts out as a unit square with normal pointing in the 
+    # -z direction
+    points = [-0.5, -0.5, 0,  -0.5, 0.5, 0,  0.5, 0.5, 0,  0.5, -0.5, 0]
     triangles = [0, 1, 3,  1, 2, 3]
     Gotham.pushMatrix(self)
     Gotham.scale(self, apertureRadius/2, apertureRadius/2, apertureRadius/2)
@@ -148,15 +165,33 @@ class Gotham2(Gotham):
     look = mul(m, (0,0,-1,0))
     look = (look[0],look[1],look[2])
     look = normalize(look)
+    Gotham.pushAttributes(self)
+    # convert to radians
+    fovyRadians = fovy * (math.pi/180.0)
     Gotham2.material(self,
                      'perspective',
                      'aspect',aspect,
-                     'fovy',fovy,
+                     'fovy',fovyRadians,
                      'center',(c[0],c[1],c[2]),
                      'up', up,
                      'right', right,
                      'look', look)
+    # name the camera
+    Gotham.attribute(self, "name", "camera")
     Gotham2.mesh(self, points, triangles)
+    Gotham.popAttributes(self)
     Gotham.popMatrix(self)
+    # hint to the viewer after we've popped the attributes
+    # XXX we really need a way to pass types besides strings
+    Gotham.attribute(self, "viewer::fovy",  str(fovy))
+    Gotham.attribute(self, "viewer::eyex",  str(c[0]))
+    Gotham.attribute(self, "viewer::eyey",  str(c[1]))
+    Gotham.attribute(self, "viewer::eyez",  str(c[2]))
+    Gotham.attribute(self, "viewer::upx",   str(up[0]))
+    Gotham.attribute(self, "viewer::upy",   str(up[1]))
+    Gotham.attribute(self, "viewer::upz",   str(up[2]))
+    Gotham.attribute(self, "viewer::lookx", str(look[0]))
+    Gotham.attribute(self, "viewer::looky", str(look[1]))
+    Gotham.attribute(self, "viewer::lookz", str(look[2]))
 
 

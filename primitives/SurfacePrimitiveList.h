@@ -34,8 +34,10 @@ class SurfacePrimitiveList
      *  \param dg The DifferentialGeometry at the sampled Point is
      *            returned here.
      *  \param pdf The surface area pdf at dg is returned here.
+     *  \return true if this SurfacePrimitiveList's surface area could be sampled;
+     *          false, otherwise.
      */
-    void sampleSurfaceArea(const float u0,
+    bool sampleSurfaceArea(const float u0,
                            const float u1,
                            const float u2,
                            const float u3,
@@ -43,15 +45,34 @@ class SurfacePrimitiveList
                            DifferentialGeometry &dg,
                            float &pdf) const;
 
+    /*! This method evaluates the surface area measure pdf of choosing a point
+     *  on a surface of interest from this SurfacePrimitiveList.
+     *  \param surf The SurfacePrimitive of interest.
+     *  \param dg The DifferentialGeometry on surf at the point of interest.
+     *  \param The surface area measure pdf of choosing (surf, dg) from this
+     *         SurfacePrimitiveList.
+     */
+    float evaluateSurfaceAreaPdf(const SurfacePrimitive *surf,
+                                 const DifferentialGeometry &dg) const;
+
     /*! This method samples the surfaces area of this SurfacePrimitiveList.
      *  \param u A real number in [0,1).
      *  \prim A pointer to a SurfacePrimitive uniformly sampled from the
      *        surface area of this SurfacePrimitiveList is returned here.
      *  \param pdf The probability of sampling prim is returned here.
+     *  \return true if this SurfacePrimitiveList's surface area could be sampled;
+     *          false, otherwise.
      */
-    void sampleSurfaceArea(const float u,
+    bool sampleSurfaceArea(const float u,
                            const SurfacePrimitive **prim,
                            float &pdf) const;
+
+    /*! This method evaluates the surface area measure pdf of choosing
+     *  the given SurfacePrimitive from this SurfacePrimitiveList.
+     *  \param prim The SurfacePrimitive of interest.
+     *  \return The surface area measure pdf of choosing prim.
+     */
+    float evaluateSurfaceAreaPdf(const SurfacePrimitive *prim) const;
 
     /*! This method adds a new SurfacePrimitive to this
      *  SurfacePrimitiveList.

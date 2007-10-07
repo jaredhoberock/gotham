@@ -6,6 +6,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include "exportShading.h"
 #include "../geometry/DifferentialGeometry.h"
 class ScatteringDistributionFunction;
 

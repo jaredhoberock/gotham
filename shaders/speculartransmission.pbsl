@@ -1,0 +1,5 @@
+scattering(Spectrum Kt, float etai, float etat, float exponent)
+{
+  F = new SpecularTransmission(Kt, etai, etat);
+} // end scattering
+

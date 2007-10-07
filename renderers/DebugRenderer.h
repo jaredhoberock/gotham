@@ -27,13 +27,14 @@ class DebugRenderer
      *  \param f Sets mFilm.
      */
     DebugRenderer(boost::shared_ptr<const Scene> s,
-                  boost::shared_ptr<RandomAccessFilm> f);
+                  boost::shared_ptr<RenderFilm> f);
 
+  protected:
     /*! This method renders mScene to mFilm.
      *  \param progress A callback, which will be periodically
      *         called throughout the rendering process.
      */
-    virtual void render(ProgressCallback &progress);
+    virtual void kernel(ProgressCallback &progress);
 }; // end Renderer
 
 #endif // DEBUG_RENDERER_H

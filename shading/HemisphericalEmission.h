@@ -31,6 +31,7 @@ class HemisphericalEmission
      *  \param w  The outgoing direction of emission.
      *  \param dg The DifferentialGeometry at the Point of interest.
      */
+    using Parent::evaluate;
     Spectrum evaluate(const Vector3 &w,
                       const DifferentialGeometry &dg) const;
     
