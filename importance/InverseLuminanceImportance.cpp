@@ -4,13 +4,15 @@
  */
 
 #include "InverseLuminanceImportance.h"
+#include "LuminanceImportance.h"
 
 float InverseLuminanceImportance
-  ::operator()(const PathSampler::HyperPoint &x,
-               const Spectrum &f)
+  ::evaluate(const PathSampler::HyperPoint &x,
+             const Path &xPath,
+             const std::vector<PathSampler::Result> &results)
 {
-  if(f.isBlack()) return 0;
+  if(results.empty()) return 0;
 
-  return 1.0f / f.luminance();
-} // end InverseLuminanceImportance::operator()()
+  return 1.0f / LuminanceImportance::evaluateImportance(x,xPath,results);
+} // end InverseLuminanceImportance::evaluate()
 

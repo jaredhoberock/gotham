@@ -9,6 +9,10 @@
 #include "NormalizedImportance.h"
 #include "InverseLuminanceImportance.h"
 #include "EqualVisitImportance.h"
+#include "MultipleImportance.h"
+#include "LuminanceOverVisits.h"
+#include "ExponentImportance.h"
+#include "ThroughputLuminanceImportance.h"
 using namespace boost;
 
 ScalarImportance *ImportanceApi
@@ -25,11 +29,46 @@ ScalarImportance *ImportanceApi
     importanceName = any_cast<std::string>(val);
   } // end if
 
+  float k = 1.0f;
+  a = attr.find("importance::exponent");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    k = static_cast<float>(atof(any_cast<std::string>(val).c_str()));
+  } // end if
+
+  std::string filterName("bilinear");
+  a = attr.find("importance::visitfilter");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    filterName = any_cast<std::string>(val);
+  } // end if
+
+  bool doFilter = true;
+  if(filterName == "bilinear")
+  {
+    doFilter = true;
+  } // end if
+  else if(filterName == "nearestneighbor")
+  {
+    doFilter = false;
+  } // end if
+  else
+  {
+    std::cerr << "Warning: unknown visit filter \"" << filterName << "\"." << std::endl;
+    doFilter = true;
+  } // end else
+
   // create the importance
   if(importanceName == "luminance")
   {
     result = new LuminanceImportance();
   } // end if
+  else if(importanceName == "multiple")
+  {
+    result = new MultipleImportance();
+  } // end else if
   else if(importanceName == "normalized")
   {
     result = new NormalizedImportance();
@@ -44,7 +83,19 @@ ScalarImportance *ImportanceApi
   } // end else if
   else if(importanceName == "equalvisit")
   {
-    result = new EqualVisitImportance();
+    result = new EqualVisitImportance(doFilter);
+  } // end else if
+  else if(importanceName == "luminanceovervisits")
+  {
+    result = new LuminanceOverVisits(doFilter);
+  } // end else if
+  else if(importanceName == "exponent")
+  {
+    result = new ExponentImportance(k);
+  } // end else if
+  else if(importanceName == "throughputluminance")
+  {
+    result = new ThroughputLuminanceImportance();
   } // end else if
   else
   {

@@ -38,8 +38,9 @@ class NormalizedImportance
      *  \param f The spectral Monte Carlo throughput of the Path of interest.
      *  \return The normalized scalar importance of x.
      */
-    virtual float operator()(const PathSampler::HyperPoint &x,
-                             const Spectrum &f);
+    virtual float evaluate(const PathSampler::HyperPoint &x,
+                           const Path &xPath,
+                           const std::vector<PathSampler::Result> &results);
 
   protected:
     /*! A low resolution estimate of the image

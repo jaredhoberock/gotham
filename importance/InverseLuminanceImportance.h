@@ -19,14 +19,16 @@ class InverseLuminanceImportance
      */
     typedef ScalarImportance Parent;
 
-    /*! operator()() method assigns a constant
+    /*! This method assigns a constant
      *  scalar importance of 1.0 to each point.
-     *  \param x The HyperPoint of interest.
-     *  \param f The value of the integrand at x.
-     *  \return 1.0 / f.luminance()
+     *  \param x The HyperPoint uniquely specifying the Path of interest.
+     *  \param xPath The Path corresponding to x.
+     *  \param results The list of PathSampler Results resulting from xPath.
+     *  \return The scalar importance of x.
      */
-    virtual float operator()(const PathSampler::HyperPoint &x,
-                             const Spectrum &f);
+    virtual float evaluate(const PathSampler::HyperPoint &x,
+                           const Path &xPath,
+                           const std::vector<PathSampler::Result> &results);
 }; // end InverseLuminanceImportance
 
 #endif // INVERSE_LUMINANCE_IMPORTANCE_H

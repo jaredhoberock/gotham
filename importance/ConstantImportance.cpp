@@ -6,11 +6,20 @@
 #include "ConstantImportance.h"
 
 float ConstantImportance
-  ::operator()(const PathSampler::HyperPoint &x,
-               const Spectrum &f)
+  ::evaluate(const PathSampler::HyperPoint &x,
+             const Path &xPath,
+             const std::vector<PathSampler::Result> &results)
 {
-  return 1.0f;
-  //if(x[0][0] >= 0.5f && x[0][1] >= 0.5f) return 1000.0f;
-  //return 0.0001f;
-} // end ConstantImportance::operator()()
+  //if(results.empty()) return 0;
+  //return 1.0;
 
+  float result = 0;
+  for(std::vector<PathSampler::Result>::const_iterator r = results.begin();
+      r != results.end();
+      ++r)
+  {
+    result += 1.0f / r->mPdf;
+  } // end for r
+
+  return result;
+} // end ConstantImportance::operator()()

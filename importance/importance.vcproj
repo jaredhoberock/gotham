@@ -159,6 +159,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExponentImportance.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ImportanceApi.cpp"
 				>
 			</File>
@@ -171,11 +175,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LuminanceOverVisits.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MultipleImportance.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\NormalizedImportance.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\ScalarImportance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ThroughputLuminanceImportance.cpp"
 				>
 			</File>
 		</Filter>
@@ -193,6 +209,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExponentImportance.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ImportanceApi.h"
 				>
 			</File>
@@ -205,11 +225,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LuminanceOverVisits.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MultipleImportance.h"
+				>
+			</File>
+			<File
 				RelativePath=".\NormalizedImportance.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ScalarImportance.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ThroughputLuminanceImportance.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Inline Files"
+			>
+			<File
+				RelativePath=".\ScalarImportance.inl"
 				>
 			</File>
 		</Filter>

@@ -4,6 +4,7 @@
  */
 
 #include "NormalizedImportance.h"
+#include "LuminanceImportance.h"
 #include <stratifiedsequence/StratifiedSequence.h>
 #include "../path/KelemenSampler.h"
 #include "../path/Path.h"
@@ -74,13 +75,17 @@ void NormalizedImportance
       p = 1.0f / std::max(p, 0.01f);
     } // end for i
   } // end for i
+
+  // now call the Parent
+  Parent::preprocess(r, scene, mutator, renderer);
 } // end NormalizedImportance::preprocess()
 
 float NormalizedImportance
-  ::operator()(const PathSampler::HyperPoint &x,
-               const Spectrum &f)
+  ::evaluate(const PathSampler::HyperPoint &x,
+             const Path &xPath,
+             const std::vector<PathSampler::Result> &results)
 {
   // return f's luminance scaled by 1.0 / estimate
-  return f.luminance() * mEstimate.element(x[0][0], x[0][1]);
+  return LuminanceImportance::evaluateImportance(x,xPath,results) * mEstimate.element(x[0][0], x[0][1]);
 } // end NormalizedImportance::operator()()
 

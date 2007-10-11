@@ -10,6 +10,7 @@
 #define EQUAL_VISIT_IMPORTANCE_H
 
 #include "ScalarImportance.h"
+#include "ConstantImportance.h"
 class RenderFilm;
 
 class EqualVisitImportance
@@ -20,6 +21,12 @@ class EqualVisitImportance
      *  \brief Shorthand.
      */
     typedef ScalarImportance Parent;
+
+    /*! Constructor accepts whether or not to do interpolation
+     *  when looking up visits.
+     *  \param doInterpolate Sets mDoInterpolate
+     */
+    EqualVisitImportance(const bool doInterpolate);
 
     /*! This method is called prior to rendering.
      *  \param r A sequence of RandomNumbers.
@@ -33,17 +40,21 @@ class EqualVisitImportance
                             const boost::shared_ptr<PathMutator> &mutator,
                             MetropolisRenderer &renderer);
 
-    /*! This method converts the spectral Monte Carlo throughput
-     *  of a Path into scalar importance.
+    /*! This method assigns a scalar importance to a Path.
      *  \param x The HyperPoint uniquely specifying the Path of interest.
-     *  \param f The spectral Monte Carlo throughput of the Path of interest.
+     *  \param xPath The Path corresponding to x.
+     *  \param results The list of PathSampler Results resulting from xPath.
      *  \return The scalar importance of x.
+     *  \note This method must be implemented in a derived class.
      */
-    virtual float operator()(const PathSampler::HyperPoint &x,
-                             const Spectrum &f);
+    virtual float evaluate(const PathSampler::HyperPoint &x,
+                           const Path &xPath,
+                           const std::vector<PathSampler::Result> &results);
 
   protected:
     const RenderFilm *mAcceptance;
+    ConstantImportance mConstantImportance;
+    bool mDoInterpolate;
 }; // end EqualVisitImportance
 
 #endif // EQUAL_VISIT_IMPORTANCE_H
