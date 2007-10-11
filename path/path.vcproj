@@ -176,6 +176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PathToImage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RussianRoulette.cpp"
 				>
 			</File>
@@ -227,6 +231,10 @@
 			</File>
 			<File
 				RelativePath=".\PathSampler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PathToImage.h"
 				>
 			</File>
 			<File
