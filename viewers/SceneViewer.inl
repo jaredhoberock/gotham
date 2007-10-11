@@ -25,35 +25,6 @@ void SceneViewer
   mScene->getBoundingBox(b);
   setSceneBoundingBox(qglviewer::Vec(b[0]),
                       qglviewer::Vec(b[1]));
-
-  //// try to set the camera
-  //const SurfacePrimitiveList *sensors = mScene->getSensors();
-  //if(sensors != 0 && sensors->size() > 0)
-  //{
-  //  const SurfacePrimitive *surf = 0;
-  //  float pdf;
-  //  DifferentialGeometry dg;
-  //  sensors->sampleSurfaceArea(0.5f, 0.5f, 0.5f, 0.5f,
-  //                             &surf, dg, pdf);
-
-  //  ScatteringDistributionFunction *f = surf->getMaterial()->evaluateSensor(dg);
-
-  //  PerspectiveSensor *ps = dynamic_cast<PerspectiveSensor*>(f);
-  //  if(ps != 0)
-  //  {
-  //    Vector right, up;
-  //    right = ps->getRight();
-  //    up = ps->getUp();
-  //    Vector look = -right.cross(up);
-
-  //    // use the differential geometry to try to position the camera
-  //    camera()->setPosition(qglviewer::Vec(dg.getPoint()));
-  //    camera()->setUpVector(qglviewer::Vec(up));
-  //    camera()->setViewDirection(qglviewer::Vec(look));
-  //  } // end if
-
-  //  ScatteringDistributionFunction::mPool.freeAll();
-  //} // end if
 } // end SceneViewer::setScene()
 
 void SceneViewer
@@ -74,4 +45,27 @@ void SceneViewer
   } // end if
 } // end SceneViewer::draw()
 
+void SceneViewer
+  ::keyPressEvent(Parent::KeyEvent *e)
+{
+  switch(e->key())
+  {
+    case 'c':
+    {
+      qglviewer::Vec v = camera()->position();
+      std::cerr << "eye: " << v[0] << "," << v[1] << "," << v[2] << std::endl;
+      v += camera()->viewDirection();
+      std::cerr << "look at: " << v[0] << "," << v[1] << "," << v[2] << std::endl;
+      v = camera()->upVector();
+      std::cerr << "up: " << v[0] << "," << v[1] << "," << v[2] << std::endl;
+      break;
+    } // end case 'c'
+
+    default:
+    {
+      Parent::keyPressEvent(e);
+      break;
+    } // end default
+  } // end switch
+} // end SceneViewer::keyPressEvent()
 

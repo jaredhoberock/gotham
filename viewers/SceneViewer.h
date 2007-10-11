@@ -42,6 +42,8 @@ class SceneViewer
     inline virtual void init(void);
 
   protected:
+    inline virtual void keyPressEvent(Parent::KeyEvent *e);
+
     boost::shared_ptr<Scene> mScene;
     SceneRasterizer mRasterizeScene;
 }; // end SceneViewer
