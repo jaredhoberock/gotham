@@ -7,6 +7,8 @@
 #include <qstring.h>
 #include "../renderers/MetropolisRenderer.h"
 #include "../renderers/EnergyRedistributionRenderer.h"
+#include "../films/GpuFilm.h"
+#include "../films/GpuFilterFilm.h"
 
 #include <boost/thread/thread.hpp>
 using boost::thread;
@@ -24,6 +26,14 @@ void RenderViewer
 {
   if(!mDrawPreview)
   {
+    const Texture *texture = &mTexture;
+    GpuFilm<RenderFilm> *gpuFilm = dynamic_cast<GpuFilm<RenderFilm> *>(mImage.get());
+    if(gpuFilm != 0)
+    {
+      gpuFilm->renderPendingDeposits();
+      texture = &gpuFilm->mTexture;
+    } // end if
+
     float *data = reinterpret_cast<float*>(&mImage->raster(0,0));
     GLenum datatype = GL_FLOAT_RGB16_NV;
 
@@ -60,7 +70,7 @@ void RenderViewer
 
     glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
 
-    drawTexture(mTexture, p);
+    drawTexture(*texture, p);
     glPopAttrib();
   } // end if
   else
@@ -91,6 +101,9 @@ void RenderViewer
   mGamma = 1.0f;
 
   mDoTonemap = false;
+
+  // XXX DESIGN need a better way to get a GpuFilm a GL context
+  mImage->init();
 } // end RenderViewer::init()
 
 void RenderViewer
