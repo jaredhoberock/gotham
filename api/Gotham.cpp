@@ -18,6 +18,7 @@
 #include "../viewers/RenderViewer.h"
 #include "../renderers/RendererApi.h"
 #include "../films/RenderFilm.h"
+#include "../films/GpuFilm.h"
 #include "../rasterizables/RasterizableScene.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../rasterizables/RasterizableSurfacePrimitive.h"
@@ -200,9 +201,23 @@ void Gotham
     outfile = any_cast<std::string>(val).c_str();
   } // end if
 
+  // should we normalize on post?
+  bool doNormalize = false;
+  a = mAttributeStack.back().find("renderer::normalize");
+  if(a != mAttributeStack.back().end())
+  {
+    any val = a->second;
+    doNormalize = (any_cast<std::string>(val) == std::string("true"));
+  } // end if
+
   // give everything to the Renderer
   mRenderer->setScene(s);
   shared_ptr<RenderFilm> film(new RenderFilm(width,height,outfile));
+  //shared_ptr<RenderFilm> film(new GpuFilm<RenderFilm>());
+  //shared_ptr<RenderFilm> film(new GpuFilterFilm<RenderFilm>());
+  film->resize(width,height);
+  film->setFilename(outfile);
+  film->setNormalizeOnPostprocess(doNormalize);
   mRenderer->setFilm(film);
 
   // headless render?
@@ -317,6 +332,9 @@ void Gotham
   ::mesh(std::vector<float> &vertices,
          std::vector<unsigned int> &faces)
 {
+  // do we need to reverse the winding of vertices?
+  bool reverse = any_cast<std::string>(mAttributeStack.back()["orientation"]) == "inside";
+
   std::vector<Point> points;
   std::vector<Mesh::Triangle> triangles;
   for(unsigned int i = 0;
@@ -333,7 +351,14 @@ void Gotham
       i != faces.size();
       i += 3)
   {
-    triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
+    if(reverse)
+    {
+      triangles.push_back(Mesh::Triangle(faces[i], faces[i+2], faces[i+1]));
+    } // end if
+    else
+    {
+      triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
+    } // end if
   } // end for i
 
   Mesh *mesh = 0;
@@ -356,6 +381,9 @@ void Gotham
          std::vector<float> &parametrics,
          std::vector<unsigned int> &faces)
 {
+  // do we need to reverse the winding of vertices?
+  bool reverse = any_cast<std::string>(mAttributeStack.back()["orientation"]) == "inside";
+
   std::vector<Point> points;
   std::vector<ParametricCoordinates> parms;
   std::vector<Mesh::Triangle> triangles;
@@ -380,7 +408,14 @@ void Gotham
       i != faces.size();
       i += 3)
   {
-    triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
+    if(reverse)
+    {
+      triangles.push_back(Mesh::Triangle(faces[i], faces[i+2], faces[i+1]));
+    } // end if
+    else
+    {
+      triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
+    } // end if
   } // end for i
 
   Mesh *mesh = 0;
@@ -426,6 +461,11 @@ void Gotham
 
   toAdd = std::string("true");
   attr["scene::castshadows"] = toAdd;
+
+  // by default, assume normals point towards the outside
+  // of the object
+  toAdd = std::string("outside");
+  attr["orientation"] = toAdd;
 } // end Gotham::getDefaultAttributes()
 
 void Gotham

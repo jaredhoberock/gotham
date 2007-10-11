@@ -27,23 +27,40 @@ def readMesh(filename):
       if n < 3:
         raise ValueError, "Face is not a polygon!"
       for v in words[1:]:
-        m = pointOnly.match(v)
+        m = pointUvNormal.match(v)
         try:
-          polygon.append((int(m.group(0)) - 1, -1, -1))
+          polygon.append((int(m.group(1)) - 1, int(m.group(2)) - 1, int(m.group(3)) - 1))
         except:
-          m = pointUv.match(v)
+          m = pointNormal.match(v)
           try:
-            polygon.append((int(m.group(0)) - 1, int(m.group(1)) - 1, -1))
+            polygon.append((int(m.group(1)) - 1, -1, int(m.group(2)) - 1))
           except:
-            m = pointNormal.match(v)
+            m = pointUv.match(v)
             try:
-              polygon.append((int(m.group(0)) - 1, -1, int(m.group(1)) - 1))
+              polygon.append((int(m.group(1)) - 1, int(m.group(2)) - 1, -1))
             except:
-              m = pointUvNormal.match(v)
+              m = pointOnly.match(v)
               try:
-                polygon.append((int(m.group(0)) - 1, int(m.group(1)) - 1, int(m.group(2)) - 1))
+                polygon.append((int(m.group(0)) - 1, -1, -1))
               except:
                 raise ValueError, "Unrecognized vertex format: " + v
+        #m = pointOnly.match(v)
+        #try:
+        #  polygon.append((int(m.group(0)) - 1, -1, -1))
+        #except:
+        #  m = pointUv.match(v)
+        #  try:
+        #    polygon.append((int(m.group(0)) - 1, int(m.group(1)) - 1, -1))
+        #  except:
+        #    m = pointNormal.match(v)
+        #    try:
+        #      polygon.append((int(m.group(0)) - 1, -1, int(m.group(1)) - 1))
+        #    except:
+        #      m = pointUvNormal.match(v)
+        #      try:
+        #        polygon.append((int(m.group(0)) - 1, int(m.group(1)) - 1, int(m.group(2)) - 1))
+        #      except:
+        #        raise ValueError, "Unrecognized vertex format: " + v
       polygons.append(polygon)
   return (points, uvs, normals, polygons)
 
