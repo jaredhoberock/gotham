@@ -8,6 +8,7 @@
 #include "EnergyRedistributionRenderer.h"
 #include "MetropolisRenderer.h"
 #include "DebugRenderer.h"
+#include "TargetRaysRenderer.h"
 #include "../path/PathApi.h"
 #include "../mutators/MutatorApi.h"
 #include "../importance/ImportanceApi.h"
@@ -38,7 +39,7 @@ Renderer *RendererApi
   if(a != attr.end())
   {
     any val = a->second;
-    k = atof(boost::any_cast<std::string>(val).c_str());
+    k = static_cast<float>(atof(boost::any_cast<std::string>(val).c_str()));
   } // end if
 
   unsigned int m = 100;
@@ -47,6 +48,14 @@ Renderer *RendererApi
   {
     any val = a->second;
     m = atoi(boost::any_cast<std::string>(val).c_str());
+  } // end if
+
+  unsigned int targetRays = 0;
+  a = attr.find("renderer::targetrays");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    targetRays = atoi(boost::any_cast<std::string>(val).c_str());
   } // end if
 
   // create the renderer
@@ -73,7 +82,15 @@ Renderer *RendererApi
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
-    result = new MetropolisRenderer(z, mutator, importance);
+
+    if(targetRays != 0)
+    {
+      result = new TargetRaysRenderer(z, mutator, importance, targetRays);
+    } // end if
+    else
+    {
+      result = new MetropolisRenderer(z, mutator, importance);
+    } // end else
   } // end else if
   else if(rendererName == "debug")
   {

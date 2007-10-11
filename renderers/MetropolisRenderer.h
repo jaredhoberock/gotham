@@ -65,17 +65,6 @@ class MetropolisRenderer
      */
     virtual void setScene(const boost::shared_ptr<const Scene> &s);
 
-    /*! This method estimates the normalization constant and chooses a seed
-     *  Path proportional to its importance.
-     *  \param n The number of samples to use in the estimation.
-     *  \param x The HyperPoint of the chosen seed is returned here.
-     *  \param xPath The chosen seed Path is returned here.
-     *  \return The estimate of the normalization constant.
-     */
-    virtual float estimateNormalizationConstant(const size_t n,
-                                                PathSampler::HyperPoint &x,
-                                                Path &xPath);
-
     /*! This method calls the Parent's method and also hands the
      *  RandomSequence to mMutator.
      *  \param s Sets mRandomSequence.
@@ -125,6 +114,10 @@ class MetropolisRenderer
     boost::shared_ptr<ScalarImportance> mImportance;
 
     FunctionAllocator mLocalPool;
+
+    /*! A count of the number of proposals.
+     */
+    unsigned int mNumProposed;
 
     /*! A count of the number of accepted proposals.
      */

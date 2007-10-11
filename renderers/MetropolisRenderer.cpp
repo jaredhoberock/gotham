@@ -11,6 +11,8 @@
 #include "../path/Path.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../mutators/KelemenMutator.h"
+#include "../importance/LuminanceImportance.h"
+#include "../path/PathToImage.h"
 
 #include <gpcpu/Vector.h>
 #include <boost/progress.hpp>
@@ -64,63 +66,6 @@ void MetropolisRenderer
   mMutator->setScene(s);
 } // end MetropolisRenderer::setScene()
 
-float MetropolisRenderer
-  ::estimateNormalizationConstant(const size_t n,
-                                  PathSampler::HyperPoint &x,
-                                  Path &xPath)
-{
-  float result = 0;
-  Spectrum L;
-
-  // estimate b
-  typedef std::vector<PathSampler::HyperPoint> SeedList;
-  typedef std::vector<PathSampler::Result> ResultList;
-  ResultList resultList;
-  SeedList seeds;
-  std::vector<float> seedImportance;
-  float I;
-
-  // XXX fix this
-  PathSampler *sampler = const_cast<PathSampler*>(mMutator->getSampler());
-  for(size_t i = 0; i < n; ++i)
-  {
-    PathSampler::constructHyperPoint(*mRandomSequence, x);
-
-    // create a Path
-    if(sampler->constructPath(*mScene, x, xPath))
-    {
-      // evaluate the Path
-      resultList.clear();
-      L = mMutator->evaluate(xPath, resultList);
-
-      I = (*mImportance)(x, L);
-      result += I;
-
-      seeds.push_back(x);
-      seedImportance.push_back(I);
-    } // end if
-
-    // free all integrands allocated in this sample
-    ScatteringDistributionFunction::mPool.freeAll();
-  } // end for i
-
-  // pick a seed
-  AliasTable<PathSampler::HyperPoint> aliasTable;
-  aliasTable.build(seeds.begin(), seeds.end(),
-                   seedImportance.begin(), seedImportance.end());
-  x = aliasTable((*mRandomSequence)());
-  Path temp;
-  sampler->constructPath(*mScene, x, temp);
-
-  // copy x's integrands to the local store
-  copyPath(xPath, temp);
-
-  // free all integrands that were allocated in the estimate
-  ScatteringDistributionFunction::mPool.freeAll();
-  
-  return result / n;
-} // end MetropolisRenderer::estimateNormalizationConstant()
-
 void MetropolisRenderer
   ::kernel(ProgressCallback &progress)
 {
@@ -134,13 +79,14 @@ void MetropolisRenderer
   ResultList xResults, yResults;
 
   // estimate normalization constant and pick a seed
-  float b = estimateNormalizationConstant(10000, x, xPath);
+  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mMutator,
+                                                       10000, mLocalPool, x, xPath);
   float invB = 1.0f / b;
 
   // initial seed
   Spectrum f, g;
   f = mMutator->evaluate(xPath,xResults);
-  float ix = (*mImportance)(x, f), iy = 0;
+  float ix = (*mImportance)(x, xPath, xResults), iy = 0;
   float xPdf = ix * invB, yPdf = 0;
 
   // XXX this is still pretty gross
@@ -157,11 +103,14 @@ void MetropolisRenderer
   float a;
   int whichMutation;
 
+  PathToImage mapToImage;
+
   progress.restart(totalSamples);
   for(size_t i = 0; i < totalSamples; ++i)
   {
     // mutate
     whichMutation = (*mMutator)(x,xPath,y,yPath);
+    ++mNumProposed;
 
     // evaluate
     if(whichMutation != -1)
@@ -170,7 +119,7 @@ void MetropolisRenderer
       g = mMutator->evaluate(yPath, yResults);
 
       // compute importance
-      iy = (*mImportance)(y, g);
+      iy = (*mImportance)(y, yPath, yResults);
 
       // compute pdf of y
       yPdf = iy * invB;
@@ -181,7 +130,7 @@ void MetropolisRenderer
     } // end else
 
     // recompute x
-    ix = (*mImportance)(x,f);
+    ix = (*mImportance)(x, xPath, xResults);
     xPdf = ix * invB;
 
     // calculate accept probability
@@ -190,6 +139,9 @@ void MetropolisRenderer
 
     if(ix > 0)
     {
+      // XXX TODO PERF: all this is redundant
+      //          idea: accumulate x's weight and only deposit
+      //                when a sample is finally rejected
       // record x
       float xWeight = invSpp * (1.0f - a) / (xPdf+pLargeStep);
       for(ResultList::const_iterator r = xResults.begin();
@@ -198,20 +150,9 @@ void MetropolisRenderer
       {
         Spectrum deposit;
         float2 pixel;
-        if(r->mEyeLength == 1)
-        {
-          unsigned int endOfLightPath = xPath.getSubpathLengths().sum() - r->mLightLength;
-          ::Vector w = xPath[endOfLightPath].mDg.getPoint();
-          w -= xPath[0].mDg.getPoint();
-          xPath[0].mSensor->invert(w, xPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end if
-        else
-        {
-          xPath[0].mSensor->invert(xPath[0].mToNext,
-                                   xPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end else
+
+        // map the result to a location in the image
+        mapToImage(*r,x,xPath,pixel[0],pixel[1]);
 
         // each sample contributes (1/spp) * MIS weight * MC weight * f / pdf
         deposit = xWeight * r->mWeight * r->mThroughput / r->mPdf;
@@ -235,20 +176,9 @@ void MetropolisRenderer
       {
         Spectrum deposit;
         float2 pixel;
-        if(ry->mEyeLength == 1)
-        {
-          unsigned int endOfLightPath = yPath.getSubpathLengths().sum() - ry->mLightLength;
-          ::Vector w = yPath[endOfLightPath].mDg.getPoint();
-          w -= yPath[0].mDg.getPoint();
-          yPath[0].mSensor->invert(w, yPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end if
-        else
-        {
-          yPath[0].mSensor->invert(yPath[0].mToNext,
-                                   yPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end else
+
+        // map the result to a location in the image
+        mapToImage(*ry, y, yPath, pixel[0], pixel[0]);
 
         // each sample contributes (1/spp) * MIS weight * MC weight * f
         deposit = yWeight * ry->mWeight * ry->mThroughput / ry->mPdf;
@@ -309,8 +239,8 @@ void MetropolisRenderer
 {
   Parent::preprocess();
 
-  // zero the accepted count
-  mNumAccepted = 0;
+  // zero the proposed/accepted count
+  mNumAccepted = mNumProposed = 0;
 
   // zero the acceptance image
   mAcceptanceImage.resize(mFilm->getWidth(), mFilm->getHeight());
@@ -347,18 +277,27 @@ void MetropolisRenderer
 {
   Parent::postRenderReport(elapsed);
 
-  unsigned int totalPixels = mFilm->getWidth() * mFilm->getHeight();
-  unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-  std::cout << "Proposal acceptance rate: " << static_cast<float>(mNumAccepted) / totalSamples << std::endl;
+  std::cout << "Proposal acceptance rate: " << static_cast<float>(mNumAccepted) / mNumProposed << std::endl;
 } // end MetropolisRenderer::postRenderReport()
 
 void MetropolisRenderer
   ::postprocess(void)
 {
+  // estimate the canonical normalization constant
+  LuminanceImportance luminance;
+  float b = luminance.estimateNormalizationConstant(mRandomSequence, mScene, mMutator, 10000);
+  // rescale image so that it has b mean luminance
+  float s = b / mFilm->computeMean().luminance();
+  mFilm->scale(Spectrum(s,s,s));
+
   Parent::postprocess();
 
   mMutator->postprocess();
 
+  // rescale acceptance image so it has 1/2 mean luminance
+  Spectrum avg = mAcceptanceImage.getSum() / (mAcceptanceImage.getWidth() * mAcceptanceImage.getHeight());
+  s = 0.5f / avg.luminance();
+  mAcceptanceImage.scale(Spectrum(s,s,s));
   mAcceptanceImage.writeEXR("acceptance.exr");
 } // end MetropolisRenderer::postprocess()
 

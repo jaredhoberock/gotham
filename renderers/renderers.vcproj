@@ -183,6 +183,10 @@
 				RelativePath=".\RendererApi.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\TargetRaysRenderer.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -219,6 +223,10 @@
 			</File>
 			<File
 				RelativePath=".\RendererApi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TargetRaysRenderer.h"
 				>
 			</File>
 		</Filter>

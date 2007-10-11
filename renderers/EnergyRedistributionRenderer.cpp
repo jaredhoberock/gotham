@@ -58,9 +58,8 @@ void EnergyRedistributionRenderer
 
   // estimate normalization constant
   Path temp;
-  float b = estimateNormalizationConstant(10000, x, temp);
+  float b = mImportance->getNormalizationConstant();
   float invB = 1.0f / b;
-  mLocalPool.freeAll();
 
   // this pool saves each monte carlo path
   FunctionAllocator saveMonteCarloSample;
@@ -107,7 +106,7 @@ void EnergyRedistributionRenderer
       // get a monte carlo estimate
       xResults.clear();
       Spectrum e = smallStepper.evaluate(xPath, xResults);
-      ix = (*mImportance)(x,e);
+      ix = (*mImportance)(x, xPath, xResults);
       invIx = 1.0f / ix;
       xPdf = ix * invB;
       invXPdf = b * invIx;
@@ -138,7 +137,7 @@ void EnergyRedistributionRenderer
               g = mMutator->evaluate(zPath, zResults);
 
               // compute importance
-              iz = (*mImportance)(z, g);
+              iz = (*mImportance)(z, zPath, zResults);
               invIz = 1.0f / iz;
               zPdf = iz * invB;
               invZPdf = b * invIz;

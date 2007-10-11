@@ -72,15 +72,16 @@ void Renderer
   ::postRenderReport(const double elapsed) const
 {
   std::cout << "Finished." << std::endl;
+  std::cout << "Wrote result to: " << mFilm->getFilename() << std::endl;
 
-  unsigned long minutes = static_cast<unsigned long>(elapsed / 60);
-  unsigned long hours = static_cast<unsigned long>(minutes / 60);
+  unsigned long minutes = static_cast<unsigned long>(elapsed) % 60;
+  unsigned long hours = static_cast<unsigned long>(minutes) % (60*60);
   unsigned long seconds = static_cast<unsigned long>(elapsed) - hours*60*60 - minutes*60;
   double fractional = elapsed - hours*60*60 - minutes*60 - seconds;
 
   boost::posix_time::time_duration td(hours,minutes,seconds);
   std::cout << "Seconds elapsed: " << elapsed << std::endl;
-  std::cout << "Time elapsed: " << td << std::endl;
+  //std::cout << "Time elapsed: " << td << std::endl;
   std::cout << "Rays cast: " << mScene->getRaysCast() << std::endl;
   std::cout << "Shadow rays cast: " << mScene->getShadowRaysCast() << std::endl;
   std::cout << "Blocked shadow rays: " << mScene->getBlockedShadowRays() << std::endl;
