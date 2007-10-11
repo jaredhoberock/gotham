@@ -58,6 +58,15 @@ class RandomAccessFilm
     inline const Pixel &pixel(const float u,
                               const float v) const;
 
+    /*! This method returns a bilinearly interpolated value
+     *  from the pixel location (u,v).
+     *  \param u A parametric coordinate in [0,1).
+     *  \param v A parametric coordinate in [0,1).
+     *  \return A bilinearly interpolated value constructed from
+     *          the neighborhood of (u,v).
+     */
+    inline Pixel bilerp(const float u, const float v) const;
+
     /*! This method returns a reference to the pixel
      *  at raster location (px,py).
      *  \param px A raster coordinate in [0,mWidth).
@@ -81,6 +90,21 @@ class RandomAccessFilm
      *  \param v The fill value.
      */
     inline void fill(const Pixel &v);
+
+    /*! This method scales this Film's pixels by the given value.
+     *  \param s The scale value.
+     */
+    inline void scale(const Pixel &s);
+
+    /*! This method computes the sum of each Pixel value.
+     *  \return The sum over all Pixels.
+     */
+    inline Pixel computeSum(void) const;
+
+    /*! This method computes the mean Pixel value.
+     *  \return computeSum() / (getWidth() * getHeight())
+     */
+    inline Pixel computeMean(void) const;
 
   private:
     typedef Array2<Pixel> Parent1;

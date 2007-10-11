@@ -73,6 +73,11 @@ class RenderFilm
      */
     inline void fill(const Pixel &v);
 
+    /*! This method calls the Parent and sets the statistics accordingly.
+     *  \param s The scale value.
+     */
+    inline void scale(const Pixel &s);
+
     /*! This method returns the maximum luminance over pixels.
      *  \return mMaximumLuminance.
      */
@@ -96,17 +101,32 @@ class RenderFilm
     /*! This method is called after rendering.
      */
     inline virtual void postprocess(void);
+    
+    // XXX DESIGN this is kludgy
+    //     i'm adding this so that GpuFilm has something
+    //     to override later
+    inline virtual void init(void);
 
     /*! This method returns the filename.
      *  \return mFilename
      */
     inline const std::string &getFilename(void) const;
 
+    /*! This method sets mFilename.
+     *  \param filename Sets mFilename.
+     */
+    inline void setFilename(const std::string &filename);
+
     /*! This method writes this RenderFilm to the given filename.
      *  \param filename The name of the file to write to.
      *  XXX DESIGN I still don't think this is the place for this.
      */
     inline void writeEXR(const char *filename) const;
+
+    /*! This method sets mNormalizeOnPostprocess.
+     *  \param n Sets mNormalizeOnPostprocess
+     */
+    inline void setNormalizeOnPostprocess(const bool n);
 
   protected:
     /*! Hide access to non-const pixel().
@@ -140,6 +160,11 @@ class RenderFilm
     /*! A filename to write to during postprocessing.
      */
     std::string mFilename;
+
+    /*! Whether or not to normalize the data by dividing by the
+     *  luminance of the maximum Pixel value.
+     */
+    bool mNormalizeOnPostprocess;
 }; // end RenderFilm
 
 #include "RenderFilm.inl"

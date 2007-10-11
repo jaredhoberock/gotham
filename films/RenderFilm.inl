@@ -17,7 +17,7 @@
 
 RenderFilm
   ::RenderFilm(void)
-    :Parent(),mFilename("")
+    :Parent(),mFilename(""),mNormalizeOnPostprocess(false)
 {
   ;
 } // end RenderFilm::RenderFilm()
@@ -26,7 +26,7 @@ RenderFilm
   ::RenderFilm(const unsigned int width,
                const unsigned int height,
                const std::string &filename)
-    :Parent(width,height),mFilename(filename)
+    :Parent(width,height),mFilename(filename),mNormalizeOnPostprocess(false)
 {
   reset();
 } // end RenderFilm::RenderFilm()
@@ -103,6 +103,15 @@ void RenderFilm
   mSum = static_cast<float>(getWidth() * getHeight()) * v;
 } // end RenderFilm::fill()
 
+void RenderFilm
+  ::scale(const Pixel &s)
+{
+  Parent::scale(s);
+  mMaximumLuminance *= s.luminance();
+  mMinimumLuminance *= s.luminance();
+  mSum *= s;
+} // end RenderFilm::scale()
+
 float RenderFilm
   ::getMaximumLuminance(void) const
 {
@@ -124,6 +133,13 @@ const RandomAccessFilm::Pixel &RenderFilm
 void RenderFilm
   ::postprocess(void)
 {
+  if(mNormalizeOnPostprocess)
+  {
+    // scale by 1/mMaximumLuminance
+    float s = 1.0f / getMaximumLuminance();
+    scale(Spectrum(s,s,s));
+  } // end if
+
   if(mFilename != "")
   {
     writeEXR(mFilename.c_str());
@@ -135,6 +151,12 @@ const std::string &RenderFilm
 {
   return mFilename;
 } // end RenderFilm::getFilename()
+
+void RenderFilm
+  ::setFilename(const std::string &filename)
+{
+  mFilename = filename;
+} // end RenderFilm::setFilename()
 
 void RenderFilm
   ::writeEXR(const char *filename) const
@@ -164,4 +186,16 @@ void RenderFilm
 
   file.writePixels(getHeight());
 } // end RenderFilm::writeEXR()
+
+void RenderFilm
+  ::init(void)
+{
+  ;
+} // end RenderFilm::init()
+
+void RenderFilm
+  ::setNormalizeOnPostprocess(const bool n)
+{
+  mNormalizeOnPostprocess = n;
+} // end RenderFilm::setNormalizeOnPostprocess()
 
