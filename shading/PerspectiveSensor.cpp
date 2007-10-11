@@ -60,8 +60,12 @@ Spectrum PerspectiveSensor
   // compute surface area pdf to solid angle pdf
   pdf *= d2;
 
-  // divide the response by the dot product to remove the vignette effect
-  return mResponse / dg.getNormal().dot(ws);
+  // this removes the vignetting effect, but is it correct?
+  pdf *= dg.getNormal().dot(ws);
+
+  //// divide the response by the dot product to remove the vignette effect
+  //return mResponse / dg.getNormal().dot(ws);
+  return mResponse;
 } // end PerspectiveSensor::sample()
 
 void PerspectiveSensor
@@ -130,6 +134,10 @@ float PerspectiveSensor
   Vector3 wi = q - dg.getPoint();
   float pdf = wi.norm2();
   pdf *= mInverseWindowSurfaceArea;
+
+  // this removes the vignetting effect, but is it correct?
+  pdf *= dg.getNormal().absDot(ws);
+
   return pdf;
 } // end PerspectiveSensor::evaluatePdf()
 
@@ -139,7 +147,9 @@ Spectrum PerspectiveSensor
 {
   // evaluate the pdf at ws, and if it is not zero, return mResponse
   // divide by dot product to remove the vignetting effect
-  return evaluatePdf(ws, dg) > 0 ? (mResponse / dg.getNormal().absDot(ws)) : Spectrum::black();
+  //return evaluatePdf(ws, dg) > 0 ? (mResponse / dg.getNormal().absDot(ws)) : Spectrum::black();
+
+  return evaluatePdf(ws, dg) > 0 ? (mResponse) : Spectrum::black();
 } // end PerspectiveSensor::evaluate()
 
 Vector PerspectiveSensor
