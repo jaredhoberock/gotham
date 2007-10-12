@@ -86,7 +86,7 @@ g.attribute("path::russianroulette::continueprobability", "0.5")
 g.pushMatrix()
 g.lookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
 #g.lookAt( (0,0,2.75), (0,0,-1), (0,1,0) )
-g.camera(float(w) / h, 45.0, 0.01)
+g.camera(float(w) / h, 60.0, 0.01)
 g.popMatrix()
 
 g.render((w,h), 4)

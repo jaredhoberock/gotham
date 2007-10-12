@@ -56,7 +56,7 @@ g.popMatrix()
 
 g.material('phongreflection', 'Kr', (1.0, 1.0, 1.0), 'eta', 2.485, 'exponent', 100000)
 g.material('mirror', 'Kr', (1.0, 1.0, 1.0))
-g.sphere(-0.4, -0.66, -0.15, 0.33)
+#g.sphere(-0.4, -0.66, -0.15, 0.33)
 
 # floor
 g.material('phongreflection', 'Kr', (0.8, 0.8, 0.8), 'eta', 2.485, 'exponent', 25)
@@ -67,8 +67,8 @@ g.scale(2.0, 2.0, 2.0)
 g.mesh(unitSquare[0], unitSquare[1])
 g.popMatrix()
 
-#g.material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
-g.material('thinglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0))
+g.material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
+#g.material('thinglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0))
 g.sphere(0.4,-0.66,0.25,0.33)
 
 # lights
@@ -88,16 +88,18 @@ g.rotate(180.0, 1.0, 0, 0)
 g.mesh(unitSquare[0], unitSquare[1])
 g.popMatrix()
 
-#g.attribute("path::sampler", "kelemen")
-g.attribute("path::sampler", "whitted")
-g.attribute("path::maxlength", "20")
-g.attribute("path::russianroulette::function", "always")
-g.attribute("renderer::algorithm", "erpt")
+g.attribute("path::sampler", "kelemen")
+#g.attribute("path::sampler", "whitted")
+#g.attribute("path::maxlength", "20")
+g.attribute("path::maxlength", "10")
+#g.attribute("path::russianroulette::function", "always")
+g.attribute("renderer::algorithm", "metropolis")
+g.attribute("importance::function", "constant")
 
 (w,h) = (512,512)
 g.pushMatrix()
 g.lookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
-g.camera(float(w) / h, 45.0, 0.01)
+g.camera(float(w) / h, 60.0, 0.01)
 g.popMatrix()
 
 g.render((w,h), 4)
