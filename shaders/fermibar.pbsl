@@ -1,0 +1,13 @@
+scattering(float sfreq, float tfreq, Spectrum under, Spectrum over, Spectrum Ks, float exponent)
+{
+  float tt = tfreq * UV[1];
+  float d = 0.5f + 0.5f * sinf(tt);
+  float o = step(0.5f, d);
+
+  float ss = sfreq * UV[0] * 2.0f * PI;
+
+  Spectrum c = mix<Spectrum>(under, (0.5f + 0.5f * sinf(ss)) * over, o);
+
+  F = uber(c, Ks, exponent);
+} // end scattering()
+

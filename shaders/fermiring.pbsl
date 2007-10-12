@@ -1,0 +1,9 @@
+scattering(float freq, Spectrum Kd, Spectrum Ks, float nu, float nv)
+{
+  float ss = UV[1] * freq;
+  float pat = periodicFbm(ss, freq, 3, 0.75f);
+  Spectrum c = Kd * (0.5f * pat + 0.5f);
+
+  F = uber(c, Ks, nu, nv);
+} // end scattering()
+

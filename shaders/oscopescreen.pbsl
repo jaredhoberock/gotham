@@ -1,0 +1,27 @@
+emission(Spectrum power)
+{
+  float ss = UV[0];
+  float tt = 2.5f * (UV[1] - 0.5f);
+
+  float os = 0;
+  float f;
+
+  f = sinf(20.0f * ss);
+  os += 0.2f * pulse(f - 0.025f, f + 0.025f, tt);
+
+  f = 0.5f * snoise(13.2f * ss);
+  os += 0.5f * pulse(f - 0.025f, f + 0.025f, tt);
+
+  f = -2.0f * expf(-4.0f * ss) * snoise(40.0f * ss);
+  os += 0.75f * pulse(f - 0.025f, f + 0.025f, tt);
+
+  Spectrum radiosity = os * invArea * power;
+  E = new HemisphericalEmission(radiosity);
+} // end emission()
+
+scattering(void)
+{
+  // dull glossy reflection
+  F = new PhongReflection(Spectrum(0.5f, 0.5f, 0.5f), 1.5f, 25.0f);
+} // end scattering
+

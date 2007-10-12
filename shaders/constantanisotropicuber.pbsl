@@ -1,0 +1,5 @@
+scattering(Spectrum Kd, Spectrum Ks, float nu, float nv)
+{
+  F = uber(Ks, Ks, nu, nv);
+} // end scattering()
+

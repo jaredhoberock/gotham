@@ -1,0 +1,22 @@
+scattering(Spectrum Kd, Spectrum Ks, float uShininess, float vShininess, float grainfreq, float grainamp, float grainaspect)
+{
+  Point pGrain = grainfreq * Point(UV[0], UV[1], 1.0f);
+  if(uShininess < vShininess)
+  {
+    pGrain[0] /= (grainaspect+1.0f);
+  } // end if
+  else
+  {
+    pGrain[1] /= (grainaspect+1.0f);
+  } // end else
+
+  float grain = (grainamp / 3.0f) * snoise(pGrain);
+  grain += (grainamp / 3.0f) * snoise(2.1f * pGrain);
+  grain += 0.5f;
+
+  Spectrum d = grain * Kd;
+  Spectrum s = grain * grain * Ks;
+
+  F = uber(d, s, uShininess, vShininess);
+} // end scattering()
+

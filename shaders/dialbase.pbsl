@@ -1,0 +1,6 @@
+scattering(Spectrum Kd, Spectrum Ks, float exponent, float freq)
+{
+  float tick = pulsetrain(0.9f, 1.0f, UV[1] * freq);
+  F = uber(tick * Kd, Ks, exponent);
+} // end scattering()
+

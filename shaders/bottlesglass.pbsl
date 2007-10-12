@@ -1,0 +1,5 @@
+scattering(Spectrum Kd, Spectrum Kr, Spectrum Kt)
+{
+  F = glass(1.5f, Kr, Kt);
+} // end scattering()
+
