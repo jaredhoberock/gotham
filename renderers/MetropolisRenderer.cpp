@@ -178,7 +178,7 @@ void MetropolisRenderer
         float2 pixel;
 
         // map the result to a location in the image
-        mapToImage(*ry, y, yPath, pixel[0], pixel[0]);
+        mapToImage(*ry, y, yPath, pixel[0], pixel[1]);
 
         // each sample contributes (1/spp) * MIS weight * MC weight * f
         deposit = yWeight * ry->mWeight * ry->mThroughput / ry->mPdf;
