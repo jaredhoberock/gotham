@@ -517,3 +517,325 @@ bool Path
   return true;
 } // end Path::clone()
 
+float Path
+  ::computePowerHeuristicWeight(const Scene &scene,                                             
+                                const const_iterator &lLast,
+                                const size_t s,
+                                const size_t lightSubpathLength,
+                                const const_iterator &eLast,
+                                const size_t t,
+                                const size_t eyeSubpathLength,
+                                const Vector &connection,
+                                const float g,
+                                const RussianRoulette &roulette)
+{
+  float sum = 1.0f;
+
+  // Temporarily set the geometric terms and to/prev vectors
+  // at eLast and lLast, since as they are, they correspond
+  // to a different path.  We will restore them at the end of the
+  // function.
+  Vector cacheLightToPrev = lLast->mToPrev;
+  Vector cacheEyeToNext = eLast->mToNext;
+  float cacheLightPrevG = lLast->mPreviousGeometricTerm;
+  float cacheEyeNextG = eLast->mNextGeometricTerm;
+
+  const_cast<PathVertex&>(*lLast).mToPrev = -connection;
+  const_cast<PathVertex&>(*lLast).mPreviousGeometricTerm = g;
+  const_cast<PathVertex&>(*eLast).mToNext = connection;
+  const_cast<PathVertex&>(*eLast).mNextGeometricTerm = g;
+
+  sum += computePowerHeuristicWeightLightSubpaths
+           (scene, lLast, s, lightSubpathLength,
+            eLast, t, eyeSubpathLength, roulette);
+
+  sum += computePowerHeuristicWeightEyeSubpaths
+           (scene, lLast, s, lightSubpathLength,
+            eLast, t, eyeSubpathLength, roulette);
+
+  // restore data
+  const_cast<PathVertex&>(*lLast).mToPrev = cacheLightToPrev;
+  const_cast<PathVertex&>(*eLast).mToNext = cacheEyeToNext;
+  const_cast<PathVertex&>(*lLast).mPreviousGeometricTerm = cacheLightPrevG;
+  const_cast<PathVertex&>(*eLast).mNextGeometricTerm = cacheEyeNextG;
+
+  return 1.0f / sum;
+} // end Path::computePowerHeuristicWeight()
+
+float Path
+  ::computePowerHeuristicWeightLightSubpaths(const Scene &scene,
+                                             const Path::const_iterator &lLast,
+                                             const size_t s,
+                                             const size_t lightSubpathLength,
+                                             const Path::const_iterator &eLast,
+                                             const size_t t,
+                                             const size_t eyeSubpathLength,
+                                             const RussianRoulette &roulette)
+{
+  float sum = 0.0f;
+  size_t k = s + t;
+  float ratio = 1.0f;
+
+  // note this is different from specularConnection
+  bool deltaBounce = false;
+  ScatteringDistributionFunction::ComponentIndex bounceComponent = 0;
+
+  // iteratively adding light vertices
+  Path::const_iterator vert = eLast;
+  Path::const_iterator nextVert = vert; --nextVert;
+  Path::const_iterator prevVert = lLast;
+  for(size_t sPrime = s + 1;
+      sPrime <= k;
+      ++sPrime, --vert, --nextVert)
+  {
+    size_t tPrime = k - sPrime;
+    float solidAnglePdf = 0;
+
+    // if we find a non-intersectable primitive
+    // (like a point light or directional light)
+    // break immediately, since the probability
+    // of connecting a path there and beyond is 0
+    //if(!vert->mPrimitive->isIntersectable()) break;
+
+    // note this is different from deltaBounce
+    bool specularConnection = false;
+    // when tPrime is 0, there's no connection to be made
+    // so we don't check
+    if(tPrime != 0)
+    {
+      specularConnection |= vert->mScattering->isSpecular();
+      specularConnection |= nextVert->mScattering->isSpecular();
+    } // end if
+
+    // multiply by probability of point added to light path
+    if(sPrime == 1)
+    {
+      // vertex was added at a light surface
+      ratio *= scene.getEmitters()->evaluateSurfaceAreaPdf(vert->mSurface,
+                                                           vert->mDg);
+    } // end if
+    else
+    {
+      // compute the solid angle pdf
+      solidAnglePdf = 0;
+      Spectrum f;
+      if(sPrime == 2)
+      {
+        // vertex was added as an emission from a light surface
+        solidAnglePdf = prevVert->mEmission->evaluatePdf(prevVert->mToPrev,
+                                                         prevVert->mDg);
+        f = prevVert->mEmission->evaluate(prevVert->mToPrev, prevVert->mDg);
+      } // end else if
+      else
+      {
+        // XXX PERF: we could add a method which evaluates the integrand & pdf at the same time
+        //     which would compute much less redundant work
+        // XXX DESIGN: rather than taking a boolean deltaBounce, just keep track of which
+        //             component the bounce came from?
+        solidAnglePdf = prevVert->mScattering->evaluatePdf(prevVert->mToNext,
+                                                           prevVert->mDg,
+                                                           prevVert->mToPrev,
+                                                           deltaBounce,
+                                                           bounceComponent);
+
+        // XXX DESIGN: kill this branch by creating an evaluate() method
+        //     similar to the evaluatePdf() we just called.
+        if(!prevVert->mScattering->isSpecular())
+        {
+          f = prevVert->mScattering->evaluate(prevVert->mToNext,
+                                              prevVert->mDg,
+                                              prevVert->mToPrev);
+        } // end if
+        else
+        {
+          // XXX this isn't correct in general
+          f = Spectrum::white();
+        } // end else
+      } // end else
+
+      // XXX technically, if we receive a solidAnglePdf of zero, this means
+      //     we should quit altogether: no other sampling strategies will have
+      //     a non-zero contribution to the sum
+      if(solidAnglePdf != 0)
+      {
+        ratio *= solidAnglePdf;
+      } // end if
+
+      // convert to projected solid angle pdf
+      ratio /= prevVert->mDg.getNormal().absDot(prevVert->mToPrev);
+
+      // convert to area product pdf
+      ratio *= prevVert->mPreviousGeometricTerm;
+
+      // convert to Russian roulette area product pdf
+      ratio *= roulette(sPrime - 1, f, prevVert->mDg, prevVert->mToPrev, solidAnglePdf, deltaBounce);
+
+      // update bounce info
+      // not on the first iteration
+      if(sPrime != s + 1)
+      {
+        deltaBounce = prevVert->mFromDelta;
+        bounceComponent = prevVert->mFromComponent;
+      } // end if
+    } // end else
+
+    // divide by probability of point removed from eye path
+    // use the cached pdf value at the new vertex
+    // note that this is not just an optimization: we must do this
+    // to account for specular bsdfs since evaluatePdf() always returns 0
+    ratio /= (vert->mPdf * vert->mPreviousGeometricTerm);
+
+    if(!specularConnection)
+    {
+      // power heuristic
+      sum += ratio*ratio;
+    } // end if
+
+    // update prev vertex
+    prevVert = vert;
+  } // end for
+
+  return sum;
+} // end Path::computePowerHeuristicWeightLightSubpaths()
+
+float Path
+  ::computePowerHeuristicWeightEyeSubpaths(const Scene &scene,
+                                           const Path::const_iterator &lLast,
+                                           const size_t s,
+                                           const size_t lightSubpathLength,
+                                           const Path::const_iterator &eLast,
+                                           const size_t t,
+                                           const size_t eyeSubpathLength,
+                                           const RussianRoulette &roulette)
+{
+  float sum = 0.0f;
+  size_t k = s + t;
+  float ratio = 1.0f;
+
+  // note that this is different from specularConnection
+  bool deltaBounce = false;
+  ScatteringDistributionFunction::ComponentIndex bounceComponent;
+
+  // iteratively adding eye vertices
+  Path::const_iterator vert = lLast;
+  Path::const_iterator nextVert = vert; ++nextVert;
+  Path::const_iterator prevVert = eLast;
+  for(size_t tPrime = t + 1;
+      tPrime <= k;
+      ++tPrime, ++nextVert, ++vert)
+  {
+    size_t sPrime = k - tPrime;
+    float solidAnglePdf = 0;
+
+    // if we find a non-intersectable primitive
+    // (like a point light or directional light)
+    // break immediately since the probability
+    // of connecting a path there and beyond is 0
+    //if(!vert->mPrimitive->isIntersectable()) break;
+
+    bool specularConnection = false;
+
+    if(sPrime != 0)
+    {
+      specularConnection |= vert->mScattering->isSpecular();
+      specularConnection |= nextVert->mScattering->isSpecular();
+    } // end if
+
+    // multiply by probability of point added to eye path
+    if(tPrime == 1)
+    {
+      // vertex was added as a lens sample
+      ratio *= scene.getSensors()->evaluateSurfaceAreaPdf(vert->mSurface,
+                                                          vert->mDg);
+    } // end if
+    else
+    {
+      // compute the solid angle pdf
+      solidAnglePdf = 0;
+      Spectrum f;
+      if(tPrime == 2)
+      {
+        // vertex was added as a film plane sample
+        solidAnglePdf = prevVert->mSensor->evaluatePdf(prevVert->mToNext,
+                                                       prevVert->mDg);
+        f = prevVert->mSensor->evaluate(prevVert->mToNext,
+                                        prevVert->mDg);
+      } // end if
+      else
+      {
+        // XXX PERF: we could add a method which evaluates the integrand & pdf at the same time
+        //     which would compute much less redundant work
+        // XXX DESIGN: rather than taking a boolean deltaBounce, just keep track of which
+        //             component the bounce came from?
+        solidAnglePdf = prevVert->mScattering->evaluatePdf(prevVert->mToPrev,
+                                                           prevVert->mDg,
+                                                           prevVert->mToNext,
+                                                           deltaBounce,
+                                                           bounceComponent);
+
+        // XXX DESIGN: kill this branch by creating an evaluate() method
+        //     similar to the evaluatePdf() we just called.
+        if(!prevVert->mScattering->isSpecular())
+        {
+          f = prevVert->mScattering->evaluate(prevVert->mToPrev,
+                                              prevVert->mDg,
+                                              prevVert->mToNext);
+        } // end if
+        else
+        {
+          // XXX this isn't correct in general
+          f = Spectrum::white();
+        } // end else
+      } // end else
+
+      // XXX technically, if we receive a solidAnglePdf of zero, this means
+      //     we should quit altogether: no other sampling strategies will have
+      //     a non-zero contribution to the sum
+      if(solidAnglePdf != 0)
+      {
+        ratio *= solidAnglePdf;
+      } // end if
+
+      // convert to projected solid angle pdf
+      ratio /= prevVert->mDg.getNormal().absDot(prevVert->mToNext);
+
+      // convert to area product pdf
+      ratio *= prevVert->mNextGeometricTerm;
+
+      // convert to Russian roulette area product pdf
+      ratio *= roulette(tPrime - 1, f, prevVert->mDg, prevVert->mToNext, solidAnglePdf, deltaBounce);
+
+      // update bounce info
+      // not on the first iteration
+      if(tPrime != t + 1)
+      {
+        deltaBounce = prevVert->mFromDelta;
+        bounceComponent = prevVert->mFromComponent;
+      } // end if
+    } // end else
+
+    // divide by probability of point removed from light path
+    // use the cached pdf value at the new vertex
+    // note that this is not just an optimization: we must do this
+    // to account for specular bsdfs since evaluatePdf() always returns 0
+    ratio /= (vert->mPdf * vert->mNextGeometricTerm);
+
+    // be careful about specular connecting vertices
+    // if a connecting vertex (ie, vert or nextVert) is specular,
+    // then this path carries no power (since the probability of the other
+    // connecting vertex lying on the specular direction is 0)
+    // In this case, don't add to the sum
+
+    if(!specularConnection)
+    {
+      // power heuristic
+      sum += ratio*ratio;
+    } // end if
+
+    // update prev vertex
+    prevVert = vert;
+  } // end for tPrime
+
+  return sum;
+} // end Path::computePowerHeuristicWeightEyeSubpaths()
+

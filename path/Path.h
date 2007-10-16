@@ -287,6 +287,54 @@ class Path
      */
     bool clone(Path &dst, FunctionAllocator &allocator) const;
 
+    /*! This static method computes a MIS weight for a Path with the power heuristic.
+     *  \param scene The Scene containing the Path.
+     *  \param lLast The last vertex of the light subpath to consider.
+     *  \param s The length of the light subpath being considered.
+     *  \param lightSubpathLength The length of the full light subpath that was generated
+     *                            when the Path was sampled.
+     *  \param eLast The last vertex of the eye subpath to consider.
+     *  \param t The length of the eye subpath being considered.
+     *  \param eyeSubpathLength The length of the full eye subpath that was generated
+     *                          when the Path was sampled.
+     *  \param connection A unit vector pointing from eLast to lLast.
+     *  \param g The geometric term between eLast and lLast.
+     *  \param roulette The RussianRoulette function used when sampling the Path being
+     *                  considered.
+     *  \return The power heuristic (with exponent == 2) weight of the Path being considered.
+     */
+    static float computePowerHeuristicWeight(const Scene &scene,
+                                             const const_iterator &lLast,
+                                             const size_t s,
+                                             const size_t lightSubpathLength,
+                                             const const_iterator &eLast,
+                                             const size_t t,
+                                             const size_t eyeSubpathLength,
+                                             const Vector &connection,
+                                             const float g,
+                                             const RussianRoulette &roulette);
+
+    /*! These methods are too confusing to describe.  Don't call them unless you wrote them.
+     */
+    static float computePowerHeuristicWeightEyeSubpaths(const Scene &scene,
+                                                        const Path::const_iterator &lLast,
+                                                        const size_t s,
+                                                        const size_t lightSubpathLength,
+                                                        const Path::const_iterator &eLast,
+                                                        const size_t t,
+                                                        const size_t eyeSubpathLength,
+                                                        const RussianRoulette &roulette);
+
+    static float computePowerHeuristicWeightLightSubpaths(const Scene &scene,
+                                                          const Path::const_iterator &lLast,
+                                                          const size_t s,
+                                                          const size_t lightSubpathLength,
+                                                          const Path::const_iterator &eLast,
+                                                          const size_t t,
+                                                          const size_t eyeSubpathLength,
+                                                          const RussianRoulette &roulette);
+    
+
   //protected:
     // XXX pass prev as a PathVertex reference
     // XXX dir & pdf need not be passed as parameters:

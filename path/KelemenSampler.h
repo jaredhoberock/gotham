@@ -85,17 +85,6 @@ class KelemenSampler
                                     const HyperPoint &x,
                                     Path &p) const;
 
-    float computeWeight(const Scene &scene,
-                        const Path::const_iterator &lLast,
-                        const size_t s,
-                        const size_t lightSubpathLength,
-                        const Path::const_iterator &eLast,
-                        const size_t t,
-                        const size_t eyeSubpathLength,
-                        const Vector &connection,
-                        const float g,
-                        const RussianRoulette &roulette) const;
-
     unsigned int mMaxPathLength;
 
     /*! A RussianRoulette function.
