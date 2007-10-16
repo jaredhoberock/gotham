@@ -12,11 +12,7 @@ void PathToImage
              float &u,
              float &v) const
 {
-  if(r.mEyeLength == 0)
-  {
-    std::cerr << "PathToImage::evaluate(): Implement me!" << std::endl;
-  } // end if
-  else if(r.mEyeLength == 1)
+  if(r.mEyeLength <= 1)
   {
     // we need to invert the sensor function
     unsigned int endOfLightPath = xPath.getSubpathLengths().sum() - r.mLightLength;
