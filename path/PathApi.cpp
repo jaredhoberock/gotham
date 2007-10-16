@@ -78,6 +78,10 @@ PathSampler *PathApi
   {
     rr.reset(new OnlyAfterDeltaRoulette());
   } // end else if
+  else if(rrFunction == "kelemen")
+  {
+    rr.reset(new KelemenRoulette(continueProbability));
+  } // end else if
   else
   {
     std::cerr << "Warning: unknown Russian roulette function \"" << rrFunction << "\"." << std::endl;

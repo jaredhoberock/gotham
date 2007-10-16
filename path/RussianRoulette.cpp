@@ -102,3 +102,29 @@ float OnlyAfterDeltaRoulette
   return (i < 2 || fromDelta) ? 1.0f : 0.0f;
 }; // end OnlyAfterDeltaRoulette::operator()()
 
+KelemenRoulette
+  ::KelemenRoulette(const float continueProbability)
+    :Parent(continueProbability)
+{
+  ;
+} // end KelemenRoulette::KelemenRoulette()
+
+float KelemenRoulette
+  ::operator()(const unsigned int i,
+               const Spectrum &f,
+               const DifferentialGeometry &dg,
+               const Vector &w,
+               const float &pdf,
+               const bool fromDelta) const
+{
+  if(i == 1) return mContinueProbability;
+  if(fromDelta) return 1.0f;
+
+  // return MaxOverSpectrumRoulette
+  float fs = f.maxElement();
+  float psaPdf = pdf / dg.getNormal().absDot(w);
+  
+  // we convert pdf to projected solid angle pdf before dividing fs
+  return std::min(1.0f, fs / psaPdf);
+} // end KelemenRoulette::operator()()
+

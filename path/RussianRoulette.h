@@ -94,7 +94,7 @@ class ConstantAndAlwaysAfterDeltaRoulette
   : public ConstantRoulette
 {
   public:
-    /*! \typedef ConstantRoulette Parent
+    /*! \typedef Parent
      *  \brief Shorthand.
      */
     typedef ConstantRoulette Parent;
@@ -108,6 +108,25 @@ class ConstantAndAlwaysAfterDeltaRoulette
                              const float &pdf,
                              const bool fromDelta) const;
 }; // end ConstantAndAlwaysAfterDeltaRoulette
+
+class KelemenRoulette
+  : public ConstantRoulette
+{
+  public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef ConstantRoulette Parent;
+
+    KelemenRoulette(const float continueProbability = 0.3f);
+
+    virtual float operator()(const unsigned int i,
+                             const Spectrum &f,
+                             const DifferentialGeometry &dg,
+                             const Vector &w,
+                             const float &pdf,
+                             const bool fromDelta) const;
+}; // end KelemenRoulette
 
 #endif // RUSSIAN_ROULETTE_H
 
