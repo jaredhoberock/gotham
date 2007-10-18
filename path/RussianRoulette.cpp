@@ -8,6 +8,12 @@
 #include "../geometry/DifferentialGeometry.h"
 #include "../geometry/Vector.h"
 
+float RussianRoulette
+  ::operator()(void) const
+{
+  return 1.0f;
+} // end RussianRoulette::operator()()
+
 float AlwaysRoulette
   ::operator()(const unsigned int i,
                const Spectrum &f,
@@ -25,6 +31,12 @@ ConstantRoulette
 {
   ;
 } // end ConstantRoulette::ConstantRoulette()
+
+float ConstantRoulette
+  ::operator()(void) const
+{
+  return mContinueProbability;
+} // end ConstantRoulette::operator()()
 
 float ConstantRoulette
   ::operator()(const unsigned int i,
@@ -128,3 +140,27 @@ float KelemenRoulette
   return std::min(1.0f, fs / psaPdf);
 } // end KelemenRoulette::operator()()
 
+VeachRoulette
+  ::VeachRoulette(const size_t minimalSubpathLength)
+    :Parent(),mMinimalSubpathLength(std::max<size_t>(1,minimalSubpathLength))
+{
+  ;
+} // end VeachRoulette::VeachRoulette()
+
+float VeachRoulette
+  ::operator()(const unsigned int i,
+               const Spectrum &f,
+               const DifferentialGeometry &dg,
+               const Vector &w,
+               const float &pdf,
+               const bool fromDelta) const
+{
+  if(i < mMinimalSubpathLength || fromDelta) return 1.0f;
+
+  // return MaxOverSpectrumRoulette
+  float fs = f.maxElement();
+  float psaPdf = pdf / dg.getNormal().absDot(w);
+  
+  // we convert pdf to projected solid angle pdf before dividing fs
+  return std::min(1.0f, fs / psaPdf);
+} // end VeachRoulette::operator()()

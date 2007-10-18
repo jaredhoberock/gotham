@@ -52,6 +52,14 @@ PathSampler *PathApi
     continueProbability = static_cast<float>(atof(boost::any_cast<std::string>(val).c_str()));
   } // end if
 
+  size_t minimumSubpathLength = 3;
+  a = attr.find("path::russianroulette::minimumsubpathlenth");
+  if(a != attr.end())
+  {
+    boost::any val = a->second;
+    minimumSubpathLength = atoi(boost::any_cast<std::string>(val).c_str());
+  } // end if
+
   // create the russian roulette
   boost::shared_ptr<RussianRoulette> rr(new AlwaysRoulette());
   if(rrFunction == "always")
@@ -81,6 +89,10 @@ PathSampler *PathApi
   else if(rrFunction == "kelemen")
   {
     rr.reset(new KelemenRoulette(continueProbability));
+  } // end else if
+  else if(rrFunction == "veach")
+  {
+    rr.reset(new VeachRoulette(minimumSubpathLength));
   } // end else if
   else
   {
