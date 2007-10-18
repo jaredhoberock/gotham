@@ -213,7 +213,7 @@ void KelemenSampler
 
       // compute the weight before casting the ray
       if(!L.isBlack()
-         && (w = Path::computePowerHeuristicWeight(scene, &l, lightLength, p.getSubpathLengths()[1],
+         && (w = Path::computePowerHeuristicWeight(scene, 0, 0, &l, lightLength, p.getSubpathLengths()[1],
                                                    &e, eyeLength, p.getSubpathLengths()[0],
                                                    e.mToNext, e.mNextGeometricTerm, roulette))
          && !scene.intersect(Ray(e.mDg.getPoint(), l.mDg.getPoint())))
@@ -238,7 +238,7 @@ void KelemenSampler
         Spectrum S = l.mSensor->evaluate(l.mToNext, l.mDg);
         if(!S.isBlack())
         {
-          w = Path::computePowerHeuristicWeightEyeSubpaths(scene, &l, lightLength, p.getSubpathLengths()[1],
+          w = Path::computePowerHeuristicWeightEyeSubpaths(scene, 0, &l, lightLength, p.getSubpathLengths()[1],
                                                            0, 0, p.getSubpathLengths()[0],
                                                            roulette);
           w = 1.0f / (w + 1.0f);
@@ -269,7 +269,7 @@ void KelemenSampler
       Spectrum E = e.mEmission->evaluate(e.mToPrev, e.mDg);
       if(!E.isBlack())
       {
-        w = Path::computePowerHeuristicWeightLightSubpaths(scene,
+        w = Path::computePowerHeuristicWeightLightSubpaths(scene, 0,
                                                            0, 0, p.getSubpathLengths()[1],
                                                            &e, eyeLength, p.getSubpathLengths()[0],
                                                            roulette);

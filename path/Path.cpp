@@ -335,6 +335,18 @@ const gpcpu::uint2 &Path
   return mSubpathLengths;
 } // end Path::getSubpathLengths()
 
+const gpcpu::float2 &Path
+  ::getTerminationProbabilities(void) const
+{
+  return mTerminationProbabilities;
+} // end Path::getTerminationProbabilities()
+
+gpcpu::float2 &Path
+  ::getTerminationProbabilities(void)
+{
+  return mTerminationProbabilities;
+} // end Path::getTerminationProbabilities()
+
 void Path
   ::clear(void)
 {
@@ -401,7 +413,8 @@ unsigned int Path
                                          const float u1,
                                          const float u2,
                                          const float u3,
-                                         const RussianRoulette *roulette)
+                                         const RussianRoulette *roulette,
+                                         float &termination)
 {
   PathVertex &prev = (*this)[previous];
 
@@ -448,12 +461,8 @@ unsigned int Path
       (*this)[previous].mThroughput = Spectrum::black();
     } // end if
   } // end if
-  else
-  {
-    // append the termination probability to the previous vertex
-    (*this)[previous].mPdf *= (1.0f - rr);
-    (*this)[previous].mAccumulatedPdf *= (1.0f - rr);
-  } // end else
+
+  termination = 1.0f - rr;
 
   return result;
 } // end Path::insertRussianRouletteWithTermination()
@@ -519,6 +528,8 @@ bool Path
 
 float Path
   ::computePowerHeuristicWeight(const Scene &scene,                                             
+                                const size_t minimumLightSubpathLength,
+                                const size_t minimumEyeSubpathLength,
                                 const const_iterator &lLast,
                                 const size_t s,
                                 const size_t lightSubpathLength,
@@ -546,11 +557,11 @@ float Path
   const_cast<PathVertex&>(*eLast).mNextGeometricTerm = g;
 
   sum += computePowerHeuristicWeightLightSubpaths
-           (scene, lLast, s, lightSubpathLength,
+           (scene, minimumEyeSubpathLength, lLast, s, lightSubpathLength,
             eLast, t, eyeSubpathLength, roulette);
 
   sum += computePowerHeuristicWeightEyeSubpaths
-           (scene, lLast, s, lightSubpathLength,
+           (scene, minimumLightSubpathLength, lLast, s, lightSubpathLength,
             eLast, t, eyeSubpathLength, roulette);
 
   // restore data
@@ -564,6 +575,7 @@ float Path
 
 float Path
   ::computePowerHeuristicWeightLightSubpaths(const Scene &scene,
+                                             const size_t minimumEyeSubpathLength,
                                              const Path::const_iterator &lLast,
                                              const size_t s,
                                              const size_t lightSubpathLength,
@@ -585,7 +597,7 @@ float Path
   Path::const_iterator nextVert = vert; --nextVert;
   Path::const_iterator prevVert = lLast;
   for(size_t sPrime = s + 1;
-      sPrime <= k;
+      sPrime <= k - minimumEyeSubpathLength;
       ++sPrime, --vert, --nextVert)
   {
     size_t tPrime = k - sPrime;
@@ -700,6 +712,7 @@ float Path
 
 float Path
   ::computePowerHeuristicWeightEyeSubpaths(const Scene &scene,
+                                           const size_t minimumLightSubpathLength,
                                            const Path::const_iterator &lLast,
                                            const size_t s,
                                            const size_t lightSubpathLength,
@@ -721,7 +734,7 @@ float Path
   Path::const_iterator nextVert = vert; ++nextVert;
   Path::const_iterator prevVert = eLast;
   for(size_t tPrime = t + 1;
-      tPrime <= k;
+      tPrime <= k - minimumLightSubpathLength;
       ++tPrime, ++nextVert, ++vert)
   {
     size_t sPrime = k - tPrime;

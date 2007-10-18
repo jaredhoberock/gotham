@@ -226,8 +226,7 @@ class Path
                                        const RussianRoulette *roulette);
     
     /*! This variant of the insert() method attempts to append (or prepend) a new PathVertex
-     *  using Russian roulette.  If Russian roulette decides not to insert a new vertex, the
-     *  previous vertex's pdf is multiplied by the termination probability.
+     *  using Russian roulette.  The termination probability is also returned.
      *  \param previous The index of the previous vertex.
      *  \param scene A pointer to the Scene containing this Path.
      *  \param after Whether or not to insert the new PathVertex before
@@ -240,6 +239,8 @@ class Path
      *  \param u3 A fourth real number in [0,1).
      *  \param roulette A Russian roulette function for computing whether or not
      *                  to extend the Path.
+     *  \param termination The probability of terminating this Path due to Russian roulette
+     *                     is returned here.
      *  \return The index of the newly inserted PathVertex if an intersection
      *          is found; NULL_VERTEX, otherwise.
      */
@@ -251,7 +252,8 @@ class Path
                                                       const float u1,
                                                       const float u2,
                                                       const float u3,
-                                                      const RussianRoulette *roulette);
+                                                      const RussianRoulette *roulette,
+                                                      float &termination);
 
 
     template<typename RNG>
@@ -273,6 +275,17 @@ class Path
 
     const gpcpu::uint2 &getSubpathLengths(void) const;
 
+    /*! This method returns a reference to this Path's termination probabilities.
+     *  \return mTerminationProbabilities
+     */
+    gpcpu::float2 &getTerminationProbabilities(void);
+
+    /*! This method returns a const reference to this Path's termination probabilities.
+     *  \return mTerminationProbabilities
+     */
+    const gpcpu::float2 &getTerminationProbabilities(void) const;
+
+
     // XXX this probably belonds somewhere else
     static float computeG(const Normal &n0,
                           const Vector &w,
@@ -289,6 +302,8 @@ class Path
 
     /*! This static method computes a MIS weight for a Path with the power heuristic.
      *  \param scene The Scene containing the Path.
+     *  \param minimumLightSubpathLength The minimum length of a light subpath to consider.
+     *  \param minimumEyeSubpathLength The minimum length of an eye subpath to consider.
      *  \param lLast The last vertex of the light subpath to consider.
      *  \param s The length of the light subpath being considered.
      *  \param lightSubpathLength The length of the full light subpath that was generated
@@ -304,6 +319,8 @@ class Path
      *  \return The power heuristic (with exponent == 2) weight of the Path being considered.
      */
     static float computePowerHeuristicWeight(const Scene &scene,
+                                             const size_t minimumLightSubpathLength,
+                                             const size_t minimumEyeSubpathLength,
                                              const const_iterator &lLast,
                                              const size_t s,
                                              const size_t lightSubpathLength,
@@ -314,9 +331,11 @@ class Path
                                              const float g,
                                              const RussianRoulette &roulette);
 
+
     /*! These methods are too confusing to describe.  Don't call them unless you wrote them.
      */
     static float computePowerHeuristicWeightEyeSubpaths(const Scene &scene,
+                                                        const size_t minimumLightSubpathLength,
                                                         const Path::const_iterator &lLast,
                                                         const size_t s,
                                                         const size_t lightSubpathLength,
@@ -326,6 +345,7 @@ class Path
                                                         const RussianRoulette &roulette);
 
     static float computePowerHeuristicWeightLightSubpaths(const Scene &scene,
+                                                          const size_t minimumEyeSubpathLength,
                                                           const Path::const_iterator &lLast,
                                                           const size_t s,
                                                           const size_t lightSubpathLength,
@@ -333,7 +353,7 @@ class Path
                                                           const size_t t,
                                                           const size_t eyeSubpathLength,
                                                           const RussianRoulette &roulette);
-    
+
 
   //protected:
     // XXX pass prev as a PathVertex reference
@@ -369,6 +389,12 @@ class Path
     // This tuple the length of the eye and
     // light subpaths, respectively.
     gpcpu::uint2 mSubpathLengths;
+
+    // This tuple records the termination probability of each of
+    // this Path's eye and light subpaths, respectively.
+    // These probabilities correspond to the probability that each
+    // subpath was terminated at their final vertices.
+    gpcpu::float2 mTerminationProbabilities;
 
   private:
     /*! Since ScatteringDistributionFunctions are allocated in a weird way,

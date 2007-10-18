@@ -40,9 +40,10 @@ bool SimpleForwardRussianRouletteSampler
   float u2 = x[0][2];
   float u3 = x[0][3];
   size_t coord = 2;
+  gpcpu::float2 &termination = p.getTerminationProbabilities();
   while((p.insertRussianRouletteWithTermination(lastPosition, &scene, true, lastPosition != 0, 
-                                                u0, u1, u2, u3, rr))
-        < mMaxEyeLength - 2)
+                                                u0, u1, u2, u3, rr, termination[0]))
+        < mMaxEyeLength - 1)
   {
     u0 = x[coord][0];
     u1 = x[coord][1];
@@ -52,12 +53,16 @@ bool SimpleForwardRussianRouletteSampler
     ++coord;
   } // end while
 
+  // if we terminated because we hit mMaxEyeLength, set termination to 1
+  if(p.getSubpathLengths()[0] == mMaxEyeLength) termination[0] = 1.0f;
+
   // insert a light vertex at the position just beyond the
   // last eye vertex
   // use the final coordinate to choose the light vertex
   const HyperPoint::value_type &c = x[x.size()-1];
   if(p.insert(p.getSubpathLengths()[0], scene.getEmitters(), true,
               c[0], c[1], c[2], c[3]) == Path::NULL_VERTEX) return false;
+  termination[1] = 1.0f;
 
   return true;
 } // end SimpleForwardRussianRouletteSampler::constructPath()
@@ -95,7 +100,11 @@ void SimpleForwardRussianRouletteSampler
     r.mThroughput = L;
 
     // set pdf, weight, and (s,t)
-    r.mPdf = e.mAccumulatedPdf * l.mAccumulatedPdf;
+    // compute the pdf by muliplying the pdfs of generating each subpath times the
+    // probability of ending the eye path where we did.
+    r.mPdf = e.mAccumulatedPdf * l.mAccumulatedPdf * p.getTerminationProbabilities()[0];
+    //r.mPdf = e.mAccumulatedPdf * l.mAccumulatedPdf;
+
     r.mWeight = 1.0f;
     r.mEyeLength = eyeLength;
     r.mLightLength = lightLength;
