@@ -4,8 +4,8 @@ emission(Spectrum power)
   E = new HemisphericalEmission(radiosity);
 } // end emission()
 
-scattering(void)
-{
-  F = new Lambertian(Spectrum::white());
-} // end scattering()
+//scattering(void)
+//{
+//  F = new Lambertian(Spectrum::white());
+//} // end scattering()
 

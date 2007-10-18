@@ -9,6 +9,7 @@
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../primitives/SurfacePrimitiveList.h"
+#include "../shading/HemisphericalEmission.h"
 
 SimpleForwardRussianRouletteSampler
   ::SimpleForwardRussianRouletteSampler(const boost::shared_ptr<RussianRoulette> &roulette,
@@ -23,6 +24,9 @@ bool SimpleForwardRussianRouletteSampler
                   const HyperPoint &x,
                   Path &p)
 {
+  // clear the Path to begin
+  p.clear();
+
   // shorthand
   const RussianRoulette *rr = mRoulette.get();
 
@@ -56,12 +60,29 @@ bool SimpleForwardRussianRouletteSampler
   // if we terminated because we hit mMaxEyeLength, set termination to 1
   if(p.getSubpathLengths()[0] == mMaxEyeLength) termination[0] = 1.0f;
 
-  // insert a light vertex at the position just beyond the
-  // last eye vertex
-  // use the final coordinate to choose the light vertex
-  const HyperPoint::value_type &c = x[x.size()-1];
-  if(p.insert(p.getSubpathLengths()[0], scene.getEmitters(), true,
-              c[0], c[1], c[2], c[3]) == Path::NULL_VERTEX) return false;
+  // don't insert a light vertex under the following conditions:
+  // the end of the eye path is an emitter, and the last eye vertex was
+  // sampled from a delta function
+  // otherwise, we can't sample such paths correctly
+  // XXX DESIGN this check for an emitter is ugly we should just add some isEmitter
+  //     method to the ScatteringDistributionFunction class
+  const PathVertex &lastEyeVert = p[p.getSubpathLengths()[0]-1];
+
+  if(lastEyeVert.mFromDelta
+     && dynamic_cast<const HemisphericalEmission*>(lastEyeVert.mEmission) != 0)
+  {
+    // do nothing
+  } // end if
+  else
+  {
+    // insert a light vertex at the position just beyond the
+    // last eye vertex
+    // use the final coordinate to choose the light vertex
+    const HyperPoint::value_type &c = x[x.size()-1];
+    if(p.insert(p.getSubpathLengths()[0], scene.getEmitters(), true,
+                c[0], c[1], c[2], c[3]) == Path::NULL_VERTEX) return false;
+  } // end else
+
   termination[1] = 1.0f;
 
   return true;
@@ -77,20 +98,41 @@ void SimpleForwardRussianRouletteSampler
   size_t lightLength = p.getSubpathLengths()[1];
 
   const PathVertex &e = p[eyeLength-1];
-  const PathVertex &l = p[eyeLength];
+  Spectrum L = e.mThroughput;
+  float pdf = e.mAccumulatedPdf;
 
-  // don't connect specular surfaces to anything
-  if(e.mScattering->isSpecular() || l.mScattering->isSpecular()) return;
+  bool addResult;
+  if(lightLength == 0)
+  {
+    // evaluate emission at the end of the eye path
+    L *= e.mEmission->evaluate(e.mToPrev, e.mDg);
 
-  Spectrum L = e.mThroughput * l.mThroughput;
+    // add a result to the list if it isn't black
+    addResult = !L.isBlack();
+  } // end if
+  else
+  {
+    const PathVertex &l = p[eyeLength];
 
-  // XXX PERF: make compute throughput take the connection vector and geometric term
-  L *= p.computeThroughputAssumeVisibility(eyeLength, e,
-                                           lightLength, l);
+    // don't connect specular surfaces to anything
+    if(e.mScattering->isSpecular() || l.mScattering->isSpecular()) return;
 
-  // compute the weight before casting the ray
-  if(!L.isBlack()
-     && !scene.intersect(Ray(e.mDg.getPoint(), l.mDg.getPoint())))
+    // modulate by the light subpath's throughput
+    L *= l.mThroughput;
+
+    // modulate pdf by the light subpath's pdf
+    pdf *= l.mAccumulatedPdf;
+
+    // compute the throughput of the connection
+    // XXX PERF: make compute throughput take the connection vector and geometric term
+    L *= p.computeThroughputAssumeVisibility(eyeLength, e,
+                                             lightLength, l);
+
+    // add a result if the throughput isn't black and it is not shadowed
+    addResult = !L.isBlack() && !scene.intersect(Ray(e.mDg.getPoint(), l.mDg.getPoint()));
+  } // end else
+
+  if(addResult)
   {
     // add a new result
     results.resize(results.size() + 1);
@@ -102,8 +144,7 @@ void SimpleForwardRussianRouletteSampler
     // set pdf, weight, and (s,t)
     // compute the pdf by muliplying the pdfs of generating each subpath times the
     // probability of ending the eye path where we did.
-    r.mPdf = e.mAccumulatedPdf * l.mAccumulatedPdf * p.getTerminationProbabilities()[0];
-    //r.mPdf = e.mAccumulatedPdf * l.mAccumulatedPdf;
+    r.mPdf = pdf * p.getTerminationProbabilities()[0];
 
     r.mWeight = 1.0f;
     r.mEyeLength = eyeLength;
