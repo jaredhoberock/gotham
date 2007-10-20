@@ -60,13 +60,23 @@ bool SimpleBidirectionalRussianRouletteSampler
       } // end else
     } // end if
 
+    // if we don't find a vertex when we said we would look,
+    // we MUST return a failure; otherwise, we will bias results
+    // towards shorter paths
+    if(justAdded[subpath] == Path::INSERT_FAILED) return false;
+
     ++i;
     subpath = !subpath;
   } // end while
 
-  // if we just terminated due to running out of room,
-  // set that subpath's termination probability to 1
-  if(p.getSubpathLengths().sum() == mMaxPathLength) termination[!subpath] = 1.0f;
+  // if we had to terminate due to running out of room,
+  // set the subpath's termination probabilities to 1
+  if(p.getSubpathLengths().sum() == mMaxPathLength)
+  {
+    // only do this if we were planning on continuing the subpath
+    if(justAdded[0] <= Path::INSERT_SUCCESS) termination[0] = 1.0f;
+    if(justAdded[1] <= Path::INSERT_SUCCESS) termination[1] = 1.0f;
+  } // end if
 
   // shuffle the light path so its last light vertex
   // immediately follows the last eye vertex
