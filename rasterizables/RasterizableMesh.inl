@@ -33,9 +33,9 @@ template<typename MeshParentType>
   glEnable(GL_CULL_FACE);
   glEnable(GL_NORMALIZE);
 
-  const Mesh::TriangleList &triangles = getTriangles();
-  const Mesh::PointList &points = getPoints();
-  const Mesh::NormalList &normals = getNormals();
+  const Mesh::TriangleList &triangles = Parent0::getTriangles();
+  const Mesh::PointList &points = Parent0::getPoints();
+  const Mesh::NormalList &normals = Parent0::getNormals();
   glBegin(GL_TRIANGLES);
   for(Mesh::TriangleList::const_iterator t = triangles.begin();
       t != triangles.end();
