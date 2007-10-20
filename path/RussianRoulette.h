@@ -7,6 +7,9 @@
 #ifndef RUSSIAN_ROULETTE_H
 #define RUSSIAN_ROULETTE_H
 
+// for size_t
+#include <cstdlib>
+
 class Spectrum;
 class DifferentialGeometry;
 class Vector;
@@ -36,6 +39,12 @@ class AlwaysRoulette
   : public RussianRoulette
 {
   public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef RussianRoulette Parent;
+
+    using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -48,6 +57,11 @@ class ConstantRoulette
   : public RussianRoulette
 {
   public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef RussianRoulette Parent;
+
     ConstantRoulette(const float continueProbability = 0.3f);
 
     virtual float operator()(const unsigned int i,
@@ -69,6 +83,12 @@ class LuminanceRoulette
   : public RussianRoulette
 {
   public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef RussianRoulette Parent;
+
+    using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -81,6 +101,12 @@ class MaxOverSpectrumRoulette
   : public RussianRoulette
 {
   public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef RussianRoulette Parent;
+
+    using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -93,6 +119,12 @@ class OnlyAfterDeltaRoulette
   : public RussianRoulette
 {
   public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef RussianRoulette Parent;
+
+    using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -112,6 +144,7 @@ class ConstantAndAlwaysAfterDeltaRoulette
 
     ConstantAndAlwaysAfterDeltaRoulette(const float continueProbability = 0.3f);
 
+    using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -131,6 +164,7 @@ class KelemenRoulette
 
     KelemenRoulette(const float continueProbability = 0.3f);
 
+    using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -156,6 +190,8 @@ class VeachRoulette
      *  \param minimalSubpathLength Sets mMinimalSubpathLength.
      */
     VeachRoulette(const size_t minimalSubpathLength = 3);
+
+    using Parent::operator();
 
     /*! This method returns 1.0f if i is less than mMinimalSubpathLength, or fromDelta is true;
      *  otherwise, it returns the same as MaxOverSpectrumRoulette::operator()().
