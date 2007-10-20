@@ -10,6 +10,7 @@
 using namespace boost::python;
 
 // wrapper for Gotham::material()
+// see http://www.boost.org/libs/python/doc/v2/faq.html#ownership
 void Gotham_material(Gotham &g, std::auto_ptr<Material> m)
 {
   g.material(m.get());
