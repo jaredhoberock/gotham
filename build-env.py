@@ -6,7 +6,10 @@ def getTools():
   if os.name == 'nt':
     result = ['default', 'msvc']
   elif os.name == 'posix':
-    result = ['default', 'intelc']
+    #result = ['default', 'intelc']
+    # XXX BUG after upgrading Ubuntu to Gutsy
+    #         Gotham::init() segfaults when compiled with icc
+    result = ['default']
   return result
 
 def getReleaseCPPFLAGS():
