@@ -24,7 +24,9 @@ template<typename ParentFilmType>
   // resize the Texture if it exists
   if(mTexture.getIdentifier() != 0)
   {
-    mTexture.texImage2D(GL_FLOAT_RGB16_NV, getWidth(), getHeight(), 0, GL_RGB, GL_UNSIGNED_INT, (void*)0);
+    mTexture.texImage2D(GL_FLOAT_RGB16_NV,
+                        Parent::getWidth(), Parent::getHeight(),
+                        0, GL_RGB, GL_UNSIGNED_INT, (void*)0);
   } // end if
 } // end GpuFilm::resize()
 
@@ -36,7 +38,9 @@ template<typename ParentFilmType>
 
   mFramebuffer.create();
   mTexture.create();
-  mTexture.texImage2D(GL_FLOAT_RGB16_NV, getWidth(), getHeight(), 0, GL_RGB, GL_UNSIGNED_INT, (void*)0);
+  mTexture.texImage2D(GL_FLOAT_RGB16_NV,
+                      Parent::getWidth(), Parent::getHeight(),
+                      0, GL_RGB, GL_UNSIGNED_INT, (void*)0);
 } // end GpuFilm
 
 template<typename ParentFilmType>

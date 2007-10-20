@@ -31,7 +31,7 @@ template<typename ParentFilmType>
       gl_FrontColor = gl_Color;\n\
       gl_FrontColor.a = 1.0;\n\
       gl_Position = vec4(gl_Vertex.xy, 0.0, 1.0);\n\
-      \/\/ output the sample position's pixel coordinates on texcoord 0\n\
+      // output the sample position's pixel coordinates on texcoord 0\n\
       gl_TexCoord[0].xy = vec2(imageDim) * gl_Vertex.xy;\n\
     }";
   mDepositVertexShader.create(GL_VERTEX_SHADER, source.c_str());
@@ -46,45 +46,45 @@ template<typename ParentFilmType>
     {\n\
       gl_FrontColor = gl_FrontColorIn[0];\n\
       gl_Position.zw = vec2(0.0,1.0);\n\
-      \/\/ output the sample position on texcoord 0\n\
+      // output the sample position on texcoord 0\n\
       gl_TexCoord[0].xy = vec2(imageDim) * gl_PositionIn[0].xy;\n\
-      \/\/ transform sample in [0,1)^2 to [0,width) x [0,height)\n\
+      // transform sample in [0,1)^2 to [0,width) x [0,height)\n\
       vec2 sample = gl_PositionIn[0].xy;\n\
       sample *= vec2(imageDim);\n\
-      \/\/ output the quad surrounding this sample:\n\
-      \/\/ lower left:\n\
+      // output the quad surrounding this sample:\n\
+      // lower left:\n\
       gl_Position.xy = sample + vec2(-filterWidth, -filterWidth);\n\
       gl_Position.xy = vec2(floor(gl_Position.x), floor(gl_Position.y));\n\
-      \/\/ transform back to [0,1)^2\n\
+      // transform back to [0,1)^2\n\
       gl_Position.xy *= invImageDim;\n\
-      \/\/ transform to [-1,-1)^2\n\
+      // transform to [-1,-1)^2\n\
       gl_Position.xy *= 2.0;\n\
       gl_Position.xy -= vec2(1.0,1.0);\n\
       EmitVertex();\n\
-      \/\/ lower right:\n\
+      // lower right:\n\
       gl_Position.xy = sample + vec2(filterWidth, -filterWidth);\n\
       gl_Position.xy = vec2(ceil(gl_Position.x), floor(gl_Position.y));\n\
-      \/\/ transform back to [0,1)^2\n\
+      // transform back to [0,1)^2\n\
       gl_Position.xy *= invImageDim;\n\
-      \/\/ transform to [-1,-1)^2\n\
+      // transform to [-1,-1)^2\n\
       gl_Position.xy *= 2.0;\n\
       gl_Position.xy -= vec2(1.0,1.0);\n\
       EmitVertex();\n\
-      \/\/ upper left:\n\
+      // upper left:\n\
       gl_Position.xy = sample + vec2(-filterWidth, filterWidth);\n\
       gl_Position.xy = vec2(floor(gl_Position.x), ceil(gl_Position.y));\n\
-      \/\/ transform back to [0,1)^2\n\
+      // transform back to [0,1)^2\n\
       gl_Position.xy *= invImageDim;\n\
-      \/\/ transform to [-1,-1)^2\n\
+      // transform to [-1,-1)^2\n\
       gl_Position.xy *= 2.0;\n\
       gl_Position.xy -= vec2(1.0,1.0);\n\
       EmitVertex();\n\
-      \/\/ upper right:\n\
+      // upper right:\n\
       gl_Position.xy = sample + vec2(filterWidth, filterWidth);\n\
       gl_Position.xy = ceil(gl_Position.xy);\n\
-      \/\/ transform back to [0,1)^2\n\
+      // transform back to [0,1)^2\n\
       gl_Position.xy *= invImageDim;\n\
-      \/\/ transform to [-1,-1)^2\n\
+      // transform to [-1,-1)^2\n\
       gl_Position.xy *= 2.0;\n\
       gl_Position.xy -= vec2(1.0,1.0);\n\
       EmitVertex();\n\
@@ -100,20 +100,20 @@ template<typename ParentFilmType>
     float filter(const float x)\n\
     {\n\
       return exp(-a * x*x) - exp(-a * filterWidth * filterWidth);\n\
-    } \/\/ end filter()\n\
+    } // end filter()\n\
     void main(void)\n\
     {\n\
-      \/\/ get distance in pixels from sample location\n\
+      // get distance in pixels from sample location\n\
       vec2 x = gl_TexCoord[0].xy - gl_FragCoord.xy;\n\
-      \/\/ evaluate filter\n\
+      // evaluate filter\n\
       gl_FragColor = gl_Color;\n\
       gl_FragColor *= filter(x.x) * filter(x.y);\n\
-      \/\/ weight the pixel by 1 over the number of pixels affected by the sample times\n\
-      \/\/ the integral of the filter\n\
+      // weight the pixel by 1 over the number of pixels affected by the sample times\n\
+      // the integral of the filter\n\
       gl_FragColor /= (4.0 * filterWidth * filterWidth);\n\
       gl_FragColor /= area;\n\
       gl_FragColor.a = 1.0;\n\
-      \/\/ clamp to zero\/\
+      // clamp to zero\n\
       gl_FragColor.rgb = clamp(gl_FragColor.rgb, vec3(0,0,0), gl_FragColor.rgb);\n\
     }";
   mDepositFragmentShader.create(GL_FRAGMENT_SHADER, source.c_str());
@@ -177,16 +177,18 @@ template<typename ParentFilmType>
   glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
 
   // set up the viewport
-  glViewport(0,0,mTexture.getWidth(),mTexture.getHeight());
+  glViewport(0,0,
+             Parent::mTexture.getWidth(),
+             Parent::mTexture.getHeight());
 
   // bind the framebuffer
-  mFramebuffer.bind();
+  Parent::mFramebuffer.bind();
   printGLError(__FILE__, __LINE__);
 
   // XXX PERF attach this once in the init or something
-  mFramebuffer.attachTexture(mTexture.getTarget(),
-                             GL_COLOR_ATTACHMENT0_EXT,
-                             mTexture);
+  Parent::mFramebuffer.attachTexture(Parent::mTexture.getTarget(),
+                                     GL_COLOR_ATTACHMENT0_EXT,
+                                     Parent::mTexture);
 
   glEnable(GL_BLEND);
   glDisable(GL_LIGHTING);
@@ -196,18 +198,18 @@ template<typename ParentFilmType>
   checkFramebufferStatus(__FILE__, __LINE__);
 
   mDepositProgram.bind();
-  mDepositProgram.setUniform2i("imageDim", getWidth(), getHeight());
-  mDepositProgram.setUniform2f("invImageDim", 1.0f / getWidth(), 1.0f / getHeight());
+  mDepositProgram.setUniform2i("imageDim", Parent::getWidth(), Parent::getHeight());
+  mDepositProgram.setUniform2f("invImageDim", 1.0f / Parent::getWidth(), 1.0f / Parent::getHeight());
 
   // XXX PERF replace this with a glDrawElements call
   glBegin(GL_POINTS);
-  boost::mutex::scoped_lock lock(mMutex);
+  boost::mutex::scoped_lock lock(Parent::mMutex);
   for(size_t i = 0;
-      i != mDepositBuffer.size();
+      i != Parent::mDepositBuffer.size();
       ++i)
   {
-    glColor3fv(mDepositBuffer[i].second);
-    glVertex2fv(mDepositBuffer[i].first);
+    glColor3fv(Parent::mDepositBuffer[i].second);
+    glVertex2fv(Parent::mDepositBuffer[i].first);
   } // end for i
   lock.unlock();
   glEnd();
@@ -215,8 +217,8 @@ template<typename ParentFilmType>
   mDepositProgram.unbind();
 
   // XXX PERF no need to attach/detach each time
-  mFramebuffer.detach(GL_COLOR_ATTACHMENT0_EXT);
-  mFramebuffer.unbind();
+  Parent::mFramebuffer.detach(GL_COLOR_ATTACHMENT0_EXT);
+  Parent::mFramebuffer.unbind();
 
   // restore matrix state
   glPopMatrix();
@@ -227,7 +229,7 @@ template<typename ParentFilmType>
 
   // clear pending deposits
   lock.lock();
-  mDepositBuffer.clear();
+  Parent::mDepositBuffer.clear();
   lock.unlock();
 } // end GpuFilterFilm::renderPendingDeposits()
 

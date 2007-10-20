@@ -47,6 +47,7 @@ template<typename ParentFilmType>
      *  \param py The y-coordinate of the pixel in the unit square.
      *  \param s The Spectrum to deposit.
      */
+    using Parent::deposit;
     inline virtual void deposit(const float px, const float py,
                                 const Spectrum &s);
 
