@@ -121,7 +121,9 @@ class Path
      */
     typedef boost::array<PathVertex, PATH_LENGTH> Parent;
 
-    static const unsigned int NULL_VERTEX = UINT_MAX;
+    static const unsigned int ROULETTE_TERMINATED = UINT_MAX;
+    static const unsigned int INSERT_FAILED = ROULETTE_TERMINATED - 1;
+    static const unsigned int INSERT_SUCCESS = INSERT_FAILED - 1;
 
     /*! Null constructor does nothing.
      */
@@ -144,7 +146,7 @@ class Path
      *  \param u3 A real number in [0,1).
      *  \note This method assumes that the new PathVertex begins a new
      *        eye or light path, depending on the value of emission.
-     *  \return i if a new PathVertex could be inserted; NULL_VERTEX, otherwise.
+     *  \return i if a new PathVertex could be inserted; INSERT_FAILED, otherwise.
      */
     unsigned int insert(const unsigned int i,
                         const SurfacePrimitiveList *surfaces,
@@ -165,7 +167,7 @@ class Path
      *  \param u2 A real number in [0,1).
      *  \note This method assumes that the new PathVertex begins a new
      *        eye or light path, depending on the value of emission.
-     *  \return i if a new PathVertex could be inserted; NULL_VERTEX, otherwise.
+     *  \return i if a new PathVertex could be inserted; INSERT_FAILED, otherwise.
      */
     unsigned int insert(const unsigned int i,
                         const SurfacePrimitive *prim,
@@ -187,7 +189,7 @@ class Path
      *  \param u1 A second real number in [0,1).
      *  \param u2 A third real number in [0,1).
      *  \return The index of the newly inserted PathVertex if an intersection
-     *          is found; NULL_VERTEX, otherwise.
+     *          is found; INSERT_FAILED, otherwise.
      */
     unsigned int insert(const unsigned int previous,
                         const Scene *scene,
@@ -213,7 +215,8 @@ class Path
      *  \param roulette A Russian roulette function for computing whether or not
      *                  to extend the Path.
      *  \return The index of the newly inserted PathVertex if an intersection
-     *          is found; NULL_VERTEX, otherwise.
+     *          is found; ROULETTE_TERMINATED, if roulette kills the insertion, or
+     *          INSERT_FAILED if no new PathVertex could be found.
      */
     unsigned int insertRussianRoulette(const unsigned int previous,
                                        const Scene *scene,
@@ -242,7 +245,8 @@ class Path
      *  \param termination The probability of terminating this Path due to Russian roulette
      *                     is returned here.
      *  \return The index of the newly inserted PathVertex if an intersection
-     *          is found; NULL_VERTEX, otherwise.
+     *          is found; ROULETTE_TERMINATED, if roulette kills the insertion, or
+     *          INSERT_FAILED if no new PathVertex could be found.
      */
     unsigned int insertRussianRouletteWithTermination(const unsigned int previous,
                                                       const Scene *scene,

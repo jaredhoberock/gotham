@@ -70,7 +70,7 @@ void ShirleySampler
         while(s(u0,u1))
         {
           // XXX BUG we need access to random numbers
-          if(temp.insert(0, luminaire->get(), true, u0, u1, 0.5f) != Path::NULL_VERTEX)
+          if(temp.insert(0, luminaire->get(), true, u0, u1, 0.5f) != Path::INSERT_FAILED)
           {
             PathVertex &light = temp[0];
 

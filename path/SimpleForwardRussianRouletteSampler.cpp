@@ -34,7 +34,7 @@ bool SimpleForwardRussianRouletteSampler
   // reserve the 0th coordinate to choose
   // the film plane
   // XXX remove the need for this
-  if(p.insert(0, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]) == Path::NULL_VERTEX) return false;
+  if(p.insert(0, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   unsigned int lastPosition = 0;
 
@@ -45,17 +45,23 @@ bool SimpleForwardRussianRouletteSampler
   float u3 = x[0][3];
   size_t coord = 2;
   gpcpu::float2 &termination = p.getTerminationProbabilities();
-  while((p.insertRussianRouletteWithTermination(lastPosition, &scene, true, lastPosition != 0, 
-                                                u0, u1, u2, u3, rr, termination[0]))
-        < mMaxEyeLength - 1)
+  do
   {
+    lastPosition =
+      p.insertRussianRouletteWithTermination(lastPosition, &scene, true, lastPosition != 0, 
+                                             u0, u1, u2, u3, rr, termination[0]);
     u0 = x[coord][0];
     u1 = x[coord][1];
     u2 = x[coord][2];
     u3 = x[coord][3];
-    ++lastPosition;
     ++coord;
-  } // end while
+  } // end do
+  while(lastPosition < mMaxEyeLength - 1);
+
+  // if we don't find a vertex when we said we would look,
+  // we MUST return a failure; otherwise, we will bias results
+  // towards shorter paths
+  if(lastPosition == Path::INSERT_FAILED) return false;
 
   // if we terminated because we hit mMaxEyeLength, set termination to 1
   if(p.getSubpathLengths()[0] == mMaxEyeLength) termination[0] = 1.0f;
@@ -80,7 +86,7 @@ bool SimpleForwardRussianRouletteSampler
     // use the final coordinate to choose the light vertex
     const HyperPoint::value_type &c = x[x.size()-1];
     if(p.insert(p.getSubpathLengths()[0], scene.getEmitters(), true,
-                c[0], c[1], c[2], c[3]) == Path::NULL_VERTEX) return false;
+                c[0], c[1], c[2], c[3]) == Path::INSERT_FAILED) return false;
   } // end else
 
   termination[1] = 1.0f;

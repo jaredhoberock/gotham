@@ -28,11 +28,11 @@ bool SimpleBidirectionalRussianRouletteSampler
 
   // insert an eye vertex
   if(p.insert(0, scene.getSensors(), false,
-              x[2][0], x[2][1], x[2][2], x[2][3]) == Path::NULL_VERTEX) return false;
+              x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // insert a light vertex
   if(p.insert(p.size()-1, scene.getEmitters(), true,
-              x[1][0], x[1][1], x[1][2], x[1][3]) == Path::NULL_VERTEX) return false;
+              x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   size_t i = 2;
   size_t justAdded[2] = {0, p.size()-1};
@@ -41,7 +41,7 @@ bool SimpleBidirectionalRussianRouletteSampler
   while(p.getSubpathLengths().sum() < mMaxPathLength
         && i < x.size())
   {
-    if(justAdded[subpath] != Path::NULL_VERTEX)
+    if(justAdded[subpath] <= Path::INSERT_SUCCESS)
     {
       if(i == 2)
       {

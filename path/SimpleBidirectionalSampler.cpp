@@ -191,7 +191,7 @@ bool SimpleBidirectionalSampler
     } // end else
 
     // stop?
-    if(justAdded == Path::NULL_VERTEX)
+    if(justAdded == Path::INSERT_FAILED)
     {
       return false;
     } // end if
@@ -233,7 +233,7 @@ bool SimpleBidirectionalSampler
     } // end else
 
     // stop?
-    if(justAdded == Path::NULL_VERTEX)
+    if(justAdded == Path::INSERT_FAILED)
     {
       return false;
     } // end if

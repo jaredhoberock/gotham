@@ -97,7 +97,7 @@ unsigned int Path
     return i;
   } // end if
 
-  return NULL_VERTEX;
+  return INSERT_FAILED;
 } // end Path::insert()
 
 unsigned int Path
@@ -135,7 +135,7 @@ unsigned int Path
       f = prev.mEmission->sample(prev.mDg, u0, u1, u2, w, pdf, delta);
   } // end else
 
-  unsigned int result = NULL_VERTEX;
+  unsigned int result = INSERT_FAILED;
   if(!f.isBlack()) result = insert(previous, scene, after, w, f, pdf, delta, component);
 
   return result;
@@ -151,7 +151,7 @@ unsigned int Path
            const bool delta,
            const ScatteringDistributionFunction::ComponentIndex component)
 {
-  unsigned int result = NULL_VERTEX;
+  unsigned int result = INSERT_FAILED;
 
   // XXX i kind of think this should be passed as a reference
   const PathVertex &prev = (*this)[previous];
@@ -395,7 +395,7 @@ unsigned int Path
   unsigned int newIndex = getSubpathLengths()[static_cast<unsigned int>(!after)];
   float rr = (*roulette)(newIndex, f, prev.mDg, w, pdf, delta);
 
-  unsigned int result = NULL_VERTEX;
+  unsigned int result = ROULETTE_TERMINATED;
   if(u3 < rr)
   {
     result = insert(previous, scene, after, w, f, pdf * rr, delta, component);
@@ -447,19 +447,10 @@ unsigned int Path
   unsigned int newIndex = getSubpathLengths()[static_cast<unsigned int>(!after)];
   float rr = (*roulette)(newIndex, f, prev.mDg, w, pdf, delta);
 
-  unsigned int result = NULL_VERTEX;
+  unsigned int result = ROULETTE_TERMINATED;
   if(u3 < rr)
   {
     result = insert(previous, scene, after, w, f, pdf * rr, delta, component);
-    if(result == NULL_VERTEX)
-    {
-      // if we find no intersection, we must reject this sample
-      // entirely, otherwise we will overcount shorter length
-      // paths, biasing the result
-      // XXX have some return value indicating this result
-      //     so we can be explicit about it
-      (*this)[previous].mThroughput = Spectrum::black();
-    } // end if
   } // end if
 
   termination = 1.0f - rr;

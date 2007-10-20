@@ -42,7 +42,7 @@ template<typename RNG>
         u2 = p2;
       } // end if
      
-      if(insert(i, scene, true, scatter, u0, u1, u2) == NULL_VERTEX) return false;
+      if(insert(i, scene, true, scatter, u0, u1, u2) == INSERT_FAILED) return false;
     } // end for i
   } // end if
 
@@ -58,7 +58,7 @@ template<typename RNG>
 
       if(insert(eyeSubpathLength + lightSubpathLength - i - 1,
                 scene, false, scatter,
-                rng(), rng(), rng()) == NULL_VERTEX) return false;
+                rng(), rng(), rng()) == INSERT_FAILED) return false;
     } // end for i
   } // end if
 

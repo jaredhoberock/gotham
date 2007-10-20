@@ -106,7 +106,7 @@ bool KajiyaSampler
   // XXX remove the need for this
   unsigned int lastPosition = p.insert(0, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]);
 
-  if(lastPosition == Path::NULL_VERTEX) return false;
+  if(lastPosition == Path::INSERT_FAILED) return false;
 
   // insert vertices until we miss one or we run out of slots
   float u0 = x[0][0];
@@ -131,6 +131,6 @@ bool KajiyaSampler
   lastPosition = p.insert(p.getSubpathLengths()[0], scene.getEmitters(), true,
                           c[0], c[1], c[2], c[3]);
 
-  return lastPosition != Path::NULL_VERTEX;
+  return lastPosition != Path::INSERT_FAILED;
 } // end KajiyaSampler::constructPath()
 

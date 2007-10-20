@@ -30,11 +30,11 @@ bool KelemenSampler
 
   // insert an eye vertex
   if(p.insert(0, scene.getSensors(), false,
-              x[2][0], x[2][1], x[2][2], x[2][3]) == Path::NULL_VERTEX) return false;
+              x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // insert a light vertex
   if(p.insert(p.size()-1, scene.getEmitters(), true,
-              x[1][0], x[1][1], x[1][2], x[1][3]) == Path::NULL_VERTEX) return false;
+              x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   size_t i = 2;
   size_t justAdded[2] = {0, p.size()-1};
@@ -42,7 +42,7 @@ bool KelemenSampler
   while(p.getSubpathLengths().sum() < mMaxPathLength
         && i < x.size())
   {
-    if(justAdded[subpath] != Path::NULL_VERTEX)
+    if(justAdded[subpath] <= Path::INSERT_SUCCESS)
     {
       if(i == 2)
       {
@@ -78,13 +78,13 @@ bool KelemenSampler
 
   // insert an eye vertex
   if(p.insert(0, scene.getSensors(), false,
-              x[2][0], x[2][1], x[2][2], x[2][3]) == Path::NULL_VERTEX) return false;
+              x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // treat every other coordinate of x as an eye coordinate
   size_t i = 2;
   size_t justAdded = 0;
   while(p.getSubpathLengths().sum() <= mMaxPathLength
-        && justAdded != Path::NULL_VERTEX
+        && justAdded <= Path::INSERT_SUCCESS
         && i < x.size())
   {
     if(i == 2)
@@ -114,13 +114,13 @@ bool KelemenSampler
 
   // insert a light vertex
   if(p.insert(p.size()-1, scene.getEmitters(), true,
-              x[1][0], x[1][1], x[1][2], x[1][3]) == Path::NULL_VERTEX) return false;
+              x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   // treat every other coordinate of x as a light coordinate
   size_t i = 2;
   size_t justAdded = p.size()-1;
   while(p.getSubpathLengths().sum() <= mMaxPathLength
-        && justAdded != Path::NULL_VERTEX
+        && justAdded <= Path::INSERT_SUCCESS
         && i < x.size())
   {
     if(i == 3)
@@ -291,3 +291,4 @@ void KelemenSampler
     } // end if
   } // end for eyeLength
 } // end KelemenSampler::evaluate()
+
