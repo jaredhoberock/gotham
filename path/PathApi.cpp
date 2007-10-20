@@ -123,7 +123,7 @@ PathSampler *PathApi
   } // end else if
   else if(samplerName == "simplebidirectionalrussianroulette")
   {
-    result = new SimpleBidirectionalRussianRouletteSampler(maxLength);
+    result = new SimpleBidirectionalRussianRouletteSampler(rr, maxLength);
   } // end else if
   else if(samplerName == "simpleforwardrussianroulette")
   {

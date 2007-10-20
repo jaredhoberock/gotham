@@ -11,8 +11,9 @@
 #include "../primitives/SurfacePrimitiveList.h"
 
 SimpleBidirectionalRussianRouletteSampler
-  ::SimpleBidirectionalRussianRouletteSampler(const size_t maxLength)
-    :mRoulette(0.5f),mMaxPathLength(maxLength)
+  ::SimpleBidirectionalRussianRouletteSampler(const boost::shared_ptr<RussianRoulette> &roulette,
+                                              const size_t maxLength)
+    :mRoulette(roulette),mMaxPathLength(maxLength)
 {
   ;
 } // end SimpleBidirectionalRussianRouletteSampler::init()
@@ -23,7 +24,7 @@ bool SimpleBidirectionalRussianRouletteSampler
                   Path &p)
 {
   // shorthand
-  const RussianRoulette *roulette = &mRoulette;
+  const RussianRoulette *roulette = mRoulette.get();
 
   // insert an eye vertex
   if(p.insert(0, scene.getSensors(), false,
@@ -193,7 +194,7 @@ void SimpleBidirectionalRussianRouletteSampler
              std::vector<Result> &results) const
 {
   // shorthand
-  const RussianRoulette *roulette = &mRoulette;
+  const RussianRoulette *roulette = mRoulette.get();
 
   size_t totalLength = p.getSubpathLengths().sum();
   size_t eyeLength = p.getSubpathLengths()[0];

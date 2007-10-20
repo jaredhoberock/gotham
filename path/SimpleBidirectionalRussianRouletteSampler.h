@@ -22,10 +22,12 @@ class SimpleBidirectionalRussianRouletteSampler
     typedef PathSampler Parent;
 
     /*! Constructor accepts a maximum path length.
+     *  \param roulette A shared pointer to a RussianRoulette function.
      *  \param maxLength Sets the maximum length for paths
      *                   created by this SimpleBidirectionalSampler.
      */
-    SimpleBidirectionalRussianRouletteSampler(const size_t maxLength);
+    SimpleBidirectionalRussianRouletteSampler(const boost::shared_ptr<RussianRoulette> &roulette,
+                                              const size_t maxLength);
 
     /*! This method constructs a Path given a
      *  HyperPoint uniquely specifying a Path in a
@@ -56,7 +58,7 @@ class SimpleBidirectionalRussianRouletteSampler
   protected:
     unsigned int mMaxPathLength;
 
-    ConstantRoulette mRoulette;
+    boost::shared_ptr<RussianRoulette> mRoulette;
 }; // end SimpleBidirectionalRussianRouletteSampler
 
 #endif // SIMPLE_BIDIRECTIONAL_RUSSIAN_ROULETTE_SAMPLER_H
