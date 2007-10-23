@@ -7,7 +7,7 @@
 #include "../path/Path.h"
 #include "../primitives/Scene.h"
 #include "../primitives/SurfacePrimitiveList.h"
-#include "../films/RenderFilm.h"
+#include "../records/RenderFilm.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../geometry/Ray.h"
 #include "../path/KajiyaSampler.h"

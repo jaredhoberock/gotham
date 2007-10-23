@@ -4,7 +4,7 @@
  */
 
 #include "EqualVisitImportance.h"
-#include "../films/RandomAccessFilm.h"
+#include "../records/RandomAccessFilm.h"
 #include "../renderers/MetropolisRenderer.h"
 
 EqualVisitImportance

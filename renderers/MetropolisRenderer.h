@@ -12,7 +12,7 @@
 #include "../importance/ScalarImportance.h"
 #include "../mutators/PathMutator.h"
 #include "../shading/FunctionAllocator.h"
-#include "../films/RenderFilm.h"
+#include "../records/RenderFilm.h"
 
 class MetropolisRenderer
   : public MonteCarloRenderer

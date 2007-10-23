@@ -7,7 +7,6 @@
 #include "../path/KelemenSampler.h"
 #include "../path/KajiyaSampler.h"
 #include <aliastable/AliasTable.h>
-#include "../films/RandomAccessFilm.h"
 #include "../path/Path.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../mutators/KelemenMutator.h"

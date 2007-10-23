@@ -8,7 +8,7 @@
 #define RENDER_VIEWER_H
 
 #include "SceneViewer.h"
-#include "../films/RenderFilm.h"
+#include "../records/RenderFilm.h"
 #include "../renderers/Renderer.h"
 #include <gl++/texture/Texture.h>
 #include <boost/shared_ptr.hpp>

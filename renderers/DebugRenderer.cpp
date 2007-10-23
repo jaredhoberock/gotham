@@ -8,7 +8,7 @@
 #include "../geometry/Vector.h"
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
-#include "../films/RenderFilm.h"
+#include "../records/RenderFilm.h"
 #include "../shading/Material.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../primitives/SurfacePrimitive.h"

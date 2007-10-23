@@ -11,7 +11,7 @@
 #include "MonteCarloRenderer.h"
 #include <boost/shared_ptr.hpp>
 #include "../path/PathSampler.h"
-#include "../films/RandomAccessFilm.h"
+#include "../records/RandomAccessFilm.h"
 
 class PathDebugRenderer
   : public MonteCarloRenderer

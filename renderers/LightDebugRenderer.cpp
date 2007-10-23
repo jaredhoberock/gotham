@@ -9,7 +9,7 @@
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../primitives/SurfacePrimitiveList.h"
-#include "../films/RenderFilm.h"
+#include "../records/RenderFilm.h"
 #include "../shading/Material.h"
 #include "../shading/FunctionAllocator.h"
 #include "../shading/ScatteringDistributionFunction.h"

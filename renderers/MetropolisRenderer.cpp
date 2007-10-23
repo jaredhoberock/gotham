@@ -7,7 +7,6 @@
 #include "../path/KelemenSampler.h"
 #include "../path/KajiyaSampler.h"
 #include <aliastable/AliasTable.h>
-#include "../films/RandomAccessFilm.h"
 #include "../path/Path.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../mutators/KelemenMutator.h"
@@ -158,12 +157,12 @@ void MetropolisRenderer
         deposit = xWeight * r->mWeight * r->mThroughput / r->mPdf;
         mFilm->deposit(pixel[0], pixel[1], deposit);
 
-        //// add to the acceptance image
-        //mAcceptanceImage.pixel(pixel[0], pixel[1]) += (1.0f - a);
+        // add to the acceptance image
+        mAcceptanceImage.deposit(pixel[0], pixel[1], static_cast<Spectrum>(1.0f - a));
       } // end for r
 
       // add to the acceptance image
-      mAcceptanceImage.deposit(x[0][0], x[0][1], static_cast<Spectrum>(1.0f - a));
+      //mAcceptanceImage.deposit(x[0][0], x[0][1], static_cast<Spectrum>(1.0f - a));
     } // end if
 
     if(iy > 0)
@@ -184,12 +183,12 @@ void MetropolisRenderer
         deposit = yWeight * ry->mWeight * ry->mThroughput / ry->mPdf;
         mFilm->deposit(pixel[0], pixel[1], deposit);
 
-        //// add to the acceptance image
-        //mAcceptanceImage.pixel(pixel[0], pixel[1]) += a;
+        // add to the acceptance image
+        mAcceptanceImage.deposit(pixel[0], pixel[1], static_cast<Spectrum>(a));
       } // end for r
 
-      // add to the acceptance image
-      mAcceptanceImage.deposit(y[0][0], y[0][1], static_cast<Spectrum>(a));
+      //// add to the acceptance image
+      //mAcceptanceImage.deposit(y[0][0], y[0][1], static_cast<Spectrum>(a));
     } // end if
 
     // accept?

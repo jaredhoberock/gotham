@@ -7,8 +7,8 @@
 #include <qstring.h>
 #include "../renderers/MetropolisRenderer.h"
 #include "../renderers/EnergyRedistributionRenderer.h"
-#include "../films/GpuFilm.h"
-#include "../films/GpuFilterFilm.h"
+#include "../records/GpuFilm.h"
+#include "../records/GpuFilterFilm.h"
 
 #include <boost/thread/thread.hpp>
 using boost::thread;

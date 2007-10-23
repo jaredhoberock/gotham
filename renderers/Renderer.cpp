@@ -7,7 +7,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "../primitives/Scene.h"
 #include <iostream>
-#include "../films/RenderFilm.h"
+#include "../records/RenderFilm.h"
 
 using namespace boost;
 

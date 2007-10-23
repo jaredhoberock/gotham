@@ -5,6 +5,7 @@
 
 #include "LuminanceOverVisits.h"
 #include "../renderers/MetropolisRenderer.h"
+#include "../path/PathToImage.h"
 
 LuminanceOverVisits
   ::LuminanceOverVisits(const bool doInterpolate)
@@ -50,16 +51,22 @@ float LuminanceOverVisits
     float numPixels = mAcceptance->getWidth() * mAcceptance->getHeight();
     float avg = totalAccepts / numPixels;
 
+    gpcpu::float2 pixel;
+    PathToImage mapToImage;
+    mapToImage(results[0], x, xPath, pixel[0], pixel[1]);
+
     // look up the number of visits this point has received
     float visits;
     if(mDoInterpolate)
     {
       // interpolating visits makes for a much smoother result
-      visits = mAcceptance->bilerp(x[0][0], x[0][1])[0];
+      //visits = mAcceptance->bilerp(x[0][0], x[0][1])[0];
+      visits = mAcceptance->bilerp(pixel[0], pixel[1])[0];
     } // end if
     else
     {
-      visits = mAcceptance->pixel(x[0][0], x[0][1])[0];
+      //visits = mAcceptance->pixel(x[0][0], x[0][1])[0];
+      visits = mAcceptance->pixel(pixel[0], pixel[1])[0];
     } // end else
 
     // we need to return the ratio of the number of times
