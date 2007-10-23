@@ -175,7 +175,7 @@ class KelemenRoulette
 
 /*! \class VeachRoulette
  *  \brief This RussianRoulette class implements the Russian roulette
- *         strategy described by Veach in section 10.3.3 of his thesis.
+ *         strategy described by Veach in section 10.3.3 of His thesis.
  */
 class VeachRoulette
   : public RussianRoulette
@@ -213,6 +213,52 @@ class VeachRoulette
   protected:
     size_t mMinimalSubpathLength;
 }; // end VeachRoulette
+
+/*! \class ModifiedKelemenRoulette
+ *  \brief This RussianRoulette class modifies KelemenRoulette to optionally
+ *         terminate Paths before they are even started.
+ */
+class ModifiedKelemenRoulette
+  : public RussianRoulette
+{
+  public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef RussianRoulette Parent;
+
+    /*! Constructor accepts a constant probability for beginning
+     *  a Path from nothing.
+     */
+    ModifiedKelemenRoulette(const float beginProbability);
+
+    /*! This method returns a probability for begining a new Path
+     *  from scratch.
+     *  \return mBeginProbability
+     */
+    virtual float operator()(void) const;
+
+    /*! This method returns 1.0f if fromDelta is true;
+     *  otherwise, it returns the same as MaxOverSpectrumRoulette::operator()().
+     *  \param i The index of the proposed new PathVertex.
+     *           This parameter is ignored.
+     *  \param f The throughput of the proposed bounce.
+     *  \param dg The DifferentialGeometry of the prior PathVertex.
+     *  \param w The proposed bounce direction from the prior PathVertex.
+     *  \param pdf The value of the solid angle pdf at w.
+     *  \param fromDelta Whether or not w was chosen from a delta distribution.
+     *  \return The probability of accepting the proposed Path extension.
+     */
+    virtual float operator()(const unsigned int i,
+                             const Spectrum &f,
+                             const DifferentialGeometry &dg,
+                             const Vector &w,
+                             const float &pdf,
+                             const bool fromDelta) const;
+
+  protected:
+    float mBeginProbability;
+}; // end ModifiedKelemenRoulette
 
 #endif // RUSSIAN_ROULETTE_H
 

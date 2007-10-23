@@ -164,3 +164,50 @@ float VeachRoulette
   // we convert pdf to projected solid angle pdf before dividing fs
   return std::min(1.0f, fs / psaPdf);
 } // end VeachRoulette::operator()()
+
+ModifiedKelemenRoulette
+  ::ModifiedKelemenRoulette(const float beginProbability)
+    :Parent(),mBeginProbability(beginProbability)
+{
+  ;
+} // end ModifiedKelemenRoulette::ModifiedKelemenRoulette()
+
+float ModifiedKelemenRoulette
+  ::operator()(void) const
+{
+  return mBeginProbability;
+} // end ModifiedKelemenRoulette::operator()()
+
+float ModifiedKelemenRoulette
+  ::operator()(const unsigned int i,
+               const Spectrum &f,
+               const DifferentialGeometry &dg,
+               const Vector &w,
+               const float &pdf,
+               const bool fromDelta) const
+{
+  if(fromDelta) return 1.0f;
+
+  // return MaxOverSpectrumRoulette
+  float fs = f.maxElement();
+  float psaPdf = pdf / dg.getNormal().absDot(w);
+  
+  // the value we clamp to has a very strong effect on variance
+  // for the Simple*RussianRouletteSamplers
+  // For scenes similar to the cornell box, most of the energy is
+  // concentrated in the shorter paths, so always lengthening the
+  // Path (by clamping to 1.0) isn't necessarily a good form of
+  // importance sampling
+  // Perhaps a better function would check how the Path throughput
+  // changes as the Path is lengthened?
+  //
+  // On the other hand, we are most interested in this function as it applies
+  // to finding long paths in difficult sampling conditions.
+  //
+  // For now, use a form of defensive sampling for this roulette function:
+  // 0.5 instead of 1.0
+  // we always want there to be at least a small chance
+  // for roulette to kill a path
+  return std::min(0.5f, fs / psaPdf);
+} // end ModifiedKelemenRoulette::operator()()
+
