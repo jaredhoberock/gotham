@@ -74,6 +74,10 @@ PathSampler *PathApi
   {
     rr.reset(new ConstantAndAlwaysAfterDeltaRoulette(continueProbability));
   } // end else if
+  else if(rrFunction == "kelemen")
+  {
+    rr.reset(new KelemenRoulette(continueProbability));
+  } // end else if
   else if(rrFunction == "luminance")
   {
     rr.reset(new LuminanceRoulette());
@@ -82,13 +86,13 @@ PathSampler *PathApi
   {
     rr.reset(new MaxOverSpectrumRoulette());
   } // else if
+  else if(rrFunction == "modifiedkelemen")
+  {
+    rr.reset(new ModifiedKelemenRoulette(continueProbability));
+  } // end else if
   else if(rrFunction == "onlyafterdelta")
   {
     rr.reset(new OnlyAfterDeltaRoulette());
-  } // end else if
-  else if(rrFunction == "kelemen")
-  {
-    rr.reset(new KelemenRoulette(continueProbability));
   } // end else if
   else if(rrFunction == "veach")
   {
