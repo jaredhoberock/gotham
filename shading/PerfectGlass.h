@@ -63,6 +63,23 @@ class PerfectGlass
                               const bool delta,
                               const ComponentIndex component) const;
 
+    /*! This method computes the value of this PerfectGlass and its pdf.
+     *  \param wo A Vector pointing towards the direction of scattering.
+     *  \param dg The DifferentialGeometry at the scattering Point of interest.
+     *  \param wi A Vector pointing towards the direction of incidence.
+     *  \param delta Ignored.  PerfectGlass is always a delta function.
+     *  \param component Specifies whether reflection or transmission is of interest.
+     *  \param pdf The value of this PefectGlass's pdf is returned here.
+     *  \return The value of this PerfectGlass along (wo,dg,wi).
+     */
+    using Parent::evaluate;
+    virtual Spectrum evaluate(const Vector &wo,
+                              const DifferentialGeometry &dg,
+                              const Vector &wi,
+                              const bool delta,
+                              const ComponentIndex component,
+                              float &pdf) const;
+
   protected:
     Spectrum sampleReflectance(const Vector &wo,
                                const DifferentialGeometry &dg,

@@ -100,6 +100,48 @@ bool CompositeDistributionFunction
   return true;
 } // end CompositeDistributionFunction::isSpecular()
 
+Spectrum CompositeDistributionFunction
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  pdf = 0;
+  Spectrum result(Spectrum::black());
+
+  // sum the non-delta functions into the result & pdf
+  size_t i = 0;
+  float temp;
+  for(const_iterator f = begin();
+      i != mSize;
+      ++i, ++f)
+  {
+    if(!(*f)->isSpecular())
+    {
+      result += (*f)->evaluate(wo,dg,wi, delta, component, temp);
+      pdf += temp;
+    } // end if
+  } // end for f
+
+  // if we know that wi came from a delta function,
+  // then we need to include that component when we compute
+  // our results
+  if(delta)
+  {
+    // evaluate the delta function
+    // bash what the previous stuff did with the pdf
+    result += (*this)[component]->evaluate(wo, dg, wi, delta, component, pdf);
+
+    // pdf should equal 1 now
+  } // end if
+
+  // divide pdf by the number of components
+  pdf /= mSize;
+  return result;
+} // end ComponentIndex::evaluate()
+
 float CompositeDistributionFunction
   ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,

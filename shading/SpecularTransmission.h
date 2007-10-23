@@ -65,6 +65,21 @@ class SpecularTransmission
                             bool &delta,
                             ComponentIndex &index) const;
 
+    /*! This method computes the value of this SpecularTransmission and its pdf.
+     *  \param wo A Vector pointing towards the direction of scattering.
+     *  \param dg The DifferentialGeometry at the scattering Point of interest.
+     *  \param wi A Vector pointing towards the direction of incidence.
+     *  \param delta When this is true, 
+     *  \param component Ignored.  SpecularTransmission has only one component.
+     *  \param pdf The value of this SpecularTransmission's pdf is returned here.
+     *  \return The value of this SpecularTransmission along (wo,dg,wi).
+     */
+    virtual Spectrum evaluate(const Vector &wo,
+                              const DifferentialGeometry &dg,
+                              const Vector &wi,
+                              const bool delta,
+                              const ComponentIndex component,
+                              float &pdf) const;
 
   protected:
     /*! The transmittance.

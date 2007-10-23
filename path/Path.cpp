@@ -631,29 +631,15 @@ float Path
       } // end else if
       else
       {
-        // XXX PERF: we could add a method which evaluates the integrand & pdf at the same time
-        //     which would compute much less redundant work
         // XXX DESIGN: rather than taking a boolean deltaBounce, just keep track of which
         //             component the bounce came from?
-        solidAnglePdf = prevVert->mScattering->evaluatePdf(prevVert->mToNext,
-                                                           prevVert->mDg,
-                                                           prevVert->mToPrev,
-                                                           deltaBounce,
-                                                           bounceComponent);
-
-        // XXX DESIGN: kill this branch by creating an evaluate() method
-        //     similar to the evaluatePdf() we just called.
-        if(!prevVert->mScattering->isSpecular())
-        {
-          f = prevVert->mScattering->evaluate(prevVert->mToNext,
-                                              prevVert->mDg,
-                                              prevVert->mToPrev);
-        } // end if
-        else
-        {
-          // XXX this isn't correct in general
-          f = Spectrum::white();
-        } // end else
+        // vertex was added as a bounce
+        f = prevVert->mScattering->evaluate(prevVert->mToNext,
+                                            prevVert->mDg,
+                                            prevVert->mToPrev,
+                                            deltaBounce,
+                                            bounceComponent,
+                                            solidAnglePdf);
       } // end else
 
       // XXX technically, if we receive a solidAnglePdf of zero, this means
@@ -767,29 +753,15 @@ float Path
       } // end if
       else
       {
-        // XXX PERF: we could add a method which evaluates the integrand & pdf at the same time
-        //     which would compute much less redundant work
         // XXX DESIGN: rather than taking a boolean deltaBounce, just keep track of which
         //             component the bounce came from?
-        solidAnglePdf = prevVert->mScattering->evaluatePdf(prevVert->mToPrev,
-                                                           prevVert->mDg,
-                                                           prevVert->mToNext,
-                                                           deltaBounce,
-                                                           bounceComponent);
-
-        // XXX DESIGN: kill this branch by creating an evaluate() method
-        //     similar to the evaluatePdf() we just called.
-        if(!prevVert->mScattering->isSpecular())
-        {
-          f = prevVert->mScattering->evaluate(prevVert->mToPrev,
-                                              prevVert->mDg,
-                                              prevVert->mToNext);
-        } // end if
-        else
-        {
-          // XXX this isn't correct in general
-          f = Spectrum::white();
-        } // end else
+        // vertex was added as a bounce
+        f = prevVert->mScattering->evaluate(prevVert->mToPrev,
+                                            prevVert->mDg,
+                                            prevVert->mToNext,
+                                            deltaBounce,
+                                            bounceComponent,
+                                            solidAnglePdf);
       } // end else
 
       // XXX technically, if we receive a solidAnglePdf of zero, this means

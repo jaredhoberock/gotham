@@ -78,6 +78,25 @@ class PhongReflection
                             bool &delta,
                             ComponentIndex &component) const;
 
+    /*! This method evaluates the value of this PhongReflection and its pdf given a
+     *  wo, DifferentialGeometry, and wi.
+     *  This method is included to allow bidirectional path tracing's computation of
+     *  MIS weights to work with composite scattering functions.
+     *  \param wo A Vector pointing towards the direction of scattering.
+     *  \param dg The DifferentialGeometry at the scattering Point of interest.
+     *  \param wi A Vector pointing towards the direction of incidence.
+     *  \param delta Ignored.  PhongReflection is not a delta function.
+     *  \param component Ignored.  PhongReflection is a single component.
+     *  \param pdf The value of this PhongReflection's pdf is returned here.
+     *  \return The value of this PhongReflection.
+     */
+    virtual Spectrum evaluate(const Vector &wo,
+                              const DifferentialGeometry &dg,
+                              const Vector &wi,
+                              const bool delta,
+                              const ComponentIndex component,
+                              float &pdf) const;
+
     /*! This method returns the value of
      *  this PhongReflection's pdf given a wo, DifferentialGeometry, and wi.
      *  \param wo A Vector pointing towards the direction of scattering.

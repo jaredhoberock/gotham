@@ -50,6 +50,19 @@ float ScatteringDistributionFunction
 } // end ScatteringDistributionFunction::evaluatePdf()
 
 Spectrum ScatteringDistributionFunction
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  if(isSpecular()) std::cerr << "ScatteringDistributionFunction::evaluate(): Implement me in the delta function subclass!" << std::endl;
+  pdf = evaluatePdf(wo,dg,wi,delta,component);
+  return evaluate(wo,dg,wi);
+} // end ScatteringDistributionFunction::evaluate()
+
+Spectrum ScatteringDistributionFunction
   ::sample(const Vector3 &wo,
            const DifferentialGeometry &dg,
            const float u0,

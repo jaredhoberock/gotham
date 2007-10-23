@@ -128,6 +128,71 @@ float PhongTransmission
 Spectrum PhongTransmission
   ::evaluate(const Vector &wo,
              const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  pdf = 0;
+  Spectrum result(Spectrum::black());
+
+  bool entering = wo.dot(dg.getNormal()) > 0;
+  float ei = mFresnel.mEtai, et = mFresnel.mEtat;
+  if(!entering) std::swap(ei,et);
+
+  // wo & wi must lie in different hemispheres
+  bool exiting = wi.dot(dg.getNormal()) < 0;
+  if(entering != exiting) return Spectrum::black();
+
+  // compute the halfangle
+  Vector m = -(ei * wo + et * wi);
+  m = m.normalize();
+
+  // evaluate the phong distribution
+  // XXX hide the phong distribution evaluation somewhere else
+  float D = (mExponent + 2.0f) * powf(dg.getNormal().absDot(m), mExponent) * INV_TWOPI;
+
+  // compute the transmitted direction
+  float cosi = wo.dot(m);
+
+  // compute refracted ray direction
+  float sini2 = 1.0f - cosi*cosi;
+  float eta = ei / et;
+  float sint2 = eta * eta * sini2;
+
+  float cost = -sqrtf(std::max(0.0f, 1.0f - sint2));
+  if(entering) cost = -cost;
+
+  // compute fresnel term
+  Spectrum F = mFresnel.evaluate(cosi, cost);
+
+  // compute geometry term
+  float G = 1.0f;
+
+  // Walter et al, 2007, equation 17
+  // i believe the et^2 term from the paper is incorrect
+  // rather, it is part of only the bsdf, not also the pdf
+  float J = m.absDot(wi);
+  float d = (ei*wo.dot(m) + et*wi.dot(m));
+  J /= d*d;
+
+  // compute the pdf
+  pdf = J * D;
+
+  // Walter et al, 2007, equation 21
+  result = m.absDot(wo) * (Spectrum::white() - F) * G * D * J;
+  result /= (dg.getNormal().absDot(wo) * dg.getNormal().absDot(wi));
+
+  // for reciprocity
+  result *= (et*et);
+  result /= (ei*ei);
+
+  return result;
+} // end PhongTransmission::evaluate()
+
+Spectrum PhongTransmission
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
              const Vector &wi) const
 {
   Spectrum result(Spectrum::black());

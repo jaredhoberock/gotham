@@ -58,3 +58,25 @@ Spectrum SpecularReflection
   return Spectrum::black();
 } // end SpecularReflection::evaluate()
 
+Spectrum SpecularReflection
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  pdf = 0;
+  Spectrum result(Spectrum::black());
+  if(delta)
+  {
+    pdf = 1.0f;
+    float cosi = dg.getNormal().absDot(wo);
+
+    result = mReflectance * mFresnel->evaluate(cosi);
+    result /= dg.getNormal().absDot(wi);
+  } // end if
+
+  return result;
+} // end SpecularReflection::evaluate()
+

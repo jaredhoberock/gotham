@@ -137,6 +137,40 @@ Spectrum PerfectGlass
   return result / dg.getNormal().absDot(wi);
 } // end PerfectGlass::sample()
 
+Spectrum PerfectGlass
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  Spectrum result(Spectrum::black());
+  pdf = 0;
+  if(component > 1) return result;
+
+  // evaluate both functions
+  Spectrum reflection = evaluateReflectance(wo, dg);
+  Spectrum transmission = evaluateReflectance(wo, dg);
+
+  float pReflection = reflection.luminance();
+  pReflection /= (pReflection + transmission.luminance());
+
+  // which component are we interested in?
+  if(component == 0)
+  {
+    pdf = pReflection;
+    result = reflection;
+  } // end if
+  else
+  {
+    pdf = 1.0f - pReflection;
+    result = transmission;
+  } // end else
+
+  return result;
+} // end PerfectGlass::evaluate()
+
 float PerfectGlass
   ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,

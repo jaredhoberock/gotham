@@ -97,6 +97,13 @@ class CompositeDistributionFunction
                               const bool delta,
                               const ComponentIndex component) const;
 
+    virtual Spectrum evaluate(const Vector &wo,
+                              const DifferentialGeometry &dg,
+                              const Vector &wi,
+                              const bool delta,
+                              const ComponentIndex component,
+                              float &pdf) const;
+
     virtual float evaluatePdf(const Vector &wo,
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;

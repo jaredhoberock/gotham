@@ -121,6 +121,42 @@ Spectrum PhongReflection
   return result;
 } // end PhongReflection::evaluate()
 
+Spectrum PhongReflection
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  // wo & wi must lie in the same hemisphere
+  pdf = 0;
+  if(!areSameHemisphere(wi,dg.getNormal(),wo)) return Spectrum::black();
+
+  // compute the microfacet normal (half-vector)
+  Vector m = (wo + wi).normalize();
+
+  // evaluate the phong distribution
+  // XXX hide the phong distribution evaluation somewhere else
+  float D = (mExponent + 2.0f) * powf(dg.getNormal().absDot(m), mExponent) * INV_TWOPI;
+
+  // Walter et al, 2007, equation 14
+  float J = 0.25f / m.absDot(wi);
+  pdf = D * J;
+
+  // note we can use either wo or wi here, since they are reflections about m
+  float cosi = m.absDot(wo);
+
+  // compute the geometry term
+  float G = 1.0f;
+
+  // Walter et al, 2007, equation 20
+  Spectrum result = mReflectance * mFresnel->evaluate(cosi) * G * D;
+  result /= (4.0f * dg.getNormal().absDot(wo) * dg.getNormal().absDot(wi));
+
+  return result;
+} // end PhongReflection::evaluate()
+
 ScatteringDistributionFunction *PhongReflection
   ::clone(FunctionAllocator &allocator) const
 {
@@ -142,3 +178,4 @@ ScatteringDistributionFunction *PhongReflection
 
   return result;
 } // end PhongReflection::clone()
+

@@ -133,6 +133,31 @@ class ScatteringDistributionFunction
                               const bool delta,
                               const ComponentIndex component) const;
 
+    /*! This method evaluates the value of this ScatteringDistributionFunction and its pdf given a
+     *  wo, DifferentialGeometry, and wi.
+     *  This method is included to allow bidirectional path tracing's computation of
+     *  MIS weights to work with composite scattering functions.
+     *  \param wo A Vector pointing towards the direction of scattering.
+     *  \param dg The DifferentialGeometry at the scattering Point of interest.
+     *  \param wi A Vector pointing towards the direction of incidence.
+     *  \param delta Whether or not (wo,dg,wi) is known to be a delta function (specular bounce).
+     *         If so, this method will include the probability of choosing a specular
+     *         bounce into the returned pdf.
+     *  \param component The index of the component the bounce (wo,dg,wi) is known to be sampled
+     *         from.  Important for specular bounces.
+     *  \param pdf The value of this ScatteringDistributionFunction's pdf is returned here.
+     *  \return The value of this ScatteringDistributionFunction.
+     *  \note The default implementation of this method inefficiently
+     *        (and incorrectly for delta functions) calls evaluatePdf() and then
+     *        the other version of evaluate().
+     */
+    virtual Spectrum evaluate(const Vector &wo,
+                              const DifferentialGeometry &dg,
+                              const Vector &wi,
+                              const bool delta,
+                              const ComponentIndex component,
+                              float &pdf) const;
+
     /*! This method evaluates the solid angle pdf of the
      *  direction of interest.
      *  \param w The direction of interest.

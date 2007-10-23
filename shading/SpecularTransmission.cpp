@@ -70,3 +70,42 @@ Spectrum SpecularTransmission
   return Spectrum::black();
 } // end SpecularTransmission::evaluate()
 
+Spectrum SpecularTransmission
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi,
+             const bool delta,
+             const ComponentIndex component,
+             float &pdf) const
+{
+  pdf = 0;
+  Spectrum result(Spectrum::black());
+  if(delta)
+  {
+    pdf = 1.0;
+
+    // figure out which eta is incident/transmitted
+    float cosi = wo.dot(dg.getNormal());
+    bool entering = cosi > 0;
+    float ei = mFresnel.mEtai, et = mFresnel.mEtat;
+    if(!entering) std::swap(ei,et);
+
+    // compute refracted ray direction
+    float sini2 = 1.0f - cosi*cosi;
+    float eta = ei / et;
+    float sint2 = eta * eta * sini2;
+
+    // assume no total internal refraction
+    float cost = -sqrtf(std::max(0.0f, 1.0f - sint2));
+    if(entering) cost = -cost;
+
+    // compute fresnel term
+    Spectrum f = mFresnel.evaluate(cosi, cost);
+    result = (et*et)/(ei*ei) * (Spectrum::white() - f) * mTransmittance;
+
+    result /= dg.getNormal().absDot(wi);
+  } // end if
+
+  return result;
+} // end SpecularTransmission::evaluate()
+
