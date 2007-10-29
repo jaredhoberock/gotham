@@ -36,13 +36,14 @@ float EqualVisitImportance
 {
   if(results.empty()) return 0;
 
-  // XXX don't actually know if this business is correct yet
-  float result = mConstantImportance(x,xPath,results);
-  // divide by constant's normalization constant
-  // rationale: dividing some integrand by a unitless
-  // ratio makes no sense
-  // instead, make the function unitless
-  result *= mConstantImportance.getInvNormalizationConstant();
+  //// XXX don't actually know if this business is correct yet
+  //float result = mConstantImportance(x,xPath,results);
+  //// divide by constant's normalization constant
+  //// rationale: dividing some integrand by a unitless
+  //// ratio makes no sense
+  //// instead, make the function unitless
+  //result *= mConstantImportance.getInvNormalizationConstant();
+  float result = 1.0f;
 
   // how many accepts has each pixel received, on average?
   float totalAccepts = mAcceptance->getSum()[0];
@@ -51,16 +52,20 @@ float EqualVisitImportance
     float numPixels = mAcceptance->getWidth() * mAcceptance->getHeight();
     float avg = totalAccepts / numPixels;
 
+    gpcpu::float2 pixel;
+    PathToImage mapToImage;
+    mapToImage(results[0], x, xPath, pixel[0], pixel[1]);
+
     // look up the number of visits this point has received
     float visits;
     if(mDoInterpolate)
     {
       // interpolating visits makes for a much smoother result
-      visits = mAcceptance->bilerp(x[0][0], x[0][1])[0];
+      visits = mAcceptance->bilerp(pixel[0], pixel[1])[0];
     } // end if
     else
     {
-      visits = mAcceptance->pixel(x[0][0], x[0][1])[0];
+      visits = mAcceptance->pixel(pixel[0], pixel[1])[0];
     } // end else
 
     // we need to return the ratio of the number of times
