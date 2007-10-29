@@ -11,7 +11,6 @@
 #include "MonteCarloRenderer.h"
 #include <boost/shared_ptr.hpp>
 #include "../path/PathSampler.h"
-#include "../records/RandomAccessFilm.h"
 
 class PathDebugRenderer
   : public MonteCarloRenderer
@@ -36,12 +35,12 @@ class PathDebugRenderer
 
     /*! Constructor accepts a pointer to a Scene, Film, and PathSampler.
      *  \param s Sets mScene.
-     *  \param f Sets mFilm.
+     *  \param r Sets mRecord.
      *  \param sequence Sets Parent::mRandomSequence.
      *  \param sampler Sets mSampler.
      */
     PathDebugRenderer(boost::shared_ptr<const Scene>  s,
-                      boost::shared_ptr<RenderFilm> f,
+                      boost::shared_ptr<Record> r,
                       const boost::shared_ptr<RandomSequence> &sequence,
                       const boost::shared_ptr<PathSampler> &sampler);
 
@@ -61,8 +60,6 @@ class PathDebugRenderer
     virtual void postprocess(void);
 
     boost::shared_ptr<PathSampler> mSampler;
-
-    RandomAccessFilm mSquaredEstimate;
 }; // end PathDebugRenderer
 
 #endif // PATH_DEBUG_RENDERER_H

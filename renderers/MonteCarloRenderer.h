@@ -32,11 +32,11 @@ class MonteCarloRenderer
     /*! Constructor accepts a RandomSequence
      *  and calls the Parent.
      *  \param s Sets Parent::mScene.
-     *  \param f Sets Parent::mFilm.
+     *  \param r Sets Parent::mRecord.
      *  \param sequence Sets mRandomSequence.
      */
     inline MonteCarloRenderer(boost::shared_ptr<const Scene> &s,
-                              boost::shared_ptr<RenderFilm> &f,
+                              boost::shared_ptr<Record> &r,
                               const boost::shared_ptr<RandomSequence> &sequence);
 
     /*! This method sets mRandomSequence.

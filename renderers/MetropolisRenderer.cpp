@@ -37,11 +37,11 @@ MetropolisRenderer
 
 MetropolisRenderer
   ::MetropolisRenderer(shared_ptr<const Scene> &s,
-                       shared_ptr<RenderFilm> &f,
+                       shared_ptr<Record> &r,
                        const shared_ptr<RandomSequence> &sequence,
                        const shared_ptr<PathMutator> &m,
                        const shared_ptr<ScalarImportance> &i)
-    :Parent(s,f,sequence),mMutator(m),mImportance(i)
+    :Parent(s,r,sequence),mMutator(m),mImportance(i)
 {
   ;
 } // end MetropolisRenderer::MetropolisRenderer()
@@ -68,7 +68,10 @@ void MetropolisRenderer
 void MetropolisRenderer
   ::kernel(ProgressCallback &progress)
 {
-  unsigned int totalPixels = mFilm->getWidth() * mFilm->getHeight();
+  // XXX kill this nastiness
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+
+  unsigned int totalPixels = film->getWidth() * film->getHeight();
   unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
   float invSpp = 1.0f / (mSamplesPerPixel * mSamplesPerPixel);
 
@@ -83,8 +86,7 @@ void MetropolisRenderer
   float invB = 1.0f / b;
 
   // initial seed
-  Spectrum f, g;
-  f = mMutator->evaluate(xPath,xResults);
+  mMutator->evaluate(xPath,xResults);
   float ix = (*mImportance)(x, xPath, xResults), iy = 0;
   float xPdf = ix * invB, yPdf = 0;
 
@@ -115,7 +117,7 @@ void MetropolisRenderer
     if(whichMutation != -1)
     {
       yResults.clear();
-      g = mMutator->evaluate(yPath, yResults);
+      mMutator->evaluate(yPath, yResults);
 
       // compute importance
       iy = (*mImportance)(y, yPath, yResults);
@@ -130,11 +132,14 @@ void MetropolisRenderer
 
     // recompute x
     ix = (*mImportance)(x, xPath, xResults);
-    xPdf = ix * invB;
 
     // calculate accept probability
-    a = mMutator->evaluateTransitionRatio(whichMutation, x, xPath, ix, y, yPath, iy);
-    a = std::min<float>(1.0f, a * iy/ix);
+    a = 0;
+    if(iy > 0)
+    {
+      a = mMutator->evaluateTransitionRatio(whichMutation, x, xPath, ix, y, yPath, iy);
+      a = std::min<float>(1.0f, a * iy/ix);
+    } // end if
 
     if(ix > 0)
     {
@@ -143,52 +148,29 @@ void MetropolisRenderer
       //                when a sample is finally rejected
       // record x
       float xWeight = invSpp * (1.0f - a) / (xPdf+pLargeStep);
-      for(ResultList::const_iterator r = xResults.begin();
-          r != xResults.end();
-          ++r)
-      {
-        Spectrum deposit;
-        float2 pixel;
-
-        // map the result to a location in the image
-        mapToImage(*r,x,xPath,pixel[0],pixel[1]);
-
-        // each sample contributes (1/spp) * MIS weight * MC weight * f / pdf
-        deposit = xWeight * r->mWeight * r->mThroughput / r->mPdf;
-        mFilm->deposit(pixel[0], pixel[1], deposit);
-
-        // add to the acceptance image
-        mAcceptanceImage.deposit(pixel[0], pixel[1], static_cast<Spectrum>(1.0f - a));
-      } // end for r
+      //float xWeight = invSpp * (1.0f - a) / xPdf;
+      mRecord->record(xWeight, x, xPath, xResults);
 
       // add to the acceptance image
-      //mAcceptanceImage.deposit(x[0][0], x[0][1], static_cast<Spectrum>(1.0f - a));
+      // XXX TODO: generalize this to all samplers somehow
+      gpcpu::float2 pixel;
+      float xu, xv;
+      mapToImage(xResults[0], x, xPath, xu, xv);
+      mAcceptanceImage.deposit(xu, xv, Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
     } // end if
 
     if(iy > 0)
     {
       // record y
       float yWeight = invSpp * (a + float(whichMutation))/(yPdf + pLargeStep);
-      for(ResultList::const_iterator ry = yResults.begin();
-          ry != yResults.end();
-          ++ry)
-      {
-        Spectrum deposit;
-        float2 pixel;
+      //float yWeight = invSpp * a / yPdf;
+      mRecord->record(yWeight, y, yPath, yResults);
 
-        // map the result to a location in the image
-        mapToImage(*ry, y, yPath, pixel[0], pixel[1]);
-
-        // each sample contributes (1/spp) * MIS weight * MC weight * f
-        deposit = yWeight * ry->mWeight * ry->mThroughput / ry->mPdf;
-        mFilm->deposit(pixel[0], pixel[1], deposit);
-
-        // add to the acceptance image
-        mAcceptanceImage.deposit(pixel[0], pixel[1], static_cast<Spectrum>(a));
-      } // end for r
-
-      //// add to the acceptance image
-      //mAcceptanceImage.deposit(y[0][0], y[0][1], static_cast<Spectrum>(a));
+      // add to the acceptance image
+      // XXX TODO: generalize this to all samplers somehow
+      float yu, yv;
+      mapToImage(yResults[0], y, yPath, yu, yv);
+      mAcceptanceImage.deposit(yu, yv, Spectrum(a, a, a));
     } // end if
 
     // accept?
@@ -200,7 +182,6 @@ void MetropolisRenderer
       // safely copy the path
       copyPath(xPath, yPath);
 
-      f = g;
       ix = iy;
       xResults = yResults;
       xPdf = yPdf;
@@ -242,8 +223,13 @@ void MetropolisRenderer
   mNumAccepted = mNumProposed = 0;
 
   // zero the acceptance image
-  mAcceptanceImage.resize(mFilm->getWidth(), mFilm->getHeight());
-  mAcceptanceImage.fill(Spectrum::black());
+  // XXX kill this nastiness somehow
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  if(film != 0)
+  {
+    mAcceptanceImage.resize(film->getWidth(), film->getHeight());
+    mAcceptanceImage.preprocess();
+  } // end if
 
   // preprocess the mutator
   mMutator->preprocess();
@@ -284,18 +270,30 @@ void MetropolisRenderer
 {
   // estimate the canonical normalization constant
   LuminanceImportance luminance;
-  float b = luminance.estimateNormalizationConstant(mRandomSequence, mScene, mMutator, 10000);
+
   // rescale image so that it has b mean luminance
-  float s = b / mFilm->computeMean().luminance();
-  mFilm->scale(Spectrum(s,s,s));
+  // XXX TODO kill this nastiness
+  //          should Record provide these hooks?
+  //          Or should we only do this when Record is an image?
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  if(film)
+  {
+    // use our own random sequence so we always get the same result here
+    // this is particularly important for difficult scenes where it is hard
+    // to agree on an estimate
+    RandomSequence seq(13u);
+
+    float b = luminance.estimateNormalizationConstant(seq, mScene, mMutator, 10000);
+    float s = b / film->computeMean().luminance();
+    film->scale(Spectrum(s,s,s));
+  } // end if
 
   Parent::postprocess();
 
   mMutator->postprocess();
 
   // rescale acceptance image so it has 1/2 mean luminance
-  Spectrum avg = mAcceptanceImage.getSum() / (mAcceptanceImage.getWidth() * mAcceptanceImage.getHeight());
-  s = 0.5f / avg.luminance();
+  float s = 0.5f / mAcceptanceImage.computeMean().luminance();
   mAcceptanceImage.scale(Spectrum(s,s,s));
   mAcceptanceImage.writeEXR("acceptance.exr");
 } // end MetropolisRenderer::postprocess()

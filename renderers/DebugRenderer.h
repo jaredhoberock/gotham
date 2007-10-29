@@ -24,10 +24,10 @@ class DebugRenderer
 
     /*! Constructor accepts a pointer to a Scene, Camera, and Film.
      *  \param s Sets mScene.
-     *  \param f Sets mFilm.
+     *  \param r Sets mRecord.
      */
     DebugRenderer(boost::shared_ptr<const Scene> s,
-                  boost::shared_ptr<RenderFilm> f);
+                  boost::shared_ptr<Record> r);
 
   protected:
     /*! This method renders mScene to mFilm.

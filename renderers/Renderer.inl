@@ -7,15 +7,15 @@
 
 Renderer
   ::Renderer(void)
-    :mScene(),mFilm(),mSamplesPerPixel(1)
+    :mScene(),mRecord(),mSamplesPerPixel(1)
 {
   ;
 } // end Renderer::Renderer()
 
 Renderer
   ::Renderer(boost::shared_ptr<const Scene> s,
-             boost::shared_ptr<RenderFilm> f)
-    :mScene(s),mFilm(f)
+             boost::shared_ptr<Record> r)
+    :mScene(s),mRecord(r)
 {
   ;
 } // end Renderer::Renderer()
@@ -33,16 +33,16 @@ boost::shared_ptr<const Scene> Renderer
 } // end Renderer::getScene()
 
 void Renderer
-  ::setFilm(boost::shared_ptr<RenderFilm> f)
+  ::setRecord(boost::shared_ptr<Record> r)
 {
-  mFilm = f;
-} // end Renderer::setFilm()
+  mRecord = r;
+} // end Renderer::setRecord()
 
-boost::shared_ptr<const RenderFilm> Renderer
-  ::getFilm(void) const
+boost::shared_ptr<const Record> Renderer
+  ::getRecord(void) const
 {
-  return mFilm;
-} // end Renderer::getFilm()
+  return mRecord;
+} // end Renderer::getRecord()
 
 void Renderer
   ::setSamplesPerPixel(const unsigned int spp)

@@ -21,9 +21,9 @@ MonteCarloRenderer
 
 MonteCarloRenderer
   ::MonteCarloRenderer(boost::shared_ptr<const Scene> &s,
-                       boost::shared_ptr<RenderFilm> &f,
+                       boost::shared_ptr<Record> &r,
                        const boost::shared_ptr<RandomSequence> &sequence)
-     :Parent(s,f)
+     :Parent(s,r)
 {
   setRandomSequence(sequence);
 } // end MonteCarloRenderer::MonteCarloRenderer()

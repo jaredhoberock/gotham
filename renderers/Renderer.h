@@ -8,7 +8,7 @@
 #define RENDERER_H
 
 class Scene;
-class RenderFilm;
+class Record;
 
 #ifdef WIN32
 #define WINDOWS_LEAN_AND_MEAN
@@ -24,7 +24,7 @@ class RenderFilm;
  *  \brief A Renderer abstracts the high-level
  *         coordination of rendering tasks.
  *         Renderer is an abstract class: an
- *         implementation must implement render().
+ *         implementation must implement kernel().
  */
 class Renderer
 {
@@ -51,10 +51,10 @@ class Renderer
 
     /*! Constructor accepts a pointer to a Scene, Camera, and Film.
      *  \param s Sets mScene.
-     *  \param f Sets mFilm.
+     *  \param r Sets mRecord.
      */
     inline Renderer(boost::shared_ptr<const Scene>  s,
-                    boost::shared_ptr<RenderFilm> f);
+                    boost::shared_ptr<Record> r);
 
     /*! This method renders mScene to mFilm.
      *  \param progress A callback, which will be periodically
@@ -72,19 +72,21 @@ class Renderer
      */
     inline boost::shared_ptr<const Scene> getScene(void) const;
 
-    /*! This method sets mFilm.
-     *  \param f Sets mFilm.
+    /*! This method sets mRecord.
+     *  \param r Sets mRecord.
      */
-    inline void setFilm(boost::shared_ptr<RenderFilm> f);
+    inline void setRecord(boost::shared_ptr<Record> f);
 
-    /*! This method returns mFilm.
-     *  \return mFilm.
+    /*! This method returns mRecord.
+     *  \return mRecord.
      */
-    inline boost::shared_ptr<const RenderFilm> getFilm(void) const;
+    inline boost::shared_ptr<const Record> getRecord(void) const;
 
     /*! This method sets mSamplesPerPixel.
      *  \param spp Sets mSamplesPerPixel.
      *  XXX remove this
+     *  RATIONALE: we would like a rendering process not necessarily
+     *             have to render pixels (like generating a photon map, for example)
      */
     inline void setSamplesPerPixel(const unsigned int spp);
 
@@ -122,7 +124,7 @@ class Renderer
 
     /*! A Renderer keeps a pointer to the RandomAccessFilm to which mScene is rendered.
      */
-    boost::shared_ptr<RenderFilm> mFilm;
+    boost::shared_ptr<Record> mRecord;
 
     /*! The number of samples to take per pixel.
      *  XXX remove this.

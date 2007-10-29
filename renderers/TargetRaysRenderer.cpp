@@ -5,6 +5,7 @@
 
 #include "TargetRaysRenderer.h"
 #include "../mutators/KelemenMutator.h"
+#include "../path/PathToImage.h"
 
 using namespace gpcpu;
 
@@ -27,12 +28,12 @@ TargetRaysRenderer
 
 TargetRaysRenderer
   ::TargetRaysRenderer(boost::shared_ptr<const Scene> &s,
-                       boost::shared_ptr<RenderFilm> &f,
+                       boost::shared_ptr<Record> &r,
                        const boost::shared_ptr<RandomSequence> &sequence,
                        const boost::shared_ptr<PathMutator> &m,
                        const boost::shared_ptr<ScalarImportance> &i,
                        const unsigned int target)
-    :Parent(s,f,sequence,m,i),mNumSamplesTaken(0),mRayTarget(target)
+    :Parent(s,r,sequence,m,i),mNumSamplesTaken(0),mRayTarget(target)
 {
   ;
 } // end TargetRaysRenderer::TargetRaysRenderer()
@@ -40,7 +41,10 @@ TargetRaysRenderer
 void TargetRaysRenderer
   ::kernel(ProgressCallback &progress)
 {
-  unsigned int totalPixels = mFilm->getWidth() * mFilm->getHeight();
+  // XXX TODO kill this nastiness
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+
+  unsigned int totalPixels = film->getWidth() * film->getHeight();
 
   PathSampler::HyperPoint x, y;
   Path xPath, yPath;
@@ -68,6 +72,8 @@ void TargetRaysRenderer
   {
     ;
   } // end catch
+
+  PathToImage mapToImage;
 
   float a;
   int whichMutation;
@@ -112,74 +118,28 @@ void TargetRaysRenderer
     {
       // record x
       float xWeight = (1.0f - a) / (xPdf+pLargeStep);
-      for(ResultList::const_iterator r = xResults.begin();
-          r != xResults.end();
-          ++r)
-      {
-        Spectrum deposit;
-        float2 pixel;
-        if(r->mEyeLength == 1)
-        {
-          unsigned int endOfLightPath = xPath.getSubpathLengths().sum() - r->mLightLength;
-          ::Vector w = xPath[endOfLightPath].mDg.getPoint();
-          w -= xPath[0].mDg.getPoint();
-          xPath[0].mSensor->invert(w, xPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end if
-        else
-        {
-          xPath[0].mSensor->invert(xPath[0].mToNext,
-                                   xPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end else
-
-        // each sample contributes (1/spp) * MIS weight * MC weight * f / pdf
-        deposit = xWeight * r->mWeight * r->mThroughput / r->mPdf;
-        mFilm->deposit(pixel[0], pixel[1], deposit);
-
-        //// add to the acceptance image
-        //mAcceptanceImage.pixel(pixel[0], pixel[1]) += (1.0f - a);
-      } // end for r
+      mRecord->record(xWeight, x, xPath, xResults);
 
       // add to the acceptance image
-      mAcceptanceImage.deposit(x[0][0], x[0][1], static_cast<Spectrum>(1.0f - a));
+      // XXX TODO: generalize this to all samplers somehow
+      gpcpu::float2 pixel;
+      mapToImage(xResults[0], x, xPath, pixel[0], pixel[1]);
+      //mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
+      mAcceptanceImage.deposit(x[0][0], x[0][1], Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
     } // end if
 
     if(iy > 0)
     {
       // record y
       float yWeight = (a + float(whichMutation))/(yPdf + pLargeStep);
-      for(ResultList::const_iterator ry = yResults.begin();
-          ry != yResults.end();
-          ++ry)
-      {
-        Spectrum deposit;
-        float2 pixel;
-        if(ry->mEyeLength == 1)
-        {
-          unsigned int endOfLightPath = yPath.getSubpathLengths().sum() - ry->mLightLength;
-          ::Vector w = yPath[endOfLightPath].mDg.getPoint();
-          w -= yPath[0].mDg.getPoint();
-          yPath[0].mSensor->invert(w, yPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end if
-        else
-        {
-          yPath[0].mSensor->invert(yPath[0].mToNext,
-                                   yPath[0].mDg,
-                                   pixel[0], pixel[1]);
-        } // end else
-
-        // each sample contributes (1/spp) * MIS weight * MC weight * f
-        deposit = yWeight * ry->mWeight * ry->mThroughput / ry->mPdf;
-        mFilm->deposit(pixel[0], pixel[1], deposit);
-
-        //// add to the acceptance image
-        //mAcceptanceImage.pixel(pixel[0], pixel[1]) += a;
-      } // end for r
+      mRecord->record(yWeight, y, yPath, yResults);
 
       // add to the acceptance image
-      mAcceptanceImage.deposit(y[0][0], y[0][1], static_cast<Spectrum>(a));
+      // XXX TODO: generalize this to all samplers somehow
+      gpcpu::float2 pixel;
+      mapToImage(yResults[0], y, yPath, pixel[0], pixel[1]);
+      //mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(a, a, a));
+      mAcceptanceImage.deposit(x[0][0], x[0][1], Spectrum(a, a, a));
     } // end if
 
     // accept?
@@ -216,9 +176,16 @@ void TargetRaysRenderer
   std::cout << std::endl;
 
   // scale film by 1/spp
-  float spp = static_cast<float>(mNumSamplesTaken) / (mFilm->getWidth() * mFilm->getHeight());
-  float invSpp = 1.0f / spp;
-  mFilm->scale(Spectrum(invSpp, invSpp, invSpp));
+  // XXX TODO should mRecord provide scale()?
+  //          or only when it is an image?
+  // XXX TODO kill this dynamic_cast grossness
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  if(film)
+  {
+    float spp = static_cast<float>(mNumSamplesTaken) / (film->getWidth() * film->getHeight());
+    float invSpp = 1.0f / spp;
+    film->scale(Spectrum(invSpp, invSpp, invSpp));
+  } // end if
   
   Parent::postprocess();
 } // end TargetRaysRenderer::postprocess()

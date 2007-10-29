@@ -25,8 +25,8 @@ DebugRenderer
 
 DebugRenderer
   ::DebugRenderer(shared_ptr<const Scene> s,
-                  shared_ptr<RenderFilm> f)
-    :Parent(s,f)
+                  shared_ptr<Record> r)
+    :Parent(s,r)
 {
   ;
 } // end DebugRenderer::DebugRenderer()
@@ -34,8 +34,10 @@ DebugRenderer
 void DebugRenderer
   ::kernel(ProgressCallback &progress)
 {
-  float2 step(1.0f / mFilm->getWidth(),
-              1.0f / mFilm->getHeight());
+  // XXX TODO: kill this
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  float2 step(1.0f / film->getWidth(),
+              1.0f / film->getHeight());
 
   Ray r;
   Point o;
@@ -51,14 +53,14 @@ void DebugRenderer
   float temp;
   mScene->getSensors()->sampleSurfaceArea(0.0f, &sensor, temp);
 
-  progress.restart(mFilm->getWidth() * mFilm->getHeight());
+  progress.restart(film->getWidth() * film->getHeight());
   for(unsigned int y = 0;
-      y < mFilm->getHeight();
+      y < film->getHeight();
       ++y, uv[1] += step[1])
   {
     uv[0] = 0;
     for(unsigned int x = 0;
-        x < mFilm->getWidth();
+        x < film->getWidth();
         ++x, uv[0] += step[0])
     {
       // sample a point on the sensor
@@ -84,7 +86,7 @@ void DebugRenderer
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
       } // end if
 
-      mFilm->raster(x,y) = L;
+      film->raster(x,y) = L;
 
       // purge all malloc'd memory for this sample
       ScatteringDistributionFunction::mPool.freeAll();

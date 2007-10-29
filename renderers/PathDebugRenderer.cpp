@@ -27,10 +27,10 @@ PathDebugRenderer
 
 PathDebugRenderer
   ::PathDebugRenderer(shared_ptr<const Scene> s,
-                      shared_ptr<RenderFilm> f,
+                      shared_ptr<Record> r,
                       const shared_ptr<RandomSequence> &sequence,
                       const shared_ptr<PathSampler> &sampler)
-    :Parent(s,f,sequence),mSampler(sampler)
+    :Parent(s,r,sequence),mSampler(sampler)
 {
   ;
 } // end PathDebugRenderer::PathDebugRenderer()
@@ -46,16 +46,16 @@ PathDebugRenderer
 void PathDebugRenderer
   ::kernel(ProgressCallback &progress)
 {
-  float2 step(1.0f / mFilm->getWidth(),
-              1.0f / mFilm->getHeight());
-
   // shorthand
   RandomSequence &z = *mRandomSequence.get();
 
   Path p;
   float2 uv(0,0);
 
-  unsigned int totalPixels = mFilm->getWidth() * mFilm->getHeight();
+  // XXX TODO kill this grossness
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+
+  unsigned int totalPixels = film->getWidth() * film->getHeight();
   unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
   float invSpp = 1.0f / (mSamplesPerPixel * mSamplesPerPixel);
   float invTotalSamples = 1.0f / totalSamples;
@@ -63,8 +63,8 @@ void PathDebugRenderer
   const Scene *s = mScene.get();
 
   HilbertSequence sequence(0, 1.0f, 0, 1.0f,
-                           mFilm->getWidth() * mSamplesPerPixel,
-                           mFilm->getHeight() * mSamplesPerPixel);
+                           film->getWidth() * mSamplesPerPixel,
+                           film->getHeight() * mSamplesPerPixel);
 
   std::vector<PathSampler::Result> results;
   PathSampler::HyperPoint x;
@@ -88,40 +88,7 @@ void PathDebugRenderer
     {
       results.clear();
       mSampler->evaluate(*s, p, results);
-      float2 pixel;
-      Spectrum sum(Spectrum::black());
-      for(std::vector<PathSampler::Result>::const_iterator r = results.begin();
-          r != results.end();
-          ++r)
-      {
-        if(r->mEyeLength == 1)
-        {
-          unsigned int endOfLightPath = p.getSubpathLengths().sum() - r->mLightLength;
-          ::Vector w = p[endOfLightPath].mDg.getPoint();
-          w -= p[0].mDg.getPoint();
-          p[0].mSensor->invert(w,
-                               p[0].mDg,
-                               pixel[0], pixel[1]);
-        } // end if
-        else
-        {
-          p[0].mSensor->invert(p[0].mToNext,
-                               p[0].mDg,
-                               pixel[0], pixel[1]);
-        } // end else
-
-        if(pixel[0] >= 0 && pixel[0] < 1.0f &&
-           pixel[1] >= 0 && pixel[1] < 1.0f)
-        {
-          Spectrum deposit = r->mWeight * r->mThroughput / r->mPdf;
-          mFilm->deposit(pixel[0], pixel[1], invSpp * deposit);
-          sum += deposit;
-
-          if(deposit[0] != deposit[0]) std::cerr << "nan deposit" << std::endl;
-        } // end if
-      } // end for result
-
-      mSquaredEstimate.pixel(pixel[0], pixel[1]) += invSpp * sum*sum;
+      mRecord->record(invSpp, x, p, results);
     } // end if
 
     // purge all malloc'd memory for this sample
@@ -141,10 +108,6 @@ void PathDebugRenderer
   ::preprocess(void)
 {
   Parent::preprocess();
-
-  // zero the squared estimate image
-  mSquaredEstimate.resize(mFilm->getWidth(), mFilm->getHeight());
-  mSquaredEstimate.fill(Spectrum::black());
 } // end PathDebugRenderer::preprocess()
 
 #ifdef WIN32
@@ -184,53 +147,21 @@ void PathDebugRenderer
 {
   Parent::postprocess();
 
-  // turn squared estimate image into a variance image
-  for(size_t j = 0; j < mSquaredEstimate.getHeight(); ++j)
+  // XXX TODO kill this nastiness
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  if(film)
   {
-    for(size_t i = 0; i < mSquaredEstimate.getWidth(); ++i)
+    // compute the average pixel value
+    Spectrum avg(0,0,0);
+    for(size_t j = 0; j < film->getHeight(); ++j)
     {
-      Spectrum &s = mSquaredEstimate.raster(i,j);
-      s -= mFilm->raster(i,j)*mFilm->raster(i,j);
-    } // end for i
-  } // end for j
+      for(size_t i = 0; i < film->getWidth(); ++i)
+      {
+        avg += film->raster(i,j);
+      } // end for i
+    } // end for j
 
-  writeEXR("variance.exr", mSquaredEstimate);
-
-  // rms
-  for(size_t j = 0; j < mSquaredEstimate.getHeight(); ++j)
-  {
-    for(size_t i = 0; i < mSquaredEstimate.getWidth(); ++i)
-    {
-      Spectrum &s = mSquaredEstimate.raster(i,j);
-      s[0] = sqrtf(s[0]);
-      s[1] = sqrtf(s[1]);
-      s[2] = sqrtf(s[2]);
-    } // end for i
-  } // end for j
-
-  writeEXR("rms.exr", mSquaredEstimate);
-
-  // normalize by dividing by the estimate
-  for(size_t j = 0; j < mSquaredEstimate.getHeight(); ++j)
-  {
-    for(size_t i = 0; i < mSquaredEstimate.getWidth(); ++i)
-    {
-      mSquaredEstimate.raster(i,j) /= mFilm->raster(i,j);
-    } // end for i
-  } // end for j
-
-  writeEXR("normalized-rms.exr", mSquaredEstimate);
-
-  // compute the average pixel value
-  Spectrum avg(0,0,0);
-  for(size_t j = 0; j < mFilm->getHeight(); ++j)
-  {
-    for(size_t i = 0; i < mFilm->getWidth(); ++i)
-    {
-      avg += mFilm->raster(i,j);
-    } // end for i
-  } // end for j
-
-  std::cout << "Average pixel value: " << avg / (mFilm->getWidth() * mFilm->getHeight()) << std::endl;
+    std::cout << "Average pixel value: " << avg / (film->getWidth() * film->getHeight()) << std::endl;
+  } // end if
 } // end PathDebugRenderer::postprocess()
 

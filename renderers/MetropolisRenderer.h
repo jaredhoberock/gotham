@@ -37,15 +37,15 @@ class MetropolisRenderer
                        const boost::shared_ptr<PathMutator> &mutator,
                        const boost::shared_ptr<ScalarImportance> &importance);
 
-    /*! Constructor accepts a pointer to a Scene, Film, and PathMutator.
+    /*! Constructor accepts a pointer to a Scene, Record, and PathMutator.
      *  \param s Sets mScene.
-     *  \param f Sets mFilm.
+     *  \param r Sets mRecord.
      *  \param s Sets Parent::mRandomSequence.
      *  \param m Sets mMutator.
      *  \param i Sets mImportance.
      */
     MetropolisRenderer(boost::shared_ptr<const Scene> &s,
-                       boost::shared_ptr<RenderFilm> &f,
+                       boost::shared_ptr<Record> &r,
                        const boost::shared_ptr<RandomSequence> &sequence,
                        const boost::shared_ptr<PathMutator> &m,
                        const boost::shared_ptr<ScalarImportance> &i);

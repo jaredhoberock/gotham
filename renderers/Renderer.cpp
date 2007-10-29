@@ -50,8 +50,8 @@ void Renderer
 void Renderer
   ::preprocess(void)
 {
-  // clear image
-  mFilm->fill(Spectrum::black());
+  // preprocess the record
+  mRecord->preprocess();
 
   // start the timer
   mTimer.restart();
@@ -65,14 +65,13 @@ void Renderer
 
   postRenderReport(elapsed);
 
-  mFilm->postprocess();
+  mRecord->postprocess();
 } // end Renderer::postprocess()
 
 void Renderer
   ::postRenderReport(const double elapsed) const
 {
   std::cout << "Finished." << std::endl;
-  std::cout << "Wrote result to: " << mFilm->getFilename() << std::endl;
 
   unsigned long minutes = static_cast<unsigned long>(elapsed) % 60;
   unsigned long hours = static_cast<unsigned long>(minutes) % (60*60);
