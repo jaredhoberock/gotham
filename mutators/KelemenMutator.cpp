@@ -148,9 +148,27 @@ float KelemenMutator
   float result = 1.0f;
   //if(which == 1)
   //{
-  //  result = a[a.getSubpathLengths()[0]-1].mAccumulatedPdf * a[a.getSubpathLengths()[0]].mAccumulatedPdf;
+  //  if(a.getSubpathLengths()[0] > 0)
+  //  {
+  //    result *= a[a.getSubpathLengths()[0]-1].mAccumulatedPdf;
+  //  } // end if
+  //  if(a.getSubpathLengths()[1] > 0)
+  //  {
+  //    result *= a[a.getSubpathLengths()[0]].mAccumulatedPdf;
+  //  } // end if
 
-  //  result /= b[b.getSubpathLengths()[0]-1].mAccumulatedPdf * b[b.getSubpathLengths()[0]].mAccumulatedPdf;
+  //  result *= a.getTerminationProbabilities().product();
+
+  //  if(b.getSubpathLengths()[0] > 0)
+  //  {
+  //    result /= b[b.getSubpathLengths()[0]-1].mAccumulatedPdf;
+  //  } // end if
+  //  if(b.getSubpathLengths()[1] > 0)
+  //  {
+  //    result /= b[b.getSubpathLengths()[0]].mAccumulatedPdf;
+  //  } // end if
+
+  //  result /= b.getTerminationProbabilities().product();
   //} // end if
   //else
   //{
@@ -166,6 +184,7 @@ Spectrum KelemenMutator
 {
   mSampler->evaluate(*mScene, x, results);
 
+  // XXX TODO kill all of this - it's not used
   // XXX we may wish to return the maximum over results rather than the sum
   Spectrum L(0,0,0);
   for(std::vector<PathSampler::Result>::const_iterator r = results.begin();
