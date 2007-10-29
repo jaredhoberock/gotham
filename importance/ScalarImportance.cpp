@@ -20,7 +20,7 @@ void ScalarImportance
   mInvNormalizationConstant = 1.0f;
 
   // now integrate
-  mNormalizationConstant = estimateNormalizationConstant(r, scene, mutator, 10000);
+  mNormalizationConstant = estimateNormalizationConstant(*r.get(), scene, mutator, 10000);
   mInvNormalizationConstant = 1.0f / mNormalizationConstant;
 } // end ScalarImportance::preprocess()
 
@@ -86,7 +86,7 @@ float ScalarImportance
 } // end ScalarImportance::estimateNormalizationConstant()
 
 float ScalarImportance
-  ::estimateNormalizationConstant(const boost::shared_ptr<RandomSequence> &r,
+  ::estimateNormalizationConstant(RandomSequence &r,
                                   const boost::shared_ptr<const Scene> &scene,
                                   const boost::shared_ptr<PathMutator> &mutator,
                                   const size_t n)
@@ -104,7 +104,7 @@ float ScalarImportance
   std::vector<PathSampler::Result> resultList;
   for(size_t i = 0; i < n; ++i)
   {
-    PathSampler::constructHyperPoint(*r, x);
+    PathSampler::constructHyperPoint(r, x);
 
     // create a Path
     if(sampler->constructPath(*scene, x, xPath))

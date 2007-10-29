@@ -90,7 +90,7 @@ class ScalarImportance
      *  \param n The number of samples to use in the estimation.
      *  \return The estimate of the normalization constant.
      */
-    virtual float estimateNormalizationConstant(const boost::shared_ptr<RandomSequence> &r,
+    virtual float estimateNormalizationConstant(RandomSequence &r,
                                                 const boost::shared_ptr<const Scene> &scene,
                                                 const boost::shared_ptr<PathMutator> &mutator,
                                                 const size_t n);
