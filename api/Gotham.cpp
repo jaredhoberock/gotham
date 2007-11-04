@@ -201,24 +201,25 @@ void Gotham
     outfile = any_cast<std::string>(val).c_str();
   } // end if
 
-  // should we normalize on post?
-  bool doNormalize = false;
-  a = mAttributeStack.back().find("renderer::normalize");
+  // should we apply a tonemap on post?
+  bool doTonemap = false;
+  a = mAttributeStack.back().find("renderer::tonemap");
   if(a != mAttributeStack.back().end())
   {
     any val = a->second;
-    doNormalize = (any_cast<std::string>(val) == std::string("true"));
+    doTonemap = (any_cast<std::string>(val) == std::string("true"));
   } // end if
 
   // give everything to the Renderer
   mRenderer->setScene(s);
-  shared_ptr<RenderFilm> film(new RenderFilm(width,height,outfile));
   //shared_ptr<RenderFilm> film(new GpuFilm<RenderFilm>());
   //shared_ptr<RenderFilm> film(new GpuFilterFilm<RenderFilm>());
+  RenderFilm *film = new RenderFilm(width,height,outfile);
   film->resize(width,height);
   film->setFilename(outfile);
-  film->setNormalizeOnPostprocess(doNormalize);
-  mRenderer->setFilm(film);
+  film->setApplyTonemap(doTonemap);
+  shared_ptr<Record> record(film);
+  mRenderer->setRecord(record);
 
   // headless render?
   bool headless = false;
@@ -239,7 +240,14 @@ void Gotham
 
     // everything to the viewer
     v.setScene(s);
-    v.setImage(film);
+
+    // XXX TODO what should the viewer do when the Record isn't a RenderFilm?
+    shared_ptr<RenderFilm> film = dynamic_pointer_cast<RenderFilm, Record>(record);
+    if(film.get())
+    {
+      v.setImage(film);
+    } // end if
+
     v.setRenderer(mRenderer);
 
     v.setSnapshotFileName(mRenderer->getRenderParameters().c_str());
