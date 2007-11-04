@@ -8,8 +8,10 @@
 #include <stratifiedsequence/StratifiedSequence.h>
 #include "../path/KelemenSampler.h"
 #include "../path/Path.h"
+#include "../path/PathToImage.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include <gpcpu/Vector.h>
+#include "../renderers/TargetRaysRenderer.h"
 
 using namespace boost;
 using namespace gpcpu;
@@ -20,50 +22,23 @@ void NormalizedImportance
                const shared_ptr<PathMutator> &mutator,
                MetropolisRenderer &renderer)
 {
-  const unsigned int n = 10000;
+  // render a low resolution estimate using LuminanceImportance
+  // XXX DESIGN just render into mEstimate
+  shared_ptr<RenderFilm> estimate(new RenderFilm(20,20));
+  mEstimate.resize(estimate->getWidth(),estimate->getHeight());
+  shared_ptr<LuminanceImportance> luminance(new LuminanceImportance());
 
-  unsigned int sx = 4;
-  unsigned int sy = 4;
-  unsigned int spp = sx*sy;
-  unsigned int w = static_cast<unsigned int>(sqrtf(static_cast<float>(n)/spp));
-  unsigned int h = (n/spp) / w;
-  float weight = 1.0f / spp;
+  // create a separate renderer temporarily
+  TargetRaysRenderer tempRenderer(r, mutator, luminance, 1000000);
+  tempRenderer.setScene(scene);
+  tempRenderer.setRecord(dynamic_pointer_cast<Record,RenderFilm>(estimate));
+  Renderer::ProgressCallback callback;
+  
+  // render
+  tempRenderer.render(callback);
 
-  mEstimate.resize(w,h);
-  mEstimate.fill(0);
-
-  PathSampler::HyperPoint x;
-  Path xPath;
-  Spectrum L;
-
-  float px, py;
-
-  typedef std::vector<PathSampler::Result> ResultList;
-  ResultList resultList;
-
-  // XXX fix this
-  PathSampler *sampler = const_cast<PathSampler*>(mutator->getSampler());
-  StratifiedSequence sequence(0, 1.0f, 0, 1.0f, w*sx, h*sy);
-  while(sequence(px, py, (*r)(), (*r)()))
-  {
-    PathSampler::constructHyperPoint(*r, x);
-    x[0][0] = px;
-    x[0][1] = py;
-
-    // create a Path
-    if(sampler->constructPath(*scene, x, xPath))
-    {
-      // evaluate the Path
-      resultList.clear();
-      L = mutator->evaluate(xPath, resultList);
-
-      // deposit the luminance
-      mEstimate.element(x[0][0], x[0][1]) += weight * L.luminance();
-    } // end if
-
-    ScatteringDistributionFunction::mPool.freeAll();
-  } // end while
-
+  // copy estimate into mEstimate
+  // XXX DESIGN this is unnecessary: just render into mEstimate
   // set each pixel to 1 over itself
   for(unsigned int j = 0; j < mEstimate.getDimensions()[1]; ++j)
   {
@@ -72,7 +47,7 @@ void NormalizedImportance
       float &p = mEstimate.raster(i,j);
 
       // note that this is not biased, it's defensive sampling
-      p = 1.0f / std::max(p, 0.01f);
+      p = 1.0f / std::max(estimate->raster(i,j).luminance(), 0.01f);
     } // end for i
   } // end for i
 
@@ -85,7 +60,18 @@ float NormalizedImportance
              const Path &xPath,
              const std::vector<PathSampler::Result> &results)
 {
-  // return f's luminance scaled by 1.0 / estimate
-  return LuminanceImportance::evaluateImportance(x,xPath,results) * mEstimate.element(x[0][0], x[0][1]);
+  PathToImage mapToImage;
+  Spectrum I(0,0,0);
+  gpcpu::float2 bucket;
+  for(std::vector<PathSampler::Result>::const_iterator r = results.begin();
+      r != results.end();
+      ++r)
+  {
+    // scale each result by its corresponding bucket
+    mapToImage(*r, x, xPath, bucket[0], bucket[1]);
+    I += (r->mThroughput * r->mWeight / r->mPdf) * mEstimate.element(bucket[0], bucket[1]);
+  } // end for r
+
+  return I.luminance();
 } // end NormalizedImportance::operator()()
 
