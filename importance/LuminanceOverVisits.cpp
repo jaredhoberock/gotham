@@ -21,11 +21,15 @@ void LuminanceOverVisits
                MetropolisRenderer &renderer)
 {
   // very important that this assignment occur first
+  // before any preprocessing
   mAcceptance = renderer.getAcceptanceImage();
 
-  const_cast<RenderFilm*>(mAcceptance)->fill(Spectrum(1,1,1));
+  // fill with 1 to start with
+  renderer.getAcceptanceImage()->fill(Spectrum(1,1,1));
 
   mLuminanceImportance.preprocess(r,scene,mutator,renderer);
+
+  // call the Parent
   Parent::preprocess(r,scene,mutator,renderer);
 } // end LuminanceOverVisits::preprocess()
 
