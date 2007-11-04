@@ -44,10 +44,28 @@ class MonteCarloRenderer
      */
     virtual void setRandomSequence(const boost::shared_ptr<RandomSequence> &s);
 
+    /*! This method intializes mNumSamples to 0.
+     */
+    virtual void preprocess(void);
+
+    /*! This method scales mRecord by 1 / samples per pixel.
+     */
+    virtual void postprocess(void);
+
+    /*! This method returns mNumSamples.
+     *  \return mNumSamples
+     */
+    unsigned long getNumSamples(void) const;
+
   protected:
     /*! A sequence of pseudo-random numbers.
      */
     boost::shared_ptr<RandomSequence> mRandomSequence;
+
+    /*! This counts the total number of samples
+     *  generated during kernel().
+     */
+    unsigned long mNumSamples; 
 }; // end MonteCarloRenderer
 
 #include "MonteCarloRenderer.inl"

@@ -73,7 +73,6 @@ void MetropolisRenderer
 
   unsigned int totalPixels = film->getWidth() * film->getHeight();
   unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-  float invSpp = 1.0f / (mSamplesPerPixel * mSamplesPerPixel);
 
   PathSampler::HyperPoint x, y;
   Path xPath, yPath;
@@ -111,7 +110,6 @@ void MetropolisRenderer
   {
     // mutate
     whichMutation = (*mMutator)(x,xPath,y,yPath);
-    ++mNumProposed;
 
     // evaluate
     if(whichMutation != -1)
@@ -147,8 +145,8 @@ void MetropolisRenderer
       //          idea: accumulate x's weight and only deposit
       //                when a sample is finally rejected
       // record x
-      float xWeight = invSpp * (1.0f - a) / (xPdf+pLargeStep);
-      //float xWeight = invSpp * (1.0f - a) / xPdf;
+      float xWeight = (1.0f - a) / (xPdf+pLargeStep);
+      //float xWeight = (1.0f - a) / xPdf;
       mRecord->record(xWeight, x, xPath, xResults);
 
       // add to the acceptance image
@@ -162,8 +160,8 @@ void MetropolisRenderer
     if(iy > 0)
     {
       // record y
-      float yWeight = invSpp * (a + float(whichMutation))/(yPdf + pLargeStep);
-      //float yWeight = invSpp * a / yPdf;
+      float yWeight = (a + float(whichMutation))/(yPdf + pLargeStep);
+      //float yWeight = a / yPdf;
       mRecord->record(yWeight, y, yPath, yResults);
 
       // add to the acceptance image
@@ -190,6 +188,7 @@ void MetropolisRenderer
     // purge all malloc'd memory for this sample
     ScatteringDistributionFunction::mPool.freeAll();
 
+    ++mNumSamples;
     ++progress;
   } // end for i
 
@@ -219,15 +218,16 @@ void MetropolisRenderer
 {
   Parent::preprocess();
 
-  // zero the proposed/accepted count
-  mNumAccepted = mNumProposed = 0;
+  // zero the accepted count
+  mNumAccepted = 0;
 
-  // zero the acceptance image
   // XXX kill this nastiness somehow
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
   if(film != 0)
   {
+    // zero the acceptance image
     mAcceptanceImage.resize(film->getWidth(), film->getHeight());
+    mAcceptanceImage.setFilename("acceptance.exr");
     mAcceptanceImage.preprocess();
   } // end if
 
@@ -262,7 +262,7 @@ void MetropolisRenderer
 {
   Parent::postRenderReport(elapsed);
 
-  std::cout << "Proposal acceptance rate: " << static_cast<float>(mNumAccepted) / mNumProposed << std::endl;
+  std::cout << "Proposal acceptance rate: " << static_cast<float>(mNumAccepted) / mNumSamples << std::endl;
 } // end MetropolisRenderer::postRenderReport()
 
 void MetropolisRenderer
@@ -288,14 +288,16 @@ void MetropolisRenderer
     film->scale(Spectrum(s,s,s));
   } // end if
 
-  Parent::postprocess();
+  // jump over MonteCarloRenderer's postprocess
+  // we don't need to scale by 1 / sp
+  Parent::Parent::postprocess();
 
   mMutator->postprocess();
 
   // rescale acceptance image so it has 1/2 mean luminance
   float s = 0.5f / mAcceptanceImage.computeMean().luminance();
   mAcceptanceImage.scale(Spectrum(s,s,s));
-  mAcceptanceImage.writeEXR("acceptance.exr");
+  mAcceptanceImage.postprocess();
 } // end MetropolisRenderer::postprocess()
 
 RenderFilm *MetropolisRenderer

@@ -42,27 +42,29 @@ void RenderViewer
                   0,
                   GL_RGB, data);
 
-    float progressScale = static_cast<float>(mProgress.expected_count()) / mProgress.count();
-
     // choose which program to use
     Program &p = mDoTonemap ? mTexture2DRectTonemapProgram : mTexture2DRectGammaProgram;
 
     p.bind();
 
-    // compensate for progress if we're doing metropolis
-    if(!mDoTonemap
-       && dynamic_cast<const MetropolisRenderer*>(mRenderer.get())
-       && dynamic_cast<const EnergyRedistributionRenderer*>(mRenderer.get()) == 0)
+    // scale by 1/spp if we haven't finished the render
+    float scale = 1.0f;
+    //if(!mDoTonemap && mProgress.count() < mProgress.expected_count())
+    if(mProgress.count() < mProgress.expected_count())
     {
-      p.setUniform1f("scale", powf(2.0f, mExposure) * progressScale);
-    } // end if
-    else
-    {
-      p.setUniform1f("scale", powf(2.0f, mExposure));
+      // XXX DESIGN kill this dynamic_cast somehow
+      float spp = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get())->getNumSamples();
+      spp /= (mImage->getWidth() * mImage->getHeight());
+      scale = 1.0f / spp;
     } // end else
 
+    p.setUniform1f("scale", powf(2.0f, mExposure) * scale);
     p.setUniform1f("gamma", mGamma);
-    p.setUniform1f("Ywa", mImage->getMaximumLuminance());
+    float meanLogL = mImage->getSumLogLuminance() / (mImage->getWidth() * mImage->getHeight());
+    float Lwa = expf(meanLogL);
+    p.setUniform1f("Lwa", Lwa);
+    p.setUniform1f("Lwhite", mImage->getMaximumLuminance());
+    p.setUniform1f("a", mMiddleGrey);
 
     printGLError(__FILE__, __LINE__);
 
@@ -101,6 +103,7 @@ void RenderViewer
   mGamma = 1.0f;
 
   mDoTonemap = false;
+  mMiddleGrey = 0.5f;
 
   // XXX DESIGN need a better way to get a GpuFilm a GL context
   mImage->init();
@@ -162,10 +165,20 @@ void RenderViewer
 
     case '[':
     {
-      mExposure -= 0.1f;
-
       char msg[32];
-      sprintf(msg, "Exposure: %f", mExposure);
+      if(mDoTonemap)
+      {
+        mMiddleGrey -= 0.01f;
+
+        sprintf(msg, "Middle grey: %f", mMiddleGrey);
+      } // end if
+      else
+      {
+        mExposure -= 0.1f;
+
+        sprintf(msg, "Exposure: %f", mExposure);
+      } // end else
+
       displayMessage(msg);
       updateGL();
       break;
@@ -184,10 +197,21 @@ void RenderViewer
 
     case ']':
     {
-      mExposure += 0.1f;
-
       char msg[32];
-      sprintf(msg, "Exposure: %f", mExposure);
+
+      if(mDoTonemap)
+      {
+        mMiddleGrey += 0.01f;
+
+        sprintf(msg, "Middle grey: %f", mMiddleGrey);
+      } // end if
+      else
+      {
+        mExposure += 0.1f;
+
+        sprintf(msg, "Exposure: %f", mExposure);
+      } // end else
+
       displayMessage(msg);
       updateGL();
       break;

@@ -21,7 +21,7 @@ TargetRaysRenderer
                        const boost::shared_ptr<PathMutator> &mutator,
                        const boost::shared_ptr<ScalarImportance> &importance,
                        const unsigned int target)
-    :Parent(s,mutator,importance),mNumSamplesTaken(0),mRayTarget(target)
+    :Parent(s,mutator,importance),mRayTarget(target)
 {
   ;
 } // end TargetRaysRenderer::TargetRaysRenderer()
@@ -33,7 +33,7 @@ TargetRaysRenderer
                        const boost::shared_ptr<PathMutator> &m,
                        const boost::shared_ptr<ScalarImportance> &i,
                        const unsigned int target)
-    :Parent(s,r,sequence,m,i),mNumSamplesTaken(0),mRayTarget(target)
+    :Parent(s,r,sequence,m,i),mRayTarget(target)
 {
   ;
 } // end TargetRaysRenderer::TargetRaysRenderer()
@@ -78,16 +78,16 @@ void TargetRaysRenderer
   float a;
   int whichMutation;
 
+  const RenderFilm *meanImage = dynamic_cast<const RenderFilm*>(mRecord.get());
+
   unsigned int oldRays;
   progress.restart(mRayTarget);
-  mNumSamplesTaken = 0;
   while(progress.count() < progress.expected_count())
   {
     oldRays = mScene->getRaysCast();
 
     // mutate
     whichMutation = (*mMutator)(x,xPath,y,yPath);
-    ++mNumProposed;
 
     // evaluate
     if(whichMutation != -1)
@@ -96,7 +96,9 @@ void TargetRaysRenderer
       g = mMutator->evaluate(yPath, yResults);
 
       // compute importance
-      iy = (*mImportance)(y, yPath, yResults);
+      //iy = (*mImportance)(y, yPath, yResults);
+      iy = mImportance->evaluate(y, yPath, yResults,
+                                 x, xPath, xResults);
 
       // compute pdf of y
       yPdf = iy * invB;
@@ -107,7 +109,20 @@ void TargetRaysRenderer
     } // end else
 
     // recompute x
-    ix = (*mImportance)(x, xPath, xResults);
+    //ix = (*mImportance)(x, xPath, xResults);
+    if(iy)
+    {
+      ix = mImportance->evaluate(x, xPath, xResults,
+                                 y, yPath, yResults);
+    } // end if
+    else
+    {
+      // XXX what should we really do here? just evaluate
+      //     x alone?
+      ix = mImportance->evaluate(x, xPath, xResults,
+                                 x, xPath, xResults);
+    } // end else
+
     xPdf = ix * invB;
 
     // calculate accept probability
@@ -124,8 +139,7 @@ void TargetRaysRenderer
       // XXX TODO: generalize this to all samplers somehow
       gpcpu::float2 pixel;
       mapToImage(xResults[0], x, xPath, pixel[0], pixel[1]);
-      //mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
-      mAcceptanceImage.deposit(x[0][0], x[0][1], Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
+      mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
     } // end if
 
     if(iy > 0)
@@ -138,8 +152,7 @@ void TargetRaysRenderer
       // XXX TODO: generalize this to all samplers somehow
       gpcpu::float2 pixel;
       mapToImage(yResults[0], y, yPath, pixel[0], pixel[1]);
-      //mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(a, a, a));
-      mAcceptanceImage.deposit(x[0][0], x[0][1], Spectrum(a, a, a));
+      mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(a, a, a));
     } // end if
 
     // accept?
@@ -160,33 +173,11 @@ void TargetRaysRenderer
     // purge all malloc'd memory for this sample
     ScatteringDistributionFunction::mPool.freeAll();
 
-    ++mNumSamplesTaken;
+    ++mNumSamples;
     progress += mScene->getRaysCast() - oldRays;
   } // end for i
 
   // purge the local store
   mLocalPool.freeAll();
 } // end TargetRaysRenderer::kernel()
-
-void TargetRaysRenderer
-  ::postprocess(void)
-{
-  // need to output a newline since progress_display
-  // only does this when count() == expected_count()
-  std::cout << std::endl;
-
-  // scale film by 1/spp
-  // XXX TODO should mRecord provide scale()?
-  //          or only when it is an image?
-  // XXX TODO kill this dynamic_cast grossness
-  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
-  if(film)
-  {
-    float spp = static_cast<float>(mNumSamplesTaken) / (film->getWidth() * film->getHeight());
-    float invSpp = 1.0f / spp;
-    film->scale(Spectrum(invSpp, invSpp, invSpp));
-  } // end if
-  
-  Parent::postprocess();
-} // end TargetRaysRenderer::postprocess()
 

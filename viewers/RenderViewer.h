@@ -64,6 +64,10 @@ class RenderViewer
     /*! Whether or not to apply tonemapping.
      */
     bool mDoTonemap;
+
+    /*! Where to map middle-grey when applying tonemapping.
+     */
+    float mMiddleGrey;
 }; // end RenderViewer
 
 #include "RenderViewer.inl"

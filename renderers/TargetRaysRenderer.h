@@ -59,18 +59,9 @@ class TargetRaysRenderer
      */
     virtual void kernel(ProgressCallback &progress);
 
-    /*! This method is called after kernel().
-     */
-    virtual void postprocess(void);
-
     /*! A loose limit on the number of rays to cast.
      */
     unsigned int mRayTarget;
-
-    /*! The number of samples taken.
-     *  XXX DESIGN: move this somewhere common
-     */
-    unsigned int mNumSamplesTaken;
 }; // end TargetRaysRenderer
 
 #endif // TARGET_RAYS_RENDERER_H

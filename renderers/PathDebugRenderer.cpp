@@ -57,8 +57,6 @@ void PathDebugRenderer
 
   unsigned int totalPixels = film->getWidth() * film->getHeight();
   unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-  float invSpp = 1.0f / (mSamplesPerPixel * mSamplesPerPixel);
-  float invTotalSamples = 1.0f / totalSamples;
 
   const Scene *s = mScene.get();
 
@@ -88,12 +86,13 @@ void PathDebugRenderer
     {
       results.clear();
       mSampler->evaluate(*s, p, results);
-      mRecord->record(invSpp, x, p, results);
+      mRecord->record(1.0f, x, p, results);
     } // end if
 
     // purge all malloc'd memory for this sample
     ScatteringDistributionFunction::mPool.freeAll();
 
+    ++mNumSamples;
     ++progress;
   } // end for i
 } // end PathDebugRenderer::kernel()

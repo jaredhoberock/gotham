@@ -13,6 +13,7 @@
 #include "../mutators/PathMutator.h"
 #include "../shading/FunctionAllocator.h"
 #include "../records/RenderFilm.h"
+#include "../records/MipMappedRenderFilm.h"
 
 class MetropolisRenderer
   : public MonteCarloRenderer
@@ -115,13 +116,9 @@ class MetropolisRenderer
 
     FunctionAllocator mLocalPool;
 
-    /*! A count of the number of proposals.
-     */
-    unsigned int mNumProposed;
-
     /*! A count of the number of accepted proposals.
      */
-    unsigned int mNumAccepted;
+    unsigned long mNumAccepted;
 
     /*! An image of the acceptance rate.
      */

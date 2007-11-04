@@ -71,9 +71,6 @@ void EnergyRedistributionRenderer
 
   float edTimesMRecip = 1.0f / (ed*mChainLength);
 
-  // reciprocal of mutations per pixel
-  float invMpp = 1.0 / (mMutationsPerSample * mSamplesPerPixel * mSamplesPerPixel);
-
   // weight each monte carlo sample by the number of samples per pixel
   HilbertSequence walk(0, 1.0f, 0, 1.0f,
                        film->getWidth() * mSamplesPerPixel,
@@ -156,14 +153,14 @@ void EnergyRedistributionRenderer
             if(iy > 0)
             {
               // record y
-              float yWeight = invMpp * (1.0f - a) * invYPdf;
+              float yWeight = (1.0f - a) * invYPdf;
               mRecord->record(yWeight, y, yPath, yResults);
             } // end if
 
             if(iz > 0)
             {
               // record z
-              float zWeight = invMpp * a * invZPdf;
+              float zWeight = a * invZPdf;
               mRecord->record(zWeight, z, zPath, zResults);
             } // end if
 
@@ -186,6 +183,8 @@ void EnergyRedistributionRenderer
 
             // purge all malloc'd memory for this sample
             ScatteringDistributionFunction::mPool.freeAll();
+
+            ++mNumSamples;
           } // end for j
         } // end for i
       } // end if

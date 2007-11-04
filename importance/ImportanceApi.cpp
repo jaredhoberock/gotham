@@ -13,6 +13,10 @@
 #include "LuminanceOverVisits.h"
 #include "ExponentImportance.h"
 #include "ThroughputLuminanceImportance.h"
+#include "ConditionalLuminanceOverVisitsImportance.h"
+#include "ConditionalEqualVisitImportance.h"
+#include "ManualImportance.h"
+#include "HierarchicalLuminanceOverVisits.h"
 using namespace boost;
 
 ScalarImportance *ImportanceApi
@@ -60,6 +64,14 @@ ScalarImportance *ImportanceApi
     doFilter = true;
   } // end else
 
+  float radius = 0;
+  a = attr.find("importance::radius");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    radius = atof(any_cast<std::string>(val).c_str());
+  } // end if
+
   // create the importance
   if(importanceName == "luminance")
   {
@@ -72,6 +84,14 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "normalized")
   {
     result = new NormalizedImportance();
+  } // end else if
+  else if(importanceName == "conditionalequalvisit")
+  {
+    result = new ConditionalEqualVisitImportance(doFilter);
+  } // end else if
+  else if(importanceName == "conditionalluminanceovervisits")
+  {
+    result = new ConditionalLuminanceOverVisitsImportance(doFilter);
   } // end else if
   else if(importanceName == "constant")
   {
@@ -96,6 +116,14 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "throughputluminance")
   {
     result = new ThroughputLuminanceImportance();
+  } // end else if
+  else if(importanceName == "manual")
+  {
+    result = new ManualImportance();
+  } // end else if
+  else if(importanceName == "hierarchicalluminanceovervisits")
+  {
+    result = new HierarchicalLuminanceOverVisits(doFilter, radius);
   } // end else if
   else
   {
