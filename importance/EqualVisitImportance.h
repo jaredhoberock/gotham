@@ -45,7 +45,6 @@ class EqualVisitImportance
      *  \param xPath The Path corresponding to x.
      *  \param results The list of PathSampler Results resulting from xPath.
      *  \return The scalar importance of x.
-     *  \note This method must be implemented in a derived class.
      */
     virtual float evaluate(const PathSampler::HyperPoint &x,
                            const Path &xPath,
