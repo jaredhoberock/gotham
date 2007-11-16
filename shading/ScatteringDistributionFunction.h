@@ -229,7 +229,7 @@ class ScatteringDistributionFunction
 
     /*! Overload the new operator.
      */
-    void *operator new(unsigned int size);
+    void *operator new(size_t size);
 
     /*! This method clones this ScatteringDistributionFunction.
      *  \param allocator The FunctionAllocator to allocate from.

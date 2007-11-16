@@ -7,7 +7,7 @@
 #include "ScatteringDistributionFunction.h"
 
 void *Fresnel
-  ::operator new(unsigned int size)
+  ::operator new(size_t size)
 {
   return ScatteringDistributionFunction::mPool.malloc();
 } // end Fresnel::operator new()

@@ -40,7 +40,7 @@ class Fresnel
 
     /*! Overload the new operator.
      */
-    void *operator new(unsigned int size);
+    void *operator new(size_t size);
 }; // end Fresnel
 
 class FresnelDielectric

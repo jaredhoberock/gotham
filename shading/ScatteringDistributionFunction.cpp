@@ -25,7 +25,7 @@ Spectrum ScatteringDistributionFunction
 } // end ScatteringDistributionFunction::evaluate()
 
 void *ScatteringDistributionFunction
-  ::operator new(unsigned int size)
+  ::operator new(size_t size)
 {
   return mPool.malloc();
 } // end ScatteringDistributionFunction::operator new()
