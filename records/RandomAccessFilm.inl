@@ -46,8 +46,8 @@ const RandomAccessFilm::Pixel &RandomAccessFilm
 } // end RandomAccessFilm::pixel()
 
 RandomAccessFilm::Pixel &RandomAccessFilm
-  ::raster(const unsigned int px,
-           const unsigned int py)
+  ::raster(const size_t px,
+           const size_t py)
 {
   return Parent1::raster(px,py);
 } // end RandomAccessFilm::raster()
@@ -171,7 +171,7 @@ RandomAccessFilm &RandomAccessFilm
 
 void RandomAccessFilm
   ::getRasterPosition(const float u, const float v,
-                      unsigned int &i, unsigned int &j) const
+                      size_t &i, size_t &j) const
 {
   i = column(u);
   j = row(v);
@@ -196,9 +196,9 @@ void RandomAccessFilm
   // now resize ourself
   resize(w,h);
 
-  for(unsigned int y = 0; y < getHeight(); ++y)
+  for(size_t y = 0; y < getHeight(); ++y)
   {
-    for(unsigned int x = 0; x < getWidth(); ++x)
+    for(size_t x = 0; x < getWidth(); ++x)
     {
       // flip the image because EXR is stored ass-backwards
       raster(x,y)[0] = pixels[h-1-y][x].r;

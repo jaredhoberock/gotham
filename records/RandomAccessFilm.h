@@ -73,8 +73,8 @@ class RandomAccessFilm
      *  \param py A raster coordinate in [0,mHeight).
      *  \return A reference to the pixel at (px,py).
      */
-    inline Pixel &raster(const unsigned int px,
-                         const unsigned int py);
+    inline Pixel &raster(const size_t px,
+                         const size_t py);
 
     /*! This method returns a const reference to the pixel
      *  at raster location (px,py).
@@ -129,7 +129,7 @@ class RandomAccessFilm
      *  \param j The raster column corresponding to v is returned here.
      */
     inline void getRasterPosition(const float u, const float v,
-                                  unsigned int &i, unsigned int &j) const;
+                                  size_t &i, size_t &j) const;
 
     /*! This method writes this RandomAccessFilm to the given filename.
      *  \param filename The name of the file to write to.

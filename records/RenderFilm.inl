@@ -44,7 +44,7 @@ void RenderFilm
   ::deposit(const float px, const float py,
             const Spectrum &s)
 {
-  unsigned int rx, ry;
+  size_t rx, ry;
   getRasterPosition(px, py, rx, ry);
   deposit(rx, ry, s);
 } // end RenderFilm::deposit()
