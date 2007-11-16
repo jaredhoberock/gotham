@@ -158,7 +158,7 @@ const RandomAccessFilm::Pixel &RenderFilm
 } // end RenderFilm::pixel()
 
 const RandomAccessFilm::Pixel &RenderFilm
-  ::raster(const unsigned int i, const unsigned int j) const
+  ::raster(const size_t i, const size_t j) const
 {
   return Parent1::raster(i,j);
 } // end RenderFilm::raster()

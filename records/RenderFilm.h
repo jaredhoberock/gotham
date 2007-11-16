@@ -157,8 +157,8 @@ class RenderFilm
      *  \param j The row index of the raster location of interest.
      *  \return A const reference to the pixel at raster location (i,j).
      */
-    inline const Parent1::Pixel &raster(const unsigned int i,
-                                        const unsigned int j) const;
+    inline const Parent1::Pixel &raster(const size_t i,
+                                        const size_t j) const;
 
     /*! This method is called before rendering and clears
      *  this RenderFilm to black.
