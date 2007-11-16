@@ -1,0 +1,15 @@
+import os
+import glob
+
+exec open('../build-env.py')
+
+# find all .cpps in the current directory
+sources = []
+pattern = os.path.join(os.getcwd(), "*.cpp")
+for fullpath in glob.glob(pattern):
+  basename = os.path.basename(fullpath)
+  sources.append(basename)
+
+# create a library 
+GothamLibrary('records', sources)
+
