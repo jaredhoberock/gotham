@@ -38,7 +38,7 @@ float HierarchicalLuminanceOverVisits
   mapToImage(yResults[0], y, yPath, yPixel[0], yPixel[1]);
 
   // find the coarsest miplevel where they have differing raster locations
-  gpcpu::uint2 xRaster, yRaster;
+  gpcpu::size2 xRaster, yRaster;
   gpcpu::int2 diff;
   int level = image->getNumMipLevels();
   unsigned int manhattanDistance;

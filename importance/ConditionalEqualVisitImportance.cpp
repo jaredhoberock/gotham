@@ -34,7 +34,7 @@ float ConditionalEqualVisitImportance
   mapToImage(yResults[0], y, yPath, yPixel[0], yPixel[1]);
 
   // find their raster positions
-  gpcpu::uint2 xRaster, yRaster;
+  gpcpu::size2 xRaster, yRaster;
   mAcceptance->getRasterPosition(xPixel[0], xPixel[1], xRaster[0], xRaster[1]);
   mAcceptance->getRasterPosition(yPixel[0], yPixel[1], yRaster[0], yRaster[1]);
 
