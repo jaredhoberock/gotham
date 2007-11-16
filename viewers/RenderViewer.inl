@@ -34,7 +34,7 @@ void RenderViewer
       texture = &gpuFilm->mTexture;
     } // end if
 
-    float *data = reinterpret_cast<float*>(&mImage->raster(0,0));
+    const float *data = reinterpret_cast<const float*>(&mImage->raster(0,0));
     GLenum datatype = GL_FLOAT_RGB16_NV;
 
     mTexture.init(datatype,
