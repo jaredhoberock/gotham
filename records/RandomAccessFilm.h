@@ -82,8 +82,8 @@ class RandomAccessFilm
      *  \param py A raster coordinate in [0,mHeight).
      *  \return A const reference to the pixel at (px,py).
      */
-    inline const Pixel &raster(const unsigned int px,
-                               const unsigned int py) const;
+    inline const Pixel &raster(const size_t px,
+                               const size_t py) const;
 
     /*! This method fills this Film with the given
      *  pixel value.

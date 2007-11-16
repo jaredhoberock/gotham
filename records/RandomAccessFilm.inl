@@ -53,8 +53,8 @@ RandomAccessFilm::Pixel &RandomAccessFilm
 } // end RandomAccessFilm::raster()
 
 const RandomAccessFilm::Pixel &RandomAccessFilm
-  ::raster(const unsigned int px,
-           const unsigned int py) const
+  ::raster(const size_t px,
+           const size_t py) const
 {
   return Parent1::raster(px,py);
 } // end RandomAccessFilm::raster()
