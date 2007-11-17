@@ -54,12 +54,12 @@ void DebugRenderer
   mScene->getSensors()->sampleSurfaceArea(0.0f, &sensor, temp);
 
   progress.restart(film->getWidth() * film->getHeight());
-  for(unsigned int y = 0;
+  for(size_t y = 0;
       y < film->getHeight();
       ++y, uv[1] += step[1])
   {
     uv[0] = 0;
-    for(unsigned int x = 0;
+    for(size_t x = 0;
         x < film->getWidth();
         ++x, uv[0] += step[0])
     {
@@ -74,7 +74,7 @@ void DebugRenderer
       s.sample(dgSensor, uv[0], uv[1], 0.5f, d, pdf, delta);
       r = Ray(dgSensor.getPoint(), d);
 
-      Spectrum L(0.1f,0.1f,0.1f);
+      Spectrum L(0.0f,0.0f,0.0f);
 
       // intersect the Scene
       if(mScene->intersect(r, inter))
@@ -86,7 +86,7 @@ void DebugRenderer
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
       } // end if
 
-      film->raster(x,y) = L;
+      film->deposit(x,y,L);
 
       // purge all malloc'd memory for this sample
       ScatteringDistributionFunction::mPool.freeAll();
