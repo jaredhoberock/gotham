@@ -17,7 +17,7 @@ def getReleaseCPPFLAGS():
   if os.name == 'nt':
     result = ['/EHsc', '/MD']
   elif os.name == 'posix':
-    result = ['-O3']
+    result = ['-O3', '-fPIC']
   return result
 
 def getDebugCPPFLAGS():
@@ -25,7 +25,7 @@ def getDebugCPPFLAGS():
   if os.name == 'nt':
     result = ['/EHsc', '/MDd']
   elif os.name == 'posix':
-    pass
+    result = ['-fPIC']
   return result;
 
 def getIncludes():
