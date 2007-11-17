@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="path"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{69C1022A-D766-41DC-AF88-B9562F8A5FB2}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="renderers"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{A88B9A35-81FD-4E88-87F0-B38A3F112091}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

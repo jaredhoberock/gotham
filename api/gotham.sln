@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gotham", "gotham.vcproj", "{78F3DA3C-DBC0-4CCD-9CD3-219CADB12E71}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gotham", "gotham.vcproj", "{ECA17F9D-A009-416D-B2ED-666687B0A750}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{78F3DA3C-DBC0-4CCD-9CD3-219CADB12E71}.Debug|Win32.ActiveCfg = Debug|Win32
-		{78F3DA3C-DBC0-4CCD-9CD3-219CADB12E71}.Debug|Win32.Build.0 = Debug|Win32
-		{78F3DA3C-DBC0-4CCD-9CD3-219CADB12E71}.Release|Win32.ActiveCfg = Release|Win32
-		{78F3DA3C-DBC0-4CCD-9CD3-219CADB12E71}.Release|Win32.Build.0 = Release|Win32
+		{ECA17F9D-A009-416D-B2ED-666687B0A750}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ECA17F9D-A009-416D-B2ED-666687B0A750}.Debug|Win32.Build.0 = Debug|Win32
+		{ECA17F9D-A009-416D-B2ED-666687B0A750}.Release|Win32.ActiveCfg = Release|Win32
+		{ECA17F9D-A009-416D-B2ED-666687B0A750}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

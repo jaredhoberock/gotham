@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="primitives"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{C60E8550-13E7-4CB4-BD33-5A64435745CE}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

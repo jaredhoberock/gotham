@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="mutators"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{A6E0F6E0-3277-4AE9-BEDB-8EE1FF7D446F}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

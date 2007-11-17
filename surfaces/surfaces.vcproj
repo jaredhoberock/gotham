@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="surfaces"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{D229D31C-F836-4EBC-838A-0C794972023F}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

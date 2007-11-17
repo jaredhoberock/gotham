@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="rasterizers"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{BB5FD6F0-76DC-4312-B5F3-87AE092F1970}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

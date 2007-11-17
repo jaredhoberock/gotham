@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="gotham"
-	ProjectGUID="{78F3DA3C-DBC0-4CCD-9CD3-219CADB12E71}"
+	ProjectGUID="{ECA17F9D-A009-416D-B2ED-666687B0A750}"
 	RootNamespace="shading"
 	Keyword="Win32Proj"
 	>

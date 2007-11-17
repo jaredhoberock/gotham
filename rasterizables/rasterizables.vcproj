@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="rasterizables"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{97427859-BD6F-40C1-81A5-5CA090EB6776}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>

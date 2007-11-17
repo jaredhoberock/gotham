@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="importance"
-	ProjectGUID="{96FD508D-44B1-4A25-838B-16CB820AE4C3}"
+	ProjectGUID="{504D67C2-B226-4662-96B0-927C22242BAB}"
 	RootNamespace="geometry"
 	Keyword="Win32Proj"
 	>
