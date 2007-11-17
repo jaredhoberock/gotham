@@ -8,29 +8,19 @@ env = GothamReleaseEnvironment()
 
 # add dependencies
 
-# with msvc, boost figures out which libraries to link
-if os.name == 'posix':
-  env.Append(LIBS = ['boost_python'])
-  env.Append(LIBS = ['boost_thread'])
-
-env.Append(LIBS = ['renderers'])
-env.Append(LIBS = ['rasterizables'])
-env.Append(LIBS = ['rasterizers'])
-env.Append(LIBS = ['importance'])
-env.Append(LIBS = ['mutators'])
-env.Append(LIBS = ['path'])
-env.Append(LIBS = ['primitives'])
-env.Append(LIBS = ['surfaces'])
-# don't link libshading as a static library
-#env.Append(LIBS = ['shading'])
-env.Append(LIBS = ['geometry'])
-
 # openexr libraries
 env.Append(LIBS = ['Iex'])
 env.Append(LIBS = ['IlmImf'])
 env.Append(LIBS = ['Imath'])
 env.Append(LIBS = ['Half'])
 env.Append(LIBS = ['z'])
+
+#env.Program('testVariance', ['testVariance.cpp'])
+
+# with msvc, boost figures out which libraries to link
+if os.name == 'posix':
+  env.Append(LIBS = ['boost_python'])
+  env.Append(LIBS = ['boost_thread'])
 
 # qt libraries
 env.Append(LIBS = ['QtCore'])
@@ -51,9 +41,24 @@ env.Append(LIBPATH = ['../geometry',
                       '../primitives',
                       '../rasterizables',
                       '../rasterizers',
+                      '../records',
                       '../renderers',
                       '../surfaces',
                       '../shading'])
+
+# gotham libraries
+env.Append(LIBS = ['records'])
+env.Append(LIBS = ['renderers'])
+env.Append(LIBS = ['rasterizables'])
+env.Append(LIBS = ['rasterizers'])
+env.Append(LIBS = ['importance'])
+env.Append(LIBS = ['mutators'])
+env.Append(LIBS = ['path'])
+env.Append(LIBS = ['primitives'])
+env.Append(LIBS = ['surfaces'])
+# don't link libshading as a static library
+#env.Append(LIBS = ['shading'])
+env.Append(LIBS = ['geometry'])
 
 #env.Append(CPPPATH = getIncludes()['python'])
 
