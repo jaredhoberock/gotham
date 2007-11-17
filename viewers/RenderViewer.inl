@@ -53,9 +53,13 @@ void RenderViewer
     if(mProgress.count() < mProgress.expected_count())
     {
       // XXX DESIGN kill this dynamic_cast somehow
-      float spp = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get())->getNumSamples();
-      spp /= (mImage->getWidth() * mImage->getHeight());
-      scale = 1.0f / spp;
+      const MonteCarloRenderer *mc = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get());
+      if(mc)
+      {
+        float spp = mc->getNumSamples();
+        spp /= (mImage->getWidth() * mImage->getHeight());
+        scale = 1.0f / spp;
+      } // end if
     } // end else
 
     p.setUniform1f("scale", powf(2.0f, mExposure) * scale);
