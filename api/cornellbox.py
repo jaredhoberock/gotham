@@ -64,32 +64,23 @@ g.rotate(180.0, 1.0, 0, 0)
 g.mesh(unitSquare[0], unitSquare[1])
 g.popMatrix()
 
-#g.attribute("path::sampler", "kajiya")
-#g.attribute("path::sampler", "simplebidirectional")
-#g.attribute("path::sampler", "kelemen")
-#g.attribute("path::sampler", "simplerussianroulette")
-g.attribute("path::sampler", "simpleforwardrussianroulette")
-#g.attribute("renderer::algorithm", "metropolis")
-#g.attribute("mutator::strategy", "stratified")
-#g.attribute("importance::function", "normalized")
+# mirror ball
+g.material('mirror', 'Kr', (1.0, 1.0, 1.0))
+g.sphere(-0.4, -0.66, -0.15, 0.33)
+
+# glass ball
+g.material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
+g.sphere(0.4,-0.66,0.25,0.33)
+
+g.attribute("path::sampler", "kajiya")
 g.attribute("renderer::algorithm", "montecarlo")
 g.attribute("path::maxlength", "7")
-#g.attribute("path::maxlength", "20")
-#g.attribute("path::maxlength", "32")
-#g.attribute("path::russianroulette::function", "maxoverspectrum")
-g.attribute("path::russianroulette::function", "constant")
-g.attribute("path::russianroulette::continueprobability", "0.5")
 
 (w,h) = (512,512)
-#(w,h) = (256,256)
-#(w,h) = (128,128)
 g.pushMatrix()
 g.lookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
-#g.lookAt( (0,0,2.75), (0,0,-1), (0,1,0) )
 g.camera(float(w) / h, 60.0, 0.01)
 g.popMatrix()
 
 g.render((w,h), 4)
-#g.render((w,h), 10)
-#g.render((w,h), 32)
 
