@@ -17,8 +17,7 @@
 #include "../primitives/PrimitiveBSP.h"
 #include "../viewers/RenderViewer.h"
 #include "../renderers/RendererApi.h"
-#include "../records/RenderFilm.h"
-#include "../records/GpuFilm.h"
+#include "../records/RecordApi.h"
 #include "../rasterizables/RasterizableScene.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../rasterizables/RasterizableSurfacePrimitive.h"
@@ -192,33 +191,17 @@ void Gotham
   // create a new Renderer
   mRenderer.reset(RendererApi::renderer(mAttributeStack.back()));
 
-  // name of the output?
-  std::string outfile = "";
-  a = mAttributeStack.back().find("renderer::outfile");
-  if(a != mAttributeStack.back().end())
-  {
-    any val = a->second;
-    outfile = any_cast<std::string>(val).c_str();
-  } // end if
+  // create a Record
+  shared_ptr<Record> record;
+  char buf[33];
+  sprintf(buf, "%d", width);
+  mAttributeStack.back()["record::width"] = std::string(buf);
+  sprintf(buf, "%d", height);
+  mAttributeStack.back()["record::height"] = std::string(buf);
+  record.reset(RecordApi::record(mAttributeStack.back()));
 
-  // should we apply a tonemap on post?
-  bool doTonemap = false;
-  a = mAttributeStack.back().find("renderer::tonemap");
-  if(a != mAttributeStack.back().end())
-  {
-    any val = a->second;
-    doTonemap = (any_cast<std::string>(val) == std::string("true"));
-  } // end if
-
-  // give everything to the Renderer
+  // give everything to the renderer
   mRenderer->setScene(s);
-  //shared_ptr<RenderFilm> film(new GpuFilm<RenderFilm>());
-  //shared_ptr<RenderFilm> film(new GpuFilterFilm<RenderFilm>());
-  RenderFilm *film = new RenderFilm(width,height,outfile);
-  film->resize(width,height);
-  film->setFilename(outfile);
-  film->setApplyTonemap(doTonemap);
-  shared_ptr<Record> record(film);
   mRenderer->setRecord(record);
 
   // headless render?
@@ -459,7 +442,7 @@ void Gotham
   attr["viewer"] = toAdd;
 
   toAdd = std::string("gotham.exr");
-  attr["renderer::outfile"] = toAdd;
+  attr["record::outfile"] = toAdd;
 
   toAdd = std::string("");
   attr["name"] = toAdd;
