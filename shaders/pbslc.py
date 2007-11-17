@@ -252,7 +252,9 @@ if os.name == 'posix':
                     LIBS = libs,
                     LIBPATH = libpath,
                     SHLIBPREFIX = '',
-                    tools = ['default', 'intelc'])
+                    # we should automatically pick between icc and whatever is the default
+                    #tools = ['default', 'intelc'])
+                    tools = ['default'])
 elif os.name == 'nt':
   env = Environment(CPPPATH = includes,
                     CPPFLAGS = ['/Ox', '/EHsc', '/MD', '/DIMPORTDLL=1'],
