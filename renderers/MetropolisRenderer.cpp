@@ -238,25 +238,6 @@ void MetropolisRenderer
   mImportance->preprocess(mRandomSequence, mScene, mMutator, *this);
 } // end MetropolisRenderer::preprocess()
 
-std::string MetropolisRenderer
-  ::getRenderParameters(void) const
-{
-  std::string result = Parent::getRenderParameters();
-
-  // append the name of the path sampler
-  result += typeid(*mMutator->getSampler()).name();
-  result += '-';
-
-  // append the name of the mutator
-  result += typeid(*mMutator).name();
-  result += '-';
-
-  // append the name of the importance
-  result += typeid(*mImportance).name();
-
-  return result;
-} // end MetropolisRenderer::getRenderParameters()
-
 void MetropolisRenderer
   ::postRenderReport(const double elapsed) const
 {

@@ -9,6 +9,9 @@
 #include "MetropolisRenderer.h"
 #include "DebugRenderer.h"
 #include "TargetRaysRenderer.h"
+#include "RecursiveMetropolisRenderer.h"
+#include "VarianceRenderer.h"
+#include "BatchMeansRenderer.h"
 #include "../path/PathApi.h"
 #include "../mutators/MutatorApi.h"
 #include "../importance/ImportanceApi.h"
@@ -91,6 +94,33 @@ Renderer *RendererApi
     {
       result = new MetropolisRenderer(z, mutator, importance);
     } // end else
+  } // end else if
+  else if(rendererName == "recursivemetropolis")
+  {
+    // create a PathMutator
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+
+    result = new RecursiveMetropolisRenderer(z, mutator, targetRays);
+  } // end else if
+  else if(rendererName == "variance")
+  {
+    // create a PathSampler
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+
+    VarianceRenderer *vr = new VarianceRenderer(z, sampler);
+    result = vr;
+    boost::shared_ptr<Record> v(new RenderFilm(512, 512, "variance.exr"));
+    vr->setVarianceRecord(v);
+  } // end else if
+  else if(rendererName == "batchmeans")
+  {
+    // create a PathMutator
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+
+    // create a ScalarImportance
+    shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
+
+    result = new BatchMeansRenderer(z, mutator, importance);
   } // end else if
   else if(rendererName == "debug")
   {

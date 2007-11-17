@@ -72,12 +72,6 @@ class MetropolisRenderer
      */
     virtual void setRandomSequence(const boost::shared_ptr<RandomSequence> &s);
 
-    /*! This method returns a string describing the parameters
-     *  of the render.
-     *  \return A string describing the render.
-     */
-    virtual std::string getRenderParameters(void) const;
-
     /*! This method returns a pointer to mAcceptanceImage.
      *  \return &mAcceptanceImage.
      */
