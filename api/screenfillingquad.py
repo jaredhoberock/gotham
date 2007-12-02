@@ -39,7 +39,7 @@ g.pushMatrix()
 # why is 1.75 the magic number?
 g.translate(0,0,1.75)
 aspect = float(w) / h
-g.camera(aspect, 45.0, 0.0)
+g.camera(aspect, 60.0, 0.0)
 g.popMatrix()
 
 g.render((w,h))
