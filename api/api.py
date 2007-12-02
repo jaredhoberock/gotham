@@ -29,10 +29,11 @@ def mul(A, x):
 
 class Gotham2(Gotham):
   # standard shaderpaths
-  if os.name == 'posix':
-    shaderpaths = [".","/home/jared/dev/src/gotham/shaders"]
-  elif os.name == 'nt':
-    shaderpaths = [".","c:/dev/src/gotham/shaders"]
+  shaderpaths = ['.']
+  try:
+    shaderpaths += [os.environ['GOTHAMHOME'] + '/shaders']
+  except:
+    print 'Warning: $GOTHAMHOME undefined! Some shaders may not be found.'
 
   def material(self, name, *parms):
     # XXX this is getting ugly
