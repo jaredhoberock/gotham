@@ -5,8 +5,8 @@ import objtogoth
 g = api.Gotham2()
 
 g.material('matte', "Kd", (1.0,1.0,1.0))
-(vertices, indices) = objtogoth.objtogoth("/home/jared/dev/data/geometry/obj/cabin.obj")
-g.mesh(vertices, indices)
+(vertices, uvs, indices) = objtogoth.objtogoth("/home/jared/dev/data/geometry/obj/cabin.obj")
+g.mesh(vertices, uvs, indices)
 
 # light
 g.material('light', 'power', (3500 * 500,3500 * 500,3500 * 500))
