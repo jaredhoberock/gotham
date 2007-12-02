@@ -59,9 +59,9 @@ class VarianceRenderer
      *  \param n The number of samples generated.
      *  \param samples The non-zero sample values.
      */
-    virtual void depositVariance(const unsigned int px,
-                                 const unsigned int py,
-                                 const unsigned int n,
+    virtual void depositVariance(const size_t px,
+                                 const size_t py,
+                                 const size_t n,
                                  const std::vector<Spectrum> &samples);
 
     virtual void depositVariance(const PathSampler::HyperPoint &x,

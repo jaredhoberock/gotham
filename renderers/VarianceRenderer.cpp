@@ -256,7 +256,7 @@ void VarianceRenderer
 
   unsigned int n = 0;
 
-  gpcpu::uint2 raster, oldRaster(0, 0); 
+  gpcpu::size2 raster, oldRaster(0, 0); 
 
   std::vector<Spectrum> samples;
 
@@ -264,8 +264,8 @@ void VarianceRenderer
   while(sequence(px,py, z(), z()))
   {
     variance->getRasterPosition(px, py, raster[0], raster[1]);
-    raster[0] = std::min(raster[0], film->getWidth() - 1);
-    raster[1] = std::min(raster[1], film->getHeight() - 1);
+    raster[0] = std::min<size_t>(raster[0], film->getWidth() - 1);
+    raster[1] = std::min<size_t>(raster[1], film->getHeight() - 1);
 
     //if(raster[0] != oldRaster[0] || raster[1] != oldRaster[1])
     //{
@@ -325,9 +325,9 @@ void VarianceRenderer
 } // end VarianceRenderer::kernel()
 
 void VarianceRenderer
-  ::depositVariance(const unsigned int px,
-                    const unsigned int py,
-                    const unsigned int n,
+  ::depositVariance(const size_t px,
+                    const size_t py,
+                    const size_t n,
                     const std::vector<Spectrum> &samples)
 {
   // XXX TODO kill this grossness
@@ -412,11 +412,11 @@ void VarianceRenderer
   // sum
   //std::cerr << "px: " << px << std::endl;
   //std::cerr << "py: " << py << std::endl;
-  unsigned int rx, ry;
+  size_t rx, ry;
   RenderFilm *vFilm = dynamic_cast<RenderFilm*>(mVarianceRecord.get());
   vFilm->getRasterPosition(px, py, rx, ry);
-  rx = std::min(rx, vFilm->getWidth()-1);
-  ry = std::min(ry, vFilm->getHeight()-1);
+  rx = std::min<size_t>(rx, vFilm->getWidth()-1);
+  ry = std::min<size_t>(ry, vFilm->getHeight()-1);
 
   vFilm->deposit(rx,ry, delta * (sample - mean));
 } // end VarianceRenderer::depositVariance()
