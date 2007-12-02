@@ -12,6 +12,13 @@ svn checkout http://graphics.cs.uiuc.edu/svn/jared/src dev/src
 # you may want to put this in your .bashrc or similar script
 export GOTHAMHOME=<absolute root here>/src/gotham
 
+# update PATH to point to gotham's bin directory
+export PATH=$PATH:$GOTHAMHOME/bin
+
+# update PYTHONPATH and LD_LIBRARY_PATH to point to gotham's lib directory
+export PYTHONPATH=$PYTHONPATH:$GOTHAMHOME/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GOTHAMHOME/lib
+
 # install scons, our build system
 sudo apt-get install scons
 
@@ -55,5 +62,6 @@ scons
 
 # render a simple scene
 # press 'r' to start the render
+cd ../scenes
 ./cornellbox.py
 

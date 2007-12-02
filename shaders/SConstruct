@@ -1,17 +1,15 @@
 import os
 import glob
 
-# XXX fix this path issue
-if os.name == 'posix':
-  bld = Builder(action = '/home/jared/dev/src/gotham/shaders/pbslc.py $SOURCE')
-elif os.name == 'nt':
-  bld = Builder(action = 'c:/dev/src/gotham/shaders/pbslc.py $SOURCE')
+bld = Builder(action = 'pbslc $SOURCE')
 env = Environment(BUILDERS = {'Material' : bld},
                   suffix = '.so',
                   src_suffix = '.pbsl')
 
 # set GOTHAMHOME in the scons environment
 env['ENV']['GOTHAMHOME'] = os.environ['GOTHAMHOME']
+# add the bin directory to the path
+env['ENV']['PATH'] += ':' + env['ENV']['GOTHAMHOME'] + '/bin'
 
 # find all .pbsls in the current directory
 sources = []

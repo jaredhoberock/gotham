@@ -65,12 +65,15 @@ env.Append(LIBPATH = ['../geometry',
 # create a shared library
 gothamLib = env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'], SHLIBPREFIX = '')
 
-# install the necessary files at $GOTHAMHOME/lib
-# XXX it would be nice if we could compile api.py and gotham.so together into a single file someway
+# install the distribution
 try:
   dir = os.environ["GOTHAMHOME"] + '/lib'
   Default(env.Install(dir, source = gothamLib))
   Default(env.Install(dir, source = 'api.py'))
+  Default(env.Install(dir, source = 'objtogoth.py'))
+  Default(env.Install(dir, source = 'wavefront.py'))
+  dir = os.environ["GOTHAMHOME"] + '/bin'
+  Default(env.Install(dir, source = 'pbslc'))
 except:
   print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
 
