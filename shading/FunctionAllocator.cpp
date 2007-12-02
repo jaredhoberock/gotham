@@ -25,8 +25,6 @@
 FunctionAllocator
   ::FunctionAllocator(void)
 {
-  typedef Accomodator<8 * sizeof(size_t)> Block;
-
   // XXX TODO get these lines to compile on 64b (they should all assert true)
   //// assert that any known ScatteringDistributionFunction will fit into a Block
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerspectiveSensor));
@@ -46,7 +44,6 @@ FunctionAllocator
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelDielectric));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelConductor));
 
-  
   assert(sizeof(Block) >= sizeof(PerspectiveSensor));
   assert(sizeof(Block) >= sizeof(Lambertian));
   assert(sizeof(Block) >= sizeof(HemisphericalEmission));
