@@ -18,7 +18,6 @@
 #include <QKeyEvent>
 #include <commonviewer/CommonViewer.h>
 #include "../primitives/Scene.h"
-#include "../rasterizers/SceneRasterizer.h"
 #include <boost/shared_ptr.hpp>
 
 class SceneViewer
@@ -45,7 +44,6 @@ class SceneViewer
     inline virtual void keyPressEvent(Parent::KeyEvent *e);
 
     boost::shared_ptr<Scene> mScene;
-    SceneRasterizer mRasterizeScene;
 }; // end SceneViewer
 
 #include "SceneViewer.inl"

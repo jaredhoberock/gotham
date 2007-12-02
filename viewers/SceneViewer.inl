@@ -17,9 +17,6 @@ void SceneViewer
 {
   mScene = s;
 
-  // hand to rasterizer
-  mRasterizeScene.setPrimitive(s);
-
   // fit the view to the scene
   BoundingBox b;
   mScene->getBoundingBox(b);
@@ -37,7 +34,6 @@ void SceneViewer
 void SceneViewer
   ::draw(void)
 {
-  mRasterizeScene();
   Rasterizable *r = dynamic_cast<Rasterizable*>(mScene.get());
   if(r != 0)
   {
