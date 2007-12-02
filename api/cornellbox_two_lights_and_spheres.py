@@ -56,7 +56,7 @@ g.popMatrix()
 
 g.material('phongreflection', 'Kr', (1.0, 1.0, 1.0), 'eta', 2.485, 'exponent', 100000)
 g.material('mirror', 'Kr', (1.0, 1.0, 1.0))
-#g.sphere(-0.4, -0.66, -0.15, 0.33)
+g.sphere(-0.4, -0.66, -0.15, 0.33)
 
 # floor
 g.material('phongreflection', 'Kr', (0.8, 0.8, 0.8), 'eta', 2.485, 'exponent', 25)
