@@ -7,6 +7,11 @@ sudo apt-get install subversion
 # checkout the code from the repository
 svn checkout http://graphics.cs.uiuc.edu/svn/jared/src dev/src
 
+# set the environment variable GOTHAMHOME to point to the gotham directory under src/
+# for example, on my machine it is /home/jared/dev/src/gotham
+# you may want to put this in your .bashrc or similar script
+export GOTHAMHOME=<absolute root here>/src/gotham
+
 # install scons, our build system
 sudo apt-get install scons
 
