@@ -41,11 +41,28 @@ FunctionAllocator
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerfectGlass));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(ThinGlass));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(AshikhminShirleyReflection));
-
+  
   //// assert that either Fresnel will fit into a block
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelDielectric));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelConductor));
 
+  
+  assert(sizeof(Block) >= sizeof(PerspectiveSensor));
+  assert(sizeof(Block) >= sizeof(Lambertian));
+  assert(sizeof(Block) >= sizeof(HemisphericalEmission));
+  assert(sizeof(Block) >= sizeof(SpecularReflection));
+  assert(sizeof(Block) >= sizeof(SpecularTransmission));
+  assert(sizeof(Block) >= sizeof(PhongReflection));
+  assert(sizeof(Block) >= sizeof(PhongTransmission));
+  assert(sizeof(Block) >= sizeof(CompositeDistributionFunction));
+  assert(sizeof(Block) >= sizeof(TransparentTransmission));
+  assert(sizeof(Block) >= sizeof(PerfectGlass));
+  assert(sizeof(Block) >= sizeof(ThinGlass));
+  assert(sizeof(Block) >= sizeof(AshikhminShirleyReflection));
+
+  assert(sizeof(Block) >= sizeof(FresnelDielectric));
+  assert(sizeof(Block) >= sizeof(FresnelConductor));
+  
   reserve(32678);
 } // end FunctionAllocator::FunctionAllocator()
 
