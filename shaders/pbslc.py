@@ -234,21 +234,21 @@ BOOST_PYTHON_MODULE(%s)
   #     with an include directory. point to that.
   makefile = '''
 import os
+includes = [os.environ['GOTHAMHOME'] + '/shading']
 if os.name == 'posix':
-  includes = ['/home/jared/dev/src', '/home/jared/dev/src/gotham/shading', '/usr/include/python2.5']
+  includes += ['/home/jared/dev/src', '/usr/include/python2.5']
 elif os.name == 'nt':
-  includes = ['c:/dev/src', 'c:/dev/include', 'c:/dev/src/gotham/shading', 'c:/Python25/include']
+  includes += ['c:/dev/src', 'c:/dev/include', 'c:/Python25/include']
+libpath = os.environ["GOTHAMHOME"] + '/lib'
 if os.name == 'posix':
   # remember gotham doesn't have the 'lib-' prefix
-  libs = [File('/home/jared/dev/src/gotham/api/gotham.so'), 'boost_python']
+  libs = [File(libpath + '/gotham.so'), 'boost_python']
 elif os.name == 'nt':
   # on windows, we need to link to the import library
   libs = ['gotham']
-# fix these path issues
-if os.name == 'posix':
-  libpath = ['/home/jared/dev/src/gotham/api']
-elif os.name == 'nt':
-  libpath = ['c:/dev/src/gotham/api', 'c:/dev/lib', 'c:/Python25/libs']
+# XXX TODO fix these path issues
+if os.name == 'nt':
+  libpath += ['c:/dev/lib', 'c:/Python25/libs']
 env = None
 if os.name == 'posix':
   env = Environment(CPPPATH = includes,
@@ -292,11 +292,15 @@ if os.name == 'nt':
   # call scons
   # XXX cygwin has a fit if you call it scons when its name is scons.bat
   #     fix this nonsense
+  pathToScons = ''
   if os.name == 'posix':
+    pathToScons = 'scons'
     command = 'scons -Q -f %s' % dir + '/' + 'SConstruct' 
   elif os.name == 'nt':
+    pathToScons = 'c:/Python25/scons.bat'
     command = 'c:/Python25/scons.bat -Q -f %s' % dir + '/' + 'SConstruct' 
   os.system(command)
+  #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
   
   # kill the tempfiles
   shutil.rmtree(dir, True)

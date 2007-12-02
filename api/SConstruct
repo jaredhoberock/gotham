@@ -21,8 +21,7 @@ env.Append(LIBS = ['mutators'])
 env.Append(LIBS = ['path'])
 env.Append(LIBS = ['primitives'])
 env.Append(LIBS = ['surfaces'])
-# don't link libshading as a static library
-#env.Append(LIBS = ['shading'])
+env.Append(LIBS = ['shading'])
 env.Append(LIBS = ['geometry'])
 
 # openexr libraries
@@ -60,17 +59,18 @@ env.Append(LIBPATH = ['../geometry',
                       '../records',
                       '../records',
                       '../renderers',
+                      '../shading',
                       '../surfaces'])
 
 # create a shared library
-# XXX this is pretty ugly, but it forces scons to accept the fact
-#     that I want to include libshading.so in the list of sources.
-#     We have to do this because we want to include libshading.so in this
-#     shared library rather than link to it dynamically.
-env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME'] = 1
-#env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp', '../shading/libshading.so'], SHLIBPREFIX = '')
+gothamLib = env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'], SHLIBPREFIX = '')
 
-env.Append(LIBPATH = ['../shading'])
-env.Append(LIBS = ['shading'])
-env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'], SHLIBPREFIX = '')
+# install the necessary files at $GOTHAMHOME/lib
+# XXX it would be nice if we could compile api.py and gotham.so together into a single file someway
+try:
+  dir = os.environ["GOTHAMHOME"] + '/lib'
+  Default(env.Install(dir, source = gothamLib))
+  Default(env.Install(dir, source = 'api.py'))
+except:
+  print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
 

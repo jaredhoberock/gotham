@@ -8,7 +8,7 @@ def getTools():
   elif os.name == 'posix':
     #result = ['default', 'intelc']
     # XXX BUG after upgrading Ubuntu to Gutsy
-    #         Gotham::init() segfaults when compiled with icc
+    #         gotham segfaults when compiled with icc
     result = ['default']
   return result
 

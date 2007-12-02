@@ -8,6 +8,7 @@ SConscript(['geometry/SConstruct',
             'renderers/SConstruct',
             'shading/SConstruct',
             'surfaces/SConstruct',
-# XXX get this dude working
-#           'shaders/SConstruct',
             'api/SConstruct'])
+
+# XXX why doesn't this do anything???
+SConscript(['shaders/SConstruct'])

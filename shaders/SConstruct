@@ -10,6 +10,9 @@ env = Environment(BUILDERS = {'Material' : bld},
                   suffix = '.so',
                   src_suffix = '.pbsl')
 
+# set GOTHAMHOME in the scons environment
+env['ENV']['GOTHAMHOME'] = os.environ['GOTHAMHOME']
+
 # find all .pbsls in the current directory
 sources = []
 pattern = os.path.join(os.getcwd(), "*.pbsl")
@@ -18,6 +21,5 @@ for fullpath in glob.glob(pattern):
   sources.append(basename)
 
 for s in sources:
-  basename = os.path.basename(s)
-  env.Material(basename + '.so',s)
+  env.Material(s.split('.')[0] + '.so',s)
 
