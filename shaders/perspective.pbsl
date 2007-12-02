@@ -4,6 +4,6 @@ sensor(float aspect, float fovy, Point center, Vector right, Vector up, Vector l
 
   // compute the origin of the film plane
   Point o = center + near * look - aspect * right - up;
-  S = new PerspectiveSensor(invArea * Spectrum::white(), aspect, o, right, up);
+  S = perspectiveSensor(invArea * Spectrum::white(), aspect, o, right, up);
 }
 

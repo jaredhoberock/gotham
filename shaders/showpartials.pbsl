@@ -1,6 +1,6 @@
 scattering(void)
 {
   Spectrum s(dpdu.norm(), dpdv.norm(), 0.0f);
-  F = new Lambertian(s);
+  F = diffuse(s);
 } // end scattering()
 

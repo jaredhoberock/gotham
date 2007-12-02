@@ -1,5 +1,5 @@
 scattering(Spectrum Kd)
 {
-  F = new Lambertian(Kd);
+  F = diffuse(Kd);
 } // end scattering()
 

@@ -227,10 +227,6 @@ class ScatteringDistributionFunction
 
     static FunctionAllocator mPool;
 
-    /*! Overload the new operator.
-     */
-    void *operator new(size_t size);
-
     /*! This method clones this ScatteringDistributionFunction.
      *  \param allocator The FunctionAllocator to allocate from.
      *  \return a pointer to a newly-allocated clone of this ScatteringDistributionFunction; 0,
@@ -238,7 +234,15 @@ class ScatteringDistributionFunction
      */
     virtual ScatteringDistributionFunction *clone(FunctionAllocator &allocator) const;
 
+    /*! Allow access to operator new() to ShaderApi.
+     */
+    friend class ShaderApi;
+
   protected:
+    /*! Overload the new operator.
+     */
+    void *operator new(size_t size);
+
     /*! This method evaluates the geometric term common to microfacet scattering models.
      *  \param nDotWo
      *  \param nDotWi

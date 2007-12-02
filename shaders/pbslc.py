@@ -87,6 +87,10 @@ const Vector3 &dpdv = dg.getPointPartials()[1];
   # open the file
   basename = os.path.basename(filename)
   basename = basename.split('.')[0]
+
+  # add 'Shader' to the end of the basename to make it unique
+  # from any of our c++ identifiers
+  className = basename + 'Shader'
   infile = open(filename)
   
   # copy each line without a main(...)
@@ -170,7 +174,7 @@ virtual bool isSensor(void) const
   # XXX put the preamble just before the class definition
   #compileMe += preamble
   
-  compileMe += 'class %s : public Material\n' % basename
+  compileMe += 'class %s : public Material\n' % className
   compileMe += '{\n'
   compileMe += 'public:\n'
   compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % basename
@@ -189,7 +193,7 @@ virtual bool isSensor(void) const
   # create shared library export
   compileMe += 'extern "C" Material * createMaterial(void)\n'
   compileMe += '{\n'
-  compileMe += '  return new %s();\n' % basename
+  compileMe += '  return new %s();\n' % className
   compileMe += '}\n'
   
   compileMe += '''
@@ -201,13 +205,13 @@ BOOST_PYTHON_MODULE(%s)
 {
   def("createMaterial", createMaterial, return_value_policy<manage_new_object>());
   class_<%s, bases<Material> >("%s")
-  ''' % (basename,basename,basename)
+  ''' % (basename,className,className)
   for param in scatteringParametersList:
-    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], basename, param[1])
+    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
   for param in emissionParametersList:
-    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], basename, param[1])
+    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
   for param in sensorParametersList:
-    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], basename, param[1])
+    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
   compileMe += '    ;\n'
   
   # close the module

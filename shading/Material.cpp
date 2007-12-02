@@ -5,6 +5,7 @@
 #include "Material.h"
 #include <iostream>
 #include "ScatteringDistributionFunction.h"
+#include "../api/ShaderApi.h"
 
 Material
   ::~Material(void)
@@ -15,19 +16,19 @@ Material
 ScatteringDistributionFunction *Material
   ::evaluateScattering(const DifferentialGeometry &dg) const
 {
-  return new ScatteringDistributionFunction();
+  return ShaderApi::null();
 } // end Material::evaluate()
 
 ScatteringDistributionFunction *Material
   ::evaluateEmission(const DifferentialGeometry &dg) const
 {
-  return new ScatteringDistributionFunction();
+  return ShaderApi::null();
 } // end Material::evaluateEmission()
 
 ScatteringDistributionFunction *Material
   ::evaluateSensor(const DifferentialGeometry &dg) const
 {
-  return new ScatteringDistributionFunction();
+  return ShaderApi::null();
 } // end Material::evaluateSensor()
 
 const char *Material

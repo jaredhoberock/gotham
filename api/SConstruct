@@ -8,6 +8,23 @@ env = GothamReleaseEnvironment()
 
 # add dependencies
 
+# with msvc, boost figures out which libraries to link
+if os.name == 'posix':
+  env.Append(LIBS = ['boost_python'])
+  env.Append(LIBS = ['boost_thread'])
+
+env.Append(LIBS = ['records'])
+env.Append(LIBS = ['renderers'])
+env.Append(LIBS = ['rasterizables'])
+env.Append(LIBS = ['importance'])
+env.Append(LIBS = ['mutators'])
+env.Append(LIBS = ['path'])
+env.Append(LIBS = ['primitives'])
+env.Append(LIBS = ['surfaces'])
+# don't link libshading as a static library
+#env.Append(LIBS = ['shading'])
+env.Append(LIBS = ['geometry'])
+
 # openexr libraries
 env.Append(LIBS = ['Iex'])
 env.Append(LIBS = ['IlmImf'])
@@ -40,27 +57,10 @@ env.Append(LIBPATH = ['../geometry',
                       '../mutators',
                       '../primitives',
                       '../rasterizables',
-                      '../rasterizers',
+                      '../records',
                       '../records',
                       '../renderers',
-                      '../surfaces',
-                      '../shading'])
-
-# gotham libraries
-env.Append(LIBS = ['records'])
-env.Append(LIBS = ['renderers'])
-env.Append(LIBS = ['rasterizables'])
-env.Append(LIBS = ['rasterizers'])
-env.Append(LIBS = ['importance'])
-env.Append(LIBS = ['mutators'])
-env.Append(LIBS = ['path'])
-env.Append(LIBS = ['primitives'])
-env.Append(LIBS = ['surfaces'])
-# don't link libshading as a static library
-#env.Append(LIBS = ['shading'])
-env.Append(LIBS = ['geometry'])
-
-#env.Append(CPPPATH = getIncludes()['python'])
+                      '../surfaces'])
 
 # create a shared library
 # XXX this is pretty ugly, but it forces scons to accept the fact
@@ -68,5 +68,9 @@ env.Append(LIBS = ['geometry'])
 #     We have to do this because we want to include libshading.so in this
 #     shared library rather than link to it dynamically.
 env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME'] = 1
-env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', '../shading/libshading.so'], SHLIBPREFIX = '')
+#env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp', '../shading/libshading.so'], SHLIBPREFIX = '')
+
+env.Append(LIBPATH = ['../shading'])
+env.Append(LIBS = ['shading'])
+env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'], SHLIBPREFIX = '')
 

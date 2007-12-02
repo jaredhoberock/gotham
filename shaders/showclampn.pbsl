@@ -5,6 +5,6 @@ scattering(void)
   float b = N[2] > 0 ? N[2] : 0;
 
   Spectrum n(r, g, b);
-  return new Lambertian(n);
+  return diffuse(n);
 } // end scattering()
 

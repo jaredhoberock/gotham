@@ -40,12 +40,8 @@ sudo make install
 cd ../../
 rm -rf libQGLViewer-2.2.6-3
 
-# build gotham libraries
+# build gotham
 cd dev/src/gotham
-scons
-
-# build gotham shared library
-cd api
 scons
 
 # build gotham shaders

@@ -1,5 +1,5 @@
 scattering(Spectrum Kt)
 {
-  return new TransparentTransmission(Kt);
+  return transparent(Kt);
 } // end scattering()
 

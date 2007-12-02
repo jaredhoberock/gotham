@@ -1,5 +1,5 @@
 scattering(Spectrum Kr, float eta, float exponent)
 {
-  F = new PhongReflection(Kr, eta, exponent);
+  F = glossy(Kr, eta, exponent);
 } // end scattering
 

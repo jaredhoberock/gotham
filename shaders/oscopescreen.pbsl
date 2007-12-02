@@ -16,12 +16,12 @@ emission(Spectrum power)
   os += 0.75f * pulse(f - 0.025f, f + 0.025f, tt);
 
   Spectrum radiosity = os * invArea * power;
-  E = new HemisphericalEmission(radiosity);
+  E = hemisphericalEmission(radiosity);
 } // end emission()
 
 scattering(void)
 {
   // dull glossy reflection
-  F = new PhongReflection(Spectrum(0.5f, 0.5f, 0.5f), 1.5f, 25.0f);
+  F = glossy(Spectrum(0.5f, 0.5f, 0.5f), 1.5f, 25.0f);
 } // end scattering
 

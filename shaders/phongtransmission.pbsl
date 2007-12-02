@@ -1,5 +1,5 @@
 scattering(Spectrum Kt, float etai, float etat, float exponent)
 {
-  F = new PhongTransmission(Kt, etai, etat, exponent);
+  F = glossyRefraction(Kt, etai, etat, exponent);
 } // end scattering
 

@@ -1,6 +1,6 @@
 scattering(void)
 {
   Spectrum s(fabs(UV[0]), fabs(UV[1]), 0);
-  F = new Lambertian(s);
+  F = diffuse(s);
 } // end scattering()
 

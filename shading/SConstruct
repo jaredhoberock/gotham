@@ -13,5 +13,6 @@ for fullpath in glob.glob(pattern):
 # we need to build the shading library as
 # a shared library so its symbols will be available
 # to shaders
-GothamSharedLibrary('shading', sources)
+#GothamSharedLibrary('shading', sources)
+GothamLibrary('shading', sources)
 

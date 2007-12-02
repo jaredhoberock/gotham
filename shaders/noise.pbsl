@@ -2,6 +2,6 @@ scattering(Spectrum Kd)
 {
   float n = 0.5f*(snoise(P) + 1.0f);
   Spectrum c(n,n,n);
-  F = new Lambertian(c);
+  F = diffuse(c);
 } // end scattering
 
