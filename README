@@ -53,15 +53,15 @@ cd ../../
 rm -rf libQGLViewer-2.2.6-3
 
 # build gotham
-cd dev/src/gotham
+cd $GOTHAMHOME
 scons
 
 # build gotham shaders
-cd ../shaders
+cd $GOTHAMHOME/shaders
 scons
 
 # render a simple scene
 # press 'r' to start the render
-cd ../scenes
+cd $GOTHAMHOME/scenes
 ./cornellbox.py
 
