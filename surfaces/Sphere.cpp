@@ -10,6 +10,7 @@
 #include "../geometry/Ray.h"
 #include "../geometry/DifferentialGeometry.h"
 #include <2dmapping/UnitSquareToSphere.h>
+#include <assert.h>
 
 #ifndef PI
 #define PI 3.14159265f
@@ -166,18 +167,33 @@ void Sphere
   // compute partial derivatives
   // 1. get partial derivatives for the hit point
   float zRadius = sqrtf(n[0]*n[0] + n[1]*n[1]);
-  float invZRadius = 1.0f / zRadius;
-  float cosPhi = p[0] * invZRadius;
-  float sinPhi = p[1] * invZRadius;
+  float invZRadius, cosPhi, sinPhi;
 
-  // dpdu
   Vector &dpdu = dg.getPointPartials()[0];
-  dpdu = Vector(-TWO_PI * n[1], TWO_PI * n[0], 0);
-     
-  // dpdv
   Vector &dpdv = dg.getPointPartials()[1];
-  dpdv = Vector(n[2]*cosPhi, n[2]*sinPhi, -mRadius * sinf(minTheta + uv[1]*(maxTheta - minTheta)));
-  dpdv *= (maxTheta - minTheta);
+
+  if(zRadius == 0)
+  {
+    // handle singularity
+    cosPhi = 0;
+    sinPhi = 1;
+
+    dpdv = (maxTheta - minTheta) * Vector(n[2] * cosPhi, n[2] * sinPhi, -mRadius * sinf(theta));
+    dpdu = dpdv.cross(n);
+  } // end if
+  else
+  {
+    cosPhi = p[0] * invZRadius;
+    sinPhi = p[1] * invZRadius;
+    invZRadius = 1.0f / zRadius;
+
+    // dpdu
+    dpdu = Vector(-TWO_PI * n[1], TWO_PI * n[0], 0);
+       
+    // dpdv
+    dpdv = Vector(n[2]*cosPhi, n[2]*sinPhi, -mRadius * sinf(minTheta + uv[1]*(maxTheta - minTheta)));
+    dpdv *= (maxTheta - minTheta);
+  } // end else
 
   // 2. get partial derivatives for the Normal
   Vector d2Pduu = -(TWO_PI * TWO_PI) * Vector(n[0], n[1], 0);
@@ -205,6 +221,9 @@ void Sphere
 
   // force an orthonormal basis
   dg.setBinormal(dg.getNormal().cross(dg.getTangent()));
+
+  assert(dg.getTangent()[0] == dg.getTangent()[0]);
+  assert(dg.getBinormal()[0] == dg.getBinormal()[0]);
 } // end Sphere::getDifferentialGeometry()
 
 float Sphere
