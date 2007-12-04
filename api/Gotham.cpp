@@ -221,6 +221,10 @@ void Gotham
     RenderViewer v;
     v.resize(width, height);
 
+    // title the window the name of the outfile
+    a = mAttributeStack.back().find("record::outfile");
+    v.setWindowTitle(any_cast<std::string>(a->second).c_str());
+
     // everything to the viewer
     v.setScene(s);
 
