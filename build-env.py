@@ -25,7 +25,7 @@ def getDebugCPPFLAGS():
   if os.name == 'nt':
     result = ['/EHsc', '/MDd']
   elif os.name == 'posix':
-    result = ['-fPIC']
+    result = ['-fPIC', '-g']
   return result;
 
 def getIncludes():
