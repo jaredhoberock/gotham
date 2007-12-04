@@ -815,3 +815,18 @@ float Path
   return sum;
 } // end Path::computePowerHeuristicWeightEyeSubpaths()
 
+bool Path
+  ::isSane(void) const
+{
+  for(size_t i = 0; i != getSubpathLengths().sum(); ++i)
+  {
+    const PathVertex &v = operator[](i);
+    if(v.mScattering == 0 && v.mEmission == 0 && v.mSensor == 0)
+    {
+      return false;
+    } // end if
+  } // end for i
+
+  return true;
+} // end Path::isSane()
+

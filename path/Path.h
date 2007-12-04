@@ -304,6 +304,11 @@ class Path
      */
     bool clone(Path &dst, FunctionAllocator &allocator) const;
 
+    /*! This method does a check to ensure this Path's PathVertices are sane.
+     *  \return true if each PathVertex has one of: mScattering, mEmission, or mSensor; false, otherwise.
+     */
+    bool isSane(void) const;
+
     /*! This static method computes a MIS weight for a Path with the power heuristic.
      *  \param scene The Scene containing the Path.
      *  \param minimumLightSubpathLength The minimum length of a light subpath to consider.
