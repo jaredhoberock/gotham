@@ -129,8 +129,7 @@ void EnergyRedistributionRenderer
           for(size_t j = 0; j < mChainLength; ++j)
           {
             // mutate & evaluate
-            int whichMutation = smallStepper.smallStep(y,yPath,z,zPath);
-            if(whichMutation != -1)
+            if(smallStepper.smallStep(y,yPath,z,zPath))
             {
               zResults.clear();
               g = mMutator->evaluate(zPath, zResults);
