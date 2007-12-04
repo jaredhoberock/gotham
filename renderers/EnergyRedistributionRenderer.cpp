@@ -85,6 +85,7 @@ void EnergyRedistributionRenderer
   {
     // construct a hyperpoint
     PathSampler::constructHyperPoint(*mRandomSequence, x);
+    ++mNumMonteCarloSamples;
 
     // replace the first two coords with
     // pixel samples
@@ -145,6 +146,8 @@ void EnergyRedistributionRenderer
               iz = 0;
             } // end else
 
+            ++mNumMutations;
+
             // calculate accept probability
             // we assume the transition pdf ~ 1 for small steps
             a = std::min<float>(1.0f, iz * invIy);
@@ -195,4 +198,14 @@ void EnergyRedistributionRenderer
   // purge the local store
   mLocalPool.freeAll();
 } // end EnergyRedistributionRenderer::kernel()
+
+void EnergyRedistributionRenderer
+  ::postRenderReport(const double elapsed) const
+{
+  Parent::postRenderReport(elapsed);
+
+  std::cout << "Monte Carlo samples: " << mNumMonteCarloSamples << std::endl;
+  std::cout << "Mutations: " << mNumMutations << std::endl;
+  std::cout << "mutation/MC ratio: " << static_cast<float>(mNumMutations) / mNumMonteCarloSamples << std::endl;
+} // end EnergyRedistributionRenderer::postRenderReport()
 

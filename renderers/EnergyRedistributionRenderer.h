@@ -39,6 +39,12 @@ class EnergyRedistributionRenderer
      */
     virtual void kernel(ProgressCallback &progress);
 
+    /*! This method calls the Parent and reports statistics.
+     *  \param elapsed The number of seconds elapsed over the course of
+     *                 the render.
+     */
+    virtual void postRenderReport(const double elapsed) const;
+
     /*! The desired number of mutations per Monte Carlo sample.
      */
     float mMutationsPerSample;
@@ -46,6 +52,14 @@ class EnergyRedistributionRenderer
     /*! The chain length.
      */
     unsigned int mChainLength;
+
+    /*! The number of Monte Carlo samples taken during the render.
+     */
+    unsigned int mNumMonteCarloSamples;
+
+    /*! The number of mutations over the course of the render.
+     */
+    unsigned int mNumMutations;
 }; // end EnergyRedistributionRenderer
 
 #endif // ENERGY_REDISTRIBUTION_RENDERER_H
