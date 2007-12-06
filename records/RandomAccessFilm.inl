@@ -243,3 +243,142 @@ void RandomAccessFilm
   file.writePixels(getHeight());
 } // end RandomAccessFilm::writeEXR()
 
+void RandomAccessFilm
+  ::resample(RandomAccessFilm &target) const
+{
+  gpcpu::float2 targetStep(1.0f / target.getWidth(),
+                           1.0f / target.getHeight());
+
+  // for every pixel of the target
+  Pixel integral;
+  for(size_t ty = 0; ty < target.getHeight(); ++ty)
+  {
+    for(size_t tx = 0; tx < target.getWidth(); ++tx)
+    {
+      // find the rectangle in the [0,1)^2 to integrate 
+      gpcpu::float2 rectStart(tx,ty);
+      rectStart *= targetStep;
+
+      gpcpu::float2 rectEnd = rectStart;
+      rectEnd += targetStep;
+
+      // we need to integrate this rectangle in the source
+      integrateRectangle(rectStart[0], rectStart[1],
+                         rectEnd[0], rectEnd[1],
+                         integral);
+
+      target.raster(tx,ty) = integral;
+    } // end for tx
+  } // end for ty
+} // end RandomAccessFilm::resample()
+
+void RandomAccessFilm
+  ::integrateRectangle(const float xStart, const float yStart,
+                       const float xEnd, const float yEnd,
+                       Pixel &integral) const
+{
+  // this implementation is nasty, but I think it is correct
+
+  integral = Spectrum::black();
+
+  // find the step size of this image
+  gpcpu::float2 step(1.0f / getWidth(), 1.0f / getHeight());
+
+  // get the raster indices of the lower left pixel
+  gpcpu::size2 ll;
+  getRasterPosition(xStart, yStart, ll[0], ll[1]);
+
+  // get the raster indices of the upper right pixel
+  gpcpu::size2 ur;
+  getRasterPosition(xEnd, yEnd, ur[0], ur[1]);
+
+  size_t x = ll[0];
+  size_t y = ll[1];
+  
+  // integrate the lower left pixel
+  // the width of the lower left pixel in the unit square
+  // is min((x+1)*step[0], xEnd) - xStart
+  // the height of the lower left pixel in the unit square
+  // is min((y+1)*step[1], yEnd) - yStart
+  // the mins account for the case where either dimension of the rectangle is
+  // is smaller than a pixel
+  float leftColumnWidth = std::min(static_cast<float>(x+1)*step[0], xEnd) - xStart;
+  float bottomRowHeight = std::min(static_cast<float>(y+1)*step[1], yEnd) - yStart;
+  integral += leftColumnWidth*bottomRowHeight * raster(x, y);
+
+  // now integrate the bottom partial row
+  for(x = x + 1; x < ur[0]; ++x)
+  {
+    // the width of these pixels simply the step size
+    integral += step[0] * bottomRowHeight * raster(x, y);
+  } // end for x
+
+  // calculate the width of the right column
+  // this width is negative if there is no right column
+  float rightColumnWidth = xEnd - step[0] * static_cast<float>(ur[0]);
+
+  // integrate the lower right pixel (if there is one)
+  if(ll[0] != ur[0])
+  {
+    integral += rightColumnWidth*bottomRowHeight * raster(ur[0], y);
+  } // end if
+
+
+
+
+  // now integrate full rows
+  // pixels within a full row have area equal to step.product()
+  float innerPixelsArea = step.product();
+  for(y = ll[1] + 1; y < ur[1]; ++y)
+  {
+    x = ll[0];
+
+    // integrate the left pixel
+    integral += leftColumnWidth * step[1] * raster(x, y);
+
+    // now integrate the inner row
+    for(x = x + 1; x < ur[0]; ++x)
+    {
+      integral += innerPixelsArea * raster(x,y);
+    } // end for x
+
+    // now integrate the right pixel (if there is one)
+    if(ll[0] != ur[0])
+    {
+      integral += rightColumnWidth * step[1] * raster(ur[0], y);
+    } // end if
+  } // end for
+
+  
+
+  // now integrate the top partial row (if these exist)
+  if(ll[1] != ur[1])
+  {
+    y = ur[1];
+    x = ll[0];
+
+    // calculate the height of the top row
+    // this height is negative if there is no top row
+    float topRowHeight = yEnd - step[1] * static_cast<float>(ur[1]);
+
+    // integrate the upper left pixel
+    integral += leftColumnWidth * topRowHeight * raster(x,y);
+
+    // now integrate the top partial row
+    for(x = x + 1; x < ur[0]; ++x)
+    {
+      // the width of these pixels simply the step size
+      integral += step[0] * topRowHeight * raster(x, y);
+    } // end for x
+
+    // now integrate the right pixel (if there is one)
+    if(ll[0] != ur[0])
+    {
+      integral += rightColumnWidth*topRowHeight * raster(ur[0], y);
+    } // end if
+  } // end if
+
+  // now divide by the area of integration
+  integral /= ((xEnd-xStart) * (yEnd - yStart));
+} // end RandomAccessFilm::integrateRectangle()
+

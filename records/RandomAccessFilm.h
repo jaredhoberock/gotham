@@ -143,6 +143,23 @@ class RandomAccessFilm
      */
     inline void readEXR(const char *filename);
 
+    /*! This method resamples this RandomAccessFilm into the given target.
+     *  \param target The RandomAccessFilm to resample to.
+     */
+    inline void resample(RandomAccessFilm &target) const;
+
+    /*! This method integrates a rectangle in this RandomAccessFilm and returns
+     *  the value
+     *  \param xStart The x-coordinate of the lower left hand corner of the rectangle.
+     *  \param yStart The y-coordinate of the lower left hand corner of the rectangle.
+     *  \param xEnd The x-coordinate of the upper right hand corner of the rectangle.
+     *  \param yEnd The y-coordinate of the upper right hand corner of the rectangle.
+     *  \param integral The result of integration is returned here.
+     */
+    inline void integrateRectangle(const float xStart, const float yStart,
+                                   const float xEnd, const float yEnd,
+                                   Pixel &integral) const;
+
   private:
     typedef Array2<Pixel> Parent1;
 }; // end RandomAccessFilm
