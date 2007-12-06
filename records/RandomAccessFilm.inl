@@ -49,14 +49,20 @@ RandomAccessFilm::Pixel &RandomAccessFilm
   ::raster(const size_t px,
            const size_t py)
 {
-  return Parent1::raster(px,py);
+  size_t xClamp = std::min<size_t>(px, getWidth() - 1);
+  size_t yClamp = std::min<size_t>(py, getHeight() - 1);
+
+  return Parent1::raster(xClamp,yClamp);
 } // end RandomAccessFilm::raster()
 
 const RandomAccessFilm::Pixel &RandomAccessFilm
   ::raster(const size_t px,
            const size_t py) const
 {
-  return Parent1::raster(px,py);
+  size_t xClamp = std::min<size_t>(px, getWidth() - 1);
+  size_t yClamp = std::min<size_t>(py, getHeight() - 1);
+
+  return Parent1::raster(xClamp,yClamp);
 } // end RandomAccessFilm::raster()
 
 RandomAccessFilm::Pixel RandomAccessFilm
