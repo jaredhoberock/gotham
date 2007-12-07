@@ -96,9 +96,7 @@ void TargetRaysRenderer
       g = mMutator->evaluate(yPath, yResults);
 
       // compute importance
-      //iy = (*mImportance)(y, yPath, yResults);
-      iy = mImportance->evaluate(y, yPath, yResults,
-                                 x, xPath, xResults);
+      iy = (*mImportance)(y, yPath, yResults);
 
       // compute pdf of y
       yPdf = iy * invB;
@@ -107,23 +105,6 @@ void TargetRaysRenderer
     {
       iy = 0;
     } // end else
-
-    // recompute x
-    //ix = (*mImportance)(x, xPath, xResults);
-    if(iy)
-    {
-      ix = mImportance->evaluate(x, xPath, xResults,
-                                 y, yPath, yResults);
-    } // end if
-    else
-    {
-      // XXX what should we really do here? just evaluate
-      //     x alone?
-      ix = mImportance->evaluate(x, xPath, xResults,
-                                 x, xPath, xResults);
-    } // end else
-
-    xPdf = ix * invB;
 
     // calculate accept probability
     a = mMutator->evaluateTransitionRatio(whichMutation, x, xPath, ix, y, yPath, iy);

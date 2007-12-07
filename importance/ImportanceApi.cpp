@@ -13,10 +13,7 @@
 #include "LuminanceOverVisits.h"
 #include "ExponentImportance.h"
 #include "ThroughputLuminanceImportance.h"
-#include "ConditionalLuminanceOverVisitsImportance.h"
-#include "ConditionalEqualVisitImportance.h"
 #include "ManualImportance.h"
-#include "HierarchicalLuminanceOverVisits.h"
 using namespace boost;
 
 ScalarImportance *ImportanceApi
@@ -85,14 +82,6 @@ ScalarImportance *ImportanceApi
   {
     result = new NormalizedImportance();
   } // end else if
-  else if(importanceName == "conditionalequalvisit")
-  {
-    result = new ConditionalEqualVisitImportance(doFilter);
-  } // end else if
-  else if(importanceName == "conditionalluminanceovervisits")
-  {
-    result = new ConditionalLuminanceOverVisitsImportance(doFilter);
-  } // end else if
   else if(importanceName == "constant")
   {
     result = new ConstantImportance();
@@ -120,10 +109,6 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "manual")
   {
     result = new ManualImportance();
-  } // end else if
-  else if(importanceName == "hierarchicalluminanceovervisits")
-  {
-    result = new HierarchicalLuminanceOverVisits(doFilter, radius);
   } // end else if
   else
   {

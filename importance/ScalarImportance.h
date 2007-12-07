@@ -60,25 +60,6 @@ class ScalarImportance
                            const Path &xPath,
                            const std::vector<PathSampler::Result> &results) = 0;
 
-    /*! This method assigns a scalar importance to a Path given knowledge
-     *  of a second Path for comparison.
-     *  \param x The HyperPoint uniquely specifying the Path of interest.
-     *  \param xPath The Path corresponding to x.
-     *  \param xResults The list of PathSampler Results resulting from xPath.
-     *  \param y The HyperPoint uniquely specifying a second Path for comparison.
-     *  \param yPath The Path corresponding to y.
-     *  \param yResults The list of PathSampler Results resulting from yPath.
-     *  \return The scalar importance of x.
-     *  \note The default implementation of this method returns the result of the
-     *        other method.
-     */
-    virtual float evaluate(const PathSampler::HyperPoint &x,
-                           const Path &xPath,
-                           const std::vector<PathSampler::Result> &xResults,
-                           const PathSampler::HyperPoint &y,
-                           const Path &yPath,
-                           const std::vector<PathSampler::Result> &yResults);
-
     /*! This method estimates the normalization constant of this ScalarImportance
      *  function and chooses a seed Path proportional to its importance.
      *  \param r A sequence of RandomNumbers.

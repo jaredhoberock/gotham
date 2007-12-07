@@ -132,15 +132,3 @@ float ScalarImportance
   return evaluate(x,xPath,results);
 } // end ScalarImportance::operator()()
 
-float ScalarImportance
-  ::evaluate(const PathSampler::HyperPoint &x,
-             const Path &xPath,
-             const std::vector<PathSampler::Result> &xResults,
-             const PathSampler::HyperPoint &y,
-             const Path &yPath,
-             const std::vector<PathSampler::Result> &yResults)
-{
-  return evaluate(x,xPath,xResults);
-} // end ScalarImportance::evaluate()
-
-
