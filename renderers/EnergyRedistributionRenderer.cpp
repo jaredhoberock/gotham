@@ -92,6 +92,8 @@ void EnergyRedistributionRenderer
     x[0][0] = px;
     x[0][1] = py;
 
+    PathToImage mapToImage;
+
     // sample a path
     Path temp;
     if(((PathSampler*)smallStepper.getSampler())->constructPath(*mScene, x, temp))
@@ -157,6 +159,13 @@ void EnergyRedistributionRenderer
               // record y
               float yWeight = (1.0f - a) * invYPdf;
               mRecord->record(yWeight, y, yPath, yResults);
+
+              // add to the acceptance image
+              // XXX TODO: generalize this to all samplers somehow
+              gpcpu::float2 pixel;
+              float yu, yv;
+              mapToImage(yResults[0], y, yPath, yu, yv);
+              mAcceptanceImage.deposit(yu, yv, Spectrum(1.0f - a, 1.0f - a, 1.0f - a));
             } // end if
 
             if(iz > 0)
@@ -164,6 +173,12 @@ void EnergyRedistributionRenderer
               // record z
               float zWeight = a * invZPdf;
               mRecord->record(zWeight, z, zPath, zResults);
+
+              // add to the acceptance image
+              // XXX TODO: generalize this to all samplers somehow
+              float zu, zv;
+              mapToImage(zResults[0], z, zPath, zu, zv);
+              mAcceptanceImage.deposit(zu, zv, Spectrum(a, a, a));
             } // end if
 
             // accept?
