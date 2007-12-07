@@ -64,7 +64,7 @@ void RecursiveMetropolisRenderer
     recurse.render(p);
 
     // use an estimate for importance
-    importance = new EstimateImportance(boost::dynamic_pointer_cast<RenderFilm,Record>(lowResImage));
+    importance = new EstimateImportance(*boost::dynamic_pointer_cast<RandomAccessFilm,Record>(lowResImage));
   } // end if
   else
   {
