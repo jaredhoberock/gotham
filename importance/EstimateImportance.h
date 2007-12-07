@@ -20,10 +20,10 @@ class EstimateImportance
      */
     typedef ScalarImportance Parent;
 
-    /*! Constructor takes a shared_pointer to a RenderFilm containing an estimate.
+    /*! Constructor takes a reference to a RandomAccessFilm containing an estimate.
      *  \param estimate Sets mEstimate.
      */
-    EstimateImportance(const boost::shared_ptr<RenderFilm> &estimate);
+    EstimateImportance(const RandomAccessFilm &estimate);
 
     /*! This method converts the spectral Monte Carlo throughput
      *  of a Path into scalar importance.
@@ -36,15 +36,11 @@ class EstimateImportance
                            const std::vector<PathSampler::Result> &results);
 
   protected:
-    /*! A pointer to the estimate of the image to render.
-     */
-    boost::shared_ptr<RenderFilm> mEstimate;
-
     /*! This maps a Path to an image location.
      */
     PathToImage mMapToImage;
 
-    // XXX TODO create an array of 1/luminance
+    RandomAccessFilm mEstimate;
 }; // end EstimateImportance
 
 #endif // ESTIMATE_IMPORTANCE_H

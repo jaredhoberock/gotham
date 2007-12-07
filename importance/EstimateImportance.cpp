@@ -6,10 +6,17 @@
 #include "EstimateImportance.h"
 
 EstimateImportance
-  ::EstimateImportance(const boost::shared_ptr<RenderFilm> &estimate)
+  ::EstimateImportance(const RandomAccessFilm &estimate)
     :mEstimate(estimate),mMapToImage()
 {
-  ;
+  for(size_t y = 0; y < mEstimate.getHeight(); ++y)
+  {
+    for(size_t x = 0; x < mEstimate.getWidth(); ++x)
+    {
+      Spectrum &e = mEstimate.raster(x,y);
+      e[0] = 1.0f / std::max(0.05f, e.luminance());
+    } // end for x
+  } // end for y
 } // end EstimateImportance::EstimateImportance()
 
 float EstimateImportance
@@ -17,8 +24,7 @@ float EstimateImportance
              const Path &xPath,
              const std::vector<PathSampler::Result> &results)
 {
-  const RenderFilm *estimate = mEstimate.get();
-  Spectrum I(0,0,0);
+  float I = 0;
   gpcpu::float2 pixel;
   for(std::vector<PathSampler::Result>::const_iterator r = results.begin();
       r != results.end();
@@ -26,12 +32,10 @@ float EstimateImportance
   {
     // scale each result by its corresponding bucket
     mMapToImage(*r, x, xPath, pixel[0], pixel[1]);
-    //I += (r->mThroughput * r->mWeight / r->mPdf) * mEstimate.element(bucket[0], bucket[1]);
 
-    // XXX PERF remove these division and max operations
-    I += (r->mThroughput * r->mWeight / r->mPdf) / std::max(0.05f, estimate->pixel(pixel[0], pixel[1]).luminance());
+    I += mEstimate.pixel(pixel[0],pixel[1])[0] * (r->mThroughput.luminance() * r->mWeight / r->mPdf);
   } // end for r
 
-  return I.luminance();
+  return I;
 } // end EstimateImportance::operator()()
 
