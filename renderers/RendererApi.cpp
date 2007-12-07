@@ -10,6 +10,7 @@
 #include "DebugRenderer.h"
 #include "TargetRaysRenderer.h"
 #include "RecursiveMetropolisRenderer.h"
+#include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
 #include "../path/PathApi.h"
@@ -94,6 +95,16 @@ Renderer *RendererApi
     {
       result = new MetropolisRenderer(z, mutator, importance);
     } // end else
+  } // end else if
+  else if(rendererName == "multistagemetropolis")
+  {
+    // create a PathMutator
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+
+    // create a ScalarImportance
+    shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
+
+    result = new MultiStageMetropolisRenderer(z, mutator, importance, targetRays);
   } // end else if
   else if(rendererName == "recursivemetropolis")
   {
