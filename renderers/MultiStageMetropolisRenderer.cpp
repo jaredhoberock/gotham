@@ -177,47 +177,10 @@ void MultiStageMetropolisRenderer
 
     if(progress.count() > actualTarget)
     {
-      shared_ptr<RenderFilm> current = dynamic_pointer_cast<RenderFilm,Record>(mRecord);
-      float s;
-
-      //RenderFilm temp = *current;
-      //s = bLuminance / temp.computeMean().luminance();
-      //temp.scale(Spectrum(s,s,s));
-
-      //char buf[32];
-      //sprintf(buf, "estimate-%d.exr", currentEstimate);
-      //temp.writeEXR(buf);
-
-      // update the estimate by resampling the current record
-      // into a lower res image
-      // round up for these dimensions
-      shared_ptr<RenderFilm> lowResEstimate(new RenderFilm(static_cast<size_t>(ceilf(recurseWidth)),
-                                                           static_cast<size_t>(ceilf(recurseHeight))));
-      current->resample(*lowResEstimate);
-
-      // scale estimate so it has mean luminance equal to bLuminance
-      s = bLuminance / lowResEstimate->computeMean().luminance();
-      lowResEstimate->scale(Spectrum(s,s,s));
-
-      //sprintf(buf, "lowres-estimate-%d.exr", currentEstimate);
-      //lowResEstimate->writeEXR(buf);
-
-      // replace the current importance with a new one
-      mImportance.reset(new EstimateImportance(*lowResEstimate));
-      
-      // update b
-      // XXX we shouldn't have to use a separate sequence
-      RandomSequence seq(13u);
-      b = mImportance->estimateNormalizationConstant(seq, mScene, mMutator, 10000);
-      invB = 1.0f / b;
-
-      // update x's importance & pdf
-      // compute importance
-      ix = (*mImportance)(x, xPath, xResults);
-
-      // compute pdf of x
-      xPdf = ix * invB;
-
+      invB = updateImportance(bLuminance,
+                              recurseWidth, recurseWidth,
+                              x, xPath, xResults,
+                              ix, xPdf);
 
       // update new target
       recurseWidth  /= mRecursionScale;
@@ -235,4 +198,59 @@ void MultiStageMetropolisRenderer
   // purge the local store
   mLocalPool.freeAll();
 } // end TargetRaysRenderer::kernel()
+
+float MultiStageMetropolisRenderer
+  ::updateImportance(const float bLuminance,
+                     const float w,
+                     const float h,
+                     const PathSampler::HyperPoint &x,
+                     const Path &xPath,
+                     const std::vector<PathSampler::Result> &xResults,
+                     float &ix,
+                     float &xPdf)
+{
+  using namespace boost;
+  shared_ptr<RenderFilm> current = dynamic_pointer_cast<RenderFilm,Record>(mRecord);
+  float s;
+
+  //RenderFilm temp = *current;
+  //s = bLuminance / temp.computeMean().luminance();
+  //temp.scale(Spectrum(s,s,s));
+
+  //char buf[32];
+  //sprintf(buf, "estimate-%d.exr", currentEstimate);
+  //temp.writeEXR(buf);
+
+  // update the estimate by resampling the current record
+  // into a lower res image
+  // round up for these dimensions
+  shared_ptr<RenderFilm> lowResEstimate(new RenderFilm(static_cast<size_t>(ceilf(w)),
+                                                       static_cast<size_t>(ceilf(h))));
+  current->resample(*lowResEstimate);
+
+  // scale estimate so it has mean luminance equal to bLuminance
+  s = bLuminance / lowResEstimate->computeMean().luminance();
+  lowResEstimate->scale(Spectrum(s,s,s));
+
+  //sprintf(buf, "lowres-estimate-%d.exr", currentEstimate);
+  //lowResEstimate->writeEXR(buf);
+
+  // replace the current importance with a new one
+  mImportance.reset(new EstimateImportance(*lowResEstimate));
+  
+  // update invB
+  // XXX we shouldn't have to use a separate sequence
+  RandomSequence seq(13u);
+  float invB = mImportance->estimateNormalizationConstant(seq, mScene, mMutator, 10000);
+  invB = 1.0f / invB;
+
+  // update x's importance & pdf
+  // compute importance
+  ix = (*mImportance)(x, xPath, xResults);
+
+  // compute pdf of x
+  xPdf = ix * invB;
+
+  return invB;
+} // end MultiStageMetropolisRenderer::updateImportance()
 

@@ -40,6 +40,30 @@ class MultiStageMetropolisRenderer
      */
     virtual void kernel(ProgressCallback &progress);
 
+    /*! This method is periodically called during kernel() to update
+     *  mImportance.
+     *  \param bLuminance The mean pixel value of the resulting rendered image.
+     *         XXX This should be available as a member of MetropolisRenderers
+     *             in general.
+     *  \param w The width of the new importance image.
+     *  \param h The height of the new importance image.
+     *  \param x The current state of x.
+     *  \param xPath The current state of xPath.
+     *  \param xResults The current state of xResults.
+     *  \param ix x's importance will be updated here to reflect the updated importance function.
+     *  \param xPdf x's pdf will be updated here to reflect the updated importance function.
+     *  \return The reciprocal of the normalization constant of the updated importance function.
+     */
+    virtual float updateImportance(const float bLuminance,
+                                   const float w,
+                                   const float h,
+                                   const PathSampler::HyperPoint &x,
+                                   const Path &xPath,
+                                   const std::vector<PathSampler::Result> &xResults,
+                                   float &ix,
+                                   float &xPdf);
+
+
     // The recursion scale.
     float mRecursionScale;
 }; // end MultiStageMetropolisRenderer
