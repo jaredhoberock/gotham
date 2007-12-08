@@ -160,6 +160,24 @@ class RandomAccessFilm
                                    const float xEnd, const float yEnd,
                                    Pixel &integral) const;
 
+    /*! This method erodes the holes of this RandomAccessFilm by setting each hole pixel
+     *  to the average of its neighbors.
+     *  \param h The hole value.
+     *  \return The number of remaining hole pixels after erosion.
+     */
+    inline size_t erode(const Pixel &h);
+
+    /*! This method performs bilateral filtering on this RandomAccessFilm.
+     *  \param sigmad The standard deviation of the spacial gaussian kernel.
+     *  \param sigmar The standard deviation of the intensity gaussian kernel.
+     *  \param intensity An image to use for intensity similarity.
+     *  \note sigmad & sigmar correspond to those quantities from
+     *        Tomasi & Manduchi '98
+     */
+    inline void bilateralFilter(const float sigmad,
+                                const float sigmar,
+                                const RandomAccessFilm &intensity);
+
   private:
     typedef Array2<Pixel> Parent1;
 }; // end RandomAccessFilm

@@ -382,3 +382,193 @@ void RandomAccessFilm
   integral /= ((xEnd-xStart) * (yEnd - yStart));
 } // end RandomAccessFilm::integrateRectangle()
 
+size_t RandomAccessFilm
+  ::erode(const Pixel &h)
+{
+  size_t holesLeft = 0;
+  size_t holesFixed = 0;
+
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      if(raster(x,y) == h)
+      {
+        // visit each non-hole neighbor
+        Pixel newVal(Pixel(0,0,0));
+
+        float neighbors = 0;
+
+        // top left
+        if(x > 0 && y + 1 < getHeight())
+        {
+          newVal += raster(x-1,y+1);
+          ++neighbors;
+        } // end if
+
+        // top
+        if(y + 1 < getHeight())
+        {
+          newVal += raster(x,y+1);
+          ++neighbors;
+        } // end if
+
+        // top right
+        if(x + 1 < getWidth() && y + 1 < getHeight())
+        {
+          newVal += raster(x+1,y+1);
+          ++neighbors;
+        } // end if
+
+        // left
+        if(x > 0)
+        {
+          newVal += raster(x-1,y);
+          ++neighbors;
+        } // end if
+
+        // right
+        if(x + 1 < getWidth())
+        {
+          newVal += raster(x+1,y);
+          ++neighbors;
+        } // end if
+
+        // bottom left
+        if(x > 0 && y > 0)
+        {
+          newVal += raster(x-1,y-1);
+          ++neighbors;
+        } // end if
+
+        // bottom
+        if(y > 0)
+        {
+          newVal += raster(x,y-1);
+          ++neighbors;
+        } // end if
+
+        // bottom right
+        if(x + 1 < getWidth() && y > 0)
+        {
+          newVal += raster(x+1,y-1);
+          ++neighbors;
+        } // end if
+
+        if(neighbors > 0)
+        {
+          newVal /= neighbors;
+          raster(x,y) = newVal;
+          ++holesFixed;
+        } // end if
+        else
+        {
+          ++holesLeft;
+        } // end else
+      } // end if
+    } // end for x
+  } // end for y
+
+  std::cerr << "RandomAccessFilm::erode(): Fixed " << holesFixed << " holes." << std::endl;
+
+  return holesLeft;
+} // end RandomAccessFilm::erode()
+
+inline static float square(const float v)
+{
+  return v*v;
+} // end square()
+
+void RandomAccessFilm
+  ::bilateralFilter(const float sigmad,
+                    const float sigmar,
+                    const RandomAccessFilm &intensity)
+{
+  if(intensity.getWidth() != getWidth() ||
+     intensity.getHeight() != getHeight())
+  {
+    std::cerr << "RandomAccessFilm::bilateralFilter(): intensity must be same resolution as this!" << std::endl;
+    return;
+  } // end if
+
+  // clamp the search radius to 3*sigmad
+  size_t radius = static_cast<size_t>(ceilf(3.0f * sigmad));
+
+  // precompute these divisions
+  float invSigmad = 1.0f / sigmad;
+  float invSigmar = 1.0f / sigmar;
+
+  using namespace gpcpu;
+
+  // separable convolution
+  RandomAccessFilm firstHalf = *this;
+  for(size_t y = 0; y != intensity.getHeight(); ++y)
+  {
+    for(size_t x = 0; x != intensity.getWidth(); ++x)
+    {
+      float sumOfWeights = 0;
+      Spectrum blurred(0,0,0);
+
+      for(size_t wy = std::max<int>(0, y - radius);
+          wy != std::min<size_t>(intensity.getHeight(), y + radius + 1);
+          ++wy)
+      {
+        // get a diff in intensity domain
+        float iDiff = (intensity.raster(x,y) - intensity.raster(x,wy)).norm();
+
+        // get a diff in spacial domain
+        float sDiff = (float2(x,y) - float2(x,wy)).norm();
+
+        // compute weight
+        float w = expf(-0.5f*square(iDiff*invSigmar))
+                * expf(-0.5f*square(sDiff*invSigmad));
+
+        // sum weight
+        sumOfWeights += w;
+
+        // sum into result
+        blurred += w * raster(x,wy);
+      } // end for wy
+
+      // now normalize
+      firstHalf.raster(x,y) = blurred / sumOfWeights;
+    } // end for x
+  } // end for y
+
+  RandomAccessFilm result = *this;
+  for(size_t y = 0; y != intensity.getHeight(); ++y)
+  {
+    for(size_t x = 0; x != intensity.getWidth(); ++x)
+    {
+      float sumOfWeights = 0;
+      Spectrum blurred(0,0,0);
+
+      for(size_t wx = std::max<int>(0, x - radius);
+          wx != std::min<size_t>(intensity.getWidth(), x + radius + 1);
+          ++wx)
+      {
+        // get a diff in intensity domain
+        float iDiff = (intensity.raster(x,y) - intensity.raster(wx,y)).norm();
+
+        // get a diff in spacial domain
+        float sDiff = (float2(x,y) - float2(wx,y)).norm();
+
+        // compute weight
+        float w = expf(-0.5f*square(iDiff*invSigmar))
+                * expf(-0.5f*square(sDiff*invSigmad));
+
+        // sum weight
+        sumOfWeights += w;
+
+        // sum into result
+        blurred += w * firstHalf.raster(wx,y);
+      } // end for wy
+
+      // now normalize
+      result.raster(x,y) = blurred / sumOfWeights;
+    } // end for x
+  } // end for y
+
+  *this = result;
+} // end RandomAccessFilm::bilateralFilter()
+
