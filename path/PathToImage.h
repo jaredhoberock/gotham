@@ -13,6 +13,10 @@
 class PathToImage
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~PathToImage(void){;};
+
     /*! This method maps a PathSampler::Result to a location
      *  within the unit square understood to correspond to a point
      *  on a camera's image plane.

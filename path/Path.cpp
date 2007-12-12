@@ -704,7 +704,7 @@ float Path
 
   // note that this is different from specularConnection
   bool deltaBounce = false;
-  ScatteringDistributionFunction::ComponentIndex bounceComponent;
+  ScatteringDistributionFunction::ComponentIndex bounceComponent = 0;
 
   // iteratively adding eye vertices
   Path::const_iterator vert = lLast;

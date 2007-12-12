@@ -14,7 +14,8 @@
 SimpleForwardRussianRouletteSampler
   ::SimpleForwardRussianRouletteSampler(const boost::shared_ptr<RussianRoulette> &roulette,
                                         const size_t maxEyeLength)
-    :mRoulette(roulette),mMaxEyeLength(std::min<size_t>(maxEyeLength, Path::static_size - 1))
+    :mMaxEyeLength(std::min<size_t>(maxEyeLength, Path::static_size - 1)),
+     mRoulette(roulette)
 {
   ;
 } // end SimpleForwardRussianRouletteSampler::init()
@@ -99,7 +100,6 @@ void SimpleForwardRussianRouletteSampler
              const Path &p,
              std::vector<Result> &results) const
 {
-  size_t totalLength = p.getSubpathLengths().sum();
   size_t eyeLength = p.getSubpathLengths()[0];
   size_t lightLength = p.getSubpathLengths()[1];
 

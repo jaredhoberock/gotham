@@ -30,6 +30,10 @@ class PathSampler
      */
     typedef boost::array<boost::array<float,5>, Path::static_size> HyperPoint;
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~PathSampler(void){;};
+
     /*! This virtual method constructs a Path given
      *  a HyperPoint uniquely specifying a Path in a Scene
      *  of interest.

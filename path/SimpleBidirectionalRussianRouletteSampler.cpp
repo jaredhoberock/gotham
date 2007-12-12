@@ -13,7 +13,8 @@
 SimpleBidirectionalRussianRouletteSampler
   ::SimpleBidirectionalRussianRouletteSampler(const boost::shared_ptr<RussianRoulette> &roulette,
                                               const size_t maxLength)
-    :mRoulette(roulette),mMaxPathLength(maxLength)
+    :mMaxPathLength(maxLength),
+     mRoulette(roulette)
 {
   ;
 } // end SimpleBidirectionalRussianRouletteSampler::init()

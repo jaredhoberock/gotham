@@ -17,6 +17,10 @@ class Vector;
 class RussianRoulette
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~RussianRoulette(void){;};
+
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
                              const DifferentialGeometry &dg,
@@ -44,6 +48,10 @@ class AlwaysRoulette
      */
     typedef RussianRoulette Parent;
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~AlwaysRoulette(void){;};
+
     using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
@@ -63,6 +71,10 @@ class ConstantRoulette
     typedef RussianRoulette Parent;
 
     ConstantRoulette(const float continueProbability = 0.3f);
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~ConstantRoulette(void){;};
 
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
@@ -88,6 +100,10 @@ class LuminanceRoulette
      */
     typedef RussianRoulette Parent;
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~LuminanceRoulette(void){;};
+
     using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
@@ -105,6 +121,10 @@ class MaxOverSpectrumRoulette
      *  \brief Shorthand.
      */
     typedef RussianRoulette Parent;
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~MaxOverSpectrumRoulette(void){;};
 
     using Parent::operator();
     virtual float operator()(const unsigned int i,
@@ -124,6 +144,10 @@ class OnlyAfterDeltaRoulette
      */
     typedef RussianRoulette Parent;
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~OnlyAfterDeltaRoulette(void){;};
+
     using Parent::operator();
     virtual float operator()(const unsigned int i,
                              const Spectrum &f,
@@ -141,6 +165,10 @@ class ConstantAndAlwaysAfterDeltaRoulette
      *  \brief Shorthand.
      */
     typedef ConstantRoulette Parent;
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~ConstantAndAlwaysAfterDeltaRoulette(void){;};
 
     ConstantAndAlwaysAfterDeltaRoulette(const float continueProbability = 0.3f);
 
@@ -163,6 +191,10 @@ class KelemenRoulette
     typedef ConstantRoulette Parent;
 
     KelemenRoulette(const float continueProbability = 0.3f);
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~KelemenRoulette(void){;};
 
     using Parent::operator();
     virtual float operator()(const unsigned int i,
@@ -190,6 +222,10 @@ class VeachRoulette
      *  \param minimalSubpathLength Sets mMinimalSubpathLength.
      */
     VeachRoulette(const size_t minimalSubpathLength = 3);
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~VeachRoulette(void){;};
 
     using Parent::operator();
 
@@ -231,6 +267,10 @@ class ModifiedKelemenRoulette
      *  a Path from nothing.
      */
     ModifiedKelemenRoulette(const float beginProbability);
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~ModifiedKelemenRoulette(void){;};
 
     /*! This method returns a probability for begining a new Path
      *  from scratch.

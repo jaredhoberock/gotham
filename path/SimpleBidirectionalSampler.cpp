@@ -165,7 +165,7 @@ bool SimpleBidirectionalSampler
 {
   // treat every other coordinate of x as an eye coordinate,
   // and vice versa for the light path
-  unsigned int justAdded;
+  unsigned int justAdded = Path::INSERT_FAILED;
   for(unsigned int i = 0;
       i != numVertices;
       ++i)
@@ -388,8 +388,8 @@ float SimpleBidirectionalSampler
   // XXX compute the area product pdf of choosing the first vertex
 
   // compute the pdf of the light subpath
-  int j = 0;
-  for(int i = t + s - 1;
+  size_t j = 0;
+  for(size_t i = t + s - 1;
       j != s;
       --i, ++j)
   {
