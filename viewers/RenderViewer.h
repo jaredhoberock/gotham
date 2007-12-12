@@ -31,7 +31,6 @@ class RenderViewer
     virtual void keyPressEvent(KeyEvent *e);
     virtual void init(void);
     virtual void resizeGL(int w, int h);
-    virtual void setImage(boost::shared_ptr<RenderFilm> i);
     virtual void setRenderer(boost::shared_ptr<Renderer> r);
 
   protected:
@@ -41,7 +40,6 @@ class RenderViewer
 
     /*! Render resources
      */
-    boost::shared_ptr<RenderFilm> mImage;
     boost::shared_ptr<Renderer> mRenderer;
     Renderer::ProgressCallback mProgress;
 

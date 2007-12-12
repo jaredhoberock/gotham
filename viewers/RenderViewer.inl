@@ -26,15 +26,20 @@ void RenderViewer
 {
   if(!mDrawPreview)
   {
+    shared_ptr<const Record> rec = mRenderer->getRecord();
+
     const Texture *texture = &mTexture;
-    GpuFilm<RenderFilm> *gpuFilm = dynamic_cast<GpuFilm<RenderFilm> *>(mImage.get());
+    const GpuFilm<RenderFilm> *gpuFilm = dynamic_cast<const GpuFilm<RenderFilm> *>(rec.get());
     if(gpuFilm != 0)
     {
-      gpuFilm->renderPendingDeposits();
+      // XXX yuck fix this
+      const_cast<GpuFilm<RenderFilm> *>(gpuFilm)->renderPendingDeposits();
       texture = &gpuFilm->mTexture;
     } // end if
 
-    const float *data = reinterpret_cast<const float*>(&mImage->raster(0,0));
+    shared_ptr<const RenderFilm> film = dynamic_pointer_cast<const RenderFilm,const Record>(rec);
+
+    const float *data = reinterpret_cast<const float*>(&film->raster(0,0));
     GLenum datatype = GL_FLOAT_RGB16_NV;
 
     mTexture.init(datatype,
@@ -57,17 +62,17 @@ void RenderViewer
       if(mc)
       {
         float spp = mc->getNumSamples();
-        spp /= (mImage->getWidth() * mImage->getHeight());
+        spp /= (film->getWidth() * film->getHeight());
         scale = 1.0f / spp;
       } // end if
     } // end else
 
     p.setUniform1f("scale", powf(2.0f, mExposure) * scale);
     p.setUniform1f("gamma", mGamma);
-    float meanLogL = mImage->getSumLogLuminance() / (mImage->getWidth() * mImage->getHeight());
+    float meanLogL = film->getSumLogLuminance() / (film->getWidth() * film->getHeight());
     float Lwa = expf(meanLogL);
     p.setUniform1f("Lwa", Lwa);
-    p.setUniform1f("Lwhite", mImage->getMaximumLuminance());
+    p.setUniform1f("Lwhite", film->getMaximumLuminance());
     p.setUniform1f("a", mMiddleGrey);
 
     printGLError(__FILE__, __LINE__);
@@ -108,9 +113,6 @@ void RenderViewer
 
   mDoTonemap = false;
   mMiddleGrey = 0.5f;
-
-  // XXX DESIGN need a better way to get a GpuFilm a GL context
-  mImage->init();
 } // end RenderViewer::init()
 
 void RenderViewer
@@ -240,7 +242,6 @@ void RenderViewer
   ::resizeGL(int w, int h)
 {
   Parent::resizeGL(w,h);
-  mImage->resize(w,h);
 
   char buffer[32];
   sprintf(buffer, "%d", width());
@@ -264,6 +265,8 @@ class RenderThunk
     ;
   }
 
+  inline virtual ~RenderThunk(void){;};
+
   virtual void run(void)
   {
     (*this)();
@@ -285,15 +288,16 @@ void RenderViewer
 } // end RenderViewer::postSelection()
 
 void RenderViewer
-  ::setImage(shared_ptr<RenderFilm> i)
-{
-  mImage = i;
-} // end RenderViewer::setImage()
-
-void RenderViewer
   ::setRenderer(shared_ptr<Renderer> r)
 {
   mRenderer = r;
+
+  shared_ptr<const Record> rec = mRenderer->getRecord();
+  const RandomAccessFilm *image = dynamic_cast<const RandomAccessFilm*>(rec.get());
+  if(image != 0)
+  {
+    resizeGL(image->getWidth(), image->getHeight());
+  } // end if
 } // end Renderer::setRenderer()
 
 void RenderViewer
