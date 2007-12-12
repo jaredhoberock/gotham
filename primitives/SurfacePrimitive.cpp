@@ -14,6 +14,12 @@ SurfacePrimitive
   ;
 } // end SurfacePrimitive::SurfacePrimitive()
 
+SurfacePrimitive
+  ::~SurfacePrimitive(void)
+{
+  ;
+} // end SurfacePrimitive::SurfacePrimitive()
+
 const Material *SurfacePrimitive
   ::getMaterial(void) const
 {

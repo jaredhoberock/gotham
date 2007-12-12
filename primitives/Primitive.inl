@@ -10,6 +10,12 @@ Primitive
   ;
 } // end Primitive::Primitive()
 
+Primitive
+  ::~Primitive(void)
+{
+  ;
+} // end Primitive::~Primitive()
+
 const DifferentialGeometry &Primitive::Intersection
   ::getDifferentialGeometry(void) const
 {

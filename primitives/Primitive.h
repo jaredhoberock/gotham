@@ -61,6 +61,10 @@ class Primitive
      */
     inline Primitive(void);
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Primitive(void);
+
     /*! A Primitive must be able to return a BoundingBox bounding it in world space.
      *  \param b A BoundingBox bounding this Primitive is returned here.
      *  \note Must be implemented in a child class.

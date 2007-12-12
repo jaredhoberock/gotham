@@ -28,6 +28,10 @@ class SurfacePrimitive
     SurfacePrimitive(boost::shared_ptr<Surface> s,
                      boost::shared_ptr<Material> m);
 
+    /*! Null destructor does nothing.
+     */
+    virtual ~SurfacePrimitive(void);
+
     /*! This method returns a const pointer to mMaterial.
      *  \return mMaterial.
      *  XXX Should this return a shared_ptr?

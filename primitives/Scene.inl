@@ -20,6 +20,12 @@ Scene
   setPrimitive(p);
 } // end Scene::Scene()
 
+Scene
+  ::~Scene(void)
+{
+  ;
+} // end Scene::~Scene()
+
 boost::shared_ptr<Primitive> Scene
   ::getPrimitive(void) const
 {

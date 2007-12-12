@@ -28,6 +28,10 @@ class Scene
      */
     inline Scene(boost::shared_ptr<Primitive> p);
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Scene(void);
+
     /*! This method returns the BoundingBox of mPrimitive.
      *  \param b A BoundingBox bounding mPrimitive is returned here.
      */
