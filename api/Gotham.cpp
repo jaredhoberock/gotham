@@ -52,6 +52,7 @@ void Gotham
   //     into the dll
   //     thanks msvc!
   float x = gotham::noise(0,0,0);
+  x += x;
 
   // clear the Matrix stack
   mMatrixStack.clear();
@@ -227,13 +228,6 @@ void Gotham
 
     // everything to the viewer
     v.setScene(s);
-
-    // XXX TODO what should the viewer do when the Record isn't a RenderFilm?
-    shared_ptr<RenderFilm> film = dynamic_pointer_cast<RenderFilm, Record>(record);
-    if(film.get())
-    {
-      v.setImage(film);
-    } // end if
 
     v.setRenderer(mRenderer);
 
