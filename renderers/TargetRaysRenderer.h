@@ -21,6 +21,11 @@ class TargetRaysRenderer
      */
     typedef MetropolisRenderer Parent;
 
+    /*! \typedef Target
+     *  \brief A big number. For portability.
+     */
+    typedef long unsigned int Target;
+
     /*! Null constructor does nothing.
      */
     TargetRaysRenderer(void);
@@ -35,7 +40,7 @@ class TargetRaysRenderer
     TargetRaysRenderer(const boost::shared_ptr<RandomSequence> &s,
                        const boost::shared_ptr<PathMutator> &mutator,
                        const boost::shared_ptr<ScalarImportance> &importance,
-                       const unsigned int target);
+                       const Target target);
 
     /*! Constructor accepts a pointer to a Scene, Film, and PathMutator.
      *  \param s Sets mScene.
@@ -50,7 +55,7 @@ class TargetRaysRenderer
                        const boost::shared_ptr<RandomSequence> &sequence,
                        const boost::shared_ptr<PathMutator> &m,
                        const boost::shared_ptr<ScalarImportance> &i,
-                       const unsigned int target);
+                       const Target target);
 
   protected:
     /*! This method renders mScene to mFilm.
@@ -61,7 +66,7 @@ class TargetRaysRenderer
 
     /*! A loose limit on the number of rays to cast.
      */
-    unsigned int mRayTarget;
+    Target mRayTarget;
 }; // end TargetRaysRenderer
 
 #endif // TARGET_RAYS_RENDERER_H

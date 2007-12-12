@@ -20,7 +20,7 @@ TargetRaysRenderer
   ::TargetRaysRenderer(const boost::shared_ptr<RandomSequence> &s,
                        const boost::shared_ptr<PathMutator> &mutator,
                        const boost::shared_ptr<ScalarImportance> &importance,
-                       const unsigned int target)
+                       const Target target)
     :Parent(s,mutator,importance),mRayTarget(target)
 {
   ;
@@ -32,7 +32,7 @@ TargetRaysRenderer
                        const boost::shared_ptr<RandomSequence> &sequence,
                        const boost::shared_ptr<PathMutator> &m,
                        const boost::shared_ptr<ScalarImportance> &i,
-                       const unsigned int target)
+                       const Target target)
     :Parent(s,r,sequence,m,i),mRayTarget(target)
 {
   ;
@@ -41,11 +41,6 @@ TargetRaysRenderer
 void TargetRaysRenderer
   ::kernel(ProgressCallback &progress)
 {
-  // XXX TODO kill this nastiness
-  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
-
-  unsigned int totalPixels = film->getWidth() * film->getHeight();
-
   PathSampler::HyperPoint x, y;
   Path xPath, yPath;
   typedef std::vector<PathSampler::Result> ResultList;
@@ -78,9 +73,7 @@ void TargetRaysRenderer
   float a;
   int whichMutation;
 
-  const RenderFilm *meanImage = dynamic_cast<const RenderFilm*>(mRecord.get());
-
-  unsigned int oldRays;
+  Target oldRays;
   progress.restart(mRayTarget);
   while(progress.count() < progress.expected_count())
   {
