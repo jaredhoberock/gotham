@@ -32,6 +32,10 @@ class PathMutator
      */
     PathMutator(const boost::shared_ptr<PathSampler> &sampler);
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~PathMutator(void){;};
+
     int operator()(const PathSampler::HyperPoint &x,
                    const Path &a,
                    PathSampler::HyperPoint &y,
