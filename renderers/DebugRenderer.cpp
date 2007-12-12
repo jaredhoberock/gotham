@@ -80,8 +80,6 @@ void DebugRenderer
       if(mScene->intersect(r, inter))
       {
         const Primitive *prim = inter.getPrimitive();
-        const SurfacePrimitive *surface = dynamic_cast<const SurfacePrimitive*>(prim);
-        const Material *material = surface->getMaterial();
         ScatteringDistributionFunction *f = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
       } // end if
