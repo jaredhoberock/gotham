@@ -44,6 +44,12 @@ Ray
   getInterval()[1] = std::max<float>(mint,maxt);
 } // end Ray::Ray()
 
+Ray
+  ::~Ray(void)
+{
+  ;
+} // end Ray::~Ray()
+
 const Point &Ray
   ::getAnchor(void) const
 {

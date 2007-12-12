@@ -11,7 +11,10 @@
  *         The template is parameterized on n and point type.
  *  \note This is actually a Hyperbox, not a Hypercube.
  */
-template<typename PointType, typename RealType, unsigned int mNumDimensions> class AxisAlignedHypercube
+template<typename PointType,
+         typename RealType,
+         size_t mNumDimensions>
+  class AxisAlignedHypercube
 {
   public:
     /*! Null constructor puts the min corner at +infinity and the max corner at -infinity.
@@ -65,13 +68,13 @@ template<typename PointType, typename RealType, unsigned int mNumDimensions> cla
      *  \param i Which corner to return: 0 for mMinCorner; mMaxCorner, otherwise.
      *  \return The indicated corner of this AxisAlignedBoundingBox.
      */
-    inline PointType &operator[](const unsigned int i);
+    inline PointType &operator[](const size_t i);
 
     /*! operator[]() method returns a const reference to a corner.
      *  \param i Which corner to return: 0 for mMinCorner; mMaxCorner, otherwise.
      *  \return The indicated corner of this AxisAlignedHypercube.
      */
-    inline const PointType &operator[](const unsigned int i) const;
+    inline const PointType &operator[](const size_t i) const;
 
     /*! This method computes the length of this AxisAlignedHypercube's diagonal.
      *  \return The length of this AxisAlignedHypercube's diagonal.

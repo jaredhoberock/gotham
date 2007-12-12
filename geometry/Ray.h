@@ -57,6 +57,10 @@ class Ray
      */
     inline Ray(const Point &a, const Vector3 &d, const float maxt);
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Ray(void);
+
     /*! This method returns a const reference to mAnchor.
      *  \return mAnchor
      */
