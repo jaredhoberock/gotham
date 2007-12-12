@@ -109,38 +109,6 @@ void PathDebugRenderer
   Parent::preprocess();
 } // end PathDebugRenderer::preprocess()
 
-#ifdef WIN32
-#define OPENEXR_DLL
-#endif // WIN32
-
-#include <halfLimits.h>
-#include <ImfRgbaFile.h>
-#include <ImfRgba.h>
-
-static void writeEXR(const char *filename, const RandomAccessFilm &image)
-{
-  size_t w = image.getWidth();
-  size_t h = image.getHeight();
-
-  // convert image to rgba
-  std::vector<Imf::Rgba> pixels(image.getWidth() * image.getHeight());
-  for(unsigned int y = 0; y < image.getHeight(); ++y)
-  {
-    for(unsigned int x = 0; x < image.getWidth(); ++x)
-    {
-      // flip the image because EXR is stored ass-backwards
-      pixels[(h-1-y)*w + x].r = image.raster(x,y)[0];
-      pixels[(h-1-y)*w + x].g = image.raster(x,y)[1];
-      pixels[(h-1-y)*w + x].b = image.raster(x,y)[2];
-      pixels[(h-1-y)*w + x].a = 1.0f;
-    } // end for
-  } // end for
-
-  Imf::RgbaOutputFile file(filename, image.getWidth(), image.getHeight(), Imf::WRITE_RGBA);
-  file.setFrameBuffer(&pixels[0], 1, image.getWidth());
-  file.writePixels(image.getHeight());
-} // end writeEXR()
-
 void PathDebugRenderer
   ::postprocess(void)
 {
