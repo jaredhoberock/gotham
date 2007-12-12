@@ -40,7 +40,6 @@ void EnergyRedistributionRenderer
 
   unsigned int totalPixels = film->getWidth() * film->getHeight();
   unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-  float oneOverN = 1.0f / totalSamples;
 
   PathSampler::HyperPoint x, y, z;
   Path xPath, yPath, zPath;
@@ -51,12 +50,12 @@ void EnergyRedistributionRenderer
   // these are the scalar results & reciprocals returned
   // by the Importance object for each Path
   float ix, iy, iz;
-  float invIx, invIy, invIz;
+  float invIx = 0, invIy = 0, invIz = 0;
 
   // these are the pdfs & reciprocals of each sample:
   // ix/b, iy/b, iz/b
   float xPdf, yPdf, zPdf;
-  float invXPdf, invYPdf, invZPdf;
+  float invXPdf = 0, invYPdf = 0, invZPdf = 0;
 
   // estimate normalization constant
   Path temp;
