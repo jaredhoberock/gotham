@@ -5,6 +5,12 @@
 
 #include "ScatteringDistributionFunction.h"
 
+ScatteringDistributionFunction
+  ::~ScatteringDistributionFunction(void)
+{
+  ;
+} // end ScatteringDistributionFunction::~ScatteringDistributionFunction()
+
 bool ScatteringDistributionFunction
   ::areSameHemisphere(const Vector3 &wo,
                       const Normal &n,

@@ -12,9 +12,10 @@ PhongTransmission
                       const float etai,
                       const float etat,
                       const float exponent)
-    :mFresnel(etai,etat),mTransmittance(t),
+    :mTransmittance(t),
      mTransmittanceOverTwoPi(mTransmittance * INV_TWOPI),
-     mExponent(exponent)
+     mExponent(exponent),
+     mFresnel(etai,etat)
 {
   ;
 } // end PhongTransmission::PhongTransmission()

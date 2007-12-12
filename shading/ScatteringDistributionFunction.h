@@ -33,6 +33,10 @@ class ScatteringDistributionFunction
      */
     typedef size_t ComponentIndex;
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~ScatteringDistributionFunction(void);
+
     /*! All child classes must implement this method which evaluates a
      *  bidirectional scattering event in an outgoing direction of interest
      *  given a direction of incidence.

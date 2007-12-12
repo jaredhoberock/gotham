@@ -12,6 +12,10 @@
 class Fresnel
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Fresnel(void);
+
     virtual Spectrum evaluate(const float cosi) const = 0;
 
     /*! This function computes the fresnel function for dielectrics.

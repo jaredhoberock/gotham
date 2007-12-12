@@ -10,7 +10,9 @@ SpecularTransmission
   ::SpecularTransmission(const Spectrum &t,
                          const float etai,
                          const float etat)
-    :Parent(),mFresnel(etai,etat),mTransmittance(t)
+    :Parent(),
+     mTransmittance(t),
+     mFresnel(etai,etat)
 {
   ;
 } // end SpecularTransmission::SpecularTransmission()

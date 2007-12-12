@@ -37,8 +37,6 @@ Spectrum AshikhminShirleyReflection
                                              mNu, mNv,
                                              dg.getTangent(), dg.getBinormal(), dg.getNormal(),
                                              wh, pdf);
-  // compute cos theta wh
-  float cosThetaH = wh.absDot(wi);
 
   // we are able to sample the Ashikhmin-Shirley distribution exactly
   float D = pdf;
@@ -52,8 +50,8 @@ Spectrum AshikhminShirleyReflection
   // compute the geometry term
   float nDotWo = dg.getNormal().absDot(wo);
   float nDotWi = dg.getNormal().absDot(wi);
-  float nDotWh = dg.getNormal().absDot(wh);
   float woDotWh = wh.absDot(wo);
+  //float nDotWh = dg.getNormal().absDot(wh);
   //float G = evaluateGeometricTerm(nDotWo, nDotWi, nDotWh, woDotWh);
   float G = 1.0f;
 
@@ -100,8 +98,8 @@ Spectrum AshikhminShirleyReflection
   // compute the geometry term
   float nDotWo = dg.getNormal().absDot(wo);
   float nDotWi = dg.getNormal().absDot(wi);
-  float nDotWh = dg.getNormal().absDot(wh);
-  float woDotWh = wh.absDot(wo);
+  //float woDotWh = wh.absDot(wo);
+  //float nDotWh = dg.getNormal().absDot(wh);
   //float G = evaluateGeometricTerm(nDotWo, nDotWi, nDotWh, woDotWh);
   float G = 1.0f;
 
@@ -136,8 +134,8 @@ Spectrum AshikhminShirleyReflection
   // compute the geometry term
   float nDotWo = dg.getNormal().absDot(wo);
   float nDotWi = dg.getNormal().absDot(wi);
-  float nDotWh = dg.getNormal().absDot(wh);
-  float woDotWh = wh.absDot(wo);
+  //float woDotWh = wh.absDot(wo);
+  //float nDotWh = dg.getNormal().absDot(wh);
   //float G = evaluateGeometricTerm(nDotWo, nDotWi, nDotWh, woDotWh);
   float G = 1.0f;
 

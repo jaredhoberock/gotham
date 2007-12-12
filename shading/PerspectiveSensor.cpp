@@ -17,12 +17,12 @@ PerspectiveSensor
                       const Point &origin,
                       const Vector3 &right,
                       const Vector3 &up)
-    :mResponse(response),
-     mAspectRatio(aspect),
-     mWindowOrigin(origin),
+    :mAspectRatio(aspect),
      mInverseWindowSurfaceArea(1.0f/(2.0f*2.0f*aspect)),
+     mWindowOrigin(origin),
      mRight(right),
-     mUp(up)
+     mUp(up),
+     mResponse(response)
 {
   ;
 } // end PerspectiveSensor::PerspectiveSensor()

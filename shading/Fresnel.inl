@@ -5,6 +5,12 @@
 
 #include "Fresnel.h"
 
+Fresnel
+  ::~Fresnel(void)
+{
+  ;
+} // end Fresnel::~Fresnel()
+
 float Fresnel
   ::dielectric(const float etai, const float etat,
                const float cosi, const float cost)
