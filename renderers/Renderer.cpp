@@ -76,7 +76,6 @@ void Renderer
   unsigned long minutes = static_cast<unsigned long>(elapsed) % 60;
   unsigned long hours = static_cast<unsigned long>(minutes) % (60*60);
   unsigned long seconds = static_cast<unsigned long>(elapsed) - hours*60*60 - minutes*60;
-  double fractional = elapsed - hours*60*60 - minutes*60 - seconds;
 
   boost::posix_time::time_duration td(hours,minutes,seconds);
   std::cout << "Seconds elapsed: " << elapsed << std::endl;

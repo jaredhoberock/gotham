@@ -20,6 +20,12 @@ Renderer
   ;
 } // end Renderer::Renderer()
 
+Renderer
+  ::~Renderer(void)
+{
+  ;
+} // end Renderer::~Renderer()
+
 void Renderer
   ::setScene(const boost::shared_ptr<const Scene> &s)
 {

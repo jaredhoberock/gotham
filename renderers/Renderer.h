@@ -43,6 +43,7 @@ class Renderer
         typedef boost::progress_display Parent;
         ProgressCallback(void);
         virtual void restart(unsigned long expected_count);
+        virtual ~ProgressCallback(void){;}
     }; // end ProgressCallback
 
     /*! Null constructor nulls mScene and mCamera.
@@ -55,6 +56,10 @@ class Renderer
      */
     inline Renderer(boost::shared_ptr<const Scene>  s,
                     boost::shared_ptr<Record> r);
+
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Renderer(void);
 
     /*! This method renders mScene to mFilm.
      *  \param progress A callback, which will be periodically
