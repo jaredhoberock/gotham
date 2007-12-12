@@ -45,7 +45,7 @@ bool SmallMesh
 {
   bool result = false;
   float tempt, tempb1, tempb2;
-  float b1, b2;
+  float b1 = 0, b2 = 0;
   const Triangle *hitTri = 0;
   TriangleList::const_iterator end = mTriangles.end();
   for(TriangleList::const_iterator tri = mTriangles.begin();
