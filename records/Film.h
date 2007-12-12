@@ -22,6 +22,10 @@ class Film
     inline Film(const unsigned int width,
                 const unsigned int height);
 
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Film(void){;};
+
     /*! This method resizes this Film.
      *  \param width The width of this Film in pixels.
      *  \param height The height of this Film in pixels.

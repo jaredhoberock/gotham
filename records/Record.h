@@ -14,6 +14,10 @@
 class Record
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Record(void){;};
+
     /*! This method records the given weighted Path.
      *  \param w The weight to associate with the record.
      *  \param x The HyperPoint associated with xPath.
