@@ -7,7 +7,8 @@
 
 EstimateImportance
   ::EstimateImportance(const RandomAccessFilm &estimate)
-    :mEstimate(estimate),mMapToImage()
+    :mMapToImage(),
+     mEstimate(estimate)
 {
   for(size_t y = 0; y < mEstimate.getHeight(); ++y)
   {

@@ -17,6 +17,10 @@ class FunctionAllocator;
 class ScalarImportance
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~ScalarImportance(void){;};
+
     /*! This method is called prior to rendering.
      *  \param r A sequence of RandomNumbers.
      *  \param scene The Scene to be rendered.
