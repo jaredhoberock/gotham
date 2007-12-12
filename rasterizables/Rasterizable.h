@@ -10,6 +10,10 @@
 class Rasterizable
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    inline virtual ~Rasterizable(void){;};
+
     /*! This method rasterizes this object.
      */
     virtual void rasterize(void) = 0;
