@@ -24,9 +24,19 @@ float LuminanceImportance
       ++r)
   {
     //L += r->mThroughput * r->mWeight;
-    L += r->mThroughput * r->mWeight / r->mPdf;
+    //L += r->mThroughput * r->mWeight / r->mPdf;
+
+    L += evaluateImportance(x,xPath,*r);
   } // end for r
 
   return L.luminance();
+} // end LuminanceImportance::evaluateImportance()
+
+float LuminanceImportance
+  ::evaluateImportance(const PathSampler::HyperPoint &x,
+                       const Path &xPath,
+                       const PathSampler::Result &r)
+{
+  return r.mThroughput.luminance() * r.mWeight / r.mPdf;
 } // end LuminanceImportance::evaluateImportance()
 

@@ -35,6 +35,17 @@ class EstimateImportance
                            const Path &xPath,
                            const std::vector<PathSampler::Result> &results);
 
+    /*! This method converts the spectral Monte Carlo throughput
+     *  of a Path into scalar importance.
+     *  \param x The HyperPoint uniquely specifying the Path of interest.
+     *  \param xPath The Path of interest.
+     *  \param r The Result of interest.
+     *  \return The scalar importance of r.
+     */
+    virtual float evaluate(const PathSampler::HyperPoint &x,
+                           const Path &xPath,
+                           const PathSampler::Result &r) const;
+
   protected:
     /*! This maps a Path to an image location.
      */
