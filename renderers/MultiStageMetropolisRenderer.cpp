@@ -33,8 +33,6 @@ void MultiStageMetropolisRenderer
   // XXX TODO kill this nastiness
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
 
-  unsigned int totalPixels = film->getWidth() * film->getHeight();
-
   PathSampler::HyperPoint x, y;
   Path xPath, yPath;
   typedef std::vector<PathSampler::Result> ResultList;
@@ -93,6 +91,11 @@ void MultiStageMetropolisRenderer
 
   // clamp target effort to something reasonable
   float actualTarget = std::max(10000.0f, recurseTarget);
+
+  // after the halfway point, do regular steps
+  float targetStep = 0;
+  float widthStep = 0;
+  float heightStep = 0;
 
   size_t currentEstimate = 0;
   unsigned int oldRays;
@@ -178,14 +181,33 @@ void MultiStageMetropolisRenderer
     if(progress.count() > actualTarget)
     {
       invB = updateImportance(bLuminance,
-                              recurseWidth, recurseWidth,
+                              recurseWidth, recurseHeight,
                               x, xPath, xResults,
                               ix, xPdf);
 
-      // update new target
-      recurseWidth  /= mRecursionScale;
-      recurseHeight /= mRecursionScale;
-      recurseTarget /= (mRecursionScale * mRecursionScale);
+      if(recurseWidth >= 0.4f * film->getWidth()
+        || recurseHeight >= 0.4f * film->getHeight())
+      {
+        if(targetStep == 0)
+        {
+          // from now on, do 10 more steps
+          targetStep = (progress.expected_count() - progress.count()) / 10.0f;
+          widthStep = (film->getWidth() - recurseWidth) / 10.0f;
+          heightStep = (film->getHeight() - recurseHeight) / 10.0f;
+        } // end if
+
+        // after the halfway point, proceed regularly
+        recurseWidth += widthStep;
+        recurseHeight += heightStep;
+        recurseTarget += targetStep;
+      } // end if
+      else
+      {
+        // update new target
+        recurseWidth  /= mRecursionScale;
+        recurseHeight /= mRecursionScale;
+        recurseTarget /= (mRecursionScale * mRecursionScale);
+      } // end else
 
       // clamp target effort to something reasonable
       actualTarget = std::max(10000.0f, recurseTarget);
@@ -217,7 +239,7 @@ float MultiStageMetropolisRenderer
   //s = bLuminance / temp.computeMean().luminance();
   //temp.scale(Spectrum(s,s,s));
 
-  //char buf[32];
+  char buf[32];
   //sprintf(buf, "estimate-%d.exr", currentEstimate);
   //temp.writeEXR(buf);
 
@@ -232,17 +254,15 @@ float MultiStageMetropolisRenderer
   s = bLuminance / lowResEstimate->computeMean().luminance();
   lowResEstimate->scale(Spectrum(s,s,s));
 
-  //sprintf(buf, "lowres-estimate-%d.exr", currentEstimate);
-  //lowResEstimate->writeEXR(buf);
+  sprintf(buf, "lowres-estimate-%dx%d.exr", lowResEstimate->getWidth(), lowResEstimate->getHeight());
+  lowResEstimate->writeEXR(buf);
 
   // replace the current importance with a new one
   mImportance.reset(new EstimateImportance(*lowResEstimate));
   
-  // update invB
-  // XXX we shouldn't have to use a separate sequence
-  RandomSequence seq(13u);
-  float invB = mImportance->estimateNormalizationConstant(seq, mScene, mMutator, 10000);
-  invB = 1.0f / invB;
+  // preprocess the importance and grab b
+  mImportance->preprocess(mRandomSequence, mScene, mMutator, *this);
+  float invB = mImportance->getInvNormalizationConstant();
 
   // update x's importance & pdf
   // compute importance
