@@ -1,7 +1,13 @@
 import re
 
 def readMesh(filename):
-  file = open(filename)
+  # assume the argument is a filename
+  # otherwise, assume it's a file
+  try:
+    file = open(filename)
+  except:
+    file = filename
+
   points = []
   uvs = []
   normals = []

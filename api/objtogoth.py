@@ -39,7 +39,11 @@ def splitTrianglesWithParametrics(points, uvs, triangles):
 def objtogoth(filename):
   (points, uvs, normals, polygons) = wavefront.readMesh(filename)
   triangles = wavefront.triangulate(polygons)
-  (points, uvs, triangles) = splitTrianglesWithParametrics(points, uvs, triangles)
+  if uvs != []:
+    (points, uvs, triangles) = splitTrianglesWithParametrics(points, uvs, triangles)
+  else:
+    (points, triangles) = splitTriangles(points, triangles)
+
   vertices = []
   indices = []
   parms = []

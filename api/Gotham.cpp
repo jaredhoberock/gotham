@@ -72,10 +72,10 @@ void Gotham
   mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
 
   // create the emitters list
-  mEmitters.reset(new SurfacePrimitiveList());
+  mEmitters.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
 
   // create the sensors list
-  mSensors.reset(new SurfacePrimitiveList());
+  mSensors.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
 } // end Gotham:init()
 
 void Gotham

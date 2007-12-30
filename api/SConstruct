@@ -31,8 +31,6 @@ env.Append(LIBS = ['Imath'])
 env.Append(LIBS = ['Half'])
 env.Append(LIBS = ['z'])
 
-#env.Program('testVariance', ['testVariance.cpp'])
-
 # with msvc, boost figures out which libraries to link
 if os.name == 'posix':
   env.Append(LIBS = ['boost_python'])
@@ -76,4 +74,9 @@ try:
   Default(env.Install(dir, source = 'pbslc'))
 except:
   print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
+
+# if we are writing test code, build it
+if os.path.isfile("test.cpp"):
+  env.Append(LIBS = ['python2.5'])
+  env.Program('test', 'test.cpp')
 

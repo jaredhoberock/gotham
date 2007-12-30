@@ -133,10 +133,9 @@ class Gotham2(Gotham):
     Gotham.translate(self, eye[0], eye[1], eye[2])
     Gotham.multMatrix(self, M)
 
-  def pointlight(self, position, power):
+  def pointlight(self, position, power, radius = 0.0005):
     Gotham.pushAttributes(self)
     Gotham2.material(self, 'light', 'power', power)
-    radius = 0.0005
     Gotham.sphere(self, position[0], position[1], position[2], radius)
     Gotham.popAttributes(self)
 
