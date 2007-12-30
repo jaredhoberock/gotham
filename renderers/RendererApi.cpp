@@ -13,6 +13,7 @@
 #include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
+#include "NoiseAwareMetropolisRenderer.h"
 #include "../path/PathApi.h"
 #include "../mutators/MutatorApi.h"
 #include "../importance/ImportanceApi.h"
@@ -54,12 +55,20 @@ Renderer *RendererApi
     m = atoi(boost::any_cast<std::string>(val).c_str());
   } // end if
 
-  unsigned int targetRays = 0;
+  TargetRaysRenderer::Target targetRays = 0;
   a = attr.find("renderer::targetrays");
   if(a != attr.end())
   {
     any val = a->second;
-    targetRays = atoi(boost::any_cast<std::string>(val).c_str());
+    targetRays = atol(boost::any_cast<std::string>(val).c_str());
+  } // end if
+
+  float varianceExponent = 0.5f;
+  a = attr.find("renderer::noiseawaremetropolis::varianceexponent");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    varianceExponent = atof(boost::any_cast<std::string>(val).c_str());
   } // end if
 
   // create the renderer
@@ -105,6 +114,16 @@ Renderer *RendererApi
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
 
     result = new MultiStageMetropolisRenderer(z, mutator, importance, targetRays);
+  } // end else if
+  else if(rendererName == "noiseawaremetropolis")
+  {
+    // create a PathMutator
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+
+    // create a ScalarImportance
+    shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
+
+    result = new NoiseAwareMetropolisRenderer(z, mutator, importance, targetRays, varianceExponent);
   } // end else if
   else if(rendererName == "recursivemetropolis")
   {
