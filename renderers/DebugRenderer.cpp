@@ -82,6 +82,10 @@ void DebugRenderer
         const Primitive *prim = inter.getPrimitive();
         ScatteringDistributionFunction *f = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
+
+        // add emission
+        ScatteringDistributionFunction *e = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
+        L += e->evaluate(-d, inter.getDifferentialGeometry());
       } // end if
 
       film->deposit(x,y,L);
