@@ -14,6 +14,7 @@
 #include "ExponentImportance.h"
 #include "ThroughputLuminanceImportance.h"
 #include "ManualImportance.h"
+#include "TargetImportance.h"
 using namespace boost;
 
 ScalarImportance *ImportanceApi
@@ -60,14 +61,6 @@ ScalarImportance *ImportanceApi
     std::cerr << "Warning: unknown visit filter \"" << filterName << "\"." << std::endl;
     doFilter = true;
   } // end else
-
-  float radius = 0;
-  a = attr.find("importance::radius");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    radius = atof(any_cast<std::string>(val).c_str());
-  } // end if
 
   // create the importance
   if(importanceName == "luminance")
