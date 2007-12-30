@@ -101,6 +101,42 @@ class RandomAccessFilm
      */
     inline Pixel computeSum(void) const;
 
+    /*! This method computes the sum of each Pixel's luminance value.
+     *  \return The sum over all Pixels' luminance.
+     */
+    inline float computeSumLuminance(void) const;
+
+    /*! This method computes the sum of each Pixel's log luminance value.
+     *  \return The sum over all Pixels' log luminance.
+     */
+    inline float computeSumLogLuminance(void) const;
+
+    /*! This method computes the mean over Pixels' luminance values.
+     *  \return The mean over all Pixels' luminance.
+     */
+    inline float computeMeanLuminance(void) const;
+
+    inline float computeMedianLuminance(void) const;
+
+    inline float computeMeanLuminanceIgnoreZero(void) const;
+
+    /*! This method computes the mean over Pixels' log luminance values.
+     *  \return The mean over all Pixels' log luminance.
+     */
+    inline float computeMeanLogLuminance(void) const;
+
+    /*! This method computes the variance over Pixels' luminance values.
+     *  \return The variance over all Pixels' luminance.
+     */
+    inline float computeVarianceLuminance(void) const;
+
+    inline float computeVarianceLuminanceIgnoreZero(void) const;
+
+    /*! This method computes the variance over Pixels' log luminance values.
+     *  \return The variance over all Pixels' log luminance.
+     */
+    inline float computeVarianceLogLuminance(void) const;
+
     /*! This method computes the mean Pixel value.
      *  \return computeSum() / (getWidth() * getHeight())
      */
@@ -162,10 +198,11 @@ class RandomAccessFilm
 
     /*! This method erodes the holes of this RandomAccessFilm by setting each hole pixel
      *  to the average of its neighbors.
-     *  \param h The hole value.
+     *  \param h The hole value. Pixels with luminance less than this value
+     *           are considered holes.
      *  \return The number of remaining hole pixels after erosion.
      */
-    inline size_t erode(const Pixel &h);
+    inline size_t erode(const float h);
 
     /*! This method performs bilateral filtering on this RandomAccessFilm.
      *  \param sigmad The standard deviation of the spacial gaussian kernel.
@@ -177,6 +214,52 @@ class RandomAccessFilm
     inline void bilateralFilter(const float sigmad,
                                 const float sigmar,
                                 const RandomAccessFilm &intensity);
+
+    /*! This method applies gamma and exposure to this RandomAccessFilm.
+     *  \param gamma The value of gamma to apply.
+     *  \param exposure The value of exposure to apply.
+     */
+    inline void applyGammaAndExposure(const float gamma, const float exposure);
+
+    /*! This method applies a clamp to each of the pixels' channels in this RandomAccessFilm.
+     *  \param m The low end of the clamp.
+     *  \param M The high end of the clamp.
+     */
+    inline void applyClamp(const float m, const float M);
+
+    /*! This method applies sqrt to each of the pixels' channels in this RandomAccessFilm.
+     */
+    inline void applySqrt(void);
+
+    /*! This method applies pow to each of the pixels' channels in this RandomAccessFilm.
+     *  \param e The exponent to apply.
+     */
+    inline void applyPow(const float e);
+
+    /*! This method divides each of the pixels' channels by the luminance of the given RandomAccessFilm.
+     *  \param rhs The numerator image.
+     *  \param epsilon An epsilon to add to the divide.
+     */
+    inline void divideLuminance(const RandomAccessFilm &rhs,
+                                const float epsilon);
+
+    /*! This method returns the percentile of this RandomAccessFilm's
+     *  luminance.
+     *  \param p The percentile of interest.
+     */
+    inline float computeLuminancePercentile(const float p) const;
+
+    /*! This method returns the percentile of this RandomAccessFilm's
+     *  luminance while ignoring zeroes.
+     *  \param p The percentile of interest.
+     */
+    inline float computeLuminancePercentileIgnoreZero(const float p) const;
+
+    /*! This method clamps this RandomAccessFilm Pixels' luminance to the given range.
+     *  \param m The minimum of the range.
+     *  \param M The maximum of the range.
+     */
+    inline void clampLuminance(const float m, const float M);
 
   private:
     typedef Array2<Pixel> Parent1;

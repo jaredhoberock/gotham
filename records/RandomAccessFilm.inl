@@ -127,11 +127,148 @@ RandomAccessFilm::Pixel RandomAccessFilm
   return result;
 } // end RandomAccessFilm::computeSum()
 
+float RandomAccessFilm
+  ::computeSumLuminance(void) const
+{
+  float result = 0;
+  for(size_t i = 0; i < size(); ++i)
+  {
+    result += (*this)[i].luminance();
+  } // end for i
+
+  return result;
+} // end RandomAccessFilm::computeSumLuminance()
+
+float RandomAccessFilm
+  ::computeSumLogLuminance(void) const
+{
+  float result = 0;
+  for(size_t i = 0; i < size(); ++i)
+  {
+    if((*this)[i].luminance() > 0)
+      result += logf((*this)[i].luminance());
+  } // end for i
+
+  return result;
+} // end RandomAccessFilm::computeSumLuminance()
+
 RandomAccessFilm::Pixel RandomAccessFilm
   ::computeMean(void) const
 {
   return computeSum() / (getWidth() * getHeight());
 } // end RandomAccessFilm::computeMean()
+
+float RandomAccessFilm
+  ::computeMeanLuminance(void) const
+{
+  return computeSumLuminance() / (getWidth() * getHeight());
+} // end RandomAccessFilm::computeMeanLuminance()
+
+float RandomAccessFilm
+  ::computeMedianLuminance(void) const
+{
+  std::vector<float> l;
+  for(size_t i = 0; i != size(); ++i)
+    l.push_back((*this)[i].luminance());
+
+  std::sort(l.begin(), l.end());
+
+  return l[l.size()/2];
+} // end RandomAccessFilm::computeMedianLuminance()
+
+float RandomAccessFilm
+  ::computeMeanLuminanceIgnoreZero(void) const
+{
+  float result = 0;
+  float l;
+  size_t n = 0;
+  for(size_t i = 0; i != size(); ++i)
+  {
+    l = (*this)[i].luminance();
+    if(l > 0)
+    {
+      result += l;
+      ++n;
+    } // end if
+  } // end for i
+
+  if(n > 0)
+  {
+    result /= n;
+  } // end if
+
+  return result;
+} // end RandomAccessFilm::computeMeanLuminanceIgnoreZero()
+
+float RandomAccessFilm
+  ::computeMeanLogLuminance(void) const
+{
+  return computeSumLogLuminance() / (getWidth() * getHeight());
+} // end RandomAccessFilm::computeMeanLogLuminance()
+
+float RandomAccessFilm
+  ::computeVarianceLuminance(void) const
+{
+  float mean = computeMeanLuminance();
+
+  float result = 0;
+  for(size_t i = 0; i != size(); ++i)
+  {
+    float diff = mean - (*this)[i].luminance();
+    result += diff * diff;
+  } // end for i
+
+  result /= (getWidth() * getHeight());
+
+  return result;
+} // end RandomAccessFilm::computeVarianceLuminance()
+
+float RandomAccessFilm
+  ::computeVarianceLuminanceIgnoreZero(void) const
+{
+  float mean = computeMeanLuminanceIgnoreZero();
+
+  float result = 0;
+  float l = 0;
+  size_t n = 0;
+  for(size_t i = 0; i != size(); ++i)
+  {
+    l = (*this)[i].luminance();
+    if(l > 0)
+    {
+      float diff = mean - l;
+      result += diff * diff;
+      ++n;
+    } // end if
+  } // end for i
+
+  if(n > 0)
+  {
+    result /= n;
+  } // end if
+
+  return result;
+} // end RandomAccessFilm::computeVarianceLuminance()
+
+float RandomAccessFilm
+  ::computeVarianceLogLuminance(void) const
+{
+  float mean = computeMeanLogLuminance();
+
+  float result = 0;
+  for(size_t i = 0; i != size(); ++i)
+  {
+    if((*this)[i].luminance() > 0)
+    {
+      float diff = mean - logf((*this)[i].luminance());
+      result += diff * diff;
+    } // end if
+  } // end for i
+
+  result /= (getWidth() * getHeight());
+
+  return result;
+} // end RandomAccessFilm::computeVarianceLogLuminance()
 
 void RandomAccessFilm
   ::tonemap(void)
@@ -383,7 +520,7 @@ void RandomAccessFilm
 } // end RandomAccessFilm::integrateRectangle()
 
 size_t RandomAccessFilm
-  ::erode(const Pixel &h)
+  ::erode(const float h)
 {
   size_t holesLeft = 0;
   size_t holesFixed = 0;
@@ -392,7 +529,7 @@ size_t RandomAccessFilm
   {
     for(size_t x = 0; x != getWidth(); ++x)
     {
-      if(raster(x,y) == h)
+      if(raster(x,y).luminance() <= h)
       {
         // visit each non-hole neighbor
         Pixel newVal(Pixel(0,0,0));
@@ -468,8 +605,6 @@ size_t RandomAccessFilm
       } // end if
     } // end for x
   } // end for y
-
-  std::cerr << "RandomAccessFilm::erode(): Fixed " << holesFixed << " holes." << std::endl;
 
   return holesLeft;
 } // end RandomAccessFilm::erode()
@@ -571,4 +706,152 @@ void RandomAccessFilm
 
   *this = result;
 } // end RandomAccessFilm::bilateralFilter()
+
+void RandomAccessFilm
+  ::applyClamp(const float m, const float M)
+{
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      Pixel &p = raster(x,y);
+      p[0] = std::max(m, std::min(p[0], M));
+      p[1] = std::max(m, std::min(p[1], M));
+      p[2] = std::max(m, std::min(p[2], M));
+    } // end for x
+  } // end for y
+} // end RandomAccessFilm::applyClamp()
+
+void RandomAccessFilm
+  ::applyGammaAndExposure(const float gamma, const float exposure)
+{
+  float invGamma = 1.0f / gamma;
+  float scale = powf(2.0f, exposure);
+
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      Pixel &p = raster(x,y);
+      p[0] = powf(scale * p[0], invGamma);
+      p[1] = powf(scale * p[1], invGamma);
+      p[2] = powf(scale * p[2], invGamma);
+    } // end for x
+  } // end for y
+} // end RandomAccessFilm::applyGammaAndExposure()
+
+void RandomAccessFilm
+  ::applySqrt(void)
+{
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      Pixel &p = raster(x,y);
+      p[0] = sqrtf(std::max(0.0f,p[0]));
+      p[1] = sqrtf(std::max(0.0f,p[1]));
+      p[2] = sqrtf(std::max(0.0f,p[2]));
+    } // end for x
+  } // end for y
+} // end RandomAccessFilm::applySqrt()
+
+void RandomAccessFilm
+  ::applyPow(const float e)
+{
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      Pixel &p = raster(x,y);
+      p[0] = powf(std::max(0.0f,p[0]), e);
+      p[1] = powf(std::max(0.0f,p[1]), e);
+      p[2] = powf(std::max(0.0f,p[2]), e);
+    } // end for x
+  } // end for y
+} // end RandomAccessFilm::applySqrt()
+
+void RandomAccessFilm
+  ::divideLuminance(const RandomAccessFilm &rhs, const float epsilon)
+{
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      Pixel &p = raster(x,y);
+
+      float r = 1.0f / std::max(rhs.raster(x,y).luminance(), epsilon);
+      p[0] *= r;
+      p[1] *= r;
+      p[2] *= r;
+    } // end for x
+  } // end for y
+} // end RandomAccessFilm::divideLuminance()
+
+float RandomAccessFilm
+  ::computeLuminancePercentile(const float p) const
+{
+  std::vector<float> luminance;
+
+  // make a list of luminance
+  for(size_t i = 0; i != size(); ++i)
+  {
+    luminance.push_back((*this)[i].luminance());
+  } // end for i
+
+  // sort
+  std::sort(luminance.begin(), luminance.end());
+
+  return luminance[std::min<size_t>(size(), static_cast<size_t>(p * size()))];
+} // end RandomAccessFilm::computeLuminancePercentile()
+
+float RandomAccessFilm
+  ::computeLuminancePercentileIgnoreZero(const float p) const
+{
+  std::vector<float> luminance;
+
+  // make a list of luminance
+  for(size_t i = 0; i != size(); ++i)
+  {
+    if((*this)[i].luminance() > 0)
+      luminance.push_back((*this)[i].luminance());
+  } // end for i
+
+  // sort
+  std::sort(luminance.begin(), luminance.end());
+
+  float result = 0;
+  if(luminance.size() > 0)
+  {
+    size_t index = std::min<size_t>(luminance.size()-1,
+                                    static_cast<size_t>(p * luminance.size()));
+    result = luminance[index];
+  } // end if
+
+  if(result == 0)
+  {
+    std::cerr << "RandomAccessFilm::computeLuminancePercentileIgnoreZero(): Failed." << std::endl;
+  } // end if
+
+  return result;
+} // end RandomAccessFilm::computeLuminancePercentile()
+
+void RandomAccessFilm
+  ::clampLuminance(const float m, const float M)
+{
+  for(size_t i = 0; i != size(); ++i)
+  {
+    Pixel &p = (*this)[i];
+
+    float l = p.luminance();
+
+    if(l < m)
+    {
+      p.setLuminance(m);
+    } // end if
+    else if(l > M)
+    {
+      p.setLuminance(M);
+    } // end else if
+  } // end for i
+} // end RandomAccessFilm::clampLuminance()
 
