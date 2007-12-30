@@ -41,9 +41,9 @@ void RecursiveMetropolisRenderer
 
   // render a half-res version of the Image first
   // XXX is there a way to do this with Records in general?
-  unsigned int w = mRecursionScale * dynamic_cast<RenderFilm*>(mRecord.get())->getWidth();
-  unsigned int h = mRecursionScale * dynamic_cast<RenderFilm*>(mRecord.get())->getHeight();
-  unsigned int target = mRecursionScale * mRecursionScale * Parent::mRayTarget;
+  size_t w = static_cast<size_t>(mRecursionScale * dynamic_cast<RenderFilm*>(mRecord.get())->getWidth());
+  size_t h = static_cast<size_t>(mRecursionScale * dynamic_cast<RenderFilm*>(mRecord.get())->getHeight());
+  Target target = static_cast<Target>(mRecursionScale * mRecursionScale * Parent::mRayTarget);
 
   ScalarImportance *importance = 0;
   if(w > 0 && h > 0 && target > 1000000)
@@ -51,7 +51,7 @@ void RecursiveMetropolisRenderer
     // recurse
     std::cerr << "recursing with " << target << " target rays." << std::endl;
     char buf[33];
-    sprintf(buf, "estimate-%dx%d.exr", w, h);
+    sprintf(buf, "estimate-%dx%d.exr", (int)w, (int)h);
     boost::shared_ptr<Record> lowResImage(new RenderFilm(w,h,buf));
     RecursiveMetropolisRenderer recurse(mScene,
                                         lowResImage,
