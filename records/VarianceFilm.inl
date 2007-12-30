@@ -13,12 +13,22 @@ VarianceFilm
 } // end VarianceFilm::VarianceFilm()
 
 VarianceFilm
+  ::VarianceFilm(const RenderFilm &r,
+                 const boost::shared_ptr<RandomAccessFilm> &estimate)
+    :Parent(r),mMeanEstimate(estimate),mVariance(r.getWidth(),r.getHeight())
+{
+  ;
+} // end VarianceFilm::VarianceFilm()
+
+VarianceFilm
   ::VarianceFilm(const unsigned int width,
                  const unsigned int height,
                  const boost::shared_ptr<RandomAccessFilm> &estimate,
                  const std::string &filename,
                  const std::string &varianceFilename)
-    :Parent(width, height, filename),mMeanEstimate(estimate)
+    :Parent(width, height, filename),
+     mMeanEstimate(estimate),
+     mVariance(width,height)
 {
   mVariance.setFilename(varianceFilename);
 } // end VarianceFilm::VarianceFilm()
@@ -35,6 +45,16 @@ void VarianceFilm
 {
   Parent::postprocess();
   mVariance.postprocess();
+
+  RandomAccessFilm rms = mVariance;
+  rms.applySqrt();
+  rms.writeEXR("rms.exr");
+
+  RandomAccessFilm normalized = rms;
+
+  // XXX perhaps we should find the minimum luminance > 0
+  normalized.divideLuminance(*this, 0.05f);
+  normalized.writeEXR("normalized-rms.exr");
 } // end VarianceFilm::postprocess()
 
 void VarianceFilm
@@ -71,12 +91,6 @@ void VarianceFilm
 
     const Spectrum &mean = mMeanEstimate->pixel(pixel[0], pixel[1]);
 
-    //diff = r.mThroughput - mean;
-    //diff *= diff;
-
-    //// each deposit takes the following form:
-    //d = (w * r.mWeight / r.mPdf) * diff;
-
     // this looks like it might be correct
     diff = (r.mWeight / r.mPdf) * r.mThroughput;
     diff -= mean;
@@ -88,8 +102,6 @@ void VarianceFilm
 
     // handoff to deposit() 
     mVariance.deposit(pixel[0], pixel[1], d);
-
-    const Spectrum &val = static_cast<const RenderFilm&>(mVariance).pixel(pixel[0], pixel[1]);
   } // end for r
 } // end VarianceFilm::record()
 
@@ -114,4 +126,22 @@ void VarianceFilm
   Parent::resize(width,height);
   mVariance.resize(width,height);
 } // end VarianceFilm::resize()
+
+RandomAccessFilm &VarianceFilm
+  ::getMeanEstimate(void)
+{
+  return *mMeanEstimate;
+} // end VarianceFilm::getMeanEstimate()
+
+void VarianceFilm
+  ::setMeanEstimate(const boost::shared_ptr<RandomAccessFilm> &mean)
+{
+  mMeanEstimate = mean;
+} // end VarianceFilm::setMeanEstimate()
+
+RenderFilm &VarianceFilm
+  ::getVariance(void)
+{
+  return mVariance;
+} // end VarianceFilm::getVariance()
 

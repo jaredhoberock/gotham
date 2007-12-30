@@ -23,6 +23,14 @@ class VarianceFilm
      */
     inline VarianceFilm(void);
 
+    /*! Constructor accepts a RenderFilm as an initializer.
+     *  mMeanEstimate and mVariance initialized with null constructor.
+     *  \param r Sets Parent.
+     *  \param estimate Sets mMeanEstimate.
+     */
+    inline VarianceFilm(const RenderFilm &r,
+                        const boost::shared_ptr<RandomAccessFilm> &estimate);
+
     /*! Constructor calls the parent and resets the statistics.
      *  \param width The new width of this RenderFilm.
      *  \param height The new height of this RenderFilm.
@@ -74,6 +82,21 @@ class VarianceFilm
      *  \param s The scale value.
      */
     inline virtual void scale(const Pixel &s);
+
+    /*! This method returns a reference to mMeanEstimate.
+     *  \return mMeanEstimate
+     */
+    inline RandomAccessFilm &getMeanEstimate(void);
+
+    /*! This method returns a reference to mVariance.
+     *  \return mVariance
+     */
+    inline RenderFilm &getVariance(void);
+
+    /*! This method sets mMeanEstimate.
+     *  \param mean Sets mMeanEstimate.
+     */
+    inline void setMeanEstimate(const boost::shared_ptr<RandomAccessFilm> &mean);
 
   protected:
     /*! An estimate of the mean.
