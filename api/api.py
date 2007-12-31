@@ -110,9 +110,21 @@ class Gotham2(Gotham):
     matrix[:] = m
     Gotham.loadMatrix(self, matrix)
 
-  def render(self, (width,height) = (600,480), spp = 4):
-    Gotham.attribute(self, "renderer::spp", str(spp))
-    Gotham.render(self, width, height)
+  def render(self, *args):
+    if len(args) > 0:
+      print "render((w,h), spp): Warning: using arguments with this function is deprecated."
+      print "Please use render() instead."
+    if len(args) == 1:
+      print "Error: too few parameters to render()."
+      return
+    if len(args) > 2:
+      print "Error: too many parameters to render()."
+      return
+    elif len(args) == 2:
+      Gotham.attribute(self, "record::width", str(args[0][0]))
+      Gotham.attribute(self, "record::height", str(args[0][1]))
+      Gotham.attribute(self, "renderer::spp", str(args[1]))
+    Gotham.render(self)
 
   def lookAt(self, eye, center, up):
     # see gluLookAt man page: we construct the

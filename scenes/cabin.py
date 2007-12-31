@@ -33,6 +33,9 @@ g.lookAt( (  29.7108,  18.1446,  -107.85),
 g.camera(float(w) / h, 45.0, 0.01)
 g.popMatrix()
 
-g.render((w,h), 32)
-#g.render((w,h), 1)
+g.attribute("record::width", str(w))
+g.attribute("record::height", str(h))
+g.attribute("renderer::spp", "1")
+
+g.render()
 

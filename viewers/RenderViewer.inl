@@ -113,6 +113,15 @@ void RenderViewer
 
   mDoTonemap = false;
   mMiddleGrey = 0.5f;
+
+  // resize
+  resize(512,512);
+
+  shared_ptr<const RenderFilm> film = dynamic_pointer_cast<const RenderFilm,const Record>(mRenderer->getRecord());
+  if(film.get() != 0)
+  {
+    resize(film->getWidth(), film->getHeight());
+  } // end if
 } // end RenderViewer::init()
 
 void RenderViewer

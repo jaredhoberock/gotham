@@ -89,11 +89,8 @@ class Gotham
     void getMatrix(std::vector<float> &m);
 
     /*! This method starts a render.
-     *  \param width The width of the image to render.
-     *  \param height The height of the image to render.
      */
-    void render(const unsigned int width,
-                const unsigned int height);
+    void render(void);
 
     /*! This method sets the given Material
      *  as the current Material.

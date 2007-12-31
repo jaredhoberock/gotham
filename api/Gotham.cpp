@@ -160,8 +160,7 @@ void Gotham
 } // end Gotham::multMatrix()
 
 void Gotham
-  ::render(const unsigned int width,
-           const unsigned int height)
+  ::render(void)
 {
   // create a new Scene
   AttributeMap::const_iterator a = mAttributeStack.back().find("scene::castshadows");
@@ -194,11 +193,6 @@ void Gotham
 
   // create a Record
   shared_ptr<Record> record;
-  char buf[33];
-  sprintf(buf, "%d", width);
-  mAttributeStack.back()["record::width"] = std::string(buf);
-  sprintf(buf, "%d", height);
-  mAttributeStack.back()["record::height"] = std::string(buf);
   record.reset(RecordApi::record(mAttributeStack.back()));
 
   // give everything to the renderer
@@ -220,7 +214,6 @@ void Gotham
     QApplication application(zero,0);
 
     RenderViewer v;
-    v.resize(width, height);
 
     // title the window the name of the outfile
     a = mAttributeStack.back().find("record::outfile");
@@ -247,11 +240,13 @@ void Gotham
       float lookx  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::lookx"]).c_str());
       float looky  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::looky"]).c_str());
       float lookz  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::lookz"]).c_str());
+      float width = atof(any_cast<std::string>(mAttributeStack.back()["record::width"]).c_str());
+      float height = atof(any_cast<std::string>(mAttributeStack.back()["record::height"]).c_str());
 
       // convert degrees to radians
       float fovyRadians = fovy * PI / 180.0f;
       v.camera()->setFieldOfView(fovyRadians);
-      v.camera()->setAspectRatio(float(width)/float(height));
+      v.camera()->setAspectRatio(width/height);
       v.camera()->setPosition(qglviewer::Vec(eyex,eyey,eyez));
       v.camera()->setUpVector(qglviewer::Vec(upx,upy,upz));
       v.camera()->setViewDirection(qglviewer::Vec(lookx,looky,lookz));

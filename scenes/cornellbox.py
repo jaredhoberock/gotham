@@ -134,6 +134,8 @@ g.attribute("renderer::algorithm", "montecarlo")
 
 # let's render to a 512x512 image
 (w,h) = (512,512)
+g.attribute("record::width", str(w))
+g.attribute("record::height", str(h))
 
 # finally we need to set up the camera
 # first push a matrix
@@ -155,10 +157,11 @@ g.camera(float(w) / h, 60.0, 0.01)
 # clean up the matrix stack
 g.popMatrix()
 
-# finally, tell gotham to render
-# render() takes two arguments
-# the dimensions of the image as given in a single tuple
-# and the square root of the number of samples to take per pixel
+# use 16 samples per pixel
+# we have to request the square root of the number of samples to take per pixel
 # we want 16 samples per pixel, so we say 4
-g.render((w,h), 4)
+g.attribute("renderer::spp", "4")
+
+# finally, tell gotham to render
+g.render()
 
