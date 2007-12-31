@@ -152,6 +152,7 @@ void MultiStageMetropolisRenderer
       gpcpu::float2 pixel;
       mapToImage(yResults[0], y, yPath, pixel[0], pixel[1]);
       mAcceptanceImage.deposit(pixel[0], pixel[1], Spectrum(a, a, a));
+      mProposalImage.deposit(pixel[0], pixel[1], Spectrum::white());
     } // end if
 
     // accept?

@@ -169,6 +169,9 @@ void MetropolisRenderer
       float yu, yv;
       mapToImage(yResults[0], y, yPath, yu, yv);
       mAcceptanceImage.deposit(yu, yv, Spectrum(a, a, a));
+
+      // add to the proposal image
+      mProposalImage.deposit(yu, yv, Spectrum::white());
     } // end if
 
     // accept?
@@ -228,6 +231,10 @@ void MetropolisRenderer
     // zero the acceptance image
     mAcceptanceImage.resize(film->getWidth(), film->getHeight());
     mAcceptanceImage.preprocess();
+
+    // zero the proposal image
+    mProposalImage.resize(film->getWidth(), film->getHeight());
+    mProposalImage.preprocess();
   } // end if
 
   // preprocess the mutator
@@ -278,6 +285,11 @@ void MetropolisRenderer
   float s = 0.5f / mAcceptanceImage.computeMean().luminance();
   mAcceptanceImage.scale(Spectrum(s,s,s));
   mAcceptanceImage.postprocess();
+
+  // rescale proposal image so it has 1/2 mean luminance
+  s = 0.5f / mProposalImage.computeMean().luminance();
+  mProposalImage.scale(Spectrum(s,s,s));
+  mProposalImage.postprocess();
 } // end MetropolisRenderer::postprocess()
 
 RenderFilm *MetropolisRenderer
@@ -291,4 +303,10 @@ void MetropolisRenderer
 {
   mAcceptanceImage.setFilename(filename);
 } // end MetropolisRenderer::setAcceptanceFilename()
+
+void MetropolisRenderer
+  ::setProposalFilename(const std::string &filename)
+{
+  mProposalImage.setFilename(filename);
+} // end MetropolisRenderer::setProposalFilename()
 

@@ -178,6 +178,7 @@ void EnergyRedistributionRenderer
               float zu, zv;
               mapToImage(zResults[0], z, zPath, zu, zv);
               mAcceptanceImage.deposit(zu, zv, Spectrum(a, a, a));
+              mProposalImage.deposit(zu, zv, Spectrum::white());
             } // end if
 
             // accept?

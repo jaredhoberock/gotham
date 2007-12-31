@@ -82,6 +82,11 @@ class MetropolisRenderer
      */
     void setAcceptanceFilename(const std::string &filename);
 
+    /*! This method sets the filename of mProposalImage.
+     *  \param filename The name of the file to write mProposalImage to.
+     */
+    void setProposalFilename(const std::string &filename);
+
   protected:
     /*! This method safely copies a Path by cloning its integrands into
      *  mLocalPool.
@@ -122,6 +127,10 @@ class MetropolisRenderer
     /*! An image of the acceptance rate.
      */
     RenderFilm mAcceptanceImage;
+
+    /*! An image of the proposal rate.
+     */
+    RenderFilm mProposalImage;
 }; // end MetropolisRenderer
 
 #endif // METROPOLIS_RENDERER_H

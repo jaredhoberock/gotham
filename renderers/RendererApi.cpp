@@ -79,6 +79,14 @@ Renderer *RendererApi
     acceptanceFilename = any_cast<std::string>(val);
   } // end if
 
+  std::string proposalFilename;
+  a = attr.find("record::proposals::outfile");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    proposalFilename = any_cast<std::string>(val);
+  } // end if
+
   // create the renderer
   if(rendererName == "montecarlo")
   {
@@ -178,7 +186,9 @@ Renderer *RendererApi
   //     i guess we need a MetropolisRecord which can also integrate acceptance and proposals?
   if(dynamic_cast<MetropolisRenderer*>(result))
   {
-    dynamic_cast<MetropolisRenderer*>(result)->setAcceptanceFilename(acceptanceFilename);
+    MetropolisRenderer *r = dynamic_cast<MetropolisRenderer*>(result);
+    r->setAcceptanceFilename(acceptanceFilename);
+    r->setProposalFilename(proposalFilename);
   } // end try
 
   // get spp
