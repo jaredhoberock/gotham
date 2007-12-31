@@ -71,6 +71,14 @@ Renderer *RendererApi
     varianceExponent = atof(boost::any_cast<std::string>(val).c_str());
   } // end if
 
+  std::string acceptanceFilename;
+  a = attr.find("record::acceptance::outfile");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    acceptanceFilename = any_cast<std::string>(val);
+  } // end if
+
   // create the renderer
   if(rendererName == "montecarlo")
   {
@@ -164,6 +172,14 @@ Renderer *RendererApi
     shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
     result = new PathDebugRenderer(z, sampler);
   } // end else
+
+  // set the acceptance filename for MetropolisRenderers
+  // XXX this is all so shitty
+  //     i guess we need a MetropolisRecord which can also integrate acceptance and proposals?
+  if(dynamic_cast<MetropolisRenderer*>(result))
+  {
+    dynamic_cast<MetropolisRenderer*>(result)->setAcceptanceFilename(acceptanceFilename);
+  } // end try
 
   // get spp
   unsigned int spp = 4;

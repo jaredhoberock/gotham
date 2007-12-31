@@ -227,7 +227,6 @@ void MetropolisRenderer
   {
     // zero the acceptance image
     mAcceptanceImage.resize(film->getWidth(), film->getHeight());
-    mAcceptanceImage.setFilename("acceptance.exr");
     mAcceptanceImage.preprocess();
   } // end if
 
@@ -286,4 +285,10 @@ RenderFilm *MetropolisRenderer
 {
   return &mAcceptanceImage;
 } // end MetropolisRenderer::getAcceptanceImage()
+
+void MetropolisRenderer
+  ::setAcceptanceFilename(const std::string &filename)
+{
+  mAcceptanceImage.setFilename(filename);
+} // end MetropolisRenderer::setAcceptanceFilename()
 

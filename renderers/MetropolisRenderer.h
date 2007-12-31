@@ -77,6 +77,11 @@ class MetropolisRenderer
      */
     RenderFilm *getAcceptanceImage(void);
 
+    /*! This method sets the filename of mAcceptanceImage.
+     *  \param filename The name of the file to write mAcceptanceImage to.
+     */
+    void setAcceptanceFilename(const std::string &filename);
+
   protected:
     /*! This method safely copies a Path by cloning its integrands into
      *  mLocalPool.
