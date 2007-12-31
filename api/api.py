@@ -35,6 +35,11 @@ class Gotham2(Gotham):
   except:
     print 'Warning: $GOTHAMHOME undefined! Some shaders may not be found.'
 
+  def attribute(self, name, value):
+    # wrap up the value as a string and pass
+    # it along to the parent
+    Gotham.attribute(self, name, str(value))
+
   def material(self, name, *parms):
     # XXX this is getting ugly
     # add shaderpaths to os.path temporarily
