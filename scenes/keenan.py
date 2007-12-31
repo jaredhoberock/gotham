@@ -7,7 +7,8 @@ g = api.Gotham2()
 # ---- Lights ----
 # two instances of the same shape of light
 translations = [(80,180,-80), (-180, 140, 80)]
-powers = [(100,100,90), (70,70,90)]
+powers = [(1024*100,1024*100,1024*90),
+          (1024*70,1024*70,1024*90)]
 for (t,p) in zip(translations,powers):
   g.pushMatrix()
   g.translate(t[0], t[1], t[2])
@@ -19,7 +20,7 @@ for (t,p) in zip(translations,powers):
 # one more light
 g.pushMatrix()
 g.translate(-5,36,-5)
-g.material('light', 'power', (8,8,8))
+g.material('light', 'power', (1024*8,1024*8,1024*8))
 g.mesh((-5, 0, 5, 5, 0, 5, 5, 0, -5, -5, 0, 5, 5, 0, -5, -5, 0, -5),
        (5, 4, 3, 2, 1, 0))
 g.popMatrix()
@@ -76,41 +77,45 @@ g.camera(float(w)/h, 35.0, 0.01)
 g.popMatrix()
 
 g.attribute('path::maxlength', '10')
-g.attribute('path::sampler', 'simpleforwardrussianroulette')
-g.attribute('path::russianroulette::function', 'kelemen')
-g.attribute('path::russianroulette::continueprobability', '1.0')
+
 g.attribute('renderer::algorithm', 'metropolis')
 g.attribute('mutator::largestep', '0.001')
-#g.attribute('importance::function', 'equalvisit')
-#g.attribute('importance::function', 'constant')
-#g.render((2*w,2*h), 64)
 
 (w,h) = (2*w,2*h)
-#g.attribute("viewer", "false")
 
 # 500M rays
 rootSpp = 1
-#g.attribute("renderer::targetrays", "500000000")
-#g.attribute("renderer::targetrays", "50000000")
-g.attribute("renderer::targetrays", "2500000000")
+g.attribute("renderer::targetrays", "500000000")
 
-# try all these functions
-outpath = "visit_tests/"
-#functions = ['luminance','equalvisit', 'luminanceovervisits']
-#functions = ['luminance', 'luminanceovervisits']
-functions = ['luminance']
-#functions = ['luminanceovervisits']
-filters = ['nearestneighbor', 'bilinear']
-for function in functions:
-  g.attribute("importance::function", function)
-  if function == 'luminance':
-    outfile = outpath + "keenan.mlt.simpleforwardrussianroulette.startfromone.sophisticated.reference." + function + ".exr"
-    g.attribute("record::outfile", outfile)
-    g.render((w,h), rootSpp)
-  else:
-    for filter in filters:
-      g.attribute("importance::visitfilter", filter)
-      outfile = outpath + "keenan.mlt.simpleforwardrussianroulette.startfromone.sophisticated." + function + "." + filter + ".exr"
-      g.attribute("record::outfile", outfile)
-      g.render((w,h), rootSpp)
+g.attribute('path::sampler', 'simplebidirectionalrussianroulette')
+g.attribute('path::russianroulette::function', 'modifiedkelemen')
+g.attribute('path::russianroulette::continueprobability', '0.9')
 
+#g.attribute('path::sampler', 'simpleforwardrussianroulette')
+#g.attribute('path::russianroulette::function', 'kelemen')
+#g.attribute('path::russianroulette::continueprobability', '1.0')
+
+##g.attribute("renderer::algorithm", "recursivemetropolis")
+##g.attribute('mutator::largestep', '0.5')
+g.render((w,h), rootSpp)
+
+## try all these functions
+#outpath = "visit_tests/"
+##functions = ['luminance','equalvisit', 'luminanceovervisits']
+##functions = ['luminance', 'luminanceovervisits']
+#functions = ['luminance']
+##functions = ['luminanceovervisits']
+#filters = ['nearestneighbor', 'bilinear']
+#for function in functions:
+#  g.attribute("importance::function", function)
+#  if function == 'luminance':
+#    outfile = outpath + "keenan.mlt.simpleforwardrussianroulette.startfromone.sophisticated.reference." + function + ".exr"
+#    g.attribute("record::outfile", outfile)
+#    g.render((w,h), rootSpp)
+#  else:
+#    for filter in filters:
+#      g.attribute("importance::visitfilter", filter)
+#      outfile = outpath + "keenan.mlt.simpleforwardrussianroulette.startfromone.sophisticated." + function + "." + filter + ".exr"
+#      g.attribute("record::outfile", outfile)
+#      g.render((w,h), rootSpp)
+#
