@@ -10,6 +10,7 @@
 
 #include "Renderer.h"
 #include "../numeric/RandomSequence.h"
+#include "HaltCriterion.h"
 
 class MonteCarloRenderer
   : public Renderer
@@ -57,6 +58,11 @@ class MonteCarloRenderer
      */
     unsigned long getNumSamples(void) const;
 
+    /*! This method sets mHalt.
+     *  \return h Sets mHalt.
+     */
+    virtual void setHaltCriterion(const boost::shared_ptr<HaltCriterion> &h);
+
   protected:
     /*! A sequence of pseudo-random numbers.
      */
@@ -66,6 +72,10 @@ class MonteCarloRenderer
      *  generated during kernel().
      */
     unsigned long mNumSamples; 
+
+    /*! A HaltCriterion.
+     */
+    boost::shared_ptr<HaltCriterion> mHalt;
 }; // end MonteCarloRenderer
 
 #include "MonteCarloRenderer.inl"

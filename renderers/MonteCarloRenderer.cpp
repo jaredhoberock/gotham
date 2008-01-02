@@ -18,6 +18,9 @@ void MonteCarloRenderer
   Parent::preprocess();
 
   mNumSamples = 0;
+
+  // introduce ourself to the HaltCriterion
+  mHalt->setRenderer(this);
 } // end MonteCarloRenderer::preprocess()
 
 void MonteCarloRenderer
@@ -46,4 +49,10 @@ unsigned long MonteCarloRenderer
 {
   return mNumSamples;
 } // end MonteCarloRenderer::getNumSamples()
+
+void MonteCarloRenderer
+  ::setHaltCriterion(const boost::shared_ptr<HaltCriterion> &h)
+{
+  mHalt = h;
+} // end MonteCarloRenderer::setHaltCriterion()
 

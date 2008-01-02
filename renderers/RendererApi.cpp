@@ -18,6 +18,7 @@
 #include "../mutators/MutatorApi.h"
 #include "../importance/ImportanceApi.h"
 #include "../importance/LuminanceImportance.h"
+#include "HaltCriterion.h"
 
 using namespace boost;
 
@@ -181,16 +182,7 @@ Renderer *RendererApi
     result = new PathDebugRenderer(z, sampler);
   } // end else
 
-  // set the acceptance filename for MetropolisRenderers
-  // XXX this is all so shitty
-  //     i guess we need a MetropolisRecord which can also integrate acceptance and proposals?
-  if(dynamic_cast<MetropolisRenderer*>(result))
-  {
-    MetropolisRenderer *r = dynamic_cast<MetropolisRenderer*>(result);
-    r->setAcceptanceFilename(acceptanceFilename);
-    r->setProposalFilename(proposalFilename);
-  } // end try
-
+  // XXX Remove this when we have successfully generalized target counts
   // get spp
   unsigned int spp = 4;
   a = attr.find("renderer::spp");
@@ -201,6 +193,23 @@ Renderer *RendererApi
   } // end if
 
   result->setSamplesPerPixel(spp);
+
+  // create a HaltCriterion for MonteCarloRenderers
+  if(dynamic_cast<MonteCarloRenderer*>(result))
+  {
+    shared_ptr<HaltCriterion> halt(HaltCriterion::createCriterion(attr));
+    dynamic_cast<MonteCarloRenderer*>(result)->setHaltCriterion(halt);
+  } // end if
+
+  // set the acceptance filename for MetropolisRenderers
+  // XXX this is all so shitty
+  //     i guess we need a MetropolisRecord which can also integrate acceptance and proposals?
+  if(dynamic_cast<MetropolisRenderer*>(result))
+  {
+    MetropolisRenderer *r = dynamic_cast<MetropolisRenderer*>(result);
+    r->setAcceptanceFilename(acceptanceFilename);
+    r->setProposalFilename(proposalFilename);
+  } // end try
 
   return result;
 } // end RendererApi::renderer()
