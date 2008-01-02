@@ -11,7 +11,9 @@
 #include "../path/PathToImage.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include <gpcpu/Vector.h>
-#include "../renderers/TargetRaysRenderer.h"
+#include "../records/RenderFilm.h"
+#include "../renderers/MetropolisRenderer.h"
+#include "../renderers/HaltCriterion.h"
 
 using namespace boost;
 using namespace gpcpu;
@@ -29,12 +31,14 @@ void NormalizedImportance
   shared_ptr<LuminanceImportance> luminance(new LuminanceImportance());
 
   // create a separate renderer temporarily
-  TargetRaysRenderer tempRenderer(r, mutator, luminance, 1000000);
+  MetropolisRenderer tempRenderer(r, mutator, luminance);
   tempRenderer.setScene(scene);
   tempRenderer.setRecord(dynamic_pointer_cast<Record,RenderFilm>(estimate));
-  Renderer::ProgressCallback callback;
+  shared_ptr<HaltCriterion> halt(new TargetRayCount(1000000));
+  tempRenderer.setHaltCriterion(halt);
   
   // render
+  Renderer::ProgressCallback callback;
   tempRenderer.render(callback);
 
   // copy estimate into mEstimate

@@ -7,16 +7,16 @@
 #ifndef MULTI_STAGE_METROPOLIS_RENDERER_H
 #define MULTI_STAGE_METROPOLIS_RENDERER_H
 
-#include "TargetRaysRenderer.h"
+#include "MetropolisRenderer.h"
 
 class MultiStageMetropolisRenderer
-  : public TargetRaysRenderer
+  : public MetropolisRenderer
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef TargetRaysRenderer Parent;
+    typedef MetropolisRenderer Parent;
 
     /*! Null constructor does nothing.
      */
@@ -26,12 +26,10 @@ class MultiStageMetropolisRenderer
      *  \param s Sets Parent::mRandomSequence.
      *  \param m Sets mMutator.
      *  \param importance Sets mImportance.
-     *  \param target Sets mRayTarget.
      */
     MultiStageMetropolisRenderer(const boost::shared_ptr<RandomSequence> &sequence,
                                  const boost::shared_ptr<PathMutator> &m,
-                                 const boost::shared_ptr<ScalarImportance> &importance,
-                                 const unsigned int target);
+                                 const boost::shared_ptr<ScalarImportance> &importance);
 
   protected:
     /*! This method renders mScene to mFilm.

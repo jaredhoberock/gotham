@@ -18,9 +18,8 @@ MultiStageMetropolisRenderer
 MultiStageMetropolisRenderer
   ::MultiStageMetropolisRenderer(const boost::shared_ptr<RandomSequence> &sequence,
                                  const boost::shared_ptr<PathMutator> &m,
-                                 const boost::shared_ptr<ScalarImportance> &importance,
-                                 const unsigned int target)
-    :Parent(sequence,m,importance,target),mRecursionScale(0.5f)
+                                 const boost::shared_ptr<ScalarImportance> &importance)
+    :Parent(sequence,m,importance),mRecursionScale(0.5f)
 {
   ;
 } // end MultiStageMetropolisRenderer::MultiStageMetropolisRenderer()
@@ -76,10 +75,14 @@ void MultiStageMetropolisRenderer
   float a;
   int whichMutation;
 
+  // initialize the HaltCriterion
+  // before we start rendering
+  mHalt->init(this, &progress);
+
   // find the terminal stage of recursion
   float recurseWidth  = dynamic_cast<RenderFilm*>(mRecord.get())->getWidth();
   float recurseHeight = dynamic_cast<RenderFilm*>(mRecord.get())->getHeight();
-  float recurseTarget = Parent::mRayTarget;
+  float recurseTarget = progress.expected_count();
 
   while(   recurseWidth  * mRecursionScale >= 2
         && recurseHeight * mRecursionScale >= 2)
@@ -98,11 +101,47 @@ void MultiStageMetropolisRenderer
   float heightStep = 0;
 
   size_t currentEstimate = 0;
-  unsigned int oldRays;
-  progress.restart(mRayTarget);
-  while(progress.count() < progress.expected_count())
+
+  // main loop
+  while(!(*mHalt)())
   {
-    oldRays = mScene->getRaysCast();
+    if(progress.count() > actualTarget)
+    {
+      invB = updateImportance(bLuminance,
+                              recurseWidth, recurseHeight,
+                              x, xPath, xResults,
+                              ix, xPdf);
+
+      if(recurseWidth >= 0.4f * film->getWidth()
+        || recurseHeight >= 0.4f * film->getHeight())
+      {
+        if(targetStep == 0)
+        {
+          // from now on, do 10 more steps
+          targetStep = (progress.expected_count() - progress.count()) / 10.0f;
+          widthStep = (film->getWidth() - recurseWidth) / 10.0f;
+          heightStep = (film->getHeight() - recurseHeight) / 10.0f;
+        } // end if
+
+        // after the halfway point, proceed regularly
+        recurseWidth += widthStep;
+        recurseHeight += heightStep;
+        recurseTarget += targetStep;
+      } // end if
+      else
+      {
+        // update new target
+        recurseWidth  /= mRecursionScale;
+        recurseHeight /= mRecursionScale;
+        recurseTarget /= (mRecursionScale * mRecursionScale);
+      } // end else
+
+      // clamp target effort to something reasonable
+      actualTarget = std::max(10000.0f, recurseTarget);
+
+      // update the index of the estimate we're on
+      ++currentEstimate;
+    } // end if
 
     // mutate
     whichMutation = (*mMutator)(x,xPath,y,yPath);
@@ -175,47 +214,6 @@ void MultiStageMetropolisRenderer
 
     // update the number of samples we've taken so far
     ++mNumSamples;
-
-    // update the number of rays we've cast so far
-    progress += mScene->getRaysCast() - oldRays;
-
-    if(progress.count() > actualTarget)
-    {
-      invB = updateImportance(bLuminance,
-                              recurseWidth, recurseHeight,
-                              x, xPath, xResults,
-                              ix, xPdf);
-
-      if(recurseWidth >= 0.4f * film->getWidth()
-        || recurseHeight >= 0.4f * film->getHeight())
-      {
-        if(targetStep == 0)
-        {
-          // from now on, do 10 more steps
-          targetStep = (progress.expected_count() - progress.count()) / 10.0f;
-          widthStep = (film->getWidth() - recurseWidth) / 10.0f;
-          heightStep = (film->getHeight() - recurseHeight) / 10.0f;
-        } // end if
-
-        // after the halfway point, proceed regularly
-        recurseWidth += widthStep;
-        recurseHeight += heightStep;
-        recurseTarget += targetStep;
-      } // end if
-      else
-      {
-        // update new target
-        recurseWidth  /= mRecursionScale;
-        recurseHeight /= mRecursionScale;
-        recurseTarget /= (mRecursionScale * mRecursionScale);
-      } // end else
-
-      // clamp target effort to something reasonable
-      actualTarget = std::max(10000.0f, recurseTarget);
-
-      // update the index of the estimate we're on
-      ++currentEstimate;
-    } // end if
   } // end for i
 
   // purge the local store

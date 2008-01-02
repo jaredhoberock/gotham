@@ -18,7 +18,7 @@ class RendererApi
      *  \param attr An AttributeMap describing a set of
      *              rendering attributes.
      */
-    static Renderer *renderer(const Gotham::AttributeMap &attr);
+    static Renderer *renderer(Gotham::AttributeMap &attr);
 }; // end RendererApi
 
 #endif // RENDERER_API_H

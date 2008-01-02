@@ -20,9 +20,8 @@ NoiseAwareMetropolisRenderer
   ::NoiseAwareMetropolisRenderer(const boost::shared_ptr<RandomSequence> &sequence,
                                  const boost::shared_ptr<PathMutator> &m,
                                  const boost::shared_ptr<ScalarImportance> &importance,
-                                 const unsigned int target,
                                  const float varianceExponent)
-    :Parent(sequence,m,importance,target),
+    :Parent(sequence,m,importance),
      mVarianceExponent(varianceExponent)
 {
   ;

@@ -18,9 +18,6 @@ void MonteCarloRenderer
   Parent::preprocess();
 
   mNumSamples = 0;
-
-  // introduce ourself to the HaltCriterion
-  mHalt->setRenderer(this);
 } // end MonteCarloRenderer::preprocess()
 
 void MonteCarloRenderer

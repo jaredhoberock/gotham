@@ -428,9 +428,6 @@ void Gotham
   toAdd = std::string("4");
   attr["path::maxlength"] = toAdd;
 
-  toAdd = std::string("4");
-  attr["renderer::spp"] = toAdd;
-
   toAdd = std::string("true");
   attr["viewer"] = toAdd;
 

@@ -8,9 +8,11 @@
 #include "../primitives/Scene.h"
 
 void HaltCriterion
-  ::setRenderer(const MonteCarloRenderer *r)
+  ::init(const MonteCarloRenderer *r,
+         Renderer::ProgressCallback *p)
 {
   mRenderer = r;
+  mProgress = p;
 } // end HaltCriterion::setRenderer()
 
 const MonteCarloRenderer *HaltCriterion
@@ -18,6 +20,17 @@ const MonteCarloRenderer *HaltCriterion
 {
   return mRenderer;
 } // end HaltCriterion::getRenderer()
+
+void TargetCriterion
+  ::init(const MonteCarloRenderer *r,
+         Renderer::ProgressCallback *p)
+{
+  Parent::init(r,p);
+
+  p->restart(getTarget());
+  
+  mPrevious = 0;
+} // end TargetCriterion::init()
 
 void TargetCriterion
   ::setTarget(const TargetCriterion::Target t)
@@ -34,13 +47,35 @@ TargetCriterion::Target TargetCriterion
 bool TargetSampleCount
   ::operator()(void)
 {
-  return mRenderer->getNumSamples() >= getTarget();
+  Target currentSamples = mRenderer->getNumSamples();
+
+  // update progress
+  *mProgress += currentSamples - mPrevious;
+
+  // update previous
+  mPrevious = currentSamples;
+  return currentSamples >= getTarget();
 } // end TargetSampleCount::operator()()
+
+TargetRayCount
+  ::TargetRayCount(const Target t)
+    :Parent()
+{
+  setTarget(t);
+} // end TargetRayCount::TargetRayCount()
 
 bool TargetRayCount
   ::operator()(void)
 {
-  return mRenderer->getScene()->getRaysCast() >= getTarget();
+  Target currentRays = mRenderer->getScene()->getRaysCast();
+
+  // update progress
+  *mProgress += currentRays - mPrevious;
+
+  // update previous
+  mPrevious = currentRays;
+
+  return currentRays >= getTarget();
 } // end TargetRayCount::operator()()
 
 HaltCriterion *HaltCriterion
@@ -56,7 +91,30 @@ HaltCriterion *HaltCriterion
     targetFunctionName = boost::any_cast<std::string>(val);
   } // end if
 
-  TargetCriterion::Target target = 0;
+  // count the number of pixels
+  // XXX these defaults really should not be hard-coded here
+  // image width
+  size_t width = 512;
+  a = attr.find("record::width");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    width = atoi(any_cast<std::string>(val).c_str());
+  } // end if
+
+  // image height
+  size_t height = 512;
+  a = attr.find("record::height");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    height = atoi(any_cast<std::string>(val).c_str());
+  } // end if
+
+  size_t numPixels = width * height;
+
+  // default target to the number of pixels
+  TargetCriterion::Target target = numPixels;
   a = attr.find("renderer::target::count");
   if(a != attr.end())
   {
@@ -75,27 +133,8 @@ HaltCriterion *HaltCriterion
     // setting samples per pixel automatically overrides the target function
     targetFunctionName = "samples";
 
-    // the total sample count is the spp * total pixel count
-    // XXX these defaults really should not be hard-coded here
-    // image width
-    size_t width = 512;
-    a = attr.find("record::width");
-    if(a != attr.end())
-    {
-      any val = a->second;
-      width = atoi(any_cast<std::string>(val).c_str());
-    } // end if
-
-    // image height
-    size_t height = 512;
-    a = attr.find("record::height");
-    if(a != attr.end())
-    {
-      any val = a->second;
-      height = atoi(any_cast<std::string>(val).c_str());
-    } // end if
-
-    target = spp * width * height;
+    // remember we actually use the square of this value
+    target = spp * spp * numPixels;
   } // end if
 
   HaltCriterion *result = 0;
@@ -103,16 +142,20 @@ HaltCriterion *HaltCriterion
   // create a HaltCriterion
   if(targetFunctionName == "samples")
   {
-    result = new TargetSampleCount();
+    TargetCriterion *r = new TargetSampleCount();
+    r->setTarget(target);
+    result = r;
   } // end if
   else if(targetFunctionName == "rays")
   {
-    result = new TargetRayCount();
+    result = new TargetRayCount(target);
   } // end if
   else
   {
     std::cerr << "Warning: unknown target function \"" << targetFunctionName << "\"." << std::endl;
-    result = new TargetSampleCount();
+    TargetCriterion *r = new TargetSampleCount();
+    r->setTarget(target);
+    result = r;
   } // end else if
 
   return result;

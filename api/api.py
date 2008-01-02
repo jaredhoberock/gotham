@@ -120,8 +120,8 @@ class Gotham2(Gotham):
       print "render((w,h), spp): Warning: using arguments with this function is deprecated."
       print "Please use render() instead."
     if len(args) == 1:
-      print "Error: too few parameters to render()."
-      return
+      Gotham.attribute(self, "record::width", str(args[0][0]))
+      Gotham.attribute(self, "record::height", str(args[0][1]))
     if len(args) > 2:
       print "Error: too many parameters to render()."
       return

@@ -8,8 +8,6 @@
 #include "EnergyRedistributionRenderer.h"
 #include "MetropolisRenderer.h"
 #include "DebugRenderer.h"
-#include "TargetRaysRenderer.h"
-#include "RecursiveMetropolisRenderer.h"
 #include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
@@ -23,7 +21,7 @@
 using namespace boost;
 
 Renderer *RendererApi
-  ::renderer(const Gotham::AttributeMap &attr)
+  ::renderer(Gotham::AttributeMap &attr)
 {
   // create a RandomSequence
   shared_ptr<RandomSequence> z(new RandomSequence());
@@ -56,12 +54,14 @@ Renderer *RendererApi
     m = atoi(boost::any_cast<std::string>(val).c_str());
   } // end if
 
-  TargetRaysRenderer::Target targetRays = 0;
   a = attr.find("renderer::targetrays");
   if(a != attr.end())
   {
-    any val = a->second;
-    targetRays = atol(boost::any_cast<std::string>(val).c_str());
+    std::cerr << "Warning: attribute \"renderer::targetrays\" is deprecated." << std::endl;
+    std::cerr << "Please use \"renderer::target::function\" and \"renderer::target::count\" instead." << std::endl;
+
+    attr["renderer::target::function"] = std::string("rays");
+    attr["renderer::target::count"] = a->second;
   } // end if
 
   float varianceExponent = 0.5f;
@@ -113,14 +113,7 @@ Renderer *RendererApi
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
 
-    if(targetRays != 0)
-    {
-      result = new TargetRaysRenderer(z, mutator, importance, targetRays);
-    } // end if
-    else
-    {
-      result = new MetropolisRenderer(z, mutator, importance);
-    } // end else
+    result = new MetropolisRenderer(z, mutator, importance);
   } // end else if
   else if(rendererName == "multistagemetropolis")
   {
@@ -130,7 +123,7 @@ Renderer *RendererApi
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
 
-    result = new MultiStageMetropolisRenderer(z, mutator, importance, targetRays);
+    result = new MultiStageMetropolisRenderer(z, mutator, importance);
   } // end else if
   else if(rendererName == "noiseawaremetropolis")
   {
@@ -140,14 +133,7 @@ Renderer *RendererApi
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
 
-    result = new NoiseAwareMetropolisRenderer(z, mutator, importance, targetRays, varianceExponent);
-  } // end else if
-  else if(rendererName == "recursivemetropolis")
-  {
-    // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
-
-    result = new RecursiveMetropolisRenderer(z, mutator, targetRays);
+    result = new NoiseAwareMetropolisRenderer(z, mutator, importance, varianceExponent);
   } // end else if
   else if(rendererName == "variance")
   {

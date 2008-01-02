@@ -70,22 +70,23 @@ g.mesh((13.595800000000001, 0.0048639599999999996, 14.161799999999999, 13.583299
 g.popMatrix()
 g.popAttributes()
 
-(w,h) = (250,200)
+(w,h) = (500,400)
 g.pushMatrix()
 g.lookAt((33.5586,45.2387,62.2788),(33.0721,44.782,61.5339), (-0.279162,0.889085,-0.362763))
 g.camera(float(w)/h, 35.0, 0.01)
 g.popMatrix()
+
+g.attribute('record::width', w)
+g.attribute('record::height', h)
 
 g.attribute('path::maxlength', '10')
 
 g.attribute('renderer::algorithm', 'metropolis')
 g.attribute('mutator::largestep', '0.001')
 
-(w,h) = (2*w,2*h)
-
 # 500M rays
-rootSpp = 1
-g.attribute("renderer::targetrays", "500000000")
+g.attribute("renderer::target::function", "rays")
+g.attribute("renderer::target::count", 500000000)
 
 g.attribute('path::sampler', 'simplebidirectionalrussianroulette')
 g.attribute('path::russianroulette::function', 'modifiedkelemen')
@@ -97,7 +98,7 @@ g.attribute('path::russianroulette::continueprobability', '0.9')
 
 ##g.attribute("renderer::algorithm", "recursivemetropolis")
 ##g.attribute('mutator::largestep', '0.5')
-g.render((w,h), rootSpp)
+g.render()
 
 ## try all these functions
 #outpath = "visit_tests/"

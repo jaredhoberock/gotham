@@ -11,6 +11,7 @@
 #include <cstddef>
 #include "../api/Gotham.h"
 
+#include "Renderer.h"
 class MonteCarloRenderer;
 
 class HaltCriterion
@@ -24,10 +25,12 @@ class HaltCriterion
      */
     virtual bool operator()(void) = 0;
 
-    /*! This method sets mRenderer.
+    /*! This method intializes this HaltCriterion.
      *  \param r Sets mRenderer.
+     *  \param p Sets mProgress.
      */
-    void setRenderer(const MonteCarloRenderer *r);
+    virtual void init(const MonteCarloRenderer *r,
+                      Renderer::ProgressCallback *p);
 
     /*! This method returns mRenderer.
      *  \return mRenderer.
@@ -43,6 +46,8 @@ class HaltCriterion
 
   protected:
     const MonteCarloRenderer *mRenderer;
+
+    Renderer::ProgressCallback *mProgress;
 }; // end HaltCriterion
 
 class TargetCriterion
@@ -59,6 +64,13 @@ class TargetCriterion
      */
     typedef long unsigned int Target;
 
+    /*! This method intializes this HaltCriterion.
+     *  \param r Sets mRenderer.
+     *  \param p Sets mProgress and sets mProgress's expected count.
+     */
+    virtual void init(const MonteCarloRenderer *r,
+                      Renderer::ProgressCallback *p);
+
     /*! This method sets mTarget.
      *  \param t Sets mTarget.
      */
@@ -71,6 +83,11 @@ class TargetCriterion
 
   protected:
     Target mTarget;
+
+    /*! This counter holds the value of the previous
+     *  call to operator()().
+     */
+    Target mPrevious;
 }; // end TargetCriterion
 
 class TargetSampleCount
@@ -96,6 +113,11 @@ class TargetRayCount
      *  \brief Shorthand.
      */
     typedef TargetCriterion Parent;
+
+    /*! Constructor accepts a target ray count.
+     *  \param t Sets Parent::mTarget.
+     */
+    TargetRayCount(const Target r);   
 
     /*! This method returns true when mRenderer has cast
      *  equal to or gretaer than Parent::mTarget rays.

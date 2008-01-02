@@ -55,9 +55,6 @@ void PathDebugRenderer
   // XXX TODO kill this grossness
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
 
-  unsigned int totalPixels = film->getWidth() * film->getHeight();
-  unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-
   const Scene *s = mScene.get();
 
   HilbertSequence sequence(0, 1.0f, 0, 1.0f,
@@ -68,9 +65,16 @@ void PathDebugRenderer
   PathSampler::HyperPoint x;
   float px, py;
 
-  progress.restart(totalSamples);
-  while(sequence(px,py, z(), z()))
+  // initialize the HaltCriterion
+  // before we start rendering
+  mHalt->init(this, &progress);
+
+  // main loop
+  while(!(*mHalt)())
   {
+    // get a new film plane sample
+    sequence(px, py, z(), z());
+
     Spectrum L(0.1f, 0.1f, 0.1f);
 
     // construct a hyperpoint
@@ -93,7 +97,6 @@ void PathDebugRenderer
     ScatteringDistributionFunction::mPool.freeAll();
 
     ++mNumSamples;
-    ++progress;
   } // end for i
 } // end PathDebugRenderer::kernel()
 

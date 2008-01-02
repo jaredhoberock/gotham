@@ -68,12 +68,6 @@ void MetropolisRenderer
 void MetropolisRenderer
   ::kernel(ProgressCallback &progress)
 {
-  // XXX kill this nastiness
-  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
-
-  unsigned int totalPixels = film->getWidth() * film->getHeight();
-  unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-
   PathSampler::HyperPoint x, y;
   Path xPath, yPath;
   typedef std::vector<PathSampler::Result> ResultList;
@@ -105,8 +99,12 @@ void MetropolisRenderer
 
   PathToImage mapToImage;
 
-  progress.restart(totalSamples);
-  for(size_t i = 0; i < totalSamples; ++i)
+  // initialize the HaltCriterion
+  // before we start rendering
+  mHalt->init(this, &progress);
+
+  // main loop
+  while(!(*mHalt)())
   {
     // mutate
     whichMutation = (*mMutator)(x,xPath,y,yPath);
@@ -192,7 +190,6 @@ void MetropolisRenderer
     ScatteringDistributionFunction::mPool.freeAll();
 
     ++mNumSamples;
-    ++progress;
   } // end for i
 
   // purge the local store

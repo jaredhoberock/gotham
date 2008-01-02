@@ -26,13 +26,11 @@ class NoiseAwareMetropolisRenderer
      *  \param s Sets Parent::mRandomSequence.
      *  \param m Sets mMutator.
      *  \param importance Sets mImportance.
-     *  \param target Sets mRayTarget.
      *  \param varianceExponent Sets mVarianceExponent.
      */
     NoiseAwareMetropolisRenderer(const boost::shared_ptr<RandomSequence> &sequence,
                                  const boost::shared_ptr<PathMutator> &m,
                                  const boost::shared_ptr<ScalarImportance> &importance,
-                                 const unsigned int target,
                                  const float varianceExponent = 0.5f);
 
   protected:
