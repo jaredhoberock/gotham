@@ -211,4 +211,23 @@ class Gotham2(Gotham):
     Gotham.attribute(self, "viewer::looky", str(look[1]))
     Gotham.attribute(self, "viewer::lookz", str(look[2]))
 
+  def parse(self, lines):
+    # XXX we can think about passing each line
+    #     to a super-efficient parser in C++
+    #     rather than calling Python's exec
+    #     because it is slow
+    numLines = len(lines)
+    fivePercent = numLines / 20
+    lineNumber = 0
+
+    print 'Parsing...'
+    for line in lines:
+      if lineNumber % fivePercent == 0:
+        print 'Progress: ' +  str(100 * float(lineNumber)/numLines) + '%\r',
+        sys.stdout.flush()
+      # each line depends on 'g' being defined as some Gotham object
+      g = self
+      exec line
+      lineNumber += 1
+    print '\nDone.'
 
