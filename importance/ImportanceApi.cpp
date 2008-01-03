@@ -15,6 +15,7 @@
 #include "ThroughputLuminanceImportance.h"
 #include "ManualImportance.h"
 #include "TargetImportance.h"
+#include "MaxImportance.h"
 using namespace boost;
 
 ScalarImportance *ImportanceApi
@@ -102,6 +103,10 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "manual")
   {
     result = new ManualImportance();
+  } // end else if
+  else if(importanceName == "max")
+  {
+    result = new MaxImportance();
   } // end else if
   else
   {
