@@ -1,0 +1,17 @@
+scattering(void)
+{
+  // create Jacobian
+  gpcpu::float3x2 J;
+  J(0,0) = dpdu[0]; J(0,1) = dpdv[0];
+  J(1,0) = dpdu[1]; J(1,1) = dpdv[1];
+  J(2,0) = dpdu[2]; J(2,1) = dpdv[2];
+
+  // create metric tensor
+  gpcpu::float2x2 G = J.transpose() * J;
+
+  float d = sqrtf(G.determinant());
+
+  Spectrum s(d,d,d);
+  F = diffuse(s);
+} // end scattering()
+
