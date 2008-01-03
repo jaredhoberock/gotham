@@ -261,13 +261,15 @@ void Mesh
   const Point &v2 = mPoints[t[2]];
 
   Point p;
-  UnitSquareToTriangle::evaluate(u2,u3, v0, v1, v2, p);
+  ParametricCoordinates b;
+  UnitSquareToTriangle::evaluate(u2,u3, v0, v1, v2, p, b);
 
   // XXX implement shading normals
-  // XXX implement derivatives
   Normal ng = (v1 - v0).cross(v2 - v0).normalize();
 
-  getDifferentialGeometry(t, p, ng, u2, u3, dg);
+  // we need to send barycentrics here, not u2 and u3
+  // as they are NOT the same thing
+  getDifferentialGeometry(t, p, ng, b[0], b[1], dg);
 
   // evaluate the pdf
   pdf = evaluateSurfaceAreaPdf(dg);
