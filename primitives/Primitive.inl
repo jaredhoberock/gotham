@@ -3,6 +3,8 @@
  *  \brief Inline file for Primitive.h.
  */
 
+#include "Primitive.h"
+
 Primitive
   ::Primitive(void)
     :mName("")
@@ -63,7 +65,14 @@ void Primitive
   ::setName(const std::string &name)
 {
   mName = name;
+  mNameHash = mStringHasher(name);
 } // end Primitive::setName()
+
+size_t Primitive
+  ::getNameHash(void) const
+{
+  return mNameHash;
+} // end Primitive::getNameHash()
 
 void Primitive
   ::finalize(void)

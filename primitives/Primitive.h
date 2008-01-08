@@ -14,6 +14,7 @@ class Intersection;
 #include "../geometry/DifferentialGeometry.h"
 #include "../geometry/Transform.h"
 #include <spectrum/Spectrum.h>
+#include <boost/functional/hash.hpp>
 
 /*! \class Primitive
  *  \brief The Primitive base class bridges geometry processing and shading.  It provides an interface
@@ -97,6 +98,11 @@ class Primitive
      */
     inline const std::string &getName(void) const;
 
+    /*! This method returns mNameHash.
+     *  \return mNameHash.
+     */
+    inline size_t getNameHash(void)const;
+
     /*! This method provides a means of doing last minute
      *  tasks immediately prior to beginning a render.
      *  \note The default implementation does nothing.
@@ -107,6 +113,12 @@ class Primitive
     /*! A name, possibly the null string, associated with this Primitive.
      */
     std::string mName;
+
+    /*! The hash of mName.
+     */
+    size_t mNameHash;
+
+    static boost::hash<std::string> mStringHasher;
 }; // end class Primitive
 
 #include "Primitive.inl"
