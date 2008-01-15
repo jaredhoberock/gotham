@@ -73,7 +73,7 @@ bool SimpleBidirectionalRussianRouletteSampler
 
   size_t i = 2;
   bool subpath = false;
-  while(p.getSubpathLengths().sum() < mMaxPathLength
+  while(p.getSubpathLengths().sum() <= (mMaxPathLength-1)
         && i < x.size())
   {
     if(justAdded[subpath] <= Path::INSERT_SUCCESS)
@@ -106,7 +106,7 @@ bool SimpleBidirectionalRussianRouletteSampler
 
   // if we had to terminate due to running out of room,
   // set the subpath's termination probabilities to 1
-  if(p.getSubpathLengths().sum() == mMaxPathLength)
+  if(p.getSubpathLengths().sum() == mMaxPathLength || i == x.size())
   {
     // only do this if we were planning on continuing the subpath
     if(justAdded[0] <= Path::INSERT_SUCCESS) termination[0] = 1.0f;
