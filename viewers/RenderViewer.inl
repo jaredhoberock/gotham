@@ -104,6 +104,9 @@ void RenderViewer
   // first init the parent
   Parent::init();
 
+  // no state file please
+  setStateFileName(QString::null);
+
   // init other stuff
   mTexture.create();
 
