@@ -183,6 +183,57 @@ ScatteringDistributionFunction *ShaderApi
 } // end ShaderApi::uber()
 
 ScatteringDistributionFunction *ShaderApi
+  ::uber(const Spectrum &Ks,
+         const float shininess,
+         const Spectrum &Kr,
+         const float eta)
+{
+  ScatteringDistributionFunction *result = 0;
+
+  ScatteringDistributionFunction *glossy = 0;
+  if(!Ks.isBlack())
+  {
+    if(shininess < 1000.0f)
+    {
+      glossy = new PhongReflection(Ks, Fresnel::approximateEta(Ks)[0], shininess);
+    } // end if
+    else
+    {
+      glossy = new SpecularReflection(Ks, Fresnel::approximateEta(Ks)[0]);
+    } // end else
+  } // end if
+
+  ScatteringDistributionFunction *specular = 0;
+  if(!Kr.isBlack())
+  {
+    specular = new SpecularReflection(Ks, eta);
+  } // end if
+
+  if(glossy && specular)
+  {
+    CompositeDistributionFunction *c = new CompositeDistributionFunction();
+    *c += glossy;
+    *c += specular;
+    result = c;
+  } // end if
+  else if(glossy)
+  {
+    result = glossy;
+  } // end else
+  else if(specular)
+  {
+    result = specular;
+  } // end else if
+  else
+  {
+    // no scattering
+    result = new ScatteringDistributionFunction();
+  } // end else
+
+  return result;
+} // end ShaderApi::uber()
+
+ScatteringDistributionFunction *ShaderApi
   ::perspectiveSensor(const Spectrum &Ks,
                       const float aspect,
                       const Point &origin,

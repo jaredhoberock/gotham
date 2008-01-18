@@ -9,7 +9,8 @@ scattering(void)
   // create metric tensor
   gpcpu::float2x2 G = J.transpose() * J;
 
-  float d = sqrtf(G.determinant());
+  float dA = sqrtf(0.5f * G(0,0) + G(1,1));
+  float d = 1.0f / dA;
 
   Spectrum s(d,d,d);
   F = diffuse(s);

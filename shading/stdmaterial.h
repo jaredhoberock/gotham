@@ -80,6 +80,14 @@ inline ScatteringDistributionFunction *uber(const Spectrum &Kd,
   return ShaderApi::uber(Kd, Ks, shininess);
 } // end uber()
 
+inline ScatteringDistributionFunction *uber(const Spectrum &Ks,
+                                            const float shininess,
+                                            const Spectrum &Kr,
+                                            const float eta)
+{
+  return ShaderApi::uber(Ks, shininess, Kr, eta);
+} // end uber()
+
 inline ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
                                                          const float aspect,
                                                          const Point &origin,

@@ -70,6 +70,11 @@ class ShaderApi
                                                 const Spectrum &Ks,
                                                 const float shininess);
 
+    static ScatteringDistributionFunction *uber(const Spectrum &Ks,
+                                                const float shininess,
+                                                const Spectrum &Kr,
+                                                float eta);
+
     static ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
                                                              const float aspect,
                                                              const Point &origin,
