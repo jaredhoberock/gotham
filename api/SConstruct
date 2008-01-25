@@ -79,4 +79,20 @@ except:
 if os.path.isfile("test.cpp"):
   env.Append(LIBS = ['python2.5'])
   env.Program('test', 'test.cpp')
+  dir = os.environ["GOTHAMHOME"] + '/bin'
+  Default(env.Install(dir, source = 'test'))
+
+# build imgstat
+if os.path.isfile("imgstat.cpp"):
+  env.Append(LIBS = ['python2.5'])
+  env.Program('imgstat', 'imgstat.cpp')
+  dir = os.environ["GOTHAMHOME"] + '/bin'
+  Default(env.Install(dir, source = 'imgstat'))
+
+# build imgclean
+if os.path.isfile("imgclean.cpp"):
+  env.Append(LIBS = ['python2.5'])
+  env.Program('imgclean', 'imgclean.cpp')
+  dir = os.environ["GOTHAMHOME"] + '/bin'
+  Default(env.Install(dir, source = 'imgclean'))
 
