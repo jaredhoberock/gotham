@@ -91,17 +91,11 @@ void VarianceFilm
 
     const Spectrum &mean = mMeanEstimate->pixel(pixel[0], pixel[1]);
 
-    // this looks like it might be correct
     diff = (r.mWeight / r.mPdf) * r.mThroughput;
     diff -= mean;
-    diff *= diff;
 
-    // remember that the metropolis renderer passes the pdf
-    // (importance / b) baked into w (which also includes the accept probability)
-    d = w * diff;
-
-    // handoff to deposit() 
-    mVariance.deposit(pixel[0], pixel[1], d);
+    float d2 = diff.norm2();
+    mVariance.deposit(pixel[0], pixel[1], Spectrum(w * d2, w * d2, w * d2));
   } // end for r
 } // end VarianceFilm::record()
 
