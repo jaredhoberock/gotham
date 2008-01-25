@@ -468,24 +468,18 @@ Path
   ::Path(const Path &p)
 {
   std::cerr << "Path::Path(): Disallowed copy constructor called!" << std::endl;
-  assert(0);
-} // end Path::Path()
 
-Path &Path
-  ::operator=(const Path &p)
-{
-  std::cerr << "Path::Path(): Disallowed assignment operator called!" << std::endl;
+  // do a dumb copy
+  *this = p;
+
   assert(0);
-  return *this;
 } // end Path::Path()
 
 bool Path
   ::clone(Path &dst, FunctionAllocator &allocator) const
 {
   // first do a dumb copy
-  memcpy((void*)&dst,
-         (const void*)this,
-         sizeof(Path));
+  dst = *this;
 
   // now, for each vertex of dst, allocate
   // a new integrand with allocator and copy

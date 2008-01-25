@@ -410,7 +410,6 @@ class Path
      *  disallow copies.
      */
     Path(const Path &p);
-    Path &operator=(const Path &p);
 }; // end Path
 
 #undef PATH_LENGTH
