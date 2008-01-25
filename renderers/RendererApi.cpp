@@ -54,6 +54,14 @@ Renderer *RendererApi
     m = atoi(boost::any_cast<std::string>(val).c_str());
   } // end if
 
+  size_t numBatches = 2;
+  a = attr.find("renderer::batchmeans::batches");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    numBatches = atol(boost::any_cast<std::string>(val).c_str());
+  } // end if
+
   a = attr.find("renderer::targetrays");
   if(a != attr.end())
   {
@@ -86,6 +94,14 @@ Renderer *RendererApi
   {
     any val = a->second;
     proposalFilename = any_cast<std::string>(val);
+  } // end if
+
+  std::string targetFilename;
+  a = attr.find("record::target::outfile");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    targetFilename = any_cast<std::string>(val);
   } // end if
 
   // create the renderer
@@ -134,6 +150,20 @@ Renderer *RendererApi
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
 
     result = new NoiseAwareMetropolisRenderer(z, mutator, importance, varianceExponent);
+    static_cast<NoiseAwareMetropolisRenderer*>(result)->setTargetFilename(targetFilename);
+  } // end else if
+  else if(rendererName == "altnoiseawaremetropolis")
+  {
+    std::cerr << "Warning: rendering algorithm \"altnoiseawaremetropolis\" is deprecated. Please use \"noiseawaremetropolis\" instead." << std::endl;
+
+    // create a PathMutator
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+
+    // create a ScalarImportance
+    shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
+
+    result = new NoiseAwareMetropolisRenderer(z, mutator, importance, varianceExponent);
+    static_cast<NoiseAwareMetropolisRenderer*>(result)->setTargetFilename(targetFilename);
   } // end else if
   else if(rendererName == "variance")
   {
@@ -153,7 +183,7 @@ Renderer *RendererApi
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
 
-    result = new BatchMeansRenderer(z, mutator, importance);
+    result = new BatchMeansRenderer(z, mutator, importance, numBatches);
   } // end else if
   else if(rendererName == "debug")
   {

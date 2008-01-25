@@ -5,6 +5,7 @@
 
 #include "EstimateImportance.h"
 #include "LuminanceImportance.h"
+#include "MaxImportance.h"
 
 EstimateImportance
   ::EstimateImportance(const RandomAccessFilm &estimate)

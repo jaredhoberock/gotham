@@ -28,10 +28,12 @@ class BatchMeansRenderer
      *  \param s Sets Parent::mRandomSequence.
      *  \param m Sets mMutator.
      *  \param i Sets mImportance.
+     *  \param b Sets mTotalBatches.
      */
     BatchMeansRenderer(const boost::shared_ptr<RandomSequence> &s,
                        const boost::shared_ptr<PathMutator> &mutator,
-                       const boost::shared_ptr<ScalarImportance> &importance);
+                       const boost::shared_ptr<ScalarImportance> &importance,
+                       const size_t b);
 
   protected:
     /*! This method coordinates preprocessing tasks prior to rendering.
@@ -69,7 +71,11 @@ class BatchMeansRenderer
 
     /*! This counts the number of batches.
      */
-    unsigned int mNumBatches;
+    size_t mNumBatches;
+
+    /*! This counts the total number of batches to collect.
+     */
+    size_t mTotalBatches;
 }; // end BatchMeansRenderer
 
 #endif // BATCH_MEANS_RENDERER_H

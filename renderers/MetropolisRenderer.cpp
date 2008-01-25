@@ -30,7 +30,9 @@ MetropolisRenderer
   ::MetropolisRenderer(const shared_ptr<RandomSequence> &s,
                        const shared_ptr<PathMutator> &mutator,
                        const shared_ptr<ScalarImportance> &importance)
-    :Parent(),mMutator(mutator),mImportance(importance)
+    :Parent(),
+     mMutator(mutator),
+     mImportance(importance)
 {
   setRandomSequence(s);
 } // end MetropolisRenderer::MetropolisRenderer()
@@ -144,7 +146,6 @@ void MetropolisRenderer
       //                when a sample is finally rejected
       // record x
       float xWeight = (1.0f - a) / (xPdf+pLargeStep);
-      //float xWeight = (1.0f - a) / xPdf;
       mRecord->record(xWeight, x, xPath, xResults);
 
       // add to the acceptance image
@@ -159,7 +160,6 @@ void MetropolisRenderer
     {
       // record y
       float yWeight = (a + float(whichMutation))/(yPdf + pLargeStep);
-      //float yWeight = a / yPdf;
       mRecord->record(yWeight, y, yPath, yResults);
 
       // add to the acceptance image

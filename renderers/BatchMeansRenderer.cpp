@@ -16,8 +16,9 @@ BatchMeansRenderer
 BatchMeansRenderer
   ::BatchMeansRenderer(const boost::shared_ptr<RandomSequence> &s,
                        const boost::shared_ptr<PathMutator> &mutator,
-                       const boost::shared_ptr<ScalarImportance> &importance)
-    :Parent(s,mutator,importance)
+                       const boost::shared_ptr<ScalarImportance> &importance,
+                       const size_t b)
+    :Parent(s,mutator,importance),mTotalBatches(b)
 {
   ;
 } // end BatchMeansRenderer::BatchMeansRenderer()
@@ -65,16 +66,6 @@ void BatchMeansRenderer
 void BatchMeansRenderer
   ::kernel(ProgressCallback &progress)
 {
-  // XXX kill this nastiness
-  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
-
-  unsigned int totalPixels = film->getWidth() * film->getHeight();
-  unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
-
-  float samplesPerPixel = static_cast<float>(totalSamples) / totalPixels;
-  float batchesPerPixel = sqrtf(samplesPerPixel);
-  float samplesPerBatch = batchesPerPixel;
-
   PathSampler::HyperPoint x, y;
   Path xPath, yPath;
   typedef std::vector<PathSampler::Result> ResultList;
@@ -106,11 +97,19 @@ void BatchMeansRenderer
 
   PathToImage mapToImage;
 
-  float batchSamples = 0;
-  float batchDelta = 1.0f / totalPixels;
+  // initialize the HaltCriterion
+  // before we start rendering
+  mHalt->init(this, &progress);
 
-  progress.restart(totalSamples);
-  for(size_t i = 0; i < totalSamples; ++i)
+  // figure out how often to update the batch means variance
+  size_t perBatchWork = progress.expected_count() / mTotalBatches;
+  size_t timeToUpdateVariance = perBatchWork;
+
+  // keep track of how many samples the current batch has received
+  float batchSamples = 0;
+
+  // main loop
+  while(!(*mHalt)())
   {
     // mutate
     whichMutation = (*mMutator)(x,xPath,y,yPath);
@@ -150,7 +149,6 @@ void BatchMeansRenderer
       //                when a sample is finally rejected
       // record x
       float xWeight = (1.0f - a) / (xPdf+pLargeStep);
-      //float xWeight = (1.0f - a) / xPdf;
       mRecord->record(xWeight, x, xPath, xResults);
 
       // deposit to current batch as well
@@ -168,7 +166,6 @@ void BatchMeansRenderer
     {
       // record y
       float yWeight = (a + float(whichMutation))/(yPdf + pLargeStep);
-      //float yWeight = a / yPdf;
       mRecord->record(yWeight, y, yPath, yResults);
 
       // deposit to current batch as well
@@ -199,16 +196,20 @@ void BatchMeansRenderer
     ScatteringDistributionFunction::mPool.freeAll();
 
     ++mNumSamples;
-    ++progress;
 
-    batchSamples += batchDelta;
-    if(batchSamples >= samplesPerBatch)
+    ++batchSamples;
+    if(progress.count() >= timeToUpdateVariance)
     {
       ++mNumBatches;
-      updateVarianceEstimate(samplesPerBatch);
+      updateVarianceEstimate(batchSamples);
 
       // init a new batch
       mCurrentBatch.fill(Spectrum::black());
+
+      // set a new time for an update
+      timeToUpdateVariance += perBatchWork;
+
+      // reset batchSamples
       batchSamples = 0;
     } // end if
   } // end for i
@@ -217,7 +218,7 @@ void BatchMeansRenderer
   if(batchSamples != 0)
   {
     ++mNumBatches;
-    updateVarianceEstimate(samplesPerBatch);
+    updateVarianceEstimate(batchSamples);
   } // end if
 
   // purge the local store
@@ -230,10 +231,11 @@ void BatchMeansRenderer
   std::cerr << "BatchMeansRenderer::updateVarianceEstimate(): " << std::endl;
 
   // divide by N to get a sample mean
-  mCurrentBatch.scale(Spectrum(1.0f / samplesPerBatch, 1.0f / samplesPerBatch, 1.0f / samplesPerBatch));
+  float spp = samplesPerBatch / (mCurrentBatch.getWidth() * mCurrentBatch.getHeight());
+  mCurrentBatch.scale(Spectrum(1.0f / spp, 1.0f / spp, 1.0f / spp));
 
   char filename[33];
-  sprintf(filename, "batch-%d.exr", mNumBatches - 1);
+  sprintf(filename, "batch-%zd.exr", mNumBatches - 1);
   mCurrentBatch.writeEXR(filename);
 
   // for each pixel, update the current variance estimate
@@ -259,9 +261,6 @@ void BatchMeansRenderer
       
       // update the mean
       mMeanOverBatches.deposit(i,j,x);
-
-      //// find the difference between the current batch and the current mean over batches
-      //Spectrum delta = x - mMeanOverBatches.raster(i,j);
 
       // update the variance over batches
       Spectrum newMean = mMeanOverBatches.raster(i,j) / mNumBatches;

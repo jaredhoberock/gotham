@@ -16,6 +16,8 @@
 #include "ManualImportance.h"
 #include "TargetImportance.h"
 #include "MaxImportance.h"
+#include "NamedPrimitiveImportance.h"
+#include <boost/lexical_cast.hpp>
 using namespace boost;
 
 ScalarImportance *ImportanceApi
@@ -63,6 +65,22 @@ ScalarImportance *ImportanceApi
     doFilter = true;
   } // end else
 
+  std::string primitiveName;
+  a = attr.find("importance::namedprimitive::name");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    primitiveName = any_cast<std::string>(val);
+  } // end if
+
+  float namedPrimitiveFactor = 1.0f;
+  a = attr.find("importance::namedprimitive::factor");
+  if(a != attr.end())
+  {
+    any val = a->second;
+    namedPrimitiveFactor = lexical_cast<float>(any_cast<std::string>(val).c_str());
+  } // end if
+
   // create the importance
   if(importanceName == "luminance")
   {
@@ -107,6 +125,10 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "max")
   {
     result = new MaxImportance();
+  } // end else if
+  else if(importanceName == "namedprimitive")
+  {
+    result = new NamedPrimitiveImportance(primitiveName, namedPrimitiveFactor);
   } // end else if
   else
   {

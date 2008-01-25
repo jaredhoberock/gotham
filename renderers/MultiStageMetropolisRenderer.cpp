@@ -19,7 +19,7 @@ MultiStageMetropolisRenderer
   ::MultiStageMetropolisRenderer(const boost::shared_ptr<RandomSequence> &sequence,
                                  const boost::shared_ptr<PathMutator> &m,
                                  const boost::shared_ptr<ScalarImportance> &importance)
-    :Parent(sequence,m,importance),mRecursionScale(0.5f)
+    :Parent(sequence,m,importance),mRecursionScale(0.5f),mSeedPool(10000 * 10000)
 {
   ;
 } // end MultiStageMetropolisRenderer::MultiStageMetropolisRenderer()
@@ -41,6 +41,7 @@ void MultiStageMetropolisRenderer
   // XXX this is useful to have around in general
   // XXX MetropolisRenderer should do this in preprocess
   LuminanceImportance luminanceImportance;
+
   // use our own random sequence so we always get the same result here
   // this is particularly important for difficult scenes where it is hard
   // to agree on an estimate
@@ -48,12 +49,24 @@ void MultiStageMetropolisRenderer
   RandomSequence seq(13u);
   float bLuminance = luminanceImportance.estimateNormalizationConstant(seq, mScene, mMutator, 10000);
 
-  // estimate normalization constant and pick a seed
+  // now integrate the importance function that we are going to be using
+  // XXX we should really choose a init path proportional to this function, not the luminance function
+  //size_t initialPathIndex;
+  //float b = mImportance->estimateNormalizationConstant(mSeedPoints, mSeedPaths, mSeedResults);
+  //x = mSeedPoints[initialPathIndex];
+  //mSeedPaths[initialPathIndex].clone(xPath, mLocalPool); 
   float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mMutator,
                                                        10000, mLocalPool, x, xPath);
+
   float invB = 1.0f / b;
 
-  // initial seed
+  // we owe these rays at the end
+  unsigned long int owedRays = mScene->getRaysCast();
+
+  // reset rays cast to 0
+  mScene->setRaysCast(0);
+
+  // evaluate the initial seed
   Spectrum f, g;
   f = mMutator->evaluate(xPath,xResults);
   float ix = (*mImportance)(x, xPath, xResults), iy = 0;
@@ -93,7 +106,7 @@ void MultiStageMetropolisRenderer
   } // end while
 
   // clamp target effort to something reasonable
-  float actualTarget = std::max(10000.0f, recurseTarget);
+  float actualTarget = std::max(10000.0f + progress.count(), recurseTarget);
 
   // after the halfway point, do regular steps
   float targetStep = 0;
@@ -107,10 +120,17 @@ void MultiStageMetropolisRenderer
   {
     if(progress.count() > actualTarget)
     {
+      long unsigned int r = mScene->getRaysCast();
+
+      // these rays are "free"
       invB = updateImportance(bLuminance,
                               recurseWidth, recurseHeight,
                               x, xPath, xResults,
                               ix, xPdf);
+      // add these to the total at the end
+      long unsigned int rayDifference = mScene->getRaysCast() - r;
+      owedRays += rayDifference;
+      mScene->setRaysCast(r);
 
       if(recurseWidth >= 0.4f * film->getWidth()
         || recurseHeight >= 0.4f * film->getHeight())
@@ -216,8 +236,19 @@ void MultiStageMetropolisRenderer
     ++mNumSamples;
   } // end for i
 
+  // pay back the rays we owe
+  mScene->setRaysCast(mScene->getRaysCast() + owedRays);
+
+  // kill the seeds
+  mSeedPoints.clear();
+  mSeedPaths.clear();
+  mSeedPaths.clear();
+
   // purge the local store
   mLocalPool.freeAll();
+
+  // purge the seed store
+  mSeedPool.freeAll();
 } // end TargetRaysRenderer::kernel()
 
 float MultiStageMetropolisRenderer
@@ -249,18 +280,36 @@ float MultiStageMetropolisRenderer
                                                        static_cast<size_t>(ceilf(h))));
   current->resample(*lowResEstimate);
 
+  if(current->computeMean().luminance() == 0)
+  {
+    std::cerr << "zero mean" << std::endl;
+  } // end if
+
   // scale estimate so it has mean luminance equal to bLuminance
   s = bLuminance / lowResEstimate->computeMean().luminance();
   lowResEstimate->scale(Spectrum(s,s,s));
+  if(s != s)
+  {
+    std::cerr << "nan scale" << std::endl;
+  } // end if
+  else if(s == std::numeric_limits<float>::infinity())
+  {
+    std::cerr << "inf scale" << std::endl;
+  } // end else if
+  else if(s == 0)
+  {
+    std::cerr << "zero scale" << std::endl;
+  } // end else if
 
   sprintf(buf, "lowres-estimate-%dx%d.exr", lowResEstimate->getWidth(), lowResEstimate->getHeight());
   lowResEstimate->writeEXR(buf);
 
   // replace the current importance with a new one
   mImportance.reset(new EstimateImportance(*lowResEstimate));
-  
+
   // preprocess the importance and grab b
   mImportance->preprocess(mRandomSequence, mScene, mMutator, *this);
+  //mImportance->preprocess(mSeedPoints, mSeedPaths, mSeedResults);
   float invB = mImportance->getInvNormalizationConstant();
 
   // update x's importance & pdf

@@ -1,7 +1,7 @@
 /*! \file NoiseAwareMetropolisRenderer.h
  *  \author Jared Hoberock
  *  \brief Defines the interface to a MultiStageMetropolisRenderer
- *         which attempts to sample proportional to noise.
+ *         which targets perceptually significant image noise.
  */
 
 #ifndef NOISE_AWARE_METROPOLIS_RENDERER_H
@@ -33,38 +33,47 @@ class NoiseAwareMetropolisRenderer
                                  const boost::shared_ptr<ScalarImportance> &importance,
                                  const float varianceExponent = 0.5f);
 
-  protected:
-    /*! This method is periodically called during kernel() to update
-     *  mImportance.
-     *  \param bLuminance The mean pixel value of the resulting rendered image.
-     *         XXX This should be available as a member of MetropolisRenderers
-     *             in general.
-     *  \param w The width of the new importance image.
-     *  \param h The height of the new importance image.
-     *  \param x The current state of x.
-     *  \param xPath The current state of xPath.
-     *  \param xResults The current state of xResults.
-     *  \param ix x's importance will be updated here to reflect the updated importance function.
-     *  \param xPdf x's pdf will be updated here to reflect the updated importance function.
-     *  \return The reciprocal of the normalization constant of the updated importance function.
+    /*! This method sets the filename to write to for the target density.
+     *  \param filename The name of the file to create and write the final target
+     *         sampling density to.
      */
-    virtual float updateImportance(const float bLuminance,
-                                   const float w,
-                                   const float h,
-                                   const PathSampler::HyperPoint &x,
-                                   const Path &xPath,
-                                   const std::vector<PathSampler::Result> &xResults,
-                                   float &ix,
-                                   float &xPdf);
+    void setTargetFilename(const std::string &filename);
 
+  protected:
+    /*! This method updates this NoiseAwareMetropolisRenderer's importance
+     *  function.
+     *  \param The estimate of b for the luminance importance function.
+     *  \param w The width, in pixels, of the importance function to create.
+     *  \param h The height, in pixels, of the importance function to create.
+     *  \param x The current state.
+     *  \param xPath The current Path.
+     *  \param xResults xPath's results.
+     *  \param ix The new importance of x is returned here.
+     *  \param xPdf The new pdf of x is returned here.
+     *  \return The inverse of the new importance function's normalization constant
+     *          is returned here.
+     */
+    float updateImportance(const float bLuminance,
+                           const float w,
+                           const float h,
+                           const PathSampler::HyperPoint &x,
+                           const Path &xPath,
+                           const std::vector<PathSampler::Result> &xResults,
+                           float &ix,
+                           float &xPdf);
+
+    /*! This method prepares a desired sampling density to target.
+     *  \param mean The current mean estimate.
+     *  \param varianceExponent The current variance estimate.
+     *  \param target The desired sampling density is returned here.
+     */
     virtual void prepareTargetImportance(const RandomAccessFilm &mean,
                                          const RandomAccessFilm &variance,
                                          RandomAccessFilm &target) const;
 
-    /*! The exponent to apply to the variance estimate while massaging.
-     *  This defaults to 0.5 (the square root).
-     */
     float mVarianceExponent;
+
+    std::string mTargetFilename;
 }; // end NoiseAwareMetropolisRenderer
 
 #endif // NOISE_AWARE_METROPOLIS_RENDERER_H

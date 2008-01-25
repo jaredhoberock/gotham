@@ -94,6 +94,10 @@ float NoiseAwareMetropolisRenderer
                           static_cast<size_t>(ceilf(h)));
   prepareTargetImportance(*lowResEstimate, tempVar, target);
 
+  // XXX we shouldn't write this here, we should do it in a postprocess
+  //     for target importance or something
+  target.writeEXR(mTargetFilename.c_str());
+
   // replace the current importance with a new one
   mImportance.reset(new TargetImportance(*lowResEstimate, target));
   
@@ -118,47 +122,66 @@ void NoiseAwareMetropolisRenderer
                             const RandomAccessFilm &variance,
                             RandomAccessFilm &target) const
 {
+  //char buf[256];
+
   // resample the current estimate of variance into target
   variance.resample(target);
 
-  char buf[256];
-
-  sprintf(buf, "variance-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
+  //sprintf(buf, "variance-%dx%d.exr", target.getWidth(), target.getHeight());
+  ////target.writeEXR(buf);
 
   // create some function of the variance -- call it rms
   target.applyPow(mVarianceExponent);
-  sprintf(buf, "rms-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
+  //sprintf(buf, "rms-%dx%d.exr", target.getWidth(), target.getHeight());
+  //target.writeEXR(buf);
 
   RandomAccessFilm meanCopy = mean;
-  
-  // massage the mean
-  // remove extreme lows
-  // remove everything below the 5th percentile
-  float low = meanCopy.computeLuminancePercentileIgnoreZero(0.05f);
-  meanCopy.clampLuminance(low, std::numeric_limits<float>::infinity());
 
-  sprintf(buf, "massaged-estimate-%dx%d.exr", meanCopy.getWidth(), meanCopy.getHeight());
-  meanCopy.writeEXR(buf);
+  // turn mean into tvi
+  RandomAccessFilm tvi = meanCopy;
+  RandomAccessFilm down(tvi.getWidth(),tvi.getHeight());
+  tvi.resample(down);
+  down.resample(tvi);
+  tvi.applyThresholdVersusIntensityFunction();
+  //sprintf(buf, "tvi-%dx%d.exr", target.getWidth(), target.getHeight());
+  //tvi.writeEXR(buf);
 
-  //std::cerr << "wrote massaged" << std::endl;
+  // divide target by tvi
+  target.divideLuminance(tvi, 0);
+  RandomAccessFilm visualError = target;
+  float meanTargetLum = target.computeMean().luminance();
+  float s = 0.5f / meanTargetLum;
+  visualError.scale(Spectrum(s,s,s));
+  //sprintf(buf, "visual-error-%dx%d.exr", target.getWidth(), target.getHeight());
+  //visualError.writeEXR(buf);
   
-  // turn target into normalized rms by dividing by estimate
-  target.divideLuminance(meanCopy, 0);
-  sprintf(buf, "normalized-rms-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
+  // make it so the ratio of the max / min == 2
+  float low = target.computeLuminancePercentileIgnoreZero(0.05f);
+  float high = target.computeLuminancePercentileIgnoreZero(0.95f);
+  float r = high / low;
+  if(r > 1.0f)
+  {
+    //float power = 1.0 / log10f(r);
+    float power = log10f(2.0f) / log10f(r);
+    target.applyPow(power);
+
+    RandomAccessFilm scaledVisualError = target;
+    float meanTargetLum = target.computeMean().luminance();
+    float s = 0.5f / meanTargetLum;
+    scaledVisualError.scale(Spectrum(s,s,s));
+    //sprintf(buf, "restricted-visual-error-%dx%d.exr", target.getWidth(), target.getHeight());
+    //scaledVisualError.writeEXR(buf);
+  } // end if
 
   // massage normalized rms
   // remove extreme lows
   // remove everything below the 5th percentile
   // and above the 95th percentile
   low = target.computeLuminancePercentileIgnoreZero(0.05f);
-  float high = target.computeLuminancePercentileIgnoreZero(0.95f);
-  //target.clampLuminance(low, std::numeric_limits<float>::infinity());
+  high = target.computeLuminancePercentileIgnoreZero(0.95f);
   target.clampLuminance(low, high);
-  sprintf(buf, "massaged-normalized-rms-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
+  //sprintf(buf, "removed-extremes-%dx%d.exr", target.getWidth(), target.getHeight());
+  //target.writeEXR(buf);
 
   // for every zero pixel in the mean, make that pixel very important in the target
   for(size_t y = 0; y != mean.getHeight(); ++y)
@@ -171,37 +194,32 @@ void NoiseAwareMetropolisRenderer
       } // end if
     } // end for x
   } // end for y
-  sprintf(buf, "removed-zeroes-rms-%dx%dx.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
 
-  //std::cerr << "wrote normalized rms" << std::endl;
-
-  // now apply tonemap to target
-  target.applyGammaAndExposure(2.1f, 0.0f);
-  sprintf(buf, "tonemapped-normalized-rms-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
-
-  //std::cerr << "wrote tonemapped normalized" << std::endl;
+  //sprintf(buf, "removed-zeroes-%dx%dx.exr", target.getWidth(), target.getHeight());
+  //target.writeEXR(buf);
 
   // filter target
   target.bilateralFilter(1.0f, 100.0f, target);
-  sprintf(buf, "filtered-tonemapped-normalized-rms-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
+  //sprintf(buf, "filtered-tonemapped-normalized-rms-%dx%d.exr", target.getWidth(), target.getHeight());
+  //target.writeEXR(buf);
 
-  // scale the target so that it has mean luminance 0.5
-  float meanLum = target.computeMean().luminance();
-  target.scale(Spectrum(1.0f / (0.299f * meanLum),
-                        1.0f / (0.587f * meanLum),
-                        1.0f / (0.114f * meanLum)));
+  //// scale the target so that it has mean luminance 0.5
+  //float meanLum = target.computeMean().luminance();
+  //target.scale(Spectrum(1.0f / (0.299f * meanLum),
+  //                      1.0f / (0.587f * meanLum),
+  //                      1.0f / (0.114f * meanLum)));
 
-  target.scale(Spectrum(0.299f * 0.5f,
-                        0.578f * 0.5f,
-                        0.114f * 0.5f));
+  //target.scale(Spectrum(0.299f * 0.5f,
+  //                      0.578f * 0.5f,
+  //                      0.114f * 0.5f));
 
-  // finally, apply clamp
-  //target.applyClamp(0.0, 1.0f);
-
-  sprintf(buf, "target-%dx%d.exr", target.getWidth(), target.getHeight());
-  target.writeEXR(buf);
+  //sprintf(buf, "target-%dx%d.exr", target.getWidth(), target.getHeight());
+  //target.writeEXR(buf);
 } // end NoiseAwareMetropolisRenderer::prepareTargetImportance()
+
+void NoiseAwareMetropolisRenderer
+  ::setTargetFilename(const std::string &filename)
+{
+  mTargetFilename = filename;
+} // end NoiseAwareMetropolisRenderer::setTargetFilename()
 
