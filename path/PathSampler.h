@@ -25,6 +25,8 @@ class PathSampler
       Spectrum mThroughput;
     }; // end Result
 
+    typedef std::vector<Result> ResultList;
+
     /*! \typedef Hyperpoint
      *  \brief Shorthand.
      */
