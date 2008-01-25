@@ -111,6 +111,16 @@ class RandomAccessFilm
      */
     inline float computeSumLogLuminance(void) const;
 
+    /*! This method computes the min over Pixels' luminance values.
+     *  \return The min over all Pixels' luminance.
+     */
+    inline float computeMinLuminance(void) const;
+
+    /*! This method compute the max over Pixels' luminance values.
+     *  \return The max over all Pixels' luminance.
+     */
+    inline float computeMaxLuminance(void) const;
+
     /*! This method computes the mean over Pixels' luminance values.
      *  \return The mean over all Pixels' luminance.
      */
@@ -198,7 +208,7 @@ class RandomAccessFilm
 
     /*! This method erodes the holes of this RandomAccessFilm by setting each hole pixel
      *  to the average of its neighbors.
-     *  \param h The hole value. Pixels with luminance less than this value
+     *  \param h The hole value. Pixels with luminance equal to this value
      *           are considered holes.
      *  \return The number of remaining hole pixels after erosion.
      */
@@ -260,6 +270,11 @@ class RandomAccessFilm
      *  \param M The maximum of the range.
      */
     inline void clampLuminance(const float m, const float M);
+
+    /*! This method applies an approximation of the threshold-versus-intensity function
+     *  to each pixel of this RandomAccessFilm.
+     */
+    inline void applyThresholdVersusIntensityFunction();
 
   private:
     typedef Array2<Pixel> Parent1;

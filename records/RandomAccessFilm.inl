@@ -4,6 +4,7 @@
  */
 
 #include "RandomAccessFilm.h"
+#include <thresholdversusintensity/thresholdVersusIntensity.h>
 
 #ifdef WIN32
 #define OPENEXR_DLL
@@ -163,6 +164,38 @@ float RandomAccessFilm
 {
   return computeSumLuminance() / (getWidth() * getHeight());
 } // end RandomAccessFilm::computeMeanLuminance()
+
+float RandomAccessFilm
+  ::computeMinLuminance(void) const
+{
+  float result = std::numeric_limits<float>::infinity();
+
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      result = std::min(result, raster(x,y).luminance());
+    } // end for x
+  } // end for y
+
+  return result;
+} // end RandomAccessFilm::computeMinLuminance()
+
+float RandomAccessFilm
+  ::computeMaxLuminance(void) const
+{
+  float result = -std::numeric_limits<float>::infinity();
+
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      result = std::max(result, raster(x,y).luminance());
+    } // end for x
+  } // end for y
+
+  return result;
+} // end RandomAccessFilm::computeMaxLuminance()
 
 float RandomAccessFilm
   ::computeMedianLuminance(void) const
@@ -525,85 +558,125 @@ size_t RandomAccessFilm
   size_t holesLeft = 0;
   size_t holesFixed = 0;
 
+  RandomAccessFilm copy = *this;
+
   for(size_t y = 0; y != getHeight(); ++y)
   {
     for(size_t x = 0; x != getWidth(); ++x)
     {
-      if(raster(x,y).luminance() <= h)
+      for(size_t c = 0; c != Spectrum::numElements(); ++c)
       {
-        // visit each non-hole neighbor
-        Pixel newVal(Pixel(0,0,0));
-
-        float neighbors = 0;
-
-        // top left
-        if(x > 0 && y + 1 < getHeight())
+        if(raster(x,y)[c] == h)
         {
-          newVal += raster(x-1,y+1);
-          ++neighbors;
+          // visit each non-hole neighbor
+          float newVal = 0;
+
+          float n = 0;
+          float neighbors = 0;
+
+          // top left
+          if(x > 0 && y + 1 < getHeight())
+          {
+            n = raster(x-1,y+1)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // top
+          if(y + 1 < getHeight())
+          {
+            n = raster(x,y+1)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // top right
+          if(x + 1 < getWidth() && y + 1 < getHeight())
+          {
+            n = raster(x+1,y+1)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // left
+          if(x > 0)
+          {
+            n = raster(x-1,y)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // right
+          if(x + 1 < getWidth())
+          {
+            n = raster(x+1,y)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // bottom left
+          if(x > 0 && y > 0)
+          {
+            n = raster(x-1,y-1)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // bottom
+          if(y > 0)
+          {
+            n = raster(x,y-1)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          // bottom right
+          if(x + 1 < getWidth() && y > 0)
+          {
+            n = raster(x+1,y-1)[c];
+            if(n != h)
+            {
+              newVal += n;
+              ++neighbors;
+            } // end if
+          } // end if
+
+          if(neighbors > 0)
+          {
+            newVal /= neighbors;
+            copy.raster(x,y)[c] = newVal;
+            ++holesFixed;
+          } // end if
+          else
+          {
+            ++holesLeft;
+          } // end else
         } // end if
-
-        // top
-        if(y + 1 < getHeight())
-        {
-          newVal += raster(x,y+1);
-          ++neighbors;
-        } // end if
-
-        // top right
-        if(x + 1 < getWidth() && y + 1 < getHeight())
-        {
-          newVal += raster(x+1,y+1);
-          ++neighbors;
-        } // end if
-
-        // left
-        if(x > 0)
-        {
-          newVal += raster(x-1,y);
-          ++neighbors;
-        } // end if
-
-        // right
-        if(x + 1 < getWidth())
-        {
-          newVal += raster(x+1,y);
-          ++neighbors;
-        } // end if
-
-        // bottom left
-        if(x > 0 && y > 0)
-        {
-          newVal += raster(x-1,y-1);
-          ++neighbors;
-        } // end if
-
-        // bottom
-        if(y > 0)
-        {
-          newVal += raster(x,y-1);
-          ++neighbors;
-        } // end if
-
-        // bottom right
-        if(x + 1 < getWidth() && y > 0)
-        {
-          newVal += raster(x+1,y-1);
-          ++neighbors;
-        } // end if
-
-        if(neighbors > 0)
-        {
-          newVal /= neighbors;
-          raster(x,y) = newVal;
-          ++holesFixed;
-        } // end if
-        else
-        {
-          ++holesLeft;
-        } // end else
-      } // end if
+      } // end for c
     } // end for x
+
+    *this = copy;
   } // end for y
 
   return holesLeft;
@@ -812,8 +885,14 @@ float RandomAccessFilm
   // make a list of luminance
   for(size_t i = 0; i != size(); ++i)
   {
-    if((*this)[i].luminance() > 0)
+    float l = (*this)[i].luminance();
+
+    if(l > 0
+       && l == l
+       && l != std::numeric_limits<float>::infinity())
+    {
       luminance.push_back((*this)[i].luminance());
+    } // end if
   } // end for i
 
   // sort
@@ -854,4 +933,29 @@ void RandomAccessFilm
     } // end else if
   } // end for i
 } // end RandomAccessFilm::clampLuminance()
+
+void RandomAccessFilm
+  ::applyThresholdVersusIntensityFunction(void)
+{
+  float maxDisplay = 100.0f;
+
+  for(size_t y = 0; y != getHeight(); ++y)
+  {
+    for(size_t x = 0; x != getWidth(); ++x)
+    {
+      Spectrum &p = raster(x,y);
+
+      // compute the luminance of p
+      float L = p.luminance();
+
+      // map to display luminance
+      L *= maxDisplay;
+
+      float t = tvi(L);
+
+      raster(x,y) = Spectrum::white();
+      raster(x,y).setLuminance(t);
+    } // end for x
+  } // end for y
+} // end RandomAccessFilm::applyThresholdVersusIntensityFunction()
 
