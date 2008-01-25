@@ -78,6 +78,11 @@ class Scene
      */
     inline long unsigned int getRaysCast(void) const;
 
+    /*! This method sets mRaysCast.
+     *  \param r Sets mRaysCast.
+     */
+    inline void setRaysCast(const long unsigned int r) const;
+
     /*! This method returns mShadowRaysCast.
      *  \return mShadowRaysCast.
      */

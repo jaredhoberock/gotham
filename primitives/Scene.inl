@@ -44,6 +44,12 @@ long unsigned int Scene
   return mRaysCast;
 } // end Scene::getRaysCast()
 
+void Scene
+  ::setRaysCast(const long unsigned int r) const
+{
+  mRaysCast = r;
+} // end Scene::setRaysCast()
+
 long unsigned int Scene
   ::getShadowRaysCast(void) const
 {
