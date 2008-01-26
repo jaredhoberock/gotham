@@ -32,7 +32,7 @@ Spectrum SpecularTransmission
   component = 0;
 
   Spectrum result(0,0,0);
-  pdf = 0;
+  pdf = 1.0f;
 
   // figure out which eta is incident/transmitted
   float cosi = wo.dot(dg.getNormal());
@@ -52,11 +52,12 @@ Spectrum SpecularTransmission
     if(entering) cost = -cost;
 
     wi = (eta*cosi - cost)*dg.getNormal() - eta * wo;
-    pdf = 1.0f;
 
     // compute fresnel term
     Spectrum f = mFresnel.evaluate(cosi, cost);
-    result = (et*et)/(ei*ei) * (Spectrum::white() - f) * mTransmittance;
+    f = Spectrum::white() - f;
+    f.saturate();
+    result = (et*et)/(ei*ei) * f * mTransmittance;
 
     result /= dg.getNormal().absDot(wi);
   } // end if
@@ -103,7 +104,9 @@ Spectrum SpecularTransmission
 
     // compute fresnel term
     Spectrum f = mFresnel.evaluate(cosi, cost);
-    result = (et*et)/(ei*ei) * (Spectrum::white() - f) * mTransmittance;
+    f = Spectrum::white() - f;
+    f.saturate();
+    result = (et*et)/(ei*ei) * f * mTransmittance;
 
     result /= dg.getNormal().absDot(wi);
   } // end if
