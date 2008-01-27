@@ -16,7 +16,7 @@ void MutatorApi
   ::getDefaultAttributes(Gotham::AttributeMap &attr)
 {
   attr["mutator:strategy"]    = std::string("kelemen");
-  attr["mutator:largestep"]   = std::string("0.5f");
+  attr["mutator:largestep"]   = std::string("0.5");
   attr["mutator:targetseeds"] = std::string("512");
 } // end MutatorApi::getDefaultAttributes()
 
