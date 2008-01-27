@@ -160,8 +160,6 @@ int main(int argc, char **argv)
     squaredError /= (in.getWidth() * in.getHeight());
 
     // measure relative error
-    float m = ref.computeLuminancePercentileIgnoreZero(0);
-
     float relError = 0;
     for(size_t y = 0; y != in.getHeight(); ++y)
     {
