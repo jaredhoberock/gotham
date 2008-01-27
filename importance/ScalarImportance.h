@@ -33,6 +33,11 @@ class ScalarImportance
                             const boost::shared_ptr<PathMutator> &mutator,
                             MetropolisRenderer &renderer);
 
+    /*! This method is called after rendering.
+     *  \note The default implementation does nothing.
+     */
+    virtual void postprocess(void);
+
     /*! This method returns mNormalizationConstant.
      *  \return mNormalizationConstant.
      */

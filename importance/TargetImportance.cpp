@@ -7,10 +7,12 @@
 
 TargetImportance
   ::TargetImportance(const RandomAccessFilm &estimate,
-                     const RandomAccessFilm &target)
+                     const RandomAccessFilm &target,
+                     const std::string &filename)
     :Parent(),
      mEstimateImportance(estimate),
-     mTarget(target)
+     mTarget(target),
+     mTargetFilename(filename)
 {
   ;
 } // end TargetImportance::TargetImportance()
@@ -51,4 +53,20 @@ void TargetImportance
   mEstimateImportance.preprocess(r,scene,mutator,renderer);
   Parent::preprocess(r,scene,mutator,renderer);
 } // end TargetImportance::preprocess()
+
+void TargetImportance
+  ::postprocess(void)
+{
+  Parent::postprocess();
+
+  if(mTargetFilename != "")
+  {
+    // scale target so that it has a mean of 0.5
+    float s = 0.5f / mTarget.computeMean().luminance();
+    mTarget.scale(Spectrum(s,s,s));
+
+    // write to file
+    mTarget.writeEXR(mTargetFilename.c_str());
+  } // end if
+} // end TargetImportance::postprocess()
 

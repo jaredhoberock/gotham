@@ -11,14 +11,12 @@
 #include "../records/RenderFilm.h"
 
 class TargetImportance
-  //: public EstimateImportance
   : public ScalarImportance
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    //typedef EstimateImportance Parent;
     typedef ScalarImportance Parent;
 
     /*! Constructor takes a reference to a RandomAccessFilm containing
@@ -26,9 +24,11 @@ class TargetImportance
      *  a target sampling distribution.
      *  \param estimate Sets mEstimate.
      *  \param target Sets mTarget.
+     *  \param filename The file to write to on postprocess.
      */
     TargetImportance(const RandomAccessFilm &estimate,
-                     const RandomAccessFilm &target);
+                     const RandomAccessFilm &target,
+                     const std::string &filename = "");
 
     /*! This method converts the spectral Monte Carlo throughput
      *  of a Path into scalar importance.
@@ -53,6 +53,11 @@ class TargetImportance
                             const boost::shared_ptr<PathMutator> &mutator,
                             MetropolisRenderer &renderer);
 
+    /*! This method is called after rendering and writes mTarget to
+     *  mTargetFilename.
+     */
+    virtual void postprocess(void);
+
   protected:
     /*! This maps a Path to an image location.
      */
@@ -63,6 +68,10 @@ class TargetImportance
     EstimateImportance mEstimateImportance;
 
     RandomAccessFilm mTarget;
+
+    /*! The filename to write on postprocess().
+     */
+    std::string mTargetFilename;
 }; // end TargetImportance
 
 #endif // TARGET_IMPORTANCE_H

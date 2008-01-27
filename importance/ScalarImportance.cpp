@@ -10,6 +10,12 @@ using namespace boost;
 class MetropolisRenderer;
 
 void ScalarImportance
+  ::postprocess(void)
+{
+  ;
+} // end ScalarImportance::postprocess()
+
+void ScalarImportance
   ::preprocess(const shared_ptr<RandomSequence> &r,
                const shared_ptr<const Scene> &scene,
                const shared_ptr<PathMutator> &mutator,

@@ -8,8 +8,6 @@
 #include "LuminanceImportance.h"
 #include "NormalizedImportance.h"
 #include "InverseLuminanceImportance.h"
-#include "MultipleImportance.h"
-#include "ExponentImportance.h"
 #include "ThroughputLuminanceImportance.h"
 #include "ManualImportance.h"
 #include "TargetImportance.h"
@@ -36,8 +34,6 @@ ScalarImportance *ImportanceApi
   // fish out the parameters
   std::string importanceName = attr["importance:function"];
 
-  float k = lexical_cast<float>(attr["importance:exponent"]);
-
   std::string primitiveName = attr["importance:namedprimitive:name"];
 
   float namedPrimitiveFactor = lexical_cast<float>(attr["importance:namedprimitive:factor"]);
@@ -47,10 +43,6 @@ ScalarImportance *ImportanceApi
   {
     result = new LuminanceImportance();
   } // end if
-  else if(importanceName == "multiple")
-  {
-    result = new MultipleImportance();
-  } // end else if
   else if(importanceName == "normalized")
   {
     result = new NormalizedImportance();
@@ -62,10 +54,6 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "inverseluminance")
   {
     result = new InverseLuminanceImportance();
-  } // end else if
-  else if(importanceName == "exponent")
-  {
-    result = new ExponentImportance(k);
   } // end else if
   else if(importanceName == "throughputluminance")
   {
