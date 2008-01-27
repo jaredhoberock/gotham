@@ -42,7 +42,7 @@ class Gotham2(Gotham):
       print 'attribute(%s,' % name, value, '): Warning double colon "::" attribute syntax is deprecated, please use single colon ":" instead.'
     # wrap up the value as a string and pass
     # it along to the parent
-    Gotham.attribute(self, fixed, str(value))
+    Gotham.attribute(self, fixed, str(value).lower())
 
   def material(self, name, *parms):
     # XXX this is getting ugly
