@@ -20,7 +20,12 @@ class ImportanceApi
      *  \return A new ScalarImportance object described by the given
      *          attributes.
      */
-    static ScalarImportance *importance(const Gotham::AttributeMap &attr);
+    static ScalarImportance *importance(Gotham::AttributeMap &attr);
+
+    /*! This method fills an AttributeMap with this library's defaults.
+     *  \param attr The set of attributes to add to.
+     */
+    static void getDefaultAttributes(Gotham::AttributeMap &attr);
 }; // end ImportanceApi
 
 #endif // IMPORTANCE_API_H

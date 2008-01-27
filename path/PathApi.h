@@ -20,7 +20,12 @@ class PathApi
      *              to create.
      *  \return A new PathSampler.
      */
-    static PathSampler *sampler(const Gotham::AttributeMap &attr);
+    static PathSampler *sampler(Gotham::AttributeMap &attr);
+
+    /*! This method fills an AttributeMap with this library's defaults.
+     *  \param attr The set of attributes to add to.
+     */
+    static void getDefaultAttributes(Gotham::AttributeMap &attr);
 }; // end PathApi
 
 #endif // PATH_API_H

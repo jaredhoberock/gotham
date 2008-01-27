@@ -18,7 +18,12 @@ class RecordApi
      *  \param attr An AttributeMap describing a set of
      *              recording attributes.
      */
-    static Record *record(const Gotham::AttributeMap &attr);
+    static Record *record(Gotham::AttributeMap &attr);
+
+    /*! This method fills an AttributeMap with this library's defaults.
+     *  \param attr The set of attributes to add to.
+     */
+    static void getDefaultAttributes(Gotham::AttributeMap &attr);
 }; // end RecordApi
 
 #endif // RECORD_API_H

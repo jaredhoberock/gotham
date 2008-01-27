@@ -3,10 +3,8 @@ import api
 
 g = api.Gotham2()
 
-#g.attribute("renderer::algorithm", "debug")
-g.attribute("path::sampler", "kajiya")
-g.attribute("path::maxlength", "10")
-#g.attribute("renderer::algorithm", "metropolis")
+g.attribute("path:sampler", "kajiya")
+g.attribute("path:maxlength", "10")
 
 g.material('matte', 'Kd', (1,1,1))
 points = [-1.0, -1.0, 0,

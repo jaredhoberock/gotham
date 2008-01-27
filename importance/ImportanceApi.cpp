@@ -8,9 +8,7 @@
 #include "LuminanceImportance.h"
 #include "NormalizedImportance.h"
 #include "InverseLuminanceImportance.h"
-#include "EqualVisitImportance.h"
 #include "MultipleImportance.h"
-#include "LuminanceOverVisits.h"
 #include "ExponentImportance.h"
 #include "ThroughputLuminanceImportance.h"
 #include "ManualImportance.h"
@@ -20,66 +18,29 @@
 #include <boost/lexical_cast.hpp>
 using namespace boost;
 
+void ImportanceApi
+  ::getDefaultAttributes(Gotham::AttributeMap &attr)
+{
+  attr["importance:function"] = "luminance";
+
+  attr["importance:namedprimitive:name"] = "";
+
+  attr["importance:namedprimitive:factor"] = "1.0";
+} // end ImportanceApi::getDefaultAttributes()
+
 ScalarImportance *ImportanceApi
-  ::importance(const Gotham::AttributeMap &attr)
+  ::importance(Gotham::AttributeMap &attr)
 {
   ScalarImportance *result = 0;
-  std::string importanceName = "luminance";
 
   // fish out the parameters
-  Gotham::AttributeMap::const_iterator a = attr.find("importance::function");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    importanceName = any_cast<std::string>(val);
-  } // end if
+  std::string importanceName = attr["importance:function"];
 
-  float k = 1.0f;
-  a = attr.find("importance::exponent");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    k = static_cast<float>(atof(any_cast<std::string>(val).c_str()));
-  } // end if
+  float k = lexical_cast<float>(attr["importance:exponent"]);
 
-  std::string filterName("bilinear");
-  a = attr.find("importance::visitfilter");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    filterName = any_cast<std::string>(val);
-  } // end if
+  std::string primitiveName = attr["importance:namedprimitive:name"];
 
-  bool doFilter = true;
-  if(filterName == "bilinear")
-  {
-    doFilter = true;
-  } // end if
-  else if(filterName == "nearestneighbor")
-  {
-    doFilter = false;
-  } // end if
-  else
-  {
-    std::cerr << "Warning: unknown visit filter \"" << filterName << "\"." << std::endl;
-    doFilter = true;
-  } // end else
-
-  std::string primitiveName;
-  a = attr.find("importance::namedprimitive::name");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    primitiveName = any_cast<std::string>(val);
-  } // end if
-
-  float namedPrimitiveFactor = 1.0f;
-  a = attr.find("importance::namedprimitive::factor");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    namedPrimitiveFactor = lexical_cast<float>(any_cast<std::string>(val).c_str());
-  } // end if
+  float namedPrimitiveFactor = lexical_cast<float>(attr["importance:namedprimitive:factor"]);
 
   // create the importance
   if(importanceName == "luminance")
@@ -101,14 +62,6 @@ ScalarImportance *ImportanceApi
   else if(importanceName == "inverseluminance")
   {
     result = new InverseLuminanceImportance();
-  } // end else if
-  else if(importanceName == "equalvisit")
-  {
-    result = new EqualVisitImportance(doFilter);
-  } // end else if
-  else if(importanceName == "luminanceovervisits")
-  {
-    result = new LuminanceOverVisits(doFilter);
   } // end else if
   else if(importanceName == "exponent")
   {

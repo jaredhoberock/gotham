@@ -8,55 +8,36 @@
 #include "VarianceFilm.h"
 using namespace boost;
 
+void RecordApi
+  ::getDefaultAttributes(Gotham::AttributeMap &attr)
+{
+  attr["record:outfile"] = "gotham.exr";
+
+  attr["record:estimate:infile"] = "";
+  attr["record:variance:outfile"] = "";
+  attr["record:acceptance:outfile"] = "";
+  attr["record:proposals:outfile"] = "";
+  attr["record:target:outfile"] = "";
+  attr["record:width"] = "512";
+  attr["record:height"] = "512";
+} // end RecordApi::getDefaultAttributes()
+
 Record *RecordApi
-  ::record(const Gotham::AttributeMap &attr)
+  ::record(Gotham::AttributeMap &attr)
 {
   Record *result = 0;
 
   // name of the output?
-  std::string outfile = "";
-
-  // XXX deprecate "renderer::outfile"
-  Gotham::AttributeMap::const_iterator a = attr.find("renderer::outfile");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    outfile = any_cast<std::string>(val).c_str();
-    std::cerr << "Warning: attribute \"renderer::outfile\" is deprecated.  Use \"record::outfile\" instead." << std::endl;
-  } // end if
-  a = attr.find("record::outfile");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    outfile = any_cast<std::string>(val).c_str();
-  } // end if
+  std::string outfile = attr["record:outfile"];
 
   // name of the variance output?
-  std::string varianceOutfile = "variance.exr";
-  a = attr.find("record::varianceoutfile");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    varianceOutfile = any_cast<std::string>(val).c_str();
-  } // end if
+  std::string varianceOutfile = attr["record:variance:outfile"];
 
   // name of the estimate image?
-  std::string estimateFilename = "";
-  a = attr.find("record::estimatefilename");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    estimateFilename = any_cast<std::string>(val).c_str();
-  } // end if
+  std::string estimateFilename = attr["record:estimate:infile"];
 
   // should we produce a variance image?
-  bool doVariance = false;
-  a = attr.find("record::estimatevariance");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    doVariance = (any_cast<std::string>(val) == std::string("true"));
-  } // end if
+  bool doVariance = (varianceOutfile != std::string(""));
 
   // load the estimate
   boost::shared_ptr<RandomAccessFilm> estimate;
@@ -69,22 +50,8 @@ Record *RecordApi
   } // end if
 
   // image width
-  unsigned int width = 512;
-  a = attr.find("record::width");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    width = atoi(any_cast<std::string>(val).c_str());
-  } // end if
-
-  // image height
-  unsigned int height = 512;
-  a = attr.find("record::height");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    height = atoi(any_cast<std::string>(val).c_str());
-  } // end if
+  size_t width  = lexical_cast<size_t>(attr["record:width"]);
+  size_t height = lexical_cast<size_t>(attr["record:height"]);
 
   // create the Record
   if(doVariance && estimate.get() != 0)

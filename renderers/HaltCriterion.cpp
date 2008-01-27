@@ -78,44 +78,28 @@ bool TargetRayCount
   return currentRays >= getTarget();
 } // end TargetRayCount::operator()()
 
+void HaltCriterion
+  ::getDefaultAttributes(Gotham::AttributeMap &attr)
+{
+  attr["renderer:target:function"] = "samples";
+} // end HaltCriterion::getDefaultAttributes()
+
 HaltCriterion *HaltCriterion
-  ::createCriterion(const Gotham::AttributeMap &attr)
+  ::createCriterion(Gotham::AttributeMap &attr)
 {
   using namespace boost;
 
-  std::string targetFunctionName = "samples";
-  Gotham::AttributeMap::const_iterator a = attr.find("renderer::target::function");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    targetFunctionName = boost::any_cast<std::string>(val);
-  } // end if
+  std::string targetFunctionName = attr["renderer:target:function"];
 
   // count the number of pixels
-  // XXX these defaults really should not be hard-coded here
-  // image width
-  size_t width = 512;
-  a = attr.find("record::width");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    width = atoi(any_cast<std::string>(val).c_str());
-  } // end if
-
-  // image height
-  size_t height = 512;
-  a = attr.find("record::height");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    height = atoi(any_cast<std::string>(val).c_str());
-  } // end if
+  size_t width = lexical_cast<size_t>(attr["record:width"]);
+  size_t height = lexical_cast<size_t>(attr["record:height"]);
 
   size_t numPixels = width * height;
 
   // default target to the number of pixels
   TargetCriterion::Target target = numPixels;
-  a = attr.find("renderer::target::count");
+  Gotham::AttributeMap::const_iterator a = attr.find("renderer:target:count");
   if(a != attr.end())
   {
     any val = a->second;
@@ -124,7 +108,7 @@ HaltCriterion *HaltCriterion
 
   // check if we specified spp
   // this automatically overrides the function name
-  a = attr.find("renderer::spp");
+  a = attr.find("renderer:spp");
   if(a != attr.end())
   {
     any val = a->second;

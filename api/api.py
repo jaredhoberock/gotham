@@ -36,9 +36,13 @@ class Gotham2(Gotham):
     print 'Warning: $GOTHAMHOME undefined! Some shaders may not be found.'
 
   def attribute(self, name, value):
+    # convert "::" to ":"
+    fixed = name.replace("::",":")
+    if fixed != name:
+      print 'attribute(%s,' % name, value, '): Warning double colon "::" attribute syntax is deprecated, please use single colon ":" instead.'
     # wrap up the value as a string and pass
     # it along to the parent
-    Gotham.attribute(self, name, str(value))
+    Gotham.attribute(self, fixed, str(value))
 
   def material(self, name, *parms):
     # XXX this is getting ugly
@@ -200,16 +204,16 @@ class Gotham2(Gotham):
     Gotham.popMatrix(self)
     # hint to the viewer after we've popped the attributes
     # XXX we really need a way to pass types besides strings
-    Gotham.attribute(self, "viewer::fovy",  str(fovy))
-    Gotham.attribute(self, "viewer::eyex",  str(c[0]))
-    Gotham.attribute(self, "viewer::eyey",  str(c[1]))
-    Gotham.attribute(self, "viewer::eyez",  str(c[2]))
-    Gotham.attribute(self, "viewer::upx",   str(up[0]))
-    Gotham.attribute(self, "viewer::upy",   str(up[1]))
-    Gotham.attribute(self, "viewer::upz",   str(up[2]))
-    Gotham.attribute(self, "viewer::lookx", str(look[0]))
-    Gotham.attribute(self, "viewer::looky", str(look[1]))
-    Gotham.attribute(self, "viewer::lookz", str(look[2]))
+    Gotham2.attribute(self, "viewer:fovy",  str(fovy))
+    Gotham2.attribute(self, "viewer:eyex",  str(c[0]))
+    Gotham2.attribute(self, "viewer:eyey",  str(c[1]))
+    Gotham2.attribute(self, "viewer:eyez",  str(c[2]))
+    Gotham2.attribute(self, "viewer:upx",   str(up[0]))
+    Gotham2.attribute(self, "viewer:upy",   str(up[1]))
+    Gotham2.attribute(self, "viewer:upz",   str(up[2]))
+    Gotham2.attribute(self, "viewer:lookx", str(look[0]))
+    Gotham2.attribute(self, "viewer:looky", str(look[1]))
+    Gotham2.attribute(self, "viewer:lookz", str(look[2]))
 
   def parse(self, lines):
     # XXX we can think about passing each line
@@ -217,7 +221,8 @@ class Gotham2(Gotham):
     #     rather than calling Python's exec
     #     because it is slow
     numLines = len(lines)
-    fivePercent = numLines / 20
+    # add one to avoid modulo by zero
+    fivePercent = numLines / 20 + 1
     lineNumber = 0
 
     print 'Parsing...'

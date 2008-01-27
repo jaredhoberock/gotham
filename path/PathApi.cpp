@@ -14,51 +14,34 @@
 #include "ShirleySampler.h"
 #include "RussianRoulette.h"
 
+using namespace boost;
+
+void PathApi
+  ::getDefaultAttributes(Gotham::AttributeMap &attr)
+{
+  attr["path:sampler"] = "kajiya";
+  attr["path:maxlength"] = "4";
+  attr["path:russianroulette:function"] = "always";
+  attr["path:russianroulette:continueprobability"] = "1.0";
+  attr["path:russianroulette:minimumsubpathlength"] = "3";
+} // end PathApi::getDefaultAttributes()
+
 PathSampler *PathApi
-  ::sampler(const Gotham::AttributeMap &attr)
+  ::sampler(Gotham::AttributeMap &attr)
 {
   PathSampler *result = 0;
   std::string samplerName = "kajiya";
 
   // fish out the parameters
-  Gotham::AttributeMap::const_iterator a = attr.find("path::sampler");
-  if(a != attr.end())
-  {
-    boost::any val = a->second;
-    samplerName = boost::any_cast<std::string>(val);
-  } // end if
+  samplerName = attr["path:sampler"];
 
-  unsigned int maxLength = UINT_MAX;
-  a = attr.find("path::maxlength");
-  if(a != attr.end())
-  {
-    boost::any val = a->second;
-    maxLength = atoi(boost::any_cast<std::string>(val).c_str());
-  } // end if
+  size_t maxLength = lexical_cast<size_t>(attr["path:maxlength"]);
 
-  std::string rrFunction = "always";
-  a = attr.find("path::russianroulette::function");
-  if(a != attr.end())
-  {
-    boost::any val = a->second;
-    rrFunction = boost::any_cast<std::string>(val);
-  } // end if
+  std::string rrFunction = attr["path:russianroulette:function"];
 
-  float continueProbability = 1.0f;
-  a = attr.find("path::russianroulette::continueprobability");
-  if(a != attr.end())
-  {
-    boost::any val = a->second;
-    continueProbability = static_cast<float>(atof(boost::any_cast<std::string>(val).c_str()));
-  } // end if
+  float continueProbability = lexical_cast<float>(attr["path:russianroulette:continueprobability"]);
 
-  size_t minimumSubpathLength = 3;
-  a = attr.find("path::russianroulette::minimumsubpathlenth");
-  if(a != attr.end())
-  {
-    boost::any val = a->second;
-    minimumSubpathLength = atoi(boost::any_cast<std::string>(val).c_str());
-  } // end if
+  size_t minimumSubpathLength = lexical_cast<size_t>(attr["path:russianroulette:minimumsubpathlength"]);
 
   // create the russian roulette
   boost::shared_ptr<RussianRoulette> rr(new AlwaysRoulette());

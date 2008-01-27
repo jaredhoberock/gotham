@@ -19,6 +19,11 @@ class RendererApi
      *              rendering attributes.
      */
     static Renderer *renderer(Gotham::AttributeMap &attr);
+
+    /*! This method fills an AttributeMap with this library's defaults.
+     *  \param attr The set of attributes to add to.
+     */
+    static void getDefaultAttributes(Gotham::AttributeMap &attr);
 }; // end RendererApi
 
 #endif // RENDERER_API_H

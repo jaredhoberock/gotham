@@ -4,9 +4,8 @@ import objtogoth
 
 g = api.Gotham2()
 
-#g.attribute("renderer::algorithm", "debug")
-g.attribute("path::sampler", "kajiya")
-g.attribute("path::maxlength", "10")
+g.attribute("path:sampler", "kajiya")
+g.attribute("path:maxlength", "10")
 
 g.material('zoneplate', 'f', 512.0)
 points = [-1.0, -1.0, 0,

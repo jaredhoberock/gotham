@@ -16,6 +16,7 @@
 #include "../renderers/Renderer.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
+#include <boost/program_options.hpp>
 
 class Gotham
 {
@@ -23,7 +24,7 @@ class Gotham
     /*! \typedef AttributeMap
      *  \brief Shorthand.
      */
-    typedef std::map<std::string, boost::any> AttributeMap;
+    typedef std::map<std::string, std::string> AttributeMap;
 
     /*! Null constructor calls init().
      */
@@ -177,6 +178,10 @@ class Gotham
     /*! The attribute stack.
      */
     std::vector<AttributeMap> mAttributeStack;
+
+    /*! The list of Materials created for this Scene.
+     */
+    std::vector<boost::shared_ptr<Material> > mMaterials;
 
     /*! A list of SurfacePrimitives.
      */

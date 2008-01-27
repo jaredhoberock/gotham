@@ -20,6 +20,19 @@
 
 using namespace boost;
 
+void RendererApi
+  ::getDefaultAttributes(Gotham::AttributeMap &attr)
+{
+  // call HaltCriterion first
+  HaltCriterion::getDefaultAttributes(attr);
+
+  attr["renderer:algorithm"] = "montecarlo";
+  attr["renderer:energyredistribution:mutationspersample"] = "1";
+  attr["renderer:energyredistribution:chainlength"] = "100";
+  attr["renderer:batchmeans:batches"] = "2";
+  attr["renderer:noiseawaremetropolis:varianceexponent"] = "0.5";
+} // end RendererApi::getDefaultAttributes()
+
 Renderer *RendererApi
   ::renderer(Gotham::AttributeMap &attr)
 {
@@ -28,41 +41,17 @@ Renderer *RendererApi
 
   // create a new Renderer
   Renderer *result = 0;
-  std::string rendererName = "montecarlo";
 
   // fish out the parameters
-  Gotham::AttributeMap::const_iterator a = attr.find("renderer::algorithm");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    rendererName = boost::any_cast<std::string>(val);
-  } // end if
+  std::string rendererName = attr["renderer:algorithm"];
 
-  float k = 1;
-  a = attr.find("renderer::energyredistribution::mutationspersample");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    k = static_cast<float>(atof(boost::any_cast<std::string>(val).c_str()));
-  } // end if
+  float k = lexical_cast<float>(attr["renderer:energyredistribution:mutationspersample"]);
 
-  unsigned int m = 100;
-  a = attr.find("renderer::energyredistribution::chainlength");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    m = atoi(boost::any_cast<std::string>(val).c_str());
-  } // end if
+  size_t m = lexical_cast<size_t>(attr["renderer:energyredistribution:chainlength"]);
 
-  size_t numBatches = 2;
-  a = attr.find("renderer::batchmeans::batches");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    numBatches = atol(boost::any_cast<std::string>(val).c_str());
-  } // end if
+  size_t numBatches = lexical_cast<size_t>(attr["renderer:batchmeans:batches"]);
 
-  a = attr.find("renderer::targetrays");
+  Gotham::AttributeMap::const_iterator a = attr.find("renderer:targetrays");
   if(a != attr.end())
   {
     std::cerr << "Warning: attribute \"renderer::targetrays\" is deprecated." << std::endl;
@@ -72,37 +61,11 @@ Renderer *RendererApi
     attr["renderer::target::count"] = a->second;
   } // end if
 
-  float varianceExponent = 0.5f;
-  a = attr.find("renderer::noiseawaremetropolis::varianceexponent");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    varianceExponent = atof(boost::any_cast<std::string>(val).c_str());
-  } // end if
+  float varianceExponent = lexical_cast<float>(attr["renderer:noiseawaremetropolis:varianceexponent"]);
 
-  std::string acceptanceFilename;
-  a = attr.find("record::acceptance::outfile");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    acceptanceFilename = any_cast<std::string>(val);
-  } // end if
-
-  std::string proposalFilename;
-  a = attr.find("record::proposals::outfile");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    proposalFilename = any_cast<std::string>(val);
-  } // end if
-
-  std::string targetFilename;
-  a = attr.find("record::target::outfile");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    targetFilename = any_cast<std::string>(val);
-  } // end if
+  std::string acceptanceFilename = attr["record:acceptance:outfile"];
+  std::string proposalFilename   = attr["record:proposals:outfile"];
+  std::string targetFilename     = attr["record:target:outfile"];
 
   // create the renderer
   if(rendererName == "montecarlo")
@@ -201,7 +164,7 @@ Renderer *RendererApi
   // XXX Remove this when we have successfully generalized target counts
   // get spp
   unsigned int spp = 4;
-  a = attr.find("renderer::spp");
+  a = attr.find("renderer:spp");
   if(a != attr.end())
   {
     any val = a->second;

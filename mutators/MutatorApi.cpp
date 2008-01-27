@@ -12,50 +12,28 @@
 using namespace boost;
 using namespace gpcpu;
 
+void MutatorApi
+  ::getDefaultAttributes(Gotham::AttributeMap &attr)
+{
+  attr["mutator:strategy"]    = std::string("kelemen");
+  attr["mutator:largestep"]   = std::string("0.5f");
+  attr["mutator:targetseeds"] = std::string("512");
+} // end MutatorApi::getDefaultAttributes()
+
 PathMutator *MutatorApi
-  ::mutator(const Gotham::AttributeMap &attr)
+  ::mutator(Gotham::AttributeMap &attr)
 {
   PathMutator *result = 0;
-  std::string mutatorName = "kelemen";
 
   // fish out the parameters
-  Gotham::AttributeMap::const_iterator a = attr.find("mutator::strategy");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    mutatorName = boost::any_cast<std::string>(val);
-  } // end if
+  std::string mutatorName = attr["mutator:strategy"];
 
-  float largeStepProbability = 0.5f;
-  a = attr.find("mutator::largestep");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    largeStepProbability = static_cast<float>(atof(any_cast<std::string>(val).c_str()));
-  } // end if
+  float largeStepProbability = lexical_cast<float>(attr["mutator:largestep"]);
 
-  unsigned int w = 512,h = 512;
-  a = attr.find("film::width");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    w = atoi(any_cast<std::string>(val).c_str());
-  } // end if
+  size_t numSeeds = lexical_cast<size_t>(attr["mutator:targetseeds"]);
 
-  a = attr.find("film::height");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    h = atoi(any_cast<std::string>(val).c_str());
-  } // end if
-
-  size_t numSeeds = 512;
-  a = attr.find("mutator::targetseeds");
-  if(a != attr.end())
-  {
-    any val = a->second;
-    numSeeds = atoi(any_cast<std::string>(val).c_str());
-  } // end if
+  size_t w = lexical_cast<size_t>(attr["record:width"]);
+  size_t h = lexical_cast<size_t>(attr["record:height"]);
 
   // create the mutator
   if(mutatorName == "kelemen")

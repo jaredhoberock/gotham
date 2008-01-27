@@ -120,21 +120,21 @@ g.sphere(0.4,-0.66,0.25,0.33)
 # first we need to specify how light paths should be created
 # we do this by setting the value of a parameter called 'path::sampler'
 # there are several of these, and many have parameters, but a straightforward one to use is called 'kajiya'
-g.attribute("path::sampler", "kajiya")
+g.attribute("path:sampler", "kajiya")
 
 # we can specify how long (in vertices) light paths are allowed to grow.
 # for the cornell box, 7 is a good compromise between correctness and speed
-g.attribute("path::maxlength", 7)
+g.attribute("path:maxlength", 7)
 
 # now we specify which rendering algorithm to use
 # let's use traditional 'montecarlo'
 # this one takes no additional parameters
-g.attribute("renderer::algorithm", "montecarlo")
+g.attribute("renderer:algorithm", "montecarlo")
 
 # let's render to a 512x512 image
 (w,h) = (512,512)
-g.attribute("record::width",  w)
-g.attribute("record::height", h)
+g.attribute("record:width",  w)
+g.attribute("record:height", h)
 
 # finally we need to set up the camera
 # first push a matrix
@@ -159,7 +159,7 @@ g.popMatrix()
 # use 16 samples per pixel
 # we have to request the square root of the number of samples to take per pixel
 # we want 16 samples per pixel, so we say 4
-g.attribute("renderer::spp", 4)
+g.attribute("renderer:spp", 4)
 
 # finally, tell gotham to render
 g.render()

@@ -24,6 +24,13 @@
 #include "../rasterizables/RasterizableMesh.h"
 #include "../rasterizables/RasterizableSphere.h"
 #include "../primitives/UnshadowedScene.h"
+
+// APIs
+#include "../path/PathApi.h"
+#include "../mutators/MutatorApi.h"
+#include "../importance/ImportanceApi.h"
+#include "../renderers/RendererApi.h"
+
 #pragma warning(push)
 #pragma warning(disable : 4311 4312)
 #include <Qt/qapplication.h>
@@ -62,6 +69,12 @@ void Gotham
 
   // clear the attribute stack
   mAttributeStack.clear();
+
+  // clear materials
+  mMaterials.clear();
+
+  // create the default material
+  mMaterials.push_back(shared_ptr<Material>(new DefaultMaterial()));
 
   // push default attributes
   AttributeMap attr;
@@ -162,10 +175,11 @@ void Gotham
 void Gotham
   ::render(void)
 {
+  AttributeMap &attr = mAttributeStack.back();
+
   // create a new Scene
-  AttributeMap::const_iterator a = mAttributeStack.back().find("scene::castshadows");
   shared_ptr<Scene> s;
-  if(any_cast<std::string>(a->second) == std::string("false"))
+  if(attr["scene:castshadows"] == std::string("false"))
   {
     s.reset(new RasterizableScene<UnshadowedScene>());
   } // end if
@@ -200,13 +214,7 @@ void Gotham
   mRenderer->setRecord(record);
 
   // headless render?
-  bool headless = false;
-  a = mAttributeStack.back().find("viewer");
-  if(a != mAttributeStack.back().end())
-  {
-    any val = a->second;
-    headless = (any_cast<std::string>(val) != std::string("true"));
-  } // end if
+  bool headless = (attr["viewer"] == std::string("false"));
 
   if(!headless)
   {
@@ -216,8 +224,7 @@ void Gotham
     RenderViewer v;
 
     // title the window the name of the outfile
-    a = mAttributeStack.back().find("record::outfile");
-    v.setWindowTitle(any_cast<std::string>(a->second).c_str());
+    v.setWindowTitle(attr["record:outfile"].c_str());
 
     // everything to the viewer
     v.setScene(s);
@@ -230,18 +237,18 @@ void Gotham
     // bail out otherwise
     try
     {
-      float fovy = atof(any_cast<std::string>(mAttributeStack.back()["viewer::fovy"]).c_str());
-      float eyex = atof(any_cast<std::string>(mAttributeStack.back()["viewer::eyex"]).c_str());
-      float eyey = atof(any_cast<std::string>(mAttributeStack.back()["viewer::eyey"]).c_str());
-      float eyez = atof(any_cast<std::string>(mAttributeStack.back()["viewer::eyez"]).c_str());
-      float upx  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::upx"]).c_str());
-      float upy  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::upy"]).c_str());
-      float upz  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::upz"]).c_str());
-      float lookx  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::lookx"]).c_str());
-      float looky  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::looky"]).c_str());
-      float lookz  = atof(any_cast<std::string>(mAttributeStack.back()["viewer::lookz"]).c_str());
-      float width = atof(any_cast<std::string>(mAttributeStack.back()["record::width"]).c_str());
-      float height = atof(any_cast<std::string>(mAttributeStack.back()["record::height"]).c_str());
+      float fovy   = lexical_cast<float>(attr["viewer:fovy"]);
+      float eyex   = lexical_cast<float>(attr["viewer:eyex"]);
+      float eyey   = lexical_cast<float>(attr["viewer:eyey"]);
+      float eyez   = lexical_cast<float>(attr["viewer:eyez"]);
+      float upx    = lexical_cast<float>(attr["viewer:upx"]);
+      float upy    = lexical_cast<float>(attr["viewer:upy"]);
+      float upz    = lexical_cast<float>(attr["viewer:upz"]);
+      float lookx  = lexical_cast<float>(attr["viewer:lookx"]);
+      float looky  = lexical_cast<float>(attr["viewer:looky"]);
+      float lookz  = lexical_cast<float>(attr["viewer:lookz"]);
+      float width  = lexical_cast<float>(attr["record:width"]);
+      float height = lexical_cast<float>(attr["record:height"]);
 
       // convert degrees to radians
       float fovyRadians = fovy * PI / 180.0f;
@@ -273,7 +280,11 @@ void Gotham
 void Gotham
   ::material(Material *m)
 {
-  mAttributeStack.back()["material"] = shared_ptr<Material>(m);
+  // add m to mMaterials
+  mMaterials.push_back(shared_ptr<Material>(m));
+
+  // note the current material
+  mAttributeStack.back()["material"] = lexical_cast<std::string>(mMaterials.size() - 1);
 } // end Gotham::material)
 
 void Gotham
@@ -287,7 +298,9 @@ void Gotham
   c = mMatrixStack.back()(c);
 
   shared_ptr<Surface> surface(new RasterizableSphere(c, radius));
-  shared_ptr<Material> m = any_cast<shared_ptr<Material> >(mAttributeStack.back()["material"]);
+
+  AttributeMap &attr = mAttributeStack.back();
+  shared_ptr<Material> m = mMaterials[lexical_cast<size_t>(attr["material"])];
   surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
 } // end Gotham::sphere()
 
@@ -295,7 +308,7 @@ void Gotham
   ::surfacePrimitive(SurfacePrimitive *prim)
 {
   // name the primitive
-  prim->setName(any_cast<std::string>(mAttributeStack.back()["name"]));
+  prim->setName(mAttributeStack.back()["name"]);
 
   shared_ptr<SurfacePrimitive> surfacePrim(prim);
   shared_ptr<Primitive> plainPrim = static_pointer_cast<Primitive,SurfacePrimitive>(surfacePrim);
@@ -317,7 +330,7 @@ void Gotham
          std::vector<unsigned int> &faces)
 {
   // do we need to reverse the winding of vertices?
-  bool reverse = any_cast<std::string>(mAttributeStack.back()["orientation"]) == "inside";
+  bool reverse = mAttributeStack.back()["orientation"] == "inside";
 
   std::vector<Point> points;
   std::vector<Mesh::Triangle> triangles;
@@ -356,8 +369,10 @@ void Gotham
   } // end else
 
   shared_ptr<Surface> surface(mesh);
-  shared_ptr<Material> m = any_cast<shared_ptr<Material> >(mAttributeStack.back()["material"]);
-  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m)); 
+
+  AttributeMap &attr = mAttributeStack.back();
+  shared_ptr<Material> m = mMaterials[lexical_cast<size_t>(attr["material"])];
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
 } // end Gotham::mesh()
 
 void Gotham
@@ -366,7 +381,7 @@ void Gotham
          std::vector<unsigned int> &faces)
 {
   // do we need to reverse the winding of vertices?
-  bool reverse = any_cast<std::string>(mAttributeStack.back()["orientation"]) == "inside";
+  bool reverse = mAttributeStack.back()["orientation"] == "inside";
 
   std::vector<Point> points;
   std::vector<ParametricCoordinates> parms;
@@ -413,8 +428,10 @@ void Gotham
   } // end else
 
   shared_ptr<Surface> surface(mesh);
-  shared_ptr<Material> m = any_cast<shared_ptr<Material> >(mAttributeStack.back()["material"]);
-  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m)); 
+
+  AttributeMap &attr = mAttributeStack.back();
+  shared_ptr<Material> m = mMaterials[lexical_cast<size_t>(attr["material"])];
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
 } // end Gotham::mesh()
 
 void Gotham
@@ -422,39 +439,27 @@ void Gotham
 {
   attr.clear();
 
-  any toAdd = std::string("kajiya");
-  attr["path::sampler"] = toAdd;
+  // call the other libraries to get their defaults
+  ImportanceApi::getDefaultAttributes(attr);
+  MutatorApi::getDefaultAttributes(attr);
+  PathApi::getDefaultAttributes(attr);
+  RecordApi::getDefaultAttributes(attr);
+  RendererApi::getDefaultAttributes(attr);
 
-  toAdd = std::string("4");
-  attr["path::maxlength"] = toAdd;
-
-  toAdd = std::string("true");
-  attr["viewer"] = toAdd;
-
-  toAdd = std::string("gotham.exr");
-  attr["record::outfile"] = toAdd;
-
-  toAdd = std::string("");
-  attr["name"] = toAdd;
-
-  toAdd = shared_ptr<Material>(new DefaultMaterial());
-  attr["material"] = toAdd;
-
-  toAdd = std::string("true");
-  attr["scene::castshadows"] = toAdd;
-
-  // by default, assume normals point towards the outside
-  // of the object
-  toAdd = std::string("outside");
-  attr["orientation"] = toAdd;
+  // set miscellaneous attributes that don't belong
+  // elsewhere
+  attr["viewer"] = "true";
+  attr["name"] = "";
+  attr["material"] = "0";
+  attr["scene:castshadows"] = "true";
+  attr["orientation"] = "outside";
 } // end Gotham::getDefaultAttributes()
 
 void Gotham
   ::attribute(const std::string &name,
               const std::string &val)
 {
-  any toAdd = val;
-  mAttributeStack.back()[name] = toAdd;
+  mAttributeStack.back()[name] = val;
 } // end Gotham::attribute()
 
 void Gotham

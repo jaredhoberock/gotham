@@ -42,7 +42,14 @@ class HaltCriterion
      *  \param attr An AttributeMap describing the parameters of the render.
      *  \return A new HaltCriterion object.
      */
-    static HaltCriterion *createCriterion(const Gotham::AttributeMap &attr);
+    static HaltCriterion *createCriterion(Gotham::AttributeMap &attr);
+
+    /*! This method fills the given AttributeMap with default values for
+     *  HaltCriterions.
+     *  \param attr An AttributeMap that will be filled with default values for
+     *              HaltCriterions.
+     */
+    static void getDefaultAttributes(Gotham::AttributeMap &attr);
 
   protected:
     const MonteCarloRenderer *mRenderer;

@@ -20,7 +20,12 @@ class MutatorApi
      *              to create.
      *  \return A new PathMutator.
      */
-    static PathMutator *mutator(const Gotham::AttributeMap &attr);
+    static PathMutator *mutator(Gotham::AttributeMap &attr);
+
+    /*! This method fills an AttributeMap with this library's defaults.
+     *  \param attr The set of attributes to add to.
+     */
+    static void getDefaultAttributes(Gotham::AttributeMap &attr);
 }; // end MutatorApi
 
 #endif // MUTATOR_API_H
