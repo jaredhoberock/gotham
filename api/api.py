@@ -124,15 +124,15 @@ class Gotham2(Gotham):
       print "render((w,h), spp): Warning: using arguments with this function is deprecated."
       print "Please use render() instead."
     if len(args) == 1:
-      Gotham.attribute(self, "record::width", str(args[0][0]))
-      Gotham.attribute(self, "record::height", str(args[0][1]))
+      Gotham2.attribute(self, "record:width", str(args[0][0]))
+      Gotham2.attribute(self, "record:height", str(args[0][1]))
     if len(args) > 2:
       print "Error: too many parameters to render()."
       return
     elif len(args) == 2:
-      Gotham.attribute(self, "record::width", str(args[0][0]))
-      Gotham.attribute(self, "record::height", str(args[0][1]))
-      Gotham.attribute(self, "renderer::spp", str(args[1]))
+      Gotham2.attribute(self, "record:width", str(args[0][0]))
+      Gotham2.attribute(self, "record:height", str(args[0][1]))
+      Gotham2.attribute(self, "renderer:spp", str(args[1]))
     Gotham.render(self)
 
   def lookAt(self, eye, center, up):
