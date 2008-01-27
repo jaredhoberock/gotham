@@ -280,26 +280,9 @@ float MultiStageMetropolisRenderer
                                                        static_cast<size_t>(ceilf(h))));
   current->resample(*lowResEstimate);
 
-  if(current->computeMean().luminance() == 0)
-  {
-    std::cerr << "zero mean" << std::endl;
-  } // end if
-
   // scale estimate so it has mean luminance equal to bLuminance
   s = bLuminance / lowResEstimate->computeMean().luminance();
   lowResEstimate->scale(Spectrum(s,s,s));
-  if(s != s)
-  {
-    std::cerr << "nan scale" << std::endl;
-  } // end if
-  else if(s == std::numeric_limits<float>::infinity())
-  {
-    std::cerr << "inf scale" << std::endl;
-  } // end else if
-  else if(s == 0)
-  {
-    std::cerr << "zero scale" << std::endl;
-  } // end else if
 
   sprintf(buf, "lowres-estimate-%dx%d.exr", lowResEstimate->getWidth(), lowResEstimate->getHeight());
   lowResEstimate->writeEXR(buf);

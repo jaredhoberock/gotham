@@ -94,12 +94,8 @@ float NoiseAwareMetropolisRenderer
                           static_cast<size_t>(ceilf(h)));
   prepareTargetImportance(*lowResEstimate, tempVar, target);
 
-  // XXX we shouldn't write this here, we should do it in a postprocess
-  //     for target importance or something
-  target.writeEXR(mTargetFilename.c_str());
-
   // replace the current importance with a new one
-  mImportance.reset(new TargetImportance(*lowResEstimate, target));
+  mImportance.reset(new TargetImportance(*lowResEstimate, target, mTargetFilename));
   
   // update invB
   // XXX we shouldn't have to use a separate sequence

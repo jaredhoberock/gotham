@@ -276,7 +276,11 @@ void MetropolisRenderer
   // we don't need to scale by 1 / sp
   Parent::Parent::postprocess();
 
+  // postprocess mutator
   mMutator->postprocess();
+
+  // postprocess importance
+  mImportance->postprocess();
 
   // rescale acceptance image so it has 1/2 mean luminance
   float s = 0.5f / mAcceptanceImage.computeMean().luminance();
