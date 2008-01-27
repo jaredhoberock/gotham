@@ -17,6 +17,7 @@
 #include "../importance/ImportanceApi.h"
 #include "../importance/LuminanceImportance.h"
 #include "HaltCriterion.h"
+#include "ExperimentalMetropolisRenderer.h"
 
 using namespace boost;
 
@@ -57,8 +58,8 @@ Renderer *RendererApi
     std::cerr << "Warning: attribute \"renderer::targetrays\" is deprecated." << std::endl;
     std::cerr << "Please use \"renderer::target::function\" and \"renderer::target::count\" instead." << std::endl;
 
-    attr["renderer::target::function"] = std::string("rays");
-    attr["renderer::target::count"] = a->second;
+    attr["renderer:target:function"] = std::string("rays");
+    attr["renderer:target:count"] = a->second;
   } // end if
 
   float varianceExponent = lexical_cast<float>(attr["renderer:noiseawaremetropolis:varianceexponent"]);
@@ -163,12 +164,11 @@ Renderer *RendererApi
 
   // XXX Remove this when we have successfully generalized target counts
   // get spp
-  unsigned int spp = 4;
+  size_t spp = 4;
   a = attr.find("renderer:spp");
   if(a != attr.end())
   {
-    any val = a->second;
-    spp = atoi(any_cast<std::string>(val).c_str());
+    spp = lexical_cast<size_t>(a->second);
   } // end if
 
   result->setSamplesPerPixel(spp);
