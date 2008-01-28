@@ -149,8 +149,7 @@ void RenderViewer
 
     case '(':
     {
-      mGamma -= 0.1f;
-      mGamma = std::max(mGamma, 0.1f);
+      setGamma(std::max(mGamma - 0.1f, 0.1f));
 
       char msg[32];
       sprintf(msg, "Gamma: %f", mGamma);
@@ -161,7 +160,7 @@ void RenderViewer
 
     case ')':
     {
-      mGamma += 0.1f;
+      setGamma(mGamma + 0.1f);
 
       char msg[32];
       sprintf(msg, "Gamma: %f", mGamma);
@@ -325,4 +324,10 @@ void RenderViewer
   // update the frame automatically
   startAnimation();
 } // end RenderViewer::startRender()
+
+void RenderViewer
+  ::setGamma(const float g)
+{
+  mGamma = g;
+} // end RenderViewer::setGamma()
 
