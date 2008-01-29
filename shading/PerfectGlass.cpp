@@ -173,7 +173,10 @@ Spectrum PerfectGlass
     result = transmission;
   } // end else
 
-  return result;
+  // XXX this division is by zero at the silhouette
+  //     this introduces nans, of course
+  // BUG #1
+  return result / dg.getNormal().absDot(wi);
 } // end PerfectGlass::evaluate()
 
 float PerfectGlass
