@@ -177,6 +177,7 @@ unsigned int Path
     // convert pdf to projected solid angle measure
     // XXX this division is by zero at the silhouette
     //     this introduces nans, of course
+    // BUG #1
     pdf /= prev.mDg.getNormal().absDot(dir);
 
     result = insert(previous, after, dir, f, pdf, delta, component,
@@ -647,6 +648,7 @@ float Path
       } // end if
 
       // convert to projected solid angle pdf
+      // BUG #1
       ratio /= prevVert->mDg.getNormal().absDot(prevVert->mToPrev);
 
       // convert to area product pdf
@@ -769,6 +771,7 @@ float Path
       } // end if
 
       // convert to projected solid angle pdf
+      // BUG #1
       ratio /= prevVert->mDg.getNormal().absDot(prevVert->mToNext);
 
       // convert to area product pdf

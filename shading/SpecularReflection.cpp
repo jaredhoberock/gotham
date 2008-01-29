@@ -47,6 +47,7 @@ Spectrum SpecularReflection
 
   // must divide by the dot product because
   // we will multiply it later
+  // BUG #1
   return result / dg.getNormal().absDot(wi);
 } // end SpecularReflection::sample()
 
@@ -74,6 +75,8 @@ Spectrum SpecularReflection
     float cosi = dg.getNormal().absDot(wo);
 
     result = mReflectance * mFresnel->evaluate(cosi);
+
+    // BUG #1
     result /= dg.getNormal().absDot(wi);
   } // end if
 
