@@ -175,6 +175,8 @@ unsigned int Path
     ScatteringDistributionFunction *sensor = material->evaluateSensor(dg);
 
     // convert pdf to projected solid angle measure
+    // XXX this division is by zero at the silhouette
+    //     this introduces nans, of course
     pdf /= prev.mDg.getNormal().absDot(dir);
 
     result = insert(previous, after, dir, f, pdf, delta, component,

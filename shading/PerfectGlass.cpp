@@ -23,7 +23,7 @@ Spectrum PerfectGlass
   wi = dg.getNormal().reflect(wo);
   wi = wi.normalize();
   return evaluateReflectance(wo,dg);
-} // end PerfectGlass::sample()
+} // end PerfectGlass::sampleReflectance()
 
 Spectrum PerfectGlass
   ::evaluateReflectance(const Vector &wo,
@@ -61,7 +61,9 @@ Spectrum PerfectGlass
 
     // compute fresnel term
     Spectrum f = mFresnel.evaluate(cosi, cost);
-    result = (et*et)/(ei*ei) * (Spectrum::white() - f) * mTransmittance;
+    f = Spectrum::white() - f;
+    f.saturate();
+    result = (et*et)/(ei*ei) * f * mTransmittance;
   } // end if
 
   return result;
@@ -134,6 +136,8 @@ Spectrum PerfectGlass
     component = 1;
   } // end else
 
+  // XXX this division is by zero at the silhouette
+  //     this introduces nans, of course
   return result / dg.getNormal().absDot(wi);
 } // end PerfectGlass::sample()
 
