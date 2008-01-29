@@ -233,6 +233,8 @@ void Gotham
 
     v.setSnapshotFileName(mRenderer->getRenderParameters().c_str());
 
+    v.setGamma(lexical_cast<float>(attr["viewer:gamma"]));
+
     // try to tell the viewer where to look
     // bail out otherwise
     try
@@ -449,6 +451,7 @@ void Gotham
   // set miscellaneous attributes that don't belong
   // elsewhere
   attr["viewer"] = "true";
+  attr["viewer:gamma"] = "2.2";
   attr["name"] = "";
   attr["material"] = "0";
   attr["scene:castshadows"] = "true";
