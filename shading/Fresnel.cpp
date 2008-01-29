@@ -22,14 +22,26 @@ FresnelDielectric
 Spectrum FresnelDielectric
   ::evaluate(const float cosi) const
 {
-  float f = dielectric(mEtai, mEtat, cosi);
+  // we must figure out which ei / et is incident / transmittant
+  bool entering = cosi > 0;
+  float ei = mEtai, et = mEtat;
+  if(!entering) std::swap(ei,et);
+
+  float f = dielectric(ei, et, cosi);
   return Spectrum(f,f,f);
 } // end FresnelDielectric::evaluate()
 
 Spectrum FresnelDielectric
   ::evaluate(const float cosi, const float cost) const
 {
-  float f = dielectric(mEtai, mEtat, cosi, cost);
+  // we must figure out which ei / et is incident / transmittant
+  // XXX we usually know the answer by this point
+  //     we could pass the answer along to avoid this extra computation
+  bool entering = cosi > 0;
+  float ei = mEtai, et = mEtat;
+  if(!entering) std::swap(ei,et);
+  float f = dielectric(ei, et, cosi, cost);
+
   return Spectrum(f,f,f);
 } // end FresnelDielectric::evaluate()
 
