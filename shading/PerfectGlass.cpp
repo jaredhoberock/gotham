@@ -29,7 +29,7 @@ Spectrum PerfectGlass
   ::evaluateReflectance(const Vector &wo,
                         const DifferentialGeometry &dg) const
 {
-  float cosi = dg.getNormal().absDot(wo);
+  float cosi = wo.dot(dg.getNormal());
   return mReflectance * mFresnel.evaluate(cosi);
 } // end PerfectGlass::evaluateReflectance()
 

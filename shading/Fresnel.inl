@@ -27,23 +27,14 @@ float Fresnel
   ::dielectric(const float etai, const float etat,
                float cosi)
 {
-  // clamp cosi
-  cosi = std::min(cosi, 1.0f);
-  cosi = std::max(cosi, -1.0f);
-
-  // compute indices of refraction for dielectric
-  bool entering = cosi > 0;
-  float ei = etai, et = etat;
-  if(!entering) std::swap(ei,et);
-
   // compute sint
-  float sint = ei/et * sqrt(std::max(0.0f, 1.0f - cosi*cosi));
+  float sint = etai/etat * sqrt(std::max(0.0f, 1.0f - cosi*cosi));
 
   // handle total internal reflection
   if(sint > 1.0f) return 1.0f;
 
   float cost = sqrt(std::max(0.0f, 1.0f - sint*sint));
-  return dielectric(ei, et, cosi, cost);
+  return dielectric(etai, etat, fabs(cosi), cost);
 } // end Fresnel::dielectric()
 
 Spectrum Fresnel

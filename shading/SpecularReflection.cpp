@@ -37,11 +37,13 @@ Spectrum SpecularReflection
   delta = true;
   component = 0;
 
+  // reflect no doubt needs to compute cosi
+  // pass this as an argument to avoid that computation
   wi = dg.getNormal().reflect(wo);
   wi = wi.normalize();
   pdf = 1.0f;
 
-  float cosi = dg.getNormal().absDot(wo);
+  float cosi = dg.getNormal().dot(wo);
 
   Spectrum result = mReflectance * mFresnel->evaluate(cosi);
 
