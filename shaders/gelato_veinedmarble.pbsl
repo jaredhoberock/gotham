@@ -1,0 +1,67 @@
+// based on /gelato/shaders/veinedmarble.glsl:
+// NVIDIA license follows:
+/////////////////////////////////////////////////////////////////////////////
+// Copyright 2004 NVIDIA Corporation.  All Rights Reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// 
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimer in the
+//   documentation and/or other materials provided with the distribution.
+// * Neither the name of NVIDIA nor the names of its contributors
+//   may be used to endorse or promote products derived from this software
+//   without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// (This is the Modified BSD License)
+/////////////////////////////////////////////////////////////////////////////
+
+scattering(float exponent,
+           Spectrum specularcolor,
+           float veinfreq,
+           float veinlevels,
+           Spectrum basecolor,
+           Spectrum veincolor,
+           float sharpness,
+           float shadingfreq)
+{
+  // Shade based on shader space
+  Point PP = shadingfreq * P;
+
+  // Warp the spatial lookup
+  PP += 0.5f * vectorFbm(PP, 6, 2, 0.5);
+
+  // Now calculate the veining function for the lookup area
+  float turbsum = 0;
+  float freq = 1;
+  PP *= veinfreq;
+  for(float i = 0; i < veinlevels; i += 1)
+  {
+    float turb = fabs(snoise(PP*freq));
+    turb = powf(smoothstep(0.5f, 1.0f, 1.0f - turb), sharpness) / freq;
+    turbsum += (1.0f - turbsum) * turb;
+    freq *= 3.0f;
+    PP *= 3.0f;
+  } // end for i
+
+  // Mix between base color and vein color
+  Spectrum Ct = mix(basecolor, veincolor, turbsum);
+
+  return uber(Ct, specularcolor, exponent);
+} // end scattering
+
