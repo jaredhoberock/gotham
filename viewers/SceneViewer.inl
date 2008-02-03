@@ -46,14 +46,9 @@ void SceneViewer
 {
   switch(e->key())
   {
-    case 'c':
+    case 'C':
     {
-      qglviewer::Vec v = camera()->position();
-      std::cerr << "eye: " << v[0] << "," << v[1] << "," << v[2] << std::endl;
-      v += camera()->viewDirection();
-      std::cerr << "look at: " << v[0] << "," << v[1] << "," << v[2] << std::endl;
-      v = camera()->upVector();
-      std::cerr << "up: " << v[0] << "," << v[1] << "," << v[2] << std::endl;
+      printCameraCode();
       break;
     } // end case 'c'
 
@@ -64,4 +59,20 @@ void SceneViewer
     } // end default
   } // end switch
 } // end SceneViewer::keyPressEvent()
+
+void SceneViewer
+  ::printCameraCode(void) const
+{
+  Point eye(camera()->position());
+  Vector look(camera()->viewDirection());
+  Vector lookAt = eye + look;
+  Vector up(camera()->upVector());
+
+  std::cerr << "g.pushMatrix()" << std::endl;
+  std::cerr << "g.lookAt([" << eye[0] << "," << eye[1] << "," << eye[2] << "]," << std::endl;
+  std::cerr << "         [" << lookAt[0] << "," << lookAt[1] << "," << lookAt[2] << "]," << std::endl;
+  std::cerr << "         [" << up[0] << "," << up[1] << "," << up[2] << "])" << std::endl;
+  std::cerr << "g.camera(" << camera()->aspectRatio() << "," << camera()->fieldOfView() << "," << camera()->zNear() << ")" << std::endl;
+  std::cerr << "g.popMatrix()" << std::endl;
+} // end SceneViewer::printCameraCode()
 

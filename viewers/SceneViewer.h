@@ -40,6 +40,11 @@ class SceneViewer
 
     inline virtual void init(void);
 
+    /*! This method outputs python code to position a camera
+     *  at this SceneViewer's location.
+     */
+    inline void printCameraCode(void) const;
+
   protected:
     inline virtual void keyPressEvent(Parent::KeyEvent *e);
 
