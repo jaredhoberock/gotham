@@ -1,4 +1,4 @@
-scattering(Spectrum Kt)
+scattering(Spectrum Kt = Spectrum::white())
 {
   return transparent(Kt);
 } // end scattering()

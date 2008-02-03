@@ -1,4 +1,4 @@
-scattering(Spectrum Kr)
+scattering(Spectrum Kr = Spectrum::white())
 {
   F = mirror(Kr, 2.485f);
 } // end scattering

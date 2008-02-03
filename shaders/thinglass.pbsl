@@ -1,4 +1,5 @@
-scattering(Spectrum Kr, Spectrum Kt)
+scattering(Spectrum Kr = Spectrum::white(),
+           Spectrum Kt = Spectrum::white())
 {
   F = thinGlass(1.5f, Kr, Kt);
 } // end scattering()

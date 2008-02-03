@@ -11,41 +11,84 @@ import re
 import tempfile
 import shutil
 
+def parseDeclaration(decl):
+  # strip leading and ending whitespace
+  decl = decl.lstrip()
+  decl = decl.rstrip()
+  try:
+    # split decl into "type expression"
+    (type, whitespace, expression) = decl.partition(' ')
+    identifier = ""
+    # set default values to 0 for now
+    default = "0.0f"
+    try:
+      # split barexpr into "identifier [= default]"
+      (identifier, default) = tuple(expression.split("="))
+    except:
+      # assume we only encountered an identifier
+      identifier = expression
+    # strip leading and ending whitespace
+    type = type.lstrip()
+    type = type.rstrip()
+    identifier = identifier.lstrip()
+    identifier = identifier.rstrip()
+    default = default.lstrip()
+    default = default.rstrip()
+    # set the result
+    result = (type, identifier, default)
+  except:
+    raise ValueError, 'Error: Expected a declaration.'
+  return result
+
 def parseParameters(parameters):
   result = []
   # first check for void parameters
   voidParameters = re.compile('^\s*$|^\s*void\s*$')
   if voidParameters.search(parameters) != None:
     return result
-  # match parameters
-  # split on ','
-  declarations = parameters.split(',')
-  for decl in declarations:
-    try:
-      (type, identifier) = tuple(decl.split())
-      # add a declaration to the result
-      result.append((type, identifier))
-    except:
-      print 'Error: Expected a declaration.'
-      exit()
+  i = 0
+  while i < len(parameters):
+    # slurp characters until we find a ','
+    # at our current depth
+    decl = ''
+    depth = 0
+    while i < len(parameters):
+      c = parameters[i]
+      i += 1
+      if c == '(':
+        depth += 1
+      elif c == ')':
+        depth -= 1
+      if c == ',' and depth == 0:
+        break
+      decl += c
+    result.append(parseDeclaration(decl))
   return result
 
 def parseFunction(name, source):
-  # find the parameters of name():
-  slurpUntilEndParens = '[^\)]*'
-  parametersPattern = re.compile(('%s\((' % name) + slurpUntilEndParens + ')\)')
-  parametersMatch = parametersPattern.search(source)
-  parameters = parametersMatch.groups()[0]
+  # split the source at the function name
+  (stuffBeforeFunctionName, funcName, stuffAfterFunctionName) = source.partition(name)
+  if funcName != name:
+    return ([], '')
+
+  # split the stuff after the function name into (parameters) and then body
+  try:
+    (params, openBrace, searchMeForBody) = stuffAfterFunctionName.partition('{')
+  except:
+    raise ValueError, "Error: expected '{' after function '%s' declaration." % name
+
+  # split the parameters into '(' parametersList ')'
+  (stuffBeforeOpenParens, firstOpenParens, stuffAfterOpenParens) = params.partition('(')
+  (parameters, lastCloseParens, stuffAfterFinalCloseParens) = stuffAfterOpenParens.rpartition(')')
+
+  # parse the parameters string into a list of parameters
   parametersList = parseParameters(parameters)
-  # find the body of the function
-  body = ''
-  searchMeForBody = source[parametersMatch.end(0):]
-  # strip off leading whitespace
+
+  # strip off the leading whitespace of the function body
   searchMeForBody = searchMeForBody.lstrip()
-  if searchMeForBody[0] != '{':
-    raise ValueError, "Error: expected '{'."
   depth = 1
-  for c in searchMeForBody[1:]:
+  body = ''
+  for c in searchMeForBody:
     if c == '{':
       depth += 1
     elif c == '}': depth -= 1
@@ -53,7 +96,7 @@ def parseFunction(name, source):
       break
     body += c
   if depth != 0:
-    raise ValueError, "Error: EOF reached before end of %s." % name
+    raise ValueError, "Error: EOF reached before end of function '%s'." % name
   return (parametersList, body)
 
 
@@ -70,6 +113,17 @@ def makeShaderParameterCode(parameterType, parameterName):
     exit()
   return result
 
+def makeNullConstructorCode(className, parameterList):
+  result = ''
+  result += className + '(void)\n'
+  if len(parameterList) > 0:
+    result += ':\n'
+    for param in parameterList[0:-1]:
+      result += param[1] + '(' + param[2] + '),\n'
+    result += parameterList[-1][1] + '(' + parameterList[-1][2] + ')\n'
+  # give it an empty body
+  result += '{;}\n'
+  return result
 
 def compile(filename):
   globalVariables = '''
@@ -99,9 +153,9 @@ const Vector3 &dpdv = dg.getPointPartials()[1];
   # try to parse 'scattering'
   scatteringString = ''
   scatteringParametersList = []
-  try:
-    (scatteringParametersList, scatteringBody) = parseFunction('scattering', shaderString)
-    
+
+  (scatteringParametersList, scatteringBody) = parseFunction('scattering', shaderString)
+  if scatteringBody != '':
     # rebuild a shader string
     scatteringString = '''
 virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeometry &dg) const
@@ -114,14 +168,13 @@ virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeo
   return F;
 }
 '''
-  except:
-    pass
   
   # try to parse 'emission'
   emissionString = ''
   emissionParametersList = []
-  try:
-    (emissionParametersList, emissionBody) = parseFunction('emission', shaderString)
+
+  (emissionParametersList, emissionBody) = parseFunction('emission', shaderString)
+  if emissionBody != '':
     emissionString = '''
  virtual ScatteringDistributionFunction *evaluateEmission(const DifferentialGeometry &dg) const
  {
@@ -137,14 +190,13 @@ virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeo
    return true;
  }
  '''
-  except:
-    pass
   
   # try to parse 'sensor'
   sensorString = ''
   sensorParametersList = []
-  try:
-    (sensorParametersList, sensorBody) = parseFunction('sensor', shaderString)
+
+  (sensorParametersList, sensorBody) = parseFunction('sensor', shaderString)
+  if sensorBody != '':
     sensorString = '''
 virtual ScatteringDistributionFunction *evaluateSensor(const DifferentialGeometry &dg) const
 {
@@ -160,9 +212,6 @@ virtual bool isSensor(void) const
   return true;
 }
 '''
-  except:
-    pass
-  
   
   # XXX we need to put the preamble outside of the class definition
   
@@ -188,6 +237,8 @@ virtual bool isSensor(void) const
     compileMe += makeShaderParameterCode(param[0], param[1])
   for param in sensorParametersList:
     compileMe += makeShaderParameterCode(param[0], param[1])
+  # create null constructor
+  compileMe += makeNullConstructorCode(className, scatteringParametersList + emissionParametersList + sensorParametersList)
   compileMe += '};\n'
   
   # create shared library export

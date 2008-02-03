@@ -1,4 +1,7 @@
-scattering(Spectrum Kt, float etai, float etat, float exponent)
+scattering(Spectrum Kt = Spectrum::white(),
+           float etai = 1.0f,
+           float etat = 1.5f,
+           float exponent = 20.0f)
 {
   F = refraction(Kt, etai, etat);
 } // end scattering

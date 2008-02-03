@@ -1,4 +1,4 @@
-emission(Spectrum power)
+emission(Spectrum power = Spectrum(1000, 1000, 1000))
 {
   Spectrum radiosity = invArea * power;
   E = hemisphericalEmission(radiosity);

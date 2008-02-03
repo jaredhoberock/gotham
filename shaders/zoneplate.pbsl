@@ -1,4 +1,4 @@
-emission(float f)
+emission(float f = 512.0f)
 {
   float x = P[0] + 1.0f;
   x *= 0.5f;

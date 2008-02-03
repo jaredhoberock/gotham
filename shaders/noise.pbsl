@@ -1,4 +1,4 @@
-scattering(Spectrum Kd)
+scattering(Spectrum Kd = Spectrum::white())
 {
   float n = 0.5f*(snoise(P) + 1.0f);
   Spectrum c(n,n,n);

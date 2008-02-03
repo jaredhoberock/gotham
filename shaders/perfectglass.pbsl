@@ -1,4 +1,6 @@
-scattering(float eta, Spectrum Kr, Spectrum Kt)
+scattering(float eta = 1.5f,
+           Spectrum Kr = Spectrum::white(),
+           Spectrum Kt = Spectrum::white())
 {
   F = glass(eta, Kr, Kt);
 } // end scattering()
