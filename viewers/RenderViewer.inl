@@ -22,67 +22,122 @@ RenderViewer
 } // end RenderViewer::RenderViewer()
 
 void RenderViewer
+  ::drawFilm(const shared_ptr<const RenderFilm> &f) 
+{
+  // figure out which texture to use
+  const Texture *texture = &mTexture;
+  const GpuFilm<RenderFilm> *gpuFilm = dynamic_cast<const GpuFilm<RenderFilm> *>(f.get());
+  if(gpuFilm != 0)
+  {
+    // XXX yuck fix this
+    const_cast<GpuFilm<RenderFilm> *>(gpuFilm)->renderPendingDeposits();
+    texture = &gpuFilm->mTexture;
+  } // end if
+
+  const float *data = reinterpret_cast<const float*>(&f->raster(0,0));
+  GLenum datatype = GL_FLOAT_RGB16_NV;
+
+  mTexture.init(datatype,
+                width(), height(),
+                0,
+                GL_RGB, data);
+
+  // choose which program to use
+  Program &p = mDoTonemap ? mTexture2DRectTonemapProgram : mTexture2DRectGammaProgram;
+
+  p.bind();
+
+  // scale by 1/spp if we haven't finished the render
+  float scale = 1.0f;
+  if(mProgress.count() < mProgress.expected_count())
+  {
+    // XXX DESIGN kill this dynamic_cast somehow
+    const MonteCarloRenderer *mc = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get());
+    if(mc)
+    {
+      float spp = mc->getNumSamples();
+      spp /= (f->getWidth() * f->getHeight());
+      scale = 1.0f / spp;
+    } // end if
+  } // end else
+
+  p.setUniform1f("scale", powf(2.0f, mExposure) * scale);
+  p.setUniform1f("gamma", mGamma);
+  float meanLogL = f->getSumLogLuminance() / (f->getWidth() * f->getHeight());
+  float Lwa = expf(meanLogL);
+  p.setUniform1f("Lwa", Lwa);
+  p.setUniform1f("Lwhite", f->getMaximumLuminance());
+  p.setUniform1f("a", mMiddleGrey);
+
+  printGLError(__FILE__, __LINE__);
+
+  p.unbind();
+
+  glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
+
+  drawTexture(*texture, p);
+  glPopAttrib();
+} // end RenderViewer::draw()
+
+void RenderViewer
+  ::drawPhotons(const PhotonMap &photons)
+{
+  glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+
+  // scale by 1/spp if we haven't finished the render
+  float scale = (width() * height());
+  if(mProgress.count() < mProgress.expected_count())
+  {
+    // XXX DESIGN kill this dynamic_cast somehow
+    const MonteCarloRenderer *mc = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get());
+    if(mc)
+    {
+      scale /= mc->getNumSamples();
+    } // end if
+  } // end else
+
+  mPassthroughGammaProgram.bind();
+  mPassthroughGammaProgram.setUniform1f("scale", powf(2.0f, mExposure) * scale);
+  mPassthroughGammaProgram.setUniform1f("gamma", mGamma);
+
+  // draw dem photons
+  glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+  glInterleavedArrays(GL_C3F_V3F, sizeof(Photon), &photons[0].mPower[0]);
+  glDrawArrays(GL_POINTS, 0, photons.size());
+  glPopClientAttrib();
+
+  mPassthroughGammaProgram.unbind();
+
+  glPopAttrib();
+} // end RenderViewer::drawPhotons()
+
+void RenderViewer
   ::draw(void)
 {
   if(!mDrawPreview)
   {
     shared_ptr<const Record> rec = mRenderer->getRecord();
 
-    const Texture *texture = &mTexture;
-    const GpuFilm<RenderFilm> *gpuFilm = dynamic_cast<const GpuFilm<RenderFilm> *>(rec.get());
-    if(gpuFilm != 0)
-    {
-      // XXX yuck fix this
-      const_cast<GpuFilm<RenderFilm> *>(gpuFilm)->renderPendingDeposits();
-      texture = &gpuFilm->mTexture;
-    } // end if
-
     shared_ptr<const RenderFilm> film = dynamic_pointer_cast<const RenderFilm,const Record>(rec);
 
-    const float *data = reinterpret_cast<const float*>(&film->raster(0,0));
-    GLenum datatype = GL_FLOAT_RGB16_NV;
-
-    mTexture.init(datatype,
-                  width(), height(),
-                  0,
-                  GL_RGB, data);
-
-    // choose which program to use
-    Program &p = mDoTonemap ? mTexture2DRectTonemapProgram : mTexture2DRectGammaProgram;
-
-    p.bind();
-
-    // scale by 1/spp if we haven't finished the render
-    float scale = 1.0f;
-    //if(!mDoTonemap && mProgress.count() < mProgress.expected_count())
-    if(mProgress.count() < mProgress.expected_count())
+    if(film.get())
     {
-      // XXX DESIGN kill this dynamic_cast somehow
-      const MonteCarloRenderer *mc = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get());
-      if(mc)
+      // draw the film
+      drawFilm(film);
+    } // end if
+    else
+    {
+      shared_ptr<const PhotonRecord> photons = dynamic_pointer_cast<const PhotonRecord, const Record>(rec);
+      if(photons.get())
       {
-        float spp = mc->getNumSamples();
-        spp /= (film->getWidth() * film->getHeight());
-        scale = 1.0f / spp;
+        // draw the photons
+        drawPhotons(*photons);
       } // end if
     } // end else
-
-    p.setUniform1f("scale", powf(2.0f, mExposure) * scale);
-    p.setUniform1f("gamma", mGamma);
-    float meanLogL = film->getSumLogLuminance() / (film->getWidth() * film->getHeight());
-    float Lwa = expf(meanLogL);
-    p.setUniform1f("Lwa", Lwa);
-    p.setUniform1f("Lwhite", film->getMaximumLuminance());
-    p.setUniform1f("a", mMiddleGrey);
-
-    printGLError(__FILE__, __LINE__);
-
-    p.unbind();
-
-    glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
-
-    drawTexture(*texture, p);
-    glPopAttrib();
   } // end if
   else
   {
@@ -171,10 +226,20 @@ void RenderViewer
 
     case '{':
     {
-      mExposure -= 1.0f;
-
       char msg[32];
-      sprintf(msg, "Exposure: %f", mExposure);
+      if(mDoTonemap)
+      {
+        mMiddleGrey -= 1.0f;
+
+        sprintf(msg, "Middle grey: %f", mMiddleGrey);
+      } // end if
+      else
+      {
+        mExposure -= 1.0f;
+
+        sprintf(msg, "Exposure: %f", mExposure);
+      } // end else
+
       displayMessage(msg);
       updateGL();
       break;
@@ -203,10 +268,21 @@ void RenderViewer
 
     case '}':
     {
-      mExposure += 1.0f;
-
       char msg[32];
-      sprintf(msg, "Exposure: %f", mExposure);
+
+      if(mDoTonemap)
+      {
+        mMiddleGrey += 1.0f;
+
+        sprintf(msg, "Middle grey: %f", mMiddleGrey);
+      } // end if
+      else
+      {
+        mExposure += 1.0f;
+
+        sprintf(msg, "Exposure: %f", mExposure);
+      } // end else
+
       displayMessage(msg);
       updateGL();
       break;

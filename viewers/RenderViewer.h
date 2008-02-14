@@ -9,6 +9,7 @@
 
 #include "SceneViewer.h"
 #include "../records/RenderFilm.h"
+#include "../records/PhotonMap.h"
 #include "../renderers/Renderer.h"
 #include <gl++/texture/Texture.h>
 #include <boost/shared_ptr.hpp>
@@ -28,6 +29,8 @@ class RenderViewer
 
     RenderViewer(void);
     virtual void draw(void);
+    virtual void drawFilm(const boost::shared_ptr<const RenderFilm> &f);
+    virtual void drawPhotons(const PhotonMap &photons);
     virtual void keyPressEvent(KeyEvent *e);
     virtual void init(void);
     virtual void resizeGL(int w, int h);
