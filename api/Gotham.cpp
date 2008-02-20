@@ -5,6 +5,8 @@
 
 #include "Gotham.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/spirit/core.hpp>
+#include <boost/spirit/actor/push_back_actor.hpp>
 
 #include "../shading/exportShading.h"
 #include "../shading/Material.h"
@@ -37,6 +39,7 @@
 #pragma warning(pop)
 
 using namespace boost;
+using namespace boost::spirit;
 
 Gotham
   ::Gotham(void)
@@ -89,6 +92,9 @@ void Gotham
 
   // create the sensors list
   mSensors.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
+
+  // clear the PhotonMap list
+  mPhotonMaps.clear();
 } // end Gotham:init()
 
 void Gotham
@@ -203,7 +209,7 @@ void Gotham
   s->setSensors(mSensors);
 
   // create a new Renderer
-  mRenderer.reset(RendererApi::renderer(mAttributeStack.back()));
+  mRenderer.reset(RendererApi::renderer(mAttributeStack.back(), mPhotonMaps));
 
   // create a Record
   shared_ptr<Record> record;
@@ -476,4 +482,84 @@ void Gotham
 {
   mAttributeStack.pop_back();
 } // end Gotham::popAttributes()
+
+void Gotham
+  ::photons(const std::vector<float> &positions,
+            const std::vector<float> &wi,
+            const std::vector<float> &power)
+{
+  std::vector<Point> points;
+  std::vector<Vector> vectors;
+  std::vector<Spectrum> spectrums;
+  for(unsigned int i = 0;
+      i != positions.size();
+      i += 3)
+  {
+    points.push_back(Point(positions[i], positions[i+1], positions[i+2]));
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != wi.size();
+      i += 3)
+  {
+    vectors.push_back(Vector(wi[i], wi[i+1], wi[i+2]));
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != power.size();
+      i += 3)
+  {
+    spectrums.push_back(Spectrum(power[i], power[i+1], power[i+2]));
+  } // end for i
+
+  shared_ptr<PhotonMap> pm(new PhotonMap(points, vectors, spectrums));
+
+  // sort the photon map
+  pm->sort();
+
+  std::string name = mAttributeStack.back()["name"];
+  mPhotonMaps.insert(std::make_pair(name, pm));
+} // end Gotham::photons()
+
+bool Gotham
+  ::parsePhotons(const std::string &line)
+{
+  std::vector<float> points;
+  std::vector<float> vectors;
+  std::vector<float> powers;
+
+  rule<phrase_scanner_t> pointsRule  = (ch_p('(') | ch_p('[')) >> real_p[push_back_a(points)]  >> *(',' >> real_p[push_back_a(points)])  >> (ch_p(')') | ch_p(']'));
+  rule<phrase_scanner_t> vectorsRule = (ch_p('(') | ch_p('[')) >> real_p[push_back_a(vectors)] >> *(',' >> real_p[push_back_a(vectors)]) >> (ch_p(')') | ch_p(']'));
+  rule<phrase_scanner_t> powersRule  = (ch_p('(') | ch_p('[')) >> real_p[push_back_a(powers)]  >> *(',' >> real_p[push_back_a(powers)])  >> (ch_p(')') | ch_p(']'));
+
+  bool result = parse(line.c_str(),
+    // begin grammar
+    (
+      str_p("g.photons") >> '(' >> pointsRule >> ',' >> vectorsRule >> ',' >> powersRule >> ')' >> end_p
+    )
+    ,
+    // end grammar
+    
+    space_p).full;
+
+  if(result)
+  {
+    // instantiate the photon map
+    photons(points, vectors, powers);
+  } // end if
+
+  return result;
+} // end Gotham::parsePhotons()
+
+bool Gotham
+  ::parseLine(const std::string &line)
+{
+  bool result = false;
+  if(parsePhotons(line))
+  {
+    result = true;
+  } // end if
+
+  return result;
+} // end Gotham::parseLine()
 

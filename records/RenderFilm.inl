@@ -116,6 +116,12 @@ void RenderFilm
 } // end RenderFilm::fill()
 
 void RenderFilm
+  ::scale(const float s)
+{
+  scale(Spectrum(s,s,s));
+} // end RenderFilm::scale()
+
+void RenderFilm
   ::scale(const Pixel &s)
 {
   Parent1::scale(s);

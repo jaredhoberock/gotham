@@ -14,9 +14,11 @@
 #include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../renderers/Renderer.h"
+#include "../records/PhotonMap.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
 #include <boost/program_options.hpp>
+#include <map>
 
 class Gotham
 {
@@ -25,6 +27,12 @@ class Gotham
      *  \brief Shorthand.
      */
     typedef std::map<std::string, std::string> AttributeMap;
+
+    /*! \typedef PhotonMaps
+     *  \brief Shorthand.
+     *  XXX This probably doesn't belong here.
+     */
+    typedef std::map<std::string, boost::shared_ptr<PhotonMap> > PhotonMaps;
 
     /*! Null constructor calls init().
      */
@@ -130,6 +138,15 @@ class Gotham
                 const float cz,
                 const float radius);
 
+    /*! This method creates a new PhotonMap.
+     *  \param positions A list of Photon positions.
+     *  \param wi A list of Photon incoming directions.
+     *  \param power A list of Photon powers.
+     */
+    void photons(const std::vector<float> &positions,
+                 const std::vector<float> &wi,
+                 const std::vector<float> &power);
+
     /*! This method sets the given named attribute.
      *  \param name The name of the attribute to set.
      *  \param val The value to set to.
@@ -144,6 +161,12 @@ class Gotham
     /*! This method pops the top of the attributes stack.
      */
     void popAttributes(void);
+
+    /*! This method tries to parse a single line of Gotham Python code.
+     *  \param line The line to parse
+     *  \return true if line could be successfully parsed; false, otherwise.
+     */
+    bool parseLine(const std::string &line);
 
   private:
     typedef Transform Matrix;
@@ -170,6 +193,12 @@ class Gotham
      *  \param prim The new SurfacePrimitive.
      */
     void surfacePrimitive(SurfacePrimitive *prim);
+
+    /*! This method parses a line of Gotham Python code for a photons() call.
+     *  \param line The line to parse.
+     *  \return true if line could be successfully parsed; false, otherwise.
+     */
+    bool parsePhotons(const std::string &line);
 
     /*! The matrix stack.
      */
@@ -202,6 +231,10 @@ class Gotham
     /*! The Renderer.
      */
     boost::shared_ptr<Renderer> mRenderer;
+
+    /*! PhotonMaps, indexed by human-readable name.
+     */
+    PhotonMaps mPhotonMaps;
 }; // end Gotham
 
 #include "Gotham.inl"

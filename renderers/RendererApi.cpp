@@ -35,7 +35,8 @@ void RendererApi
 } // end RendererApi::getDefaultAttributes()
 
 Renderer *RendererApi
-  ::renderer(Gotham::AttributeMap &attr)
+  ::renderer(Gotham::AttributeMap &attr,
+             const Gotham::PhotonMaps &photonMaps)
 {
   // create a RandomSequence
   shared_ptr<RandomSequence> z(new RandomSequence());
@@ -72,14 +73,14 @@ Renderer *RendererApi
   if(rendererName == "montecarlo")
   {
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
 
     result = new PathDebugRenderer(z, sampler);
   } // end if
   else if(rendererName == "energyredistribution")
   {
     // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr, photonMaps));
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
@@ -88,7 +89,7 @@ Renderer *RendererApi
   else if(rendererName == "metropolis")
   {
     // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr, photonMaps));
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
@@ -98,7 +99,7 @@ Renderer *RendererApi
   else if(rendererName == "multistagemetropolis")
   {
     // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr, photonMaps));
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
@@ -108,7 +109,7 @@ Renderer *RendererApi
   else if(rendererName == "noiseawaremetropolis")
   {
     // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr, photonMaps));
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
@@ -121,7 +122,7 @@ Renderer *RendererApi
     std::cerr << "Warning: rendering algorithm \"altnoiseawaremetropolis\" is deprecated. Please use \"noiseawaremetropolis\" instead." << std::endl;
 
     // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr, photonMaps));
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
@@ -132,7 +133,7 @@ Renderer *RendererApi
   else if(rendererName == "variance")
   {
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
 
     VarianceRenderer *vr = new VarianceRenderer(z, sampler);
     result = vr;
@@ -142,7 +143,7 @@ Renderer *RendererApi
   else if(rendererName == "batchmeans")
   {
     // create a PathMutator
-    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr));
+    shared_ptr<PathMutator> mutator(MutatorApi::mutator(attr, photonMaps));
 
     // create a ScalarImportance
     shared_ptr<ScalarImportance> importance(ImportanceApi::importance(attr));
@@ -158,7 +159,7 @@ Renderer *RendererApi
     std::cerr << "Warning: unknown rendering algorithm \"" << rendererName << "\"." << std::endl;
 
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
     result = new PathDebugRenderer(z, sampler);
   } // end else
 

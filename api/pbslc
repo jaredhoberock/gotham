@@ -125,6 +125,22 @@ def makeNullConstructorCode(className, parameterList):
   result += '{;}\n'
   return result
 
+def stripComments(shaderLines):
+  stripped = ''
+  for line in shaderLines:
+    # begin a new line
+    stripped += '\n'
+    for i in range(0, len(line)):
+      c = line[i]
+      nextC = ''
+      if i+1 != len(line):
+        nextC = line[i+1]
+      if c == '#' or (c == '/' and nextC == '/'):
+        break
+      lastC = c
+      stripped += c
+  return stripped
+
 def compile(filename):
   globalVariables = '''
 const Point &P = dg.getPoint();
@@ -147,8 +163,8 @@ const Vector3 &dpdv = dg.getPointPartials()[1];
   className = basename + 'Shader'
   infile = open(filename)
   
-  # copy each line without a main(...)
-  shaderString = infile.read()
+  # strip out '//' and '#' comments
+  shaderString = stripComments(infile.readlines())
   
   # try to parse 'scattering'
   scatteringString = ''

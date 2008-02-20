@@ -12,7 +12,7 @@
 #include "../geometry/Ray.h"
 #include "../path/KajiyaSampler.h"
 #include "../path/SimpleBidirectionalSampler.h"
-#include <stratifiedsequence/StratifiedSequence.h>
+#include <randomsequence2d/RandomSequence2D.h>
 #include <hilbertsequence/HilbertSequence.h>
 
 using namespace boost;
@@ -52,14 +52,25 @@ void PathDebugRenderer
   Path p;
   float2 uv(0,0);
 
-  // XXX TODO kill this grossness
-  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
-
   const Scene *s = mScene.get();
 
-  HilbertSequence sequence(0, 1.0f, 0, 1.0f,
-                           film->getWidth() * mSamplesPerPixel,
-                           film->getHeight() * mSamplesPerPixel);
+  // XXX TODO kill this grossness
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  
+  shared_ptr<RandomSequence2D> sequence;
+  if(film)
+  {
+    size_t samplesWidth = film->getWidth() * mSamplesPerPixel;
+    size_t samplesHeight = film->getHeight() * mSamplesPerPixel;
+    sequence.reset(new HilbertSequence(0, 1.0f, 0, 1.0f,
+                                       samplesWidth, samplesHeight));
+  } // end if
+  else
+  {
+    sequence.reset(new RandomSequence2D(0, 1.0f, 0, 1.0f));
+  } // end else
+
+  RandomSequence2D *seq = sequence.get();
 
   std::vector<PathSampler::Result> results;
   PathSampler::HyperPoint x;
@@ -73,7 +84,7 @@ void PathDebugRenderer
   while(!(*mHalt)())
   {
     // get a new film plane sample
-    sequence(px, py, z(), z());
+    (*seq)(px, py, z(), z());
 
     Spectrum L(0.1f, 0.1f, 0.1f);
 

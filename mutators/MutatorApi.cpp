@@ -21,7 +21,8 @@ void MutatorApi
 } // end MutatorApi::getDefaultAttributes()
 
 PathMutator *MutatorApi
-  ::mutator(Gotham::AttributeMap &attr)
+  ::mutator(Gotham::AttributeMap &attr,
+            const Gotham::PhotonMaps &photonMaps)
 {
   PathMutator *result = 0;
 
@@ -39,19 +40,19 @@ PathMutator *MutatorApi
   if(mutatorName == "kelemen")
   {
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
     result = new KelemenMutator(largeStepProbability, sampler);
   } // end if
   else if(mutatorName == "seeded")
   {
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
     result = new SeededMutator(largeStepProbability, sampler, numSeeds);
   } // end else if
   else if(mutatorName == "stratified")
   {
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
     result = new StratifiedMutator(largeStepProbability, sampler, uint2(w,h));
   } // end else if
   else
@@ -59,7 +60,7 @@ PathMutator *MutatorApi
     std::cerr << "Warning: unknown mutation strategy \"" << mutatorName << "\"." << std::endl;
 
     // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr));
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
     result = new KelemenMutator(largeStepProbability, sampler);
   } // end else if
 

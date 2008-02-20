@@ -49,15 +49,22 @@ class Gotham2(Gotham):
     # add shaderpaths to os.path temporarily
     oldpath = sys.path
     sys.path += self.shaderpaths
-    try:
-      # import the material
-      module = __import__(name)
-      # create a new material
-      m = module.createMaterial()
-      # set parameters
+    #try:
+    # import the material
+    module = __import__(name)
+    # create a new material
+    m = module.createMaterial()
+
+    parmDict = {}
+    if len(parms) > 1:
       for i in range(0, len(parms), 2):
-        p = parms[i]
-        val = parms[i+1]
+        parmDict[parms[i]] = parms[i+1]
+    elif len(parms) == 1:
+      parmDict = parms[0]
+
+    # set each parameter
+    if parmDict != {}:
+      for p, val in parmDict.iteritems():
         try:
           setMethod = getattr(m, 'set_' + p)
           try:
@@ -71,12 +78,13 @@ class Gotham2(Gotham):
               print 'Warning: %s has unknown type; material parameter left undefined.'
         except:
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
-      del module
-      Gotham.material(self, m)
-      result = True
-    except:
-      print "Unable to find material '%s'." % name
-      result = False
+
+    del module
+    Gotham.material(self, m)
+    result = True
+    #except:
+    #  print "Unable to find material '%s'." % name
+    #  result = False
     sys.path = oldpath
     return result
 
@@ -93,6 +101,9 @@ class Gotham2(Gotham):
     else:
       faces = args[2]
     # validate faces
+    if len(faces) == 0:
+      print 'mesh(): Warning: empty mesh detected.'
+      return
     if (len(faces) % 3) != 0:
       raise ValueError, "Triangle list not a multiple of 3!"
     i = 0
@@ -230,9 +241,64 @@ class Gotham2(Gotham):
       if lineNumber % fivePercent == 0:
         print 'Progress: ' +  str(100 * float(lineNumber)/numLines) + '%\r',
         sys.stdout.flush()
-      # each line depends on 'g' being defined as some Gotham object
-      g = self
-      exec line
+      # first see if we can parse it quickly in c++
+      if not Gotham.parseLine(self, line):
+        # each line depends on 'g' being defined as some Gotham object
+        g = self
+        exec line
       lineNumber += 1
     print '\nDone.'
+
+  def unitcube(self):
+    unitSquare = ([-0.5, 0,  0.5,
+                    0.5, 0,  0.5,
+                    0.5, 0, -0.5,
+                   -0.5, 0, -0.5],
+                  [   0, 0,
+                      1, 0,
+                      1, 1,
+                      0, 1],
+                  [   0, 1,  3,
+                      1, 2,  3])
+
+    # front wall
+    Gotham2.pushMatrix(self)
+    Gotham2.translate(self, 0, 0, 0.5)
+    Gotham2.rotate(self, 90, 1, 0, 0)
+    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    Gotham2.popMatrix(self)
+
+    # left wall
+    Gotham2.pushMatrix(self)
+    Gotham2.translate(self, -0.5,0,0)
+    Gotham2.rotate(self, 90, 0, 0, 1)
+    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    Gotham2.popMatrix(self)
+
+    # right wall
+    Gotham2.pushMatrix(self)
+    Gotham2.translate(self, 0.5,0,0)
+    Gotham2.rotate(self, -90, 0, 0, 1)
+    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    Gotham2.popMatrix(self)
+
+    # back wall
+    Gotham2.pushMatrix(self)
+    Gotham2.translate(self, 0, 0, -0.5)
+    Gotham2.rotate(self, -90, 1, 0, 0)
+    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    Gotham2.popMatrix(self)
+
+    # ceiling
+    Gotham2.pushMatrix(self)
+    Gotham2.translate(self, 0, 0.5,0)
+    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    Gotham2.popMatrix(self)
+
+    # floor
+    Gotham2.pushMatrix(self)
+    Gotham2.translate(self, 0, -0.5,0)
+    Gotham2.rotate(self, 180, 1, 0, 0)
+    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    Gotham2.popMatrix(self)
 

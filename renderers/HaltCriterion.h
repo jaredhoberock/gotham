@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include "../api/Gotham.h"
+#include "../records/PhotonRecord.h"
 
 #include "Renderer.h"
 class MonteCarloRenderer;
@@ -131,6 +132,34 @@ class TargetRayCount
      */
     virtual bool operator()(void);
 }; // end TargetRayCount
+
+class TargetPhotonCount
+  : public TargetCriterion
+{
+  public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef TargetCriterion Parent;
+
+    /*! This method intializes this HaltCriterion.
+     *  \param r Sets mRenderer.
+     *  \param p Sets mProgress.
+     *  \note This method sets mPhotons as a side effect.
+     */
+    virtual void init(const MonteCarloRenderer *r,
+                      Renderer::ProgressCallback *p);
+
+    /*! This method returns true when mPhotonMap->size()
+     *  is equal to or greater than Parent::mTarget rays.
+     */
+    virtual bool operator()(void);
+
+  protected:
+    /*! A pointer to a PhotonRecord.
+     */
+    const PhotonRecord *mPhotons;
+}; // end TargetCriterion
 
 #endif // HALT_CRITERION_H
 

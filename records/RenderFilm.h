@@ -128,6 +128,11 @@ class RenderFilm
     /*! This method calls the Parent and sets the statistics accordingly.
      *  \param s The scale value.
      */
+    inline virtual void scale(const float s);
+
+    /*! This method calls the Parent and sets the statistics accordingly.
+     *  \param s The scale value.
+     */
     inline virtual void scale(const Pixel &s);
 
     /*! This method returns the maximum luminance over pixels.

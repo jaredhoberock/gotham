@@ -8,6 +8,7 @@
 #define PATH_API_H
 
 #include "../api/Gotham.h"
+#include "../records/PhotonMap.h"
 class PathSampler;
 
 class PathApi
@@ -18,9 +19,11 @@ class PathApi
      *  AttributeMap.
      *  \param attr The attributes describing the PathSampler
      *              to create.
+     *  \param photonMaps A set of PhotonMaps.
      *  \return A new PathSampler.
      */
-    static PathSampler *sampler(Gotham::AttributeMap &attr);
+    static PathSampler *sampler(Gotham::AttributeMap &attr,
+                                const Gotham::PhotonMaps &photonMaps);
 
     /*! This method fills an AttributeMap with this library's defaults.
      *  \param attr The set of attributes to add to.

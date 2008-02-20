@@ -6,11 +6,13 @@
 #include "RecordApi.h"
 #include "RenderFilm.h"
 #include "VarianceFilm.h"
+#include "PhotonRecord.h"
 using namespace boost;
 
 void RecordApi
   ::getDefaultAttributes(Gotham::AttributeMap &attr)
 {
+  attr["record:type"] = "image";
   attr["record:outfile"] = "gotham.exr";
 
   attr["record:estimate:infile"] = "";
@@ -26,6 +28,9 @@ Record *RecordApi
   ::record(Gotham::AttributeMap &attr)
 {
   Record *result = 0;
+
+  // what kind of record?
+  std::string type = attr["record:type"];
 
   // name of the output?
   std::string outfile = attr["record:outfile"];
@@ -54,13 +59,51 @@ Record *RecordApi
   size_t height = lexical_cast<size_t>(attr["record:height"]);
 
   // create the Record
-  if(doVariance && estimate.get() != 0)
+  if(type == "image")
   {
-    result = new VarianceFilm(width, height, estimate, outfile, varianceOutfile);
+    if(doVariance && estimate.get() != 0)
+    {
+      result = new VarianceFilm(width, height, estimate, outfile, varianceOutfile);
+    } // end if
+    else
+    {
+      result = new RenderFilm(width, height, outfile);
+    } // end else
   } // end if
+  else if(type == "photonmap")
+  {
+    // figure out how many photons we should allocate
+    size_t width = lexical_cast<size_t>(attr["record:width"]);
+    size_t height = lexical_cast<size_t>(attr["record:height"]);
+
+    // if nothing is specified in renderer:target:count,
+    // default to the number of pixels
+    size_t numPhotons = width * height;
+
+    // check for the specific target photon count attributes
+    std::string targetFunctionName = attr["renderer:target:function"];
+    if(targetFunctionName == "photons")
+    {
+      Gotham::AttributeMap::const_iterator a = attr.find("renderer:target:count");
+      if(a != attr.end())
+      {
+        numPhotons = lexical_cast<size_t>(a->second);
+      } // end if
+    } // end if
+
+    result = new PhotonRecord(numPhotons, outfile);
+  } // end else if
   else
   {
-    result = new RenderFilm(width, height, outfile);
+    std::cerr << "Warning: Unknown record type \"" << type << "\". Creating image record." << std::endl;
+    if(doVariance && estimate.get() != 0)
+    {
+      result = new VarianceFilm(width, height, estimate, outfile, varianceOutfile);
+    } // end if
+    else
+    {
+      result = new RenderFilm(width, height, outfile);
+    } // end else
   } // end else
 
   return result;

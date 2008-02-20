@@ -39,6 +39,11 @@ class Record
      *  \note The default implementation of this method does nothing.
      */
     inline virtual void postprocess(void);
+
+    /*! This method scales the data in this Record by the given scale.
+     *  \param s The scale.
+     */
+    virtual void scale(const float s) = 0;
 }; // end Record
 
 #include "Record.inl"

@@ -18,9 +18,11 @@ class MutatorApi
      *  AttributeMap.
      *  \param attr The attributes describing the PathMutator
      *              to create.
+     *  \param photonMaps A set of PhotonMaps.
      *  \return A new PathMutator.
      */
-    static PathMutator *mutator(Gotham::AttributeMap &attr);
+    static PathMutator *mutator(Gotham::AttributeMap &attr,
+                                const Gotham::PhotonMaps &photonMaps);
 
     /*! This method fills an AttributeMap with this library's defaults.
      *  \param attr The set of attributes to add to.

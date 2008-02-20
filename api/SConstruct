@@ -70,6 +70,9 @@ try:
   Default(env.Install(dir, source = 'api.py'))
   Default(env.Install(dir, source = 'objtogoth.py'))
   Default(env.Install(dir, source = 'wavefront.py'))
+  Default(env.Install(dir, source = 'pygtogoth/pygtogoth.py'))
+  Default(env.Install(dir, source = 'pygtogoth/pygpatch.py'))
+  Default(env.Install(dir, source = 'pygtogoth/pygshaders.py'))
   dir = os.environ["GOTHAMHOME"] + '/bin'
   Default(env.Install(dir, source = 'pbslc'))
 except:

@@ -90,7 +90,7 @@ void RenderViewer
 
   // scale by 1/spp if we haven't finished the render
   float scale = (width() * height());
-  if(mProgress.count() < mProgress.expected_count())
+  //if(mProgress.count() < mProgress.expected_count())
   {
     // XXX DESIGN kill this dynamic_cast somehow
     const MonteCarloRenderer *mc = dynamic_cast<const MonteCarloRenderer*>(mRenderer.get());

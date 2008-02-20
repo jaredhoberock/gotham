@@ -134,6 +134,12 @@ HaltCriterion *HaltCriterion
   {
     result = new TargetRayCount(target);
   } // end if
+  else if(targetFunctionName == "photons")
+  {
+    TargetCriterion *r = new TargetPhotonCount();
+    r->setTarget(target);
+    result = r;
+  } // end else if
   else
   {
     std::cerr << "Warning: unknown target function \"" << targetFunctionName << "\"." << std::endl;
@@ -144,4 +150,32 @@ HaltCriterion *HaltCriterion
 
   return result;
 } // end HaltCriterion::createCriterion()
+
+void TargetPhotonCount
+  ::init(const MonteCarloRenderer *r,
+         Renderer::ProgressCallback *p)
+{
+  Parent::init(r,p);
+
+  mPhotons = dynamic_cast<const PhotonRecord*>(r->getRecord().get());
+  if(mPhotons == 0)
+  {
+    std::cerr << "Error: the current record is not a photon map!" << std::endl;
+    exit(-1);
+  } // end if
+} // end TargetPhotonCount::init()
+
+bool TargetPhotonCount
+  ::operator()(void)
+{
+  Target currentPhotons = mPhotons->size();
+
+  // update progress
+  *mProgress += currentPhotons - mPrevious;
+
+  // update previous
+  mPrevious = currentPhotons;
+
+  return currentPhotons >= getTarget();
+} // end TargetPhotonCount::operator()()
 

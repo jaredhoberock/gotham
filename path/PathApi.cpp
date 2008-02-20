@@ -12,6 +12,7 @@
 #include "KelemenSampler.h"
 #include "WhittedSampler.h"
 #include "ShirleySampler.h"
+#include "JensenSampler.h"
 #include "RussianRoulette.h"
 
 using namespace boost;
@@ -24,10 +25,13 @@ void PathApi
   attr["path:russianroulette:function"] = "always";
   attr["path:russianroulette:continueprobability"] = "1.0";
   attr["path:russianroulette:minimumsubpathlength"] = "3";
+  attr["path:finalgathersamples"] = "64";
+  attr["path:estimatephotons"] = "50";
 } // end PathApi::getDefaultAttributes()
 
 PathSampler *PathApi
-  ::sampler(Gotham::AttributeMap &attr)
+  ::sampler(Gotham::AttributeMap &attr,
+            const Gotham::PhotonMaps &photonMaps)
 {
   PathSampler *result = 0;
   std::string samplerName = "kajiya";
@@ -42,6 +46,14 @@ PathSampler *PathApi
   float continueProbability = lexical_cast<float>(attr["path:russianroulette:continueprobability"]);
 
   size_t minimumSubpathLength = lexical_cast<size_t>(attr["path:russianroulette:minimumsubpathlength"]);
+
+  float numStrata = lexical_cast<float>(attr["path:finalgathersamples"]);
+
+  // figure out x & y
+  size_t xStrata = static_cast<size_t>(floorf(sqrtf(numStrata)));
+  size_t yStrata = static_cast<size_t>(ceilf(sqrtf(numStrata)));
+
+  size_t estimatePhotons = lexical_cast<size_t>(attr["path:estimatephotons"]);
 
   // create the russian roulette
   boost::shared_ptr<RussianRoulette> rr(new AlwaysRoulette());
@@ -91,6 +103,22 @@ PathSampler *PathApi
   if(samplerName == "arvokirk")
   {
     result = new ArvoKirkSampler(rr, maxLength-1);
+  } // end else if
+  else if(samplerName == "jensen")
+  {
+    JensenSampler *js = new JensenSampler();
+
+    js->setFinalGatherPhotons(estimatePhotons);
+    js->setFinalGatherStrata(xStrata, yStrata);
+
+    // fetch the global photon map
+    Gotham::PhotonMaps::const_iterator global = photonMaps.find(std::string("global"));
+    if(global != photonMaps.end())
+    {
+      js->setGlobalMap(global->second);
+    } // end if
+
+    result = js;
   } // end else if
   else if(samplerName == "kajiya")
   {

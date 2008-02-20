@@ -55,6 +55,8 @@ void exportGotham(void)
     .def("attribute", &Gotham::attribute)
     .def("pushAttributes", &Gotham::pushAttributes)
     .def("popAttributes", &Gotham::popAttributes)
+    .def("photons", &Gotham::photons)
+    .def("parseLine", &Gotham::parseLine)
     ;
 } // end exportGotham()
 

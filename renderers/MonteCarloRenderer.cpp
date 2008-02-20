@@ -23,6 +23,8 @@ void MonteCarloRenderer
 void MonteCarloRenderer
   ::postprocess(void)
 {
+  float scale = 1.0f / mNumSamples;
+
   // rescale image by 1 / spp
   // XXX TODO kill this nastiness
   //          should Record provide these hooks?
@@ -30,12 +32,10 @@ void MonteCarloRenderer
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
   if(film)
   {
-    float spp = mNumSamples;
-    spp /= (film->getWidth() * film->getHeight());
-    float invSpp = 1.0f / spp;
-
-    film->scale(Spectrum(invSpp,invSpp,invSpp));
+    scale *= (film->getWidth() * film->getHeight());
   } // end if
+
+  mRecord->scale(scale);
 
   // hand off to Parent
   Parent::postprocess();
