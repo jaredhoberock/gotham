@@ -24,6 +24,12 @@ const DifferentialGeometry &Primitive::Intersection
   return mDifferentialGeometry;
 } // end Primitive::Intersection::getDifferentialGeometry()
 
+DifferentialGeometry &Primitive::Intersection
+  ::getDifferentialGeometry(void)
+{
+  return mDifferentialGeometry;
+} // end Primitive::Intersection::getDifferentialGeometry()
+
 void Primitive::Intersection
   ::setDifferentialGeometry(const DifferentialGeometry &dg)
 {

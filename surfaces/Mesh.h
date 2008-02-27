@@ -32,6 +32,22 @@ class Mesh
      */
     typedef Surface Parent1;
 
+    /*! This structure encapsulates the data needed to do
+     *  fast Wald-Bikker style ray-triangle intersection.
+     */
+    struct WaldBikkerData
+    {
+      gpcpu::float3 mN;
+      gpcpu::float2 mBn;
+      gpcpu::float2 mCn;
+
+      // we need two bits for the dominant axis
+      // we need not store u and v
+      size_t mDominantAxis:3;
+      size_t mUAxis:3;
+      size_t mVAxis:3;
+    }; // end WaldBikkerData
+
     /*! Constructor takes a list of vertices and a list of triangles.
      *  \param vertices A list of vertex positions.
      *  \param triangles A list of triangles.
@@ -215,11 +231,6 @@ class Mesh
      */
     virtual float getInverseSurfaceArea(void) const;
 
-  protected:
-    /*! This method builds the acceleration structure.
-     */
-    inline void buildTree(void);
-
     /*! This static method intersects a Triangle in a Mesh.
      *  \param o The origin of the Ray to test for intersection.
      *  \param d The direction of the Ray to test for intersection.
@@ -237,6 +248,18 @@ class Mesh
                                  float &t,
                                  float &b1,
                                  float &b2);
+
+    /*! This method creates WaldBikkerData from a Triangle of interest.
+     *  \param tri The Triangle of interest.
+     *  \param data tri's WaldBikkerData is returned here.
+     */
+    void getWaldBikkerData(const Triangle &tri,
+                           WaldBikkerData &data) const;
+
+  protected:
+    /*! This method builds the acceleration structure.
+     */
+    inline void buildTree(void);
 
     inline static bool intersectWaldBikker(const Point &o,
                                            const Vector &dir,
@@ -278,16 +301,6 @@ class Mesh
     /*! One over the surface area of this Mesh.
      */
     float mOneOverSurfaceArea;
-
-    struct WaldBikkerData
-    {
-      gpcpu::float3 mN;
-      gpcpu::float2 mBn;
-      gpcpu::float2 mCn;
-      int mDominantAxis:3;
-      int mUAxis:3;
-      int mVAxis:3;
-    }; // end WaldBikkerData
 
     std::vector<WaldBikkerData> mWaldBikkerTriangleData;
 

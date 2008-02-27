@@ -7,6 +7,13 @@
 #include "../geometry/BoundingBox.h"
 
 template<typename PrimitiveType>
+  PrimitiveList<PrimitiveType>
+    ::~PrimitiveList(void)
+{
+  ;
+} // end PrimitiveList::~PrimitiveList()
+
+template<typename PrimitiveType>
   void PrimitiveList<PrimitiveType>
     ::clear(void)
 {
@@ -16,7 +23,7 @@ template<typename PrimitiveType>
 
 template<typename PrimitiveType>
   void PrimitiveList<PrimitiveType>
-    ::push_back(boost::shared_ptr<PrimitiveType> &p)
+    ::push_back(boost::shared_ptr<ListElement> &p)
 {
   Parent1::push_back(p);
 

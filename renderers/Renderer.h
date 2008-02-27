@@ -50,7 +50,7 @@ class Renderer
      */
     inline Renderer(void);
 
-    /*! Constructor accepts a pointer to a Scene, Camera, and Film.
+    /*! Constructor accepts a pointer to a Scene and Record.
      *  \param s Sets mScene.
      *  \param r Sets mRecord.
      */

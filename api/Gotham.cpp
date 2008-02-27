@@ -17,6 +17,7 @@
 #include "../surfaces/Sphere.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/PrimitiveBSP.h"
+#include "../primitives/TriangleBVH.h"
 #include "../viewers/RenderViewer.h"
 #include "../renderers/RendererApi.h"
 #include "../records/RecordApi.h"
@@ -85,7 +86,8 @@ void Gotham
   getDefaultAttributes(mAttributeStack.back());
 
   // create the PrimitiveList
-  mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
+  //mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
+  mPrimitives.reset(new RasterizablePrimitiveList< TriangleBVH >());
 
   // create the emitters list
   mEmitters.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());

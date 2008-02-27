@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "../geometry/Normal.h"
 #include <2dmapping/UnitSquareToTriangle.h>
+#include <waldbikkerintersection/waldBikkerIntersection.h>
 
 Mesh
   ::Mesh(const std::vector<Point> &vertices,
@@ -295,6 +296,24 @@ float Mesh
 } // end Mesh::getInverseSurfaceArea()
 
 void Mesh
+  ::getWaldBikkerData(const Triangle &tri,
+                      WaldBikkerData &data) const
+{
+  size_t k;
+  buildWaldBikkerIntersectionData<gpcpu::float3,float>(mPoints[tri[0]],
+                                                       mPoints[tri[1]],
+                                                       mPoints[tri[2]],
+                                                       data.mN,
+                                                       k,
+                                                       data.mBn[0], data.mBn[1],
+                                                       data.mCn[0], data.mCn[1]);
+
+  data.mDominantAxis = k;
+  data.mUAxis = (data.mDominantAxis + 1) % 3;
+  data.mVAxis = (data.mDominantAxis + 2) % 3;
+} // end Mesh::getWaldBikkerData()
+
+void Mesh
   ::buildWaldBikkerData(void)
 {
   mWaldBikkerTriangleData.clear();
@@ -304,42 +323,8 @@ void Mesh
   {
     const Triangle &tri = mTriangles[i];
 
-    // compute the triangle's normal
-    Vector b = mPoints[tri[2]] - mPoints[tri[0]];
-    Vector c = mPoints[tri[1]] - mPoints[tri[0]];
-    Normal n = c.cross(b).normalize();
-
     WaldBikkerData data;
-
-    // determine dominant axis
-    if(fabsf(n[0]) > fabsf(n[1]))
-    {
-      if(fabsf(n[0]) > fabsf(n[2])) data.mDominantAxis = 0;
-      else data.mDominantAxis = 2;
-    } // end if
-    else
-    {
-      if(fabsf(n[1]) > fabsf(n[2])) data.mDominantAxis = 1;
-      else data.mDominantAxis = 2;
-    } // end else
-
-    int u = (data.mDominantAxis + 1) % 3;
-    int v = (data.mDominantAxis + 2) % 3;
-
-    data.mUAxis = u;
-    data.mVAxis = v;
-
-    data.mN[0] = n.dot(mPoints[tri[0]]) / n[data.mDominantAxis];
-    data.mN[1] = n[u] / n[data.mDominantAxis];
-    data.mN[2] = n[v] / n[data.mDominantAxis];
-
-    float bnu =  b[u] / (b[u] * c[v] - b[v] * c[u]);
-    float bnv = -b[v] / (b[u] * c[v] - b[v] * c[u]);
-    data.mBn = gpcpu::float2(bnu, bnv);
-
-    float cnu =  c[v] / (b[u] * c[v] - b[v] * c[u]);
-    float cnv = -c[u] / (b[u] * c[v] - b[v] * c[u]);
-    data.mCn = gpcpu::float2(cnu, cnv);
+    getWaldBikkerData(tri, data);
 
     mWaldBikkerTriangleData.push_back(data);
   } // end for i

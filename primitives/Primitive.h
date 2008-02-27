@@ -34,6 +34,11 @@ class Primitive
          */
         inline const DifferentialGeometry &getDifferentialGeometry(void) const;
 
+        /*! This method returns a reference to mDifferentialGeometry.
+         *  \return mDifferentialGeometry.
+         */
+        inline DifferentialGeometry &getDifferentialGeometry(void);
+
         /*! This method sets mDifferentialGeometry.
          *  \param dg Sets mDifferentialGeometry.
          */
