@@ -14,6 +14,29 @@
 class Mappings
 {
   public:
+    /*! This method maps a point in the unit square to a point on the unit
+     *  sphere situated around the z-axis.
+     *  \param u0 A real number in [0,1).
+     *  \param u1 A second real number in [0,1).
+     *  \param xAxis A unit vector parallel to the x-axis of
+     *               defining the frame of the sphere of interest.
+     *  \param yAxis A unit vector parallel to the y-axis of
+     *               defining the frame of the sphere of interest.
+     *  \param zAxis A unit vector parallel to the z-axis of
+     *               defining the frame of the sphere of interest.
+     *  \param w The point on the unit sphere is returned here.
+     *  \param pdf The value of the pdf at p is returned here.
+     *  \note xAxis, yAxis, and zAxis are assumed to define an
+     *        orthonormal basis.
+     */
+    inline static void unitSquareToSphere(const float u0,
+                                          const float u1,
+                                          const Vector3 &xAxis,
+                                          const Vector3 &yAxis,
+                                          const Vector3 &zAxis,
+                                          Vector3 &w,
+                                          float &pdf);
+
     /*! This method maps a point in the unit square
      *  to a point on the unit hemisphere situated around
      *  the z-axis.
