@@ -1,0 +1,20 @@
+#!/usr/bin/env gotham
+import objtogoth
+
+PushMatrix()
+Rotate(180, 0, 0, 1)
+Material('matte', 'Kd', (0,0,1))
+(points, uvs, triangles) = objtogoth.objtogoth('../../../data/geometry/obj/tri.obj')
+Mesh(points, triangles)
+PopMatrix()
+
+(w,h) = (512,512)
+
+PushMatrix()
+Translate(0,0,1)
+aspect = float(w) / h
+Camera(aspect, 60, 0.0)
+PopMatrix()
+
+Render((w,h))
+

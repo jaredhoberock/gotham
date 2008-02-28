@@ -8,7 +8,8 @@
 import sys
 import os
 import math
-from gotham import *
+from libgotham import *
+import inspect
 
 def normalize(x):
   length = math.sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2])
@@ -301,4 +302,29 @@ class Gotham2(Gotham):
     Gotham2.rotate(self, 180, 1, 0, 0)
     Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
     Gotham2.popMatrix(self)
+
+def __copyright():
+  print 'Gotham 0.1'
+  print '(c) Copyright 2007-2008 Jared Hoberock. All Rights Reserved.'
+
+# print copyright info as soon as this is imported
+__copyright()
+
+# wrap up the api in a singleton
+# create the 'canonical' Gotham instance
+# this is not technically a singleton but
+# the idea is to make it work like one
+__gGotham = Gotham2()
+
+def __wrapMethod(name, wrapperName):
+  firstLine = 'def ' + wrapperName + '(*args, **kwargs):\n'
+  secondLine = '  __gGotham.' + name + '(*args, **kwargs)\n'
+  return firstLine + secondLine
+
+# now wrap up the api in gGotham
+for member in dir(__gGotham):
+  # ignore standard stuff beginning '__'
+  if member[0] != '_' and inspect.ismethod(getattr(__gGotham, member)):
+    wrapperName = member[0].upper() + member[1:]
+    exec __wrapMethod(member, wrapperName)
 

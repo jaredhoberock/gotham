@@ -1,0 +1,36 @@
+#!/usr/bin/env gotham
+import objtogoth
+
+Material('matte', "Kd", (1.0,1.0,1.0))
+(vertices, uvs, indices) = objtogoth.objtogoth("../../../data/geometry/obj/cabin.obj")
+Mesh(vertices, uvs, indices)
+
+# light
+Material('light', 'power', (3500 * 500,3500 * 500,3500 * 500))
+Sphere(242, 33, -88, 5)
+
+Attribute("path:sampler", "simpleforwardrussianroulette")
+Attribute("mutator:strategy", "stratified")
+Attribute("path:maxlength", "10")
+Attribute("renderer:algorithm", "metropolis")
+Attribute("mutator:largestep", "0.001")
+Attribute("importance:function", "equalvisit")
+Attribute("path:russianroulette:function", "constant")
+Attribute("path:russianroulette:continueprobability", "0.5")
+
+(w,h) = (800,400)
+PushMatrix()
+
+LookAt( (  29.7108,  18.1446,  -107.85),
+        (  30.6369,  18.2885,  -108.199),
+        (-0.138807, 0.989526, 0.039636) )
+
+Camera(float(w) / h, 45.0, 0.01)
+PopMatrix()
+
+Attribute("record:width", str(w))
+Attribute("record:height", str(h))
+Attribute("renderer:spp", "1")
+
+Render()
+

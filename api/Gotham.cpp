@@ -86,8 +86,8 @@ void Gotham
   getDefaultAttributes(mAttributeStack.back());
 
   // create the PrimitiveList
-  //mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
-  mPrimitives.reset(new RasterizablePrimitiveList< TriangleBVH >());
+  mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
+  //mPrimitives.reset(new RasterizablePrimitiveList< TriangleBVH >());
 
   // create the emitters list
   mEmitters.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
@@ -537,7 +537,7 @@ bool Gotham
   bool result = parse(line.c_str(),
     // begin grammar
     (
-      str_p("g.photons") >> '(' >> pointsRule >> ',' >> vectorsRule >> ',' >> powersRule >> ')' >> end_p
+      (str_p("g.photons") | str_p("Photons")) >> '(' >> pointsRule >> ',' >> vectorsRule >> ',' >> powersRule >> ')' >> end_p
     )
     ,
     // end grammar

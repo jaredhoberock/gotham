@@ -88,7 +88,7 @@ void exportApi(void)
   exportVectorUint();
 } // end exportApi()
 
-BOOST_PYTHON_MODULE(gotham)
+BOOST_PYTHON_MODULE(libgotham)
 {
   exportApi();
 } // end BOOST_PYTHON_MODULE()

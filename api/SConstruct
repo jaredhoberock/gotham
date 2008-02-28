@@ -61,7 +61,7 @@ env.Append(LIBPATH = ['../geometry',
                       '../surfaces'])
 
 # create a shared library
-gothamLib = env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'], SHLIBPREFIX = '')
+gothamLib = env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'])
 
 # install the distribution
 try:
@@ -75,6 +75,7 @@ try:
   Default(env.Install(dir, source = 'pygtogoth/pygshaders.py'))
   dir = os.environ["GOTHAMHOME"] + '/bin'
   Default(env.Install(dir, source = 'pbslc'))
+  Default(env.Install(dir, source = 'gotham'))
 except:
   print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
 

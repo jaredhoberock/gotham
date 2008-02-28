@@ -308,8 +308,7 @@ elif os.name == 'nt':
   includes += ['c:/dev/src', 'c:/dev/include', 'c:/Python25/include']
 libpath = os.environ["GOTHAMHOME"] + '/lib'
 if os.name == 'posix':
-  # remember gotham doesn't have the 'lib-' prefix
-  libs = [File(libpath + '/gotham.so'), 'boost_python']
+  libs = [File(libpath + '/libgotham.so'), 'boost_python']
 elif os.name == 'nt':
   # on windows, we need to link to the import library
   libs = ['gotham']

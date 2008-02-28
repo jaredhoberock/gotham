@@ -1,44 +1,41 @@
-#!/usr/bin/env python
-import api
+#!/usr/bin/env gotham
 
-g = api.Gotham2()
+Attribute("path:sampler", "kajiya")
+Attribute("path:maxlength", "10")
 
-g.attribute("path:sampler", "kajiya")
-g.attribute("path:maxlength", "10")
-
-g.material('matte', 'Kd', (1,1,1))
+Material('matte', 'Kd', (1,1,1))
 points = [-1.0, -1.0, 0,
            1.0, -1.0, 0,
            1.0,  1.0, 0,
           -1.0,  1.0, 0]
 triangles = [0, 1, 2,
              0, 2, 3]
-g.mesh(points, triangles)
+Mesh(points, triangles)
 
 # put a dim light behind the camera
-g.material('light', 'power', (20,20,20))
+Material('light', 'power', (20,20,20))
 points = [ 1.0, -1.0, 3,
           -1.0, -1.0, 3,
           -1.0,  1.0, 3,
            1.0,  1.0, 3]
-g.mesh(points, triangles)
+Mesh(points, triangles)
 
 # put a very bright light behind the quad
-g.material('light', 'power', (2000000,2000000,2000000))
+Material('light', 'power', (2000000,2000000,2000000))
 points = [-1.0, -1.0, -3,
            1.0, -1.0, -3,
            1.0,  1.0, -3,
           -1.0,  1.0, -3]
-g.mesh(points, triangles)
+Mesh(points, triangles)
 
 (w,h) = (512,512)
 
-g.pushMatrix()
+PushMatrix()
 # why is 1.75 the magic number?
-g.translate(0,0,1.75)
+Translate(0,0,1.75)
 aspect = float(w) / h
-g.camera(aspect, 60.0, 0.0)
-g.popMatrix()
+Camera(aspect, 60.0, 0.0)
+PopMatrix()
 
-g.render((w,h))
+Render((w,h), 4)
 
