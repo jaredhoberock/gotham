@@ -7,6 +7,7 @@
 #include "ScatteringDistributionFunction.h"
 #include "CompositeDistributionFunction.h"
 #include "Lambertian.h"
+#include "SphericalEmission.h"
 #include "HemisphericalEmission.h"
 #include "PerspectiveSensor.h"
 #include "SpecularReflection.h"
@@ -29,6 +30,7 @@ FunctionAllocator
   //// assert that any known ScatteringDistributionFunction will fit into a Block
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerspectiveSensor));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(Lambertian));
+  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SphericalEmission));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(HemisphericalEmission));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularReflection));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularTransmission));
@@ -46,6 +48,7 @@ FunctionAllocator
 
   assert(sizeof(Block) >= sizeof(PerspectiveSensor));
   assert(sizeof(Block) >= sizeof(Lambertian));
+  assert(sizeof(Block) >= sizeof(SphericalEmission));
   assert(sizeof(Block) >= sizeof(HemisphericalEmission));
   assert(sizeof(Block) >= sizeof(SpecularReflection));
   assert(sizeof(Block) >= sizeof(SpecularTransmission));
@@ -84,6 +87,7 @@ void *FunctionAllocator
     return &mStorage.back();
   } // end if
 
+  std::cerr << "FunctionAllocator::malloc(): returning 0" << std::endl;
   return 0;
 } // end FunctionAllocator::malloc()
 
