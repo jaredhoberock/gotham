@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import inspect
 
 def getTools():
   result = []
@@ -31,16 +32,20 @@ def getDebugCPPFLAGS():
 def getIncludes():
   result = []
   if os.name == 'nt':
-     result = ['c:/dev/src/', 'c:/dev/include', 'c:/Python25/include',
-               'c:/dev/include/Qt', 'c:/dev/include/QtCore',
-               'c:/dev/include/QtGui', 'c:/dev/include/QtXml', 'c:/dev/include/QtOpenGL',
-               'c:/dev/include/OpenEXR']
+    result = ['c:/dev/src/', 'c:/dev/include', 'c:/Python25/include',
+              'c:/dev/include/Qt', 'c:/dev/include/QtCore',
+              'c:/dev/include/QtGui', 'c:/dev/include/QtXml', 'c:/dev/include/QtOpenGL',
+              'c:/dev/include/OpenEXR']
   elif os.name == 'posix':
-     result = ['/home/jared/dev/src/', '/usr/include/python2.5',
-               '/usr/include/qt4',
-               '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',
-               '/usr/include/qt4/QtGui', '/usr/include/qt4/QtXml', '/usr/include/qt4/QtOpenGL',
-               '/usr/include/OpenEXR']
+    # figure out the absolute path of this file
+    thisFile = inspect.getabsfile(getIncludes)
+    # include the directory above the one containing this file
+    includeMe =  os.path.dirname(os.path.dirname(thisFile))
+    result = [includeMe, '/usr/include/python2.5',
+              '/usr/include/qt4',
+              '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',
+              '/usr/include/qt4/QtGui', '/usr/include/qt4/QtXml', '/usr/include/qt4/QtOpenGL',
+              '/usr/include/OpenEXR']
   return result
 
 def GothamReleaseEnvironment():
