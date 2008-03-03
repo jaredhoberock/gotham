@@ -53,7 +53,7 @@ class FunctionAllocator
       unsigned char mFill[size];
     }; // end Accomodator
 
-    typedef Accomodator<9 * sizeof(size_t)> Block;
+    typedef Accomodator<18 * sizeof(int)> Block;
 
   protected:
 
