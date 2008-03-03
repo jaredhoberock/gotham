@@ -299,7 +299,7 @@ void Mesh
   ::getWaldBikkerData(const Triangle &tri,
                       WaldBikkerData &data) const
 {
-  size_t k;
+  unsigned int k;
   buildWaldBikkerIntersectionData<gpcpu::float3,float>(mPoints[tri[0]],
                                                        mPoints[tri[1]],
                                                        mPoints[tri[2]],

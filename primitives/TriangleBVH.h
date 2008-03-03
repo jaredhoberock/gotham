@@ -12,7 +12,7 @@
 
 class TriangleBVH
   : public TriangleList,
-    protected TriangleBoundingVolumeHierarchy<size_t, Point, float>
+    protected TriangleBoundingVolumeHierarchy<size_t, gpcpu::float3, float>
 {
   public:
     /*! \typedef Parent
@@ -44,7 +44,7 @@ class TriangleBVH
     /*! \typedef Parent1
      *  \brief Shorthand.
      */
-    typedef TriangleBoundingVolumeHierarchy<size_t, Point, float> Parent1;
+    typedef TriangleBoundingVolumeHierarchy<size_t, gpcpu::float3, float> Parent1;
 
     struct Triangle
     {
@@ -57,8 +57,8 @@ class TriangleBVH
     struct TriangleVertexAccess
     {
       const TriangleBVH &mBVH;
-      const Point &operator()(const size_t tri,
-                              const size_t vertexIndex) const;
+      const gpcpu::float3 &operator()(const size_t tri,
+                                      const size_t vertexIndex) const;
     }; // end TriangleBounder
 
     struct TriangleIntersector

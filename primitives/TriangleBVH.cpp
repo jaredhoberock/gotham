@@ -82,7 +82,7 @@ bool TriangleBVH::TriangleIntersector
   return false;
 } // end TriangleIntersector::operator()()
 
-const Point &TriangleBVH::TriangleVertexAccess
+const gpcpu::float3 &TriangleBVH::TriangleVertexAccess
   ::operator()(const size_t tri,
                const size_t vertexIndex) const
 {
@@ -94,7 +94,7 @@ const Point &TriangleBVH::TriangleVertexAccess
 
   // look up the Triangle
   Mesh::Triangle vertexIndices = mesh->getTriangles()[triIndex];
-  return mesh->getPoints()[vertexIndex];
+  return mesh->getPoints()[vertexIndices[vertexIndex]];
 } // end TriangleVertexAccess::operator()()
 
 TriangleBVH::TriangleIntersector
@@ -108,15 +108,26 @@ TriangleBVH::TriangleIntersector
 bool TriangleBVH
   ::intersect(Ray &r, Intersection &inter) const
 {
-  TriangleIntersector intersector(*this, inter, r.getInterval()[0]);
-  if(Parent1::intersect(r.getAnchor(), r.getDirection(),
+  float t, b1, b2;
+  size_t triIndex;
+  if(Parent1::intersect(r.getAnchor(),
+                        r.getDirection(),
                         r.getInterval()[0], r.getInterval()[1],
-                        intersector))
+                        t, b1, b2, triIndex))
   {
     // evaluate the differential geometry
-    const Mesh *mesh = intersector.mHitMesh;
-    const std::vector<Point> &points = mesh->getPoints();
-    const Mesh::Triangle &tri = intersector.mHitTri;
+    const Triangle &globalTri = mTriangles[triIndex];
+    size_t meshIndex     = globalTri.mPrimitiveIndex;
+    size_t localTriIndex = globalTri.mTriangleIndex;
+
+    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[meshIndex].get());
+
+    // set the primitive in the intersection
+    inter.setPrimitive(sp);
+
+    const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
+    const Mesh::PointList &points = mesh->getPoints();
+    const Mesh::Triangle &tri = mesh->getTriangles()[localTriIndex];
 
     // XXX the geometric normal should be contained within the Wald-Bikker data
     Vector3 e1 = points[tri[1]] - points[tri[0]];
@@ -124,11 +135,11 @@ bool TriangleBVH
 
     // set the end of the Ray's interval
     // XXX DESIGN: Why do we even do this?
-    r.getInterval()[1] = intersector.mHitTime;
-    mesh->getDifferentialGeometry(tri, r(intersector.mHitTime),
+    r.getInterval()[1] = t;
+    mesh->getDifferentialGeometry(tri, r(t),
                                   e1.cross(e2).normalize(),
-                                  intersector.mB1,
-                                  intersector.mB2,
+                                  b1,
+                                  b2,
                                   inter.getDifferentialGeometry());
     inter.getDifferentialGeometry().setSurface(static_cast<const SurfacePrimitive*>(inter.getPrimitive()));
     return true;

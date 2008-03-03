@@ -43,9 +43,9 @@ class Mesh
 
       // we need two bits for the dominant axis
       // we need not store u and v
-      size_t mDominantAxis:3;
-      size_t mUAxis:3;
-      size_t mVAxis:3;
+      unsigned int mDominantAxis:3;
+      unsigned int mUAxis:3;
+      unsigned int mVAxis:3;
     }; // end WaldBikkerData
 
     /*! Constructor takes a list of vertices and a list of triangles.

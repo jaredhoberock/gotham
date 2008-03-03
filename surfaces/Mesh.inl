@@ -4,6 +4,7 @@
  */
 
 #include "Mesh.h"
+#include <waldbikkerintersection/waldBikkerIntersection.h>
 
 bool Mesh::TriangleIntersector
   ::operator()(const Point &anchor, const Point &dir,
@@ -142,33 +143,15 @@ bool Mesh
   // fetch the intersection data
   size_t i = &f - &*m.mTriangles.begin();
   const WaldBikkerData &data = m.mWaldBikkerTriangleData[i];
-
-  // compute the u and v axes' indices
-  //size_t uAxis = (data.mDominantAxis + 1) % 3;
-  //size_t vAxis = (data.mDominantAxis + 2) % 3;
-  size_t uAxis = data.mUAxis;
-  size_t vAxis = data.mVAxis;
-
-  // calculate distance to triangle plane
-  float denom = (dir[data.mDominantAxis] + data.mN[1] * dir[uAxis] + data.mN[2] * dir[vAxis]);
-  float numer = (data.mN[0] - o[data.mDominantAxis] - data.mN[1] * o[uAxis] - data.mN[2] * o[vAxis]);
-  t = numer / denom;
-
-  if(t < minT || t > maxT) return false;
-
   const Point &p = m.mPoints[f[0]];
 
-  // calculate hit point
-  float pu = o[uAxis] + t * dir[uAxis] - p[uAxis];
-  float pv = o[vAxis] + t * dir[vAxis] - p[vAxis];
-  b1 = pv * data.mBn[0] + pu * data.mBn[1];
-  if(b1 < 0) return false;
-  b2 = pu * data.mCn[0] + pv * data.mCn[1];
-  if(b2 < 0) return false;
-
-  if(b1 + b2 > 1.0f) return false;
-
-  return true;
+  return waldBikkerIntersection<gpcpu::float3, float>(o, dir,
+                                                      minT, maxT,
+                                                      p, data.mN,
+                                                      data.mDominantAxis,
+                                                      data.mBn[0], data.mBn[1],
+                                                      data.mCn[0], data.mCn[1],
+                                                      t, b1, b2);
 } // end Mesh::intersectWaldBikker()
 
 void Mesh
@@ -190,3 +173,4 @@ void Mesh
     uv2 = ParametricCoordinates(1,1);
   } // end else
 } // end Mesh::getParametricCoordinates()
+
