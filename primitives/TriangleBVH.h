@@ -32,13 +32,19 @@ class TriangleBVH
      */
     virtual void finalize(void);
 
-    /*! This method intersects a Ray against this PrimitiveBSP.
+    /*! This method intersects a Ray against this TriangleBVH.
      *  \param r The Ray of interest.
      *  \param inter If an intersection exists, information regarding the
      *         geometry of the Intersection is returned here.
      *  \return true if an Intersection exists; false, otherwise.
      */
     virtual bool intersect(Ray &r, Intersection &inter) const;
+
+    /*! This method intersects a shadow Ray against this TriangleBVH.
+     *  \param r The Ray of interest.
+     *  \return true if an intersection exists; false, otherwise.
+     */
+    virtual bool intersect(const Ray &r) const;
 
   protected:
     /*! \typedef Parent1
@@ -59,23 +65,7 @@ class TriangleBVH
       const TriangleBVH &mBVH;
       const gpcpu::float3 &operator()(const size_t tri,
                                       const size_t vertexIndex) const;
-    }; // end TriangleBounder
-
-    struct TriangleIntersector
-    {
-      const TriangleBVH &mBVH;
-      Intersection &mInter;
-      const Mesh *mHitMesh;
-      Mesh::Triangle mHitTri;
-      float mB1, mB2;
-      float mHitTime;
-      float mTMin;
-      TriangleIntersector(const TriangleBVH &bvh, Intersection &inter, const float tMin);
-      bool operator()(const Point &o, const Vector &d,
-                      const size_t triangleIndex,
-                      float &t);
-
-    }; // end TriangleIntersector
+    }; // end TriangleVertexAccess
 }; // end TriangleBVH
 
 #endif // TRIANGLE_BVH_H

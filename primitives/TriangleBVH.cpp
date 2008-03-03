@@ -50,38 +50,6 @@ void TriangleBVH
   Parent1::build(tempTriangles, vertex);
 } // end TriangleBVH::finalize()
 
-bool TriangleBVH::TriangleIntersector
-  ::operator()(const Point &o,
-               const Vector &d,
-               const size_t triIndex,
-               float &t)
-{
-  // XXX TODO: directly do the Wald-Bikker intersection here
-  
-  // look up the primitive
-  size_t meshIndex = mBVH.mTriangles[triIndex].mPrimitiveIndex;
-  size_t localTriIndex = mBVH.mTriangles[triIndex].mTriangleIndex;
-  const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>(mBVH[meshIndex].get());
-  const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
-
-  // look up the Triangle
-  const Mesh::Triangle &triangle = mesh->getTriangles()[localTriIndex];
-
-  float b1, b2;
-  if(Mesh::intersect(o, d, triangle, *mesh, t, b1, b2) && t < mHitTime && t > mTMin)
-  {
-    mHitMesh = mesh;
-    mHitTri = triangle;
-    mInter.setPrimitive(sp);
-    mB1 = b1;
-    mB2 = b2;
-    mHitTime = t;
-    return true;
-  } // end if
-
-  return false;
-} // end TriangleIntersector::operator()()
-
 const gpcpu::float3 &TriangleBVH::TriangleVertexAccess
   ::operator()(const size_t tri,
                const size_t vertexIndex) const
@@ -96,14 +64,6 @@ const gpcpu::float3 &TriangleBVH::TriangleVertexAccess
   Mesh::Triangle vertexIndices = mesh->getTriangles()[triIndex];
   return mesh->getPoints()[vertexIndices[vertexIndex]];
 } // end TriangleVertexAccess::operator()()
-
-TriangleBVH::TriangleIntersector
-  ::TriangleIntersector(const TriangleBVH &bvh, Intersection &inter, const float tMin)
-    :mBVH(bvh),mInter(inter),mHitTime(std::numeric_limits<float>::infinity()),mTMin(tMin)
-{
-  ;
-} // end TriangleIntersector::TriangleIntersector()
-  
 
 bool TriangleBVH
   ::intersect(Ray &r, Intersection &inter) const
@@ -146,5 +106,14 @@ bool TriangleBVH
   } // end if
 
   return false;
+} // end TriangleBVH::intersect()
+
+bool TriangleBVH
+  ::intersect(const Ray &r) const
+{
+  return Parent1::shadow(r.getAnchor(),
+                         r.getDirection(),
+                         r.getInterval()[0],
+                         r.getInterval()[1]);
 } // end TriangleBVH::intersect()
 
