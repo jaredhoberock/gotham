@@ -101,6 +101,16 @@ bool Scene
   return getPrimitive()->intersect(r,inter);
 } // end Scene::intersect()
 
+void Scene
+  ::intersect(Ray *rays,
+              Primitive::Intersection *intersections,
+              int *stencil,
+              const size_t n) const
+{
+  mRaysCast += n;
+  return getPrimitive()->intersect(rays, intersections, stencil, n);
+} // end Scene::intersect()
+
 bool Scene
   ::intersect(const Ray &r) const
 {

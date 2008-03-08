@@ -86,6 +86,22 @@ class Primitive
      */
     inline virtual bool intersect(Ray &r, Intersection &inter) const;
 
+    /*! This method provides a SIMD path for intersect(). It intersects more than
+     *  one Ray against this Primitive en masse.
+     *  \param rays A list of Rays to intersect.
+     *  \param rays A list of Rays to intersect.
+     *  \param intersections Af an intersection for a Ray exists, a Primitive::Intersection record storing information about the first
+     *         intersection encountered is returned here.
+     *  \param stencil If a Ray hits something, this is set to true.
+     *  \param n The length of lists rays, intersections, and stencil.
+     *  \note The default implementation of this method calls the single Ray
+     *        version of intersect() repeatedly.
+     */
+    inline virtual void intersect(Ray *rays,
+                                  Intersection *intersections,
+                                  int *stencil,
+                                  const size_t n) const;
+
     /*! If a Primitive is intersectable, it must provide a way to query for a Ray intersection.
      *  \param r The Ray to intersect.
      *  \return true if an intersection between this Primitive and r exists; false, otherwise.

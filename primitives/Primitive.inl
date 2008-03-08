@@ -4,6 +4,7 @@
  */
 
 #include "Primitive.h"
+#include "../geometry/Ray.h"
 
 Primitive
   ::Primitive(void)
@@ -53,6 +54,24 @@ bool Primitive
   ::intersect(Ray &r, Intersection &inter) const
 {
   return false;
+} // end Primitive::intersect()
+
+void Primitive
+  ::intersect(Ray *rays,
+              Intersection *intersections,
+              int *stencil,
+              const size_t n) const
+{
+  Ray *r = rays;
+  Intersection *inter = intersections;
+  int *s = stencil;
+  Ray *end = rays + n;
+  for(;
+      r != end;
+      ++r, ++inter, ++s)
+  {
+    *s = intersect(*r, *inter);
+  } // end for i
 } // end Primitive::intersect()
 
 bool Primitive

@@ -46,6 +46,18 @@ class Scene
      */
     inline virtual bool intersect(Ray &r, Primitive::Intersection &inter) const;
 
+    /*! This method provides a SIMD path for ray intersection.
+     *  \param rays A list of Rays to intersect.
+     *  \param intersections Af an intersection for a Ray exists, a Primitive::Intersection record storing information about the first
+     *         intersection encountered is returned here.
+     *  \param stencil If a Ray hits something, this is set to true.
+     *  \param n The length of lists rays, intersections, and stencil.
+     */
+    inline virtual void intersect(Ray *rays,
+                                  Primitive::Intersection *intersections,
+                                  int *stencil,
+                                  const size_t n) const;
+
     /*! This method computes whether or not an intersection between the given Ray and this scene exists.
      *  \param r The Ray to intersect.
      *  \return true if an intersection exists; false, otherwise.

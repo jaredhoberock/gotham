@@ -8,6 +8,8 @@
 #define SIMD_DEBUG_RENDERER_H
 
 #include "SIMDRenderer.h"
+#include "../primitives/Primitive.h"
+#include <spectrum/Spectrum.h>
 
 class SIMDDebugRenderer
   : public SIMDRenderer
@@ -30,10 +32,29 @@ class SIMDDebugRenderer
                              boost::shared_ptr<Record> r);
 
   protected:
-    /*! This method performs kernel work for a single thread.
-     *  \param threadIdx The thread index.
-     */
-    virtual void kernel(const size_t threadIdx);
+    virtual void kernel(ProgressCallback &progress);
+
+    virtual void sampleEyeRay(const size_t batchIdx,
+                              const size_t threadIdx,
+                              Ray *rays,
+                              float *pdfs) const;
+
+    virtual void shade(const size_t batchIdx,
+                       const size_t threadIdx,
+                       const Ray *rays,
+                       const float *pdfs,
+                       const Primitive::Intersection *intersections,
+                       const int *stencil,
+                       Spectrum *results) const;
+
+    virtual void deposit(const size_t batchIdx,
+                         const size_t threadIdx,
+                         const Spectrum *results);
+
+    virtual void intersect(Ray *rays,
+                           Primitive::Intersection *intersections,
+                           int *stencil);
+
 }; // end SIMDDebugRenderer
 
 #include "SIMDDebugRenderer.inl"

@@ -35,17 +35,6 @@ class SIMDRenderer
     inline void setWorkBatchSize(const size_t n);
 
   protected:
-    /*! This method renders mScene to mFilm.
-     *  \param progress A callback, which will be periodically
-     *         called throughout the rendering process.
-     */
-    virtual void kernel(ProgressCallback &progress);
-
-    /*! This method performs kernel work for a single thread.
-     *  \param threadIdx The thread index.
-     */
-    virtual void kernel(const size_t threadIdx) = 0;
-
     /*! This parameter controls the batch size of the workload.
      */
     size_t mWorkBatchSize;
