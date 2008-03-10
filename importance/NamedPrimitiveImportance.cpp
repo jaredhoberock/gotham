@@ -8,6 +8,8 @@
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../primitives/SurfacePrimitive.h"
 
+boost::hash<std::string> NamedPrimitiveImportance::mHasher = boost::hash<std::string>();
+
 NamedPrimitiveImportance
   ::NamedPrimitiveImportance(const std::string &name,
                              const float factor)

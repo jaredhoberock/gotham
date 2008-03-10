@@ -5,3 +5,5 @@
 
 #include "Primitive.h"
 
+boost::hash<std::string> Primitive::mStringHasher = boost::hash<std::string>();
+

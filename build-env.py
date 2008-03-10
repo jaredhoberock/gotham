@@ -60,36 +60,14 @@ def GothamDebugEnvironment():
                      tools = getTools(),
                      CPPFLAGS = getDebugCPPFLAGS())
 
-def GothamSharedObject(t, source):
-  releaseEnv = GothamReleaseEnvironment()
-  releaseEnv.SharedObject(t, source)
-
-def GothamLibrary(t, sources):
-  #debugEnv = GothamDebugEnvironment()
-  releaseEnv = GothamReleaseEnvironment()
-  if os.name == 'posix':
-    releaseEnv.Library(t, sources)
-  elif os.name == 'nt':
-    releaseLib = releaseEnv.Library(t, sources)
-    #debugLib = debugEnv.Library(t + 'd', sources)
-#    MSVSProject(target = t + releaseEnv['MSVSPROJECTSUFFIX'],
-#                srcs = sources,
-##               buildtarget = releaseLib + debugLib,
-##               variant = ['Release', 'Debug'])
-#                buildtarget = releaseLib,
-#                variant = 'Release')
-
-def GothamSharedLibrary(t, sources):
-  releaseEnv = GothamReleaseEnvironment()
-  if os.name == 'posix':
-    releaseEnv.SharedLibrary(t, sources)
-  elif os.name == 'nt':
-    releaseLib = releaseEnv.SharedLibrary(t, sources)
-    #debugLib = debugEnv.SharedLibrary(t + 'd', sources)
-#    MSVSProject(target = t + releaseEnv['MSVSPROJECTSUFFIX'],
-#                srcs = sources,
-##               buildtarget = releaseLib + debugLib,
-##               variant = ['Release', 'Debug'])
-#                buildtarget = releaseLib,
-#                variant = 'Release')
+def GothamEnvironment():
+  mode = 'release'
+  if ARGUMENTS.get('mode'):
+    mode = ARGUMENTS['mode']
+  if mode == 'release':
+    return GothamReleaseEnvironment()
+  elif mode == 'debug':
+    return GothamDebugEnvironment()
+  else:
+    raise ValueError, 'Unknown target mode "%s".' % mode
 

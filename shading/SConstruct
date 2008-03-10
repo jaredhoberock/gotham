@@ -1,18 +1,4 @@
-import os
-import glob
-
 exec open('../build-env.py')
 
-# find all .cpps in the current directory
-sources = []
-pattern = os.path.join(os.getcwd(), "*.cpp")
-for fullpath in glob.glob(pattern):
-  basename = os.path.basename(fullpath)
-  sources.append(basename)
-
-# we need to build the shading library as
-# a shared library so its symbols will be available
-# to shaders
-#GothamSharedLibrary('shading', sources)
-GothamLibrary('shading', sources)
-
+env = GothamEnvironment()
+SConscript('SConscript', exports={'env':env})
