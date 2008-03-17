@@ -44,10 +44,12 @@ void CUDATriangleBVH
                                        r.getAnchor()[2],
                                        r.getInterval()[0]);
 
-    rayDirectionsAndMaxT[i] = make_float4(r.getDirection()[0],
-                                          r.getDirection()[1],
-                                          r.getDirection()[2],
-                                          r.getInterval()[1]);
+    float4 tempIn = make_float4(r.getDirection()[0],
+                                r.getDirection()[1],
+                                r.getDirection()[2],
+                                r.getInterval()[1]);
+
+    rayDirectionsAndMaxT[i] = tempIn;
   } // end for i
   //std::cerr << "init device rays" << std::endl;
   //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;

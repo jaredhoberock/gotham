@@ -87,14 +87,6 @@ LookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
 Camera(float(w) / h, 60.0, 0.01)
 PopMatrix()
 
-#PushMatrix()
-#LookAt([-0.0027008,0.326968,1.09286],
-#        [-0.0690239,-0.338381,0.349279],
-#        [-0.0335963,0.746287,-0.664776])
-#Camera(1,60.0, 0.01)
-#PopMatrix()
-
-
 # finally, tell gotham to render
 Render()
 

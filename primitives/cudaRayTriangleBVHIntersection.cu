@@ -3,11 +3,11 @@
  *  \brief Implementation of cudaRayTriangleBVHIntersection function.
  */
 
+#include <stdio.h>
+
 #include "cudaRayTriangleBVHIntersection.h"
 #include <waldbikkerintersection/cudaWaldBikkerIntersection.h>
 #include <stdcuda/vector_math.h>
-
-#include <stdio.h>
 
 inline __device__ bool intersectBox(const float3 &o,
                                     const float3 &invDir,
@@ -46,8 +46,6 @@ __global__ void kernel(const unsigned int NULL_NODE,
   {
     float4 originAndMinT = rayOriginsAndMinT[i];
     float4 dirAndMaxT = rayDirectionsAndMaxT[i];
-    printf("i: %d\n", i);
-    printf("d: %f %f %f\n", dirAndMaxT.x, dirAndMaxT.y, dirAndMaxT.z);
 
     float3 invDir = make_float3(1.0f / dirAndMaxT.x,
                                 1.0f / dirAndMaxT.y,
@@ -68,8 +66,6 @@ __global__ void kernel(const unsigned int NULL_NODE,
       minBoundsHit = minBoundHitIndex[currentNode];
       maxBoundsMiss = maxBoundMissIndex[currentNode];
 
-      //printf("currentNode: %u\n", currentNode);
-
       // leaves (primitives) are listed before interior nodes
       // so bounding boxes occur after the root index
       if(currentNode >= rootIndex)
@@ -89,7 +85,6 @@ __global__ void kernel(const unsigned int NULL_NODE,
       } // end if
       else
       {
-        printf("testing triangle\n");
         v0Axis = firstVertexDominantAxis[currentNode];
         hit = cudaWaldBikkerIntersection
           (make_float3(originAndMinT.x, originAndMinT.y, originAndMinT.z),
@@ -125,13 +120,11 @@ __global__ void kernel(const unsigned int NULL_NODE,
 
       currentNode = hit ? __float_as_int(minBoundsHit.w) : __float_as_int(maxBoundsMiss.w);
     } // end while
-    
+
     // write results
     stencil[i] = result;
     timeBarycentricsAndTriangleIndex[i] = make_float4(t, b1, b2, __int_as_float(tri));
   } // end if
-
-  //stencil[i] = 0;
 } // end kernel()
 
 void cudaRayTriangleBVHIntersection(const unsigned int NULL_NODE,
