@@ -113,9 +113,12 @@ void SIMDDebugRenderer
   std::vector<Ray> rays(totalWork);
   std::vector<float> pdfs(totalWork);
   std::vector<Primitive::Intersection> intersections(totalWork);
-  std::vector<int> stencil(totalWork);
-  std::vector<Spectrum> results(totalWork);
-  std::fill(results.begin(), results.end(), Spectrum::black());
+
+  // init stencil to 1
+  std::vector<int> stencil(totalWork, 1);
+
+  // init results to black
+  std::vector<Spectrum> results(totalWork, Spectrum::black());
 
   // sampleEyeRay + intersect + shade + deposit = 4
   progress.restart(totalWork * 4);

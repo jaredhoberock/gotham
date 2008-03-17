@@ -66,6 +66,20 @@ class TriangleBVH
       const gpcpu::float3 &operator()(const size_t tri,
                                       const size_t vertexIndex) const;
     }; // end TriangleVertexAccess
+
+    /*! This method converts the results of the tree intersection into
+     *  proper Intersection data.
+     *  \param p The intersection Point.
+     *  \param b1 The first triangle barycentric at the intersection point.
+     *  \param b2 The second triangle barycentric at the intersection point.
+     *  \param triIndex The index of the hit triangle. This number indexes
+     *         into mTriangles.
+     *  \param inter The Intersection is returned here.
+     */
+    void getIntersection(const Point &p,
+                         const float b1, const float b2,
+                         const size_t triIndex,
+                         Intersection &inter) const;
 }; // end TriangleBVH
 
 #endif // TRIANGLE_BVH_H

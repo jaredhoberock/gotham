@@ -65,6 +65,42 @@ const gpcpu::float3 &TriangleBVH::TriangleVertexAccess
   return mesh->getPoints()[vertexIndices[vertexIndex]];
 } // end TriangleVertexAccess::operator()()
 
+void TriangleBVH
+  ::getIntersection(const Point &p,
+                    const float b1, const float b2,
+                    const size_t triIndex,
+                    Intersection &inter) const
+{
+  // figure out which triangle of which mesh we are
+  // interested in
+  const Triangle &globalTri = mTriangles[triIndex];
+  size_t meshIndex     = globalTri.mPrimitiveIndex;
+  size_t localTriIndex = globalTri.mTriangleIndex;
+
+  const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[meshIndex].get());
+
+  // set the primitive in the intersection
+  inter.setPrimitive(sp);
+
+  const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
+  const Mesh::PointList &points = mesh->getPoints();
+  const Mesh::Triangle &tri = mesh->getTriangles()[localTriIndex];
+
+  // XXX precompute geometric normals
+  Vector3 e1 = points[tri[1]] - points[tri[0]];
+  Vector3 e2 = points[tri[2]] - points[tri[0]];
+
+  // create the DifferentialGeometry
+  mesh->getDifferentialGeometry(tri, p,
+                                e1.cross(e2).normalize(),
+                                b1,
+                                b2,
+                                inter.getDifferentialGeometry());
+
+  // set the SurfacePrimitive in the DifferentialGeometry
+  inter.getDifferentialGeometry().setSurface(static_cast<const SurfacePrimitive*>(inter.getPrimitive()));
+} // end TriangleBVH::getIntersection()
+
 bool TriangleBVH
   ::intersect(Ray &r, Intersection &inter) const
 {
@@ -75,33 +111,12 @@ bool TriangleBVH
                         r.getInterval()[0], r.getInterval()[1],
                         t, b1, b2, triIndex))
   {
-    // evaluate the differential geometry
-    const Triangle &globalTri = mTriangles[triIndex];
-    size_t meshIndex     = globalTri.mPrimitiveIndex;
-    size_t localTriIndex = globalTri.mTriangleIndex;
-
-    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[meshIndex].get());
-
-    // set the primitive in the intersection
-    inter.setPrimitive(sp);
-
-    const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
-    const Mesh::PointList &points = mesh->getPoints();
-    const Mesh::Triangle &tri = mesh->getTriangles()[localTriIndex];
-
-    // XXX the geometric normal should be contained within the Wald-Bikker data
-    Vector3 e1 = points[tri[1]] - points[tri[0]];
-    Vector3 e2 = points[tri[2]] - points[tri[0]];
+    // create an Intersection object
+    getIntersection(r(t), b1, b2, triIndex, inter);
 
     // set the end of the Ray's interval
     // XXX DESIGN: Why do we even do this?
     r.getInterval()[1] = t;
-    mesh->getDifferentialGeometry(tri, r(t),
-                                  e1.cross(e2).normalize(),
-                                  b1,
-                                  b2,
-                                  inter.getDifferentialGeometry());
-    inter.getDifferentialGeometry().setSurface(static_cast<const SurfacePrimitive*>(inter.getPrimitive()));
     return true;
   } // end if
 

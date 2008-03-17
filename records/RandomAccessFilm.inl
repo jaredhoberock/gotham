@@ -706,8 +706,6 @@ void RandomAccessFilm
   float invSigmad = 1.0f / sigmad;
   float invSigmar = 1.0f / sigmar;
 
-  using namespace gpcpu;
-
   // separable convolution
   RandomAccessFilm firstHalf = *this;
   for(size_t y = 0; y != intensity.getHeight(); ++y)
@@ -725,7 +723,7 @@ void RandomAccessFilm
         float iDiff = (intensity.raster(x,y) - intensity.raster(x,wy)).norm();
 
         // get a diff in spacial domain
-        float sDiff = (float2(x,y) - float2(x,wy)).norm();
+        float sDiff = (gpcpu::float2(x,y) - gpcpu::float2(x,wy)).norm();
 
         // compute weight
         float w = expf(-0.5f*square(iDiff*invSigmar))
@@ -759,7 +757,7 @@ void RandomAccessFilm
         float iDiff = (intensity.raster(x,y) - intensity.raster(wx,y)).norm();
 
         // get a diff in spacial domain
-        float sDiff = (float2(x,y) - float2(wx,y)).norm();
+        float sDiff = (gpcpu::float2(x,y) - gpcpu::float2(wx,y)).norm();
 
         // compute weight
         float w = expf(-0.5f*square(iDiff*invSigmar))
