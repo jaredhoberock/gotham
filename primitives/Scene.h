@@ -120,6 +120,11 @@ class Scene
      */
     inline const SurfacePrimitiveList *getSensors(void) const;
 
+    /*! This method is called immediately prior to rendering
+     *  and calls mPrimitive->finalize()
+     */
+    inline virtual void preprocess(void);
+
   protected:
     /*! A Scene contains the Primitive to be rendered.
      */

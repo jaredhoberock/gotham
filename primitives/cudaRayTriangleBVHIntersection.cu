@@ -8,6 +8,7 @@
 #include "cudaRayTriangleBVHIntersection.h"
 #include <waldbikkerintersection/cudaWaldBikkerIntersection.h>
 #include <stdcuda/vector_math.h>
+#include <stdcuda/vector_dev.h>
 
 inline __device__ bool intersectBox(const float3 &o,
                                     const float3 &invDir,
@@ -59,6 +60,8 @@ __global__ void kernel(const unsigned int NULL_NODE,
     float4 minBoundsHit, maxBoundsMiss;
     float4 v0Axis;
 
+    int j = 0;
+
     // XXX PERF: it might be possible to eliminate these temporaries
     float tempT, tempB1, tempB2;
     while(currentNode != NULL_NODE)
@@ -86,6 +89,8 @@ __global__ void kernel(const unsigned int NULL_NODE,
       else
       {
         v0Axis = firstVertexDominantAxis[currentNode];
+
+        timeBarycentricsAndTriangleIndex[i] = v0Axis;
         hit = cudaWaldBikkerIntersection
           (make_float3(originAndMinT.x, originAndMinT.y, originAndMinT.z),
            make_float3(dirAndMaxT.x, dirAndMaxT.y, dirAndMaxT.z),
@@ -116,6 +121,7 @@ __global__ void kernel(const unsigned int NULL_NODE,
         // ensure that the miss and hit indices are the same
         // at this point
         maxBoundsMiss.w = minBoundsHit.w;
+        hit = false;
       } // end else
 
       currentNode = hit ? __float_as_int(minBoundsHit.w) : __float_as_int(maxBoundsMiss.w);
@@ -147,7 +153,7 @@ void cudaRayTriangleBVHIntersection(const unsigned int NULL_NODE,
                          rayDirectionsAndMaxT,
                          minBoundHitIndex,
                          maxBoundMissIndex,
-                         firstVertexDominantAxis,
+                         (float4*)firstVertexDominantAxis,
                          stencil,
                          timeBarycentricsAndTriangleIndex);
 } // end cudaRayTriangleBVHIntersection()

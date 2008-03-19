@@ -127,3 +127,9 @@ void Scene
   return mPrimitive->getBoundingBox(b);
 } // end Scene::getBoundingBox()
 
+void Scene
+  ::preprocess(void)
+{
+  mPrimitive->finalize();
+} // end Scene::preprocess()
+

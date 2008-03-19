@@ -9,6 +9,12 @@
 #include "cudaRayTriangleBVHIntersection.h"
 #include <stdcuda/cuda_algorithm.h>
 
+std::ostream &operator<<(std::ostream &os, const float4 &v)
+{
+  os << v.x << " " << v.y << " " << v.z << " " << v.w;
+  return os;
+}
+
 void CUDATriangleBVH
   ::finalize(void)
 {
@@ -32,9 +38,9 @@ void CUDATriangleBVH
               int *stencil,
               const size_t n) const
 {
-  stdcuda::vector_dev<float4>    rayOriginsAndMinT(n);
+  stdcuda::vector_dev<float4> rayOriginsAndMinT(n);
   stdcuda::vector_dev<float4> rayDirectionsAndMaxT(n);
-  stdcuda::vector_dev<int> deviceStencil(n);
+  stdcuda::vector_dev<int>    deviceStencil(n);
 
   for(size_t i = 0; i != n; ++i)
   {
@@ -51,13 +57,9 @@ void CUDATriangleBVH
 
     rayDirectionsAndMaxT[i] = tempIn;
   } // end for i
-  //std::cerr << "init device rays" << std::endl;
-  //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
   // copy to the device stencil
   stdcuda::copy(stencil, stencil + n, deviceStencil.begin());
-  //std::cerr << "copied to device stencil" << std::endl;
-  //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
   stdcuda::vector_dev<float4> timeBarycentricsAndTriangleIndex(n);
   cudaRayTriangleBVHIntersection(NULL_NODE,
@@ -70,23 +72,17 @@ void CUDATriangleBVH
                                  &deviceStencil[0],
                                  &timeBarycentricsAndTriangleIndex[0],
                                  n);
-  //std::cerr << "back from kernel" << std::endl;
-  //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
   // copy deviceStencil to host
   stdcuda::copy(deviceStencil.begin(),
                 deviceStencil.end(),
                 stencil);
-  //std::cerr << "copied stencil to host" << std::endl;
-  //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
   // copy results to host
   std::vector<float4> results(n);
   stdcuda::copy(timeBarycentricsAndTriangleIndex.begin(),
                 timeBarycentricsAndTriangleIndex.end(),
                 &results[0]);
-  //std::cerr << "copied results to host" << std::endl;
-  //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
   // create Intersection objects
   for(size_t i = 0; i != n; ++i)
@@ -100,8 +96,5 @@ void CUDATriangleBVH
                       intersections[i]);
     } // end if
   } // end for i
-
-  //std::cerr << "CUDATriangleBVH::intersect(): exiting" << std::endl;
-  //std::cerr << "CUDA error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 } // end CUDATriangleBVH::intersect()
 

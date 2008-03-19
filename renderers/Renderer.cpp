@@ -50,6 +50,17 @@ void Renderer
 void Renderer
   ::preprocess(void)
 {
+  // preprocess the scene
+  // XXX now the design is broken
+  //     should we assume a Renderer
+  //     has non-const access to a Scene?
+  //     does this make sense?
+  //     can a Renderer change its Scene?
+  //     if my beliefs determine my actions, and
+  //     i can't choose my beliefs, do i have
+  //     free will?
+  const_cast<Scene*>(mScene.get())->preprocess();
+
   // preprocess the record
   mRecord->preprocess();
 
