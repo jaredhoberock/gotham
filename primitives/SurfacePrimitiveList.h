@@ -78,7 +78,7 @@ class SurfacePrimitiveList
      *  SurfacePrimitiveList.
      *  \param p The SurfacePrimitive to add.
      */
-    virtual void push_back(boost::shared_ptr<SurfacePrimitive> &p);
+    virtual void push_back(const boost::shared_ptr<SurfacePrimitive> &p);
 
     /*! This method finalizes this SurfacePrimitiveList.
      */

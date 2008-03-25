@@ -93,7 +93,7 @@ template<typename PrimitiveType>
   bool result = false;
   // XXX PERF same critique here as above
   Ray r(anchor, dir, minT, maxT);
-  Primitive::Intersection intersection;
+  Intersection intersection;
 
   while(begin != end)
   {
@@ -117,7 +117,7 @@ template<typename PrimitiveType>
 
 template<typename PrimitiveType>
   bool PrimitiveBSP<PrimitiveType>
-    ::intersect(Ray &r, typename Parent0::Intersection &inter) const
+    ::intersect(Ray &r, Intersection &inter) const
 {
   // create an intersector
   Intersector intersector;

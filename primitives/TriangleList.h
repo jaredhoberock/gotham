@@ -27,7 +27,7 @@ class TriangleList
      *  \note If p's Surface is not triangulatable, it is not added to this
      *        TriangleList.
      */
-    virtual void push_back(boost::shared_ptr<ListElement> &p);
+    virtual void push_back(const boost::shared_ptr<ListElement> &p);
 }; // end class TriangleList
 
 #endif // TRIANGLE_LIST_H

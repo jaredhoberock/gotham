@@ -44,8 +44,7 @@ bool SurfacePrimitive
     return false;
   } // end if
 
-  dg.setSurface(this);
-  inter.setPrimitive(this);
+  inter.setPrimitive(getPrimitiveHandle());
 
   // update the Ray's maximum t
   r.getInterval()[1] = t;
@@ -91,7 +90,6 @@ void SurfacePrimitive
                       float &pdf) const
 {
   mSurface->sampleSurfaceArea(u0,u1,u2,dg,pdf);
-  dg.setSurface(this);
 } // end SurfacePrimitive::sampleSurfaceArea()
 
 float SurfacePrimitive
@@ -100,4 +98,16 @@ float SurfacePrimitive
   float result = mSurface->evaluateSurfaceAreaPdf(dg);
   return result;
 } // end SurfacePrimitive::evaluatesurfaceAreaPdf()
+
+void SurfacePrimitive
+  ::setSurfacePrimitiveHandle(const PrimitiveHandle s)
+{
+  mSurfacePrimitiveHandle = s;
+} // end SurfacePrimitive::setSurfacePrimitiveHandle()
+
+PrimitiveHandle SurfacePrimitive
+  ::getSurfacePrimitiveHandle(void) const
+{
+  return mSurfacePrimitiveHandle;
+} // end SurfacePrimitive::getSurfacePrimitiveHandle()
 

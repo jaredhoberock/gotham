@@ -207,6 +207,9 @@ void Mesh
 
   // force an orthonormal basis
   dg.setBinormal(ng.cross(dg.getTangent()));
+
+  // set the inverse surface area
+  dg.setInverseSurfaceArea(getInverseSurfaceArea());
 } // end Mesh::getDifferentialGeometry()
 
 void Mesh::TriangleIntersector

@@ -2,6 +2,7 @@
 #!/usr/bin/env gotham
 
 from api import *
+import objtogoth
 
 unitSquare = ([-0.5, 0,  0.5,
                 0.5, 0,  0.5,
@@ -56,6 +57,13 @@ Rotate(90, 0, 0, 1)
 Mesh(unitSquare[0], unitSquare[1])
 PopMatrix()
 
+PushMatrix()
+Translate(0,-0.95,0)
+Scale(5,5,5)
+(verts, parms, indices) = objtogoth.objtogoth(open("../../../data/geometry/obj/bunny.obj"))
+Mesh(verts, parms, indices)
+PopMatrix()
+
 
 # light
 Material('light', 'power', (20,20,20))
@@ -75,10 +83,15 @@ Material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.
 Sphere(0.4,-0.66,0.25,0.33)
 
 Attribute("renderer:algorithm", "debug")
-Attribute("renderer:threads", "16")
+#Attribute("renderer:threads", "16")
+Attribute("renderer:threads", "192")
+
+# breaks at 193 threads (in one block)
+#Attribute("renderer:threads", "193")
 
 # let's render to a 512x512 image
 (w,h) = (512,512)
+#(w,h) = (64,64)
 Attribute("record:width",  w)
 Attribute("record:height", h)
 

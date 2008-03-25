@@ -47,7 +47,7 @@ void JensenSampler
   const PathVertex &v = p[p.getSubpathLengths()[0] - 1];
 
   float maxDist2 = std::numeric_limits<float>::infinity();
-  Primitive::Intersection inter;
+  Intersection inter;
   Spectrum L(Spectrum::black());
   Vector wi;
   Spectrum f;

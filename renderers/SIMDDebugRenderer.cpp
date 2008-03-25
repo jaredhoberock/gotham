@@ -60,24 +60,26 @@ void SIMDDebugRenderer
           const size_t threadIdx,
           const Ray *rays,
           const float *pdfs,
-          const Primitive::Intersection *intersections,
+          const Intersection *intersections,
           const int *stencil,
           Spectrum *results) const
 {
   size_t i = batchIdx * mWorkBatchSize + threadIdx;
   if(stencil[i])
   {
-    const Primitive::Intersection &inter = intersections[i];
-    const Primitive *prim = inter.getPrimitive();
+    const Intersection &inter = intersections[i];
+    PrimitiveHandle prim = inter.getPrimitive();
+    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*mScene->getPrimitives())[prim].get());
+
     Spectrum &L = results[i];
     const ::Vector &d = rays[i].getDirection();
 
     // evaluate scattering
-    ScatteringDistributionFunction *f = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
+    ScatteringDistributionFunction *f = sp->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
     L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
 
     // add emission
-    ScatteringDistributionFunction *e = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
+    ScatteringDistributionFunction *e = sp->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
     L += e->evaluate(-d, inter.getDifferentialGeometry());
   } // end if
 } // end SIMDDebugRenderer::shade()
@@ -112,7 +114,7 @@ void SIMDDebugRenderer
   // allocate per-thread data
   std::vector<Ray> rays(totalWork);
   std::vector<float> pdfs(totalWork);
-  std::vector<Primitive::Intersection> intersections(totalWork);
+  std::vector<Intersection> intersections(totalWork);
 
   // init stencil to 1
   std::vector<int> stencil(totalWork, 1);
@@ -183,7 +185,7 @@ void SIMDDebugRenderer
 
 void SIMDDebugRenderer
   ::intersect(Ray *rays,
-              Primitive::Intersection *intersections,
+              Intersection *intersections,
               int *stencil)
 {
   // XXX TODO: kill this
@@ -195,7 +197,7 @@ void SIMDDebugRenderer
   size_t numBatches = totalWork / mWorkBatchSize;
 
   Ray *r = rays;
-  Primitive::Intersection *inter = intersections;
+  Intersection *inter = intersections;
   int *s = stencil;
   Ray *end = rays + numBatches * mWorkBatchSize;
   for(;

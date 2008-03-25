@@ -42,7 +42,7 @@ template<typename PrimitiveType = Primitive>
      *         geometry of the Intersection is returned here.
      *  \return true if an Intersection exists; false, otherwise.
      */
-    inline virtual bool intersect(Ray &r, typename Parent0::Intersection &inter) const;
+    inline virtual bool intersect(Ray &r, Intersection &inter) const;
 
     /*! This method intersects a Ray against this PrimitiveBSP.
      *  \param r The Ray of interest.
@@ -92,7 +92,7 @@ template<typename PrimitiveType = Primitive>
 
       /*! Primitive::Intersection record of the hit Primitive.
        */
-      typename Parent0::Intersection mIntersection;
+      Intersection mIntersection;
 
       /*! The Ray parameter value at the point of intersection.
        */

@@ -212,9 +212,13 @@ class Gotham
      */
     std::vector<boost::shared_ptr<Material> > mMaterials;
 
-    /*! A list of SurfacePrimitives.
+    /*! A list of Primitives.
      */
     boost::shared_ptr<PrimitiveList<> > mPrimitives;
+
+    /*! A list of SurfacePrimitives.
+     */
+    boost::shared_ptr<SurfacePrimitiveList> mSurfaces;
 
     /*! A list of SurfacePrimitives whose Materials
      *  identify themselves as emitters.

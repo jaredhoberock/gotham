@@ -34,11 +34,6 @@ class Point : public gpcpu::float3
      *  \param z Sets the z coordinate.
      */
     inline Point(const float x, const float y, const float z);
-
-    /*! This static method returns a Point at infinity.
-     *  \return (infinity, infinity, infinity)
-     */
-    inline static Point infinity(void);
 }; // end class Point
 
 #include "Point.inl"

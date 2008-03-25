@@ -4,6 +4,8 @@
  */
 
 #include "Scene.h"
+#include "PrimitiveList.h"
+#include "SurfacePrimitiveList.h"
 
 Scene
   ::Scene(void)
@@ -82,6 +84,18 @@ void Scene
   mSensors = s;
 } // end Scene::setSensors()
 
+void Scene
+  ::setSurfaces(boost::shared_ptr<SurfacePrimitiveList> s)
+{
+  mSurfaces = s;
+} // end Scene::setSensors()
+
+void Scene
+  ::setPrimitives(boost::shared_ptr<PrimitiveList<> > p)
+{
+  mPrimitives = p;
+} // end Scene::setPrimitives()
+
 const SurfacePrimitiveList *Scene
   ::getEmitters(void) const
 {
@@ -94,8 +108,20 @@ const SurfacePrimitiveList *Scene
   return mSensors.get();
 } // end Scene::getSensors()
 
+const SurfacePrimitiveList *Scene
+  ::getSurfaces(void) const
+{
+  return mSurfaces.get();
+} // end Scene::getSurfaces()
+
+const PrimitiveList<> *Scene
+  ::getPrimitives(void) const
+{
+  return mPrimitives.get();
+} // end Scene::getPrimitives()
+
 bool Scene
-  ::intersect(Ray &r, Primitive::Intersection &inter) const
+  ::intersect(Ray &r, Intersection &inter) const
 {
   ++mRaysCast;
   return getPrimitive()->intersect(r,inter);
@@ -103,7 +129,7 @@ bool Scene
 
 void Scene
   ::intersect(Ray *rays,
-              Primitive::Intersection *intersections,
+              Intersection *intersections,
               int *stencil,
               const size_t n) const
 {
@@ -130,6 +156,14 @@ void Scene
 void Scene
   ::preprocess(void)
 {
+  // XXX we should rename this method to preprocess
+  mEmitters->finalize();
+  mSensors->finalize();
+
+  // XXX this is broken, because SurfacePrimitiveList::finalize()
+  //     will set the PrimitiveHandles of each primitive, when
+  //     actually they correspond to an index in mPrimitives
+  mSurfaces->finalize();
   mPrimitive->finalize();
 } // end Scene::preprocess()
 

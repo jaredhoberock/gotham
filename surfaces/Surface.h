@@ -11,7 +11,7 @@ class BoundingBox;
 class Point;
 class Normal;
 class Ray;
-class DifferentialGeometry;
+#include "../geometry/DifferentialGeometry.h"
 
 class Surface
 {

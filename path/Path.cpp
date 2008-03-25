@@ -159,14 +159,14 @@ unsigned int Path
   // cast a Ray
   Ray r(prev.mDg.getPoint(), dir);
 
-  Primitive::Intersection inter;
+  Intersection inter;
   if(scene->intersect(r, inter))
   {
     // evaluate the integrand
     // XXX yuck
-    const Primitive *prim = inter.getPrimitive();
+    PrimitiveHandle prim = inter.getPrimitive();
     const SurfacePrimitive *surface =
-      dynamic_cast<const SurfacePrimitive*>(prim);
+      dynamic_cast<const SurfacePrimitive*>((*scene->getPrimitives())[prim].get());
     const Material *material = surface->getMaterial();
     const DifferentialGeometry &dg = inter.getDifferentialGeometry();
 

@@ -183,9 +183,9 @@ void Sphere
   } // end if
   else
   {
+    invZRadius = 1.0f / zRadius;
     cosPhi = p[0] * invZRadius;
     sinPhi = p[1] * invZRadius;
-    invZRadius = 1.0f / zRadius;
 
     // dpdu
     dpdu = Vector(-TWO_PI * n[1], TWO_PI * n[0], 0);
@@ -221,6 +221,9 @@ void Sphere
 
   // force an orthonormal basis
   dg.setBinormal(dg.getNormal().cross(dg.getTangent()));
+
+  // set the inverse surface area
+  dg.setInverseSurfaceArea(getInverseSurfaceArea());
 
   assert(dg.getTangent()[0] == dg.getTangent()[0]);
   assert(dg.getBinormal()[0] == dg.getBinormal()[0]);

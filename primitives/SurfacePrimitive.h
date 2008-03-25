@@ -11,6 +11,7 @@
 #include "../shading/Material.h"
 #include <boost/shared_ptr.hpp>
 #include "../surfaces/Surface.h"
+#include "PrimitiveHandle.h"
 
 class SurfacePrimitive
   : public Primitive
@@ -105,6 +106,16 @@ class SurfacePrimitive
      */
     virtual float evaluateSurfaceAreaPdf(const DifferentialGeometry &dg) const;
 
+    /*! This method sets mSurfacePrimitiveHandle.
+     *  \param s Sets mSurfacePrimitiveHandle.
+     */
+    void setSurfacePrimitiveHandle(const PrimitiveHandle s);
+
+    /*! This method returns mSurfacePrimitiveHandle.
+     *  \return mSurfacePrimitiveHandle.
+     */
+    PrimitiveHandle getSurfacePrimitiveHandle(void) const;
+
   protected:
     /*! A SurfacePrimitive keeps a pointer to a Surface.
      */
@@ -113,6 +124,11 @@ class SurfacePrimitive
     /*! A SurfacePrimitive keeps a pointer to a Material.
      */
     boost::shared_ptr<Material> mMaterial;
+
+    /*! A PrimitiveHandle to uniquely identify this
+     *  SurfacePrimitive in the set of all SurfacePrimitives.
+     */
+    PrimitiveHandle mSurfacePrimitiveHandle;
 }; // end SurfacePrimitive
 
 #endif // SURFACE_PRIMITIVE_H

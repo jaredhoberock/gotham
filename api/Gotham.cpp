@@ -16,9 +16,7 @@
 #include "../surfaces/SmallMesh.h"
 #include "../surfaces/Sphere.h"
 #include "../primitives/SurfacePrimitive.h"
-#include "../primitives/PrimitiveBSP.h"
-#include "../primitives/TriangleBVH.h"
-#include "../primitives/CUDATriangleBVH.h"
+#include "../primitives/PrimitiveApi.h"
 #include "../viewers/RenderViewer.h"
 #include "../renderers/RendererApi.h"
 #include "../records/RecordApi.h"
@@ -87,15 +85,16 @@ void Gotham
   getDefaultAttributes(mAttributeStack.back());
 
   // create the PrimitiveList
-  //mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveBSP<> >());
-  mPrimitives.reset(new RasterizablePrimitiveList< TriangleBVH >());
-  //mPrimitives.reset(new RasterizablePrimitiveList< CUDATriangleBVH >());
+  mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveList<> >());
 
   // create the emitters list
   mEmitters.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
 
   // create the sensors list
   mSensors.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
+
+  // create the surfaces list
+  mSurfaces.reset(new SurfacePrimitiveList());
 
   // clear the PhotonMap list
   mPhotonMaps.clear();
@@ -198,13 +197,19 @@ void Gotham
     s.reset(new RasterizableScene<Scene>());
   } // end else
 
-  // finalize all primitives
-  mPrimitives->finalize();
-  mEmitters->finalize();
-  mSensors->finalize();
+  // create a final PrimitiveList
+  PrimitiveList<> *list = PrimitiveApi::list(mAttributeStack.back(),
+                                             *mPrimitives);
 
   // hand over the primitives
-  s->setPrimitive(mPrimitives);
+  shared_ptr<PrimitiveList<> > listPtr(list);
+  s->setPrimitive(listPtr);
+  s->setPrimitives(listPtr);
+
+  list->finalize();
+
+  // give the surfaces to the scene
+  s->setSurfaces(mSurfaces);
 
   // give the lights to the scene
   s->setEmitters(mEmitters);
@@ -324,7 +329,12 @@ void Gotham
 
   shared_ptr<SurfacePrimitive> surfacePrim(prim);
   shared_ptr<Primitive> plainPrim = static_pointer_cast<Primitive,SurfacePrimitive>(surfacePrim);
+
+  // add to aggregate list of all Primitives
   mPrimitives->push_back(plainPrim);
+
+  // add to list of all SurfacePrimitives
+  mSurfaces->push_back(surfacePrim);
 
   if(prim->getMaterial()->isEmitter())
   {

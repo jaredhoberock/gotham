@@ -8,10 +8,9 @@
 #include "SurfacePrimitive.h"
 
 void TriangleBVH
-  ::push_back(boost::shared_ptr<ListElement> &p)
+  ::push_back(const boost::shared_ptr<ListElement> &p)
 {
-  Parent0::push_back(p);
-
+  // check that p is triangulatable
   // XXX DESIGN this sucks
   const SurfacePrimitive *sp = dynamic_cast<const SurfacePrimitive*>(p.get());
   if(sp)
@@ -19,17 +18,9 @@ void TriangleBVH
     const Mesh *mesh = dynamic_cast<const Mesh *>(sp->getSurface());
     if(mesh)
     {
-      // make a record of the last primitive's triangles
-      size_t primIndex = size() - 1;
-      for(size_t i = 0; i != mesh->getTriangles().size(); ++i)
-      {
-        Triangle t;
-        t.mPrimitiveIndex = primIndex;
-        t.mTriangleIndex = i;
-        mTriangles.push_back(t);
-      } // end for i
+      Parent0::push_back(p);
     } // end if
-  } // end if
+  } // end sp
 } // end TriangleBVH::push_back()
 
 void TriangleBVH
@@ -37,6 +28,26 @@ void TriangleBVH
 {
   // call the Parent first
   Parent0::finalize();
+
+  // make a record of each primitive's triangles
+  for(const_iterator prim = begin(); prim != end(); ++prim)
+  {
+    // XXX DESIGN this sucks
+    const SurfacePrimitive *sp = dynamic_cast<const SurfacePrimitive*>(prim->get());
+    const Mesh *mesh = dynamic_cast<const Mesh *>(sp->getSurface());
+
+    if(mesh)
+    {
+      // make a record of the last primitive's triangles
+      for(size_t i = 0; i != mesh->getTriangles().size(); ++i)
+      {
+        Triangle t;
+        t.mPrimitiveHandle = sp->getPrimitiveHandle();
+        t.mTriangleIndex = i;
+        mTriangles.push_back(t);
+      } // end for i
+    } // end if
+  } // end for prim
 
   // build a temporary array of triangle indices
   std::vector<size_t> tempTriangles(mTriangles.size());
@@ -55,7 +66,7 @@ const gpcpu::float3 &TriangleBVH::TriangleVertexAccess
                const size_t vertexIndex) const
 {
   // look up the primitive
-  size_t prim = mBVH.mTriangles[tri].mPrimitiveIndex;
+  PrimitiveHandle prim = mBVH.mTriangles[tri].mPrimitiveHandle;
   size_t triIndex = mBVH.mTriangles[tri].mTriangleIndex;
   const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>(mBVH[prim].get());
   const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
@@ -74,13 +85,13 @@ void TriangleBVH
   // figure out which triangle of which mesh we are
   // interested in
   const Triangle &globalTri = mTriangles[triIndex];
-  size_t meshIndex     = globalTri.mPrimitiveIndex;
+  PrimitiveHandle prim = globalTri.mPrimitiveHandle;
   size_t localTriIndex = globalTri.mTriangleIndex;
 
-  const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[meshIndex].get());
+  const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[prim].get());
 
   // set the primitive in the intersection
-  inter.setPrimitive(sp);
+  inter.setPrimitive(prim);
 
   const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
   const Mesh::PointList &points = mesh->getPoints();
@@ -96,9 +107,6 @@ void TriangleBVH
                                 b1,
                                 b2,
                                 inter.getDifferentialGeometry());
-
-  // set the SurfacePrimitive in the DifferentialGeometry
-  inter.getDifferentialGeometry().setSurface(static_cast<const SurfacePrimitive*>(inter.getPrimitive()));
 } // end TriangleBVH::getIntersection()
 
 bool TriangleBVH

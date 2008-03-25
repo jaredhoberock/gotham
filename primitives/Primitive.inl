@@ -19,37 +19,6 @@ Primitive
   ;
 } // end Primitive::~Primitive()
 
-const DifferentialGeometry &Primitive::Intersection
-  ::getDifferentialGeometry(void) const
-{
-  return mDifferentialGeometry;
-} // end Primitive::Intersection::getDifferentialGeometry()
-
-DifferentialGeometry &Primitive::Intersection
-  ::getDifferentialGeometry(void)
-{
-  return mDifferentialGeometry;
-} // end Primitive::Intersection::getDifferentialGeometry()
-
-void Primitive::Intersection
-  ::setDifferentialGeometry(const DifferentialGeometry &dg)
-{
-  mDifferentialGeometry = dg;
-} // end Primitive::Intersection::setDifferentialGeometry()
-
-const Primitive *Primitive::Intersection
-  ::getPrimitive(void) const
-{
-  return mPrimitive;
-} // end Primitive::Intersection::getPrimitive()
-
-void Primitive::Intersection
-  ::setPrimitive(const Primitive *p)
-{
-  mPrimitive = p;
-} // end Primitive::Intersetion::setPrimitive()
-
-
 bool Primitive
   ::intersect(Ray &r, Intersection &inter) const
 {
@@ -104,4 +73,16 @@ void Primitive
 {
   ;
 } // end Primitive::finalize()
+
+void Primitive
+  ::setPrimitiveHandle(const PrimitiveHandle p)
+{
+  mPrimitiveHandle = p;
+} // end Primitive::setPrimitiveHandle()
+
+PrimitiveHandle Primitive
+  ::getPrimitiveHandle(void) const
+{
+  return mPrimitiveHandle;
+} // end PrimitiveHandle::getPrimitiveHandle()
 

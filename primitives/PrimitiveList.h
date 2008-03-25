@@ -27,11 +27,16 @@ template<typename PrimitiveType = Primitive>
      */
     inline virtual ~PrimitiveList(void);
 
-    inline virtual void push_back(boost::shared_ptr<ListElement> &p);
+    inline virtual void push_back(const boost::shared_ptr<ListElement> &p);
     inline virtual void clear(void);
     inline virtual void getBoundingBox(BoundingBox &b) const;
     inline virtual bool intersect(Ray &r, Intersection &inter) const;
     inline virtual bool intersect(const Ray &r) const;
+
+    /*! This method calls setPrimitiveHandle on each element of this
+     *  PrimitiveList.
+     */
+    inline virtual void finalize(void);
 
   private:
     typedef std::vector<boost::shared_ptr<ListElement> > Parent1;

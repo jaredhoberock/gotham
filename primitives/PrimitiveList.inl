@@ -23,7 +23,7 @@ template<typename PrimitiveType>
 
 template<typename PrimitiveType>
   void PrimitiveList<PrimitiveType>
-    ::push_back(boost::shared_ptr<ListElement> &p)
+    ::push_back(const boost::shared_ptr<ListElement> &p)
 {
   Parent1::push_back(p);
 
@@ -68,4 +68,16 @@ template<typename PrimitiveType>
 
   return false;
 } // end PrimitiveList::intersect()
+
+template<typename PrimitiveType>
+  void PrimitiveList<PrimitiveType>
+    ::finalize(void)
+{
+  Parent0::finalize();
+
+  for(size_t i = 0; i != Parent1::size(); ++i)
+  {
+    (*this)[i]->setPrimitiveHandle(i);
+  } // end for i
+} // end PrimitiveList::finalize()
 

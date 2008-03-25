@@ -9,7 +9,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include <vector>
+#include "Intersection.h"
 #include "Primitive.h"
+#include "PrimitiveList.h"
 class BoundingBox;
 class SurfacePrimitiveList;
 
@@ -44,7 +46,7 @@ class Scene
      *  \return true if an intersection exists; false, otherwise.
      *  \note If r is found to intersect this Scene, r's parametric bounds are appropriately updated to accomodate the intersection.
      */
-    inline virtual bool intersect(Ray &r, Primitive::Intersection &inter) const;
+    inline virtual bool intersect(Ray &r, Intersection &inter) const;
 
     /*! This method provides a SIMD path for ray intersection.
      *  \param rays A list of Rays to intersect.
@@ -54,7 +56,7 @@ class Scene
      *  \param n The length of lists rays, intersections, and stencil.
      */
     inline virtual void intersect(Ray *rays,
-                                  Primitive::Intersection *intersections,
+                                  Intersection *intersections,
                                   int *stencil,
                                   const size_t n) const;
 
@@ -81,9 +83,19 @@ class Scene
     inline void setEmitters(boost::shared_ptr<SurfacePrimitiveList> e);
 
     /*! This method sets mSensors.
-     *  \return s Sets mSensors.
+     *  \param s Sets mSensors.
      */
     inline void setSensors(boost::shared_ptr<SurfacePrimitiveList> s);
+
+    /*! This method sets mSurfaces.
+     *  \param s Sets mSurfaces.
+     */
+    inline void setSurfaces(boost::shared_ptr<SurfacePrimitiveList> s);
+
+    /*! This method sets mPrimitives.
+     *  \param p Sets mPrimitives.
+     */
+    inline void setPrimitives(boost::shared_ptr<PrimitiveList<> > p);
 
     /*! This method returns mRaysCast.
      *  \return mRaysCast
@@ -120,6 +132,17 @@ class Scene
      */
     inline const SurfacePrimitiveList *getSensors(void) const;
 
+    /*! This method returns a const pointer to the
+     *  surfaces list.
+     *  \return mSurfaces
+     */
+    inline const SurfacePrimitiveList *getSurfaces(void) const;
+
+    /*! This method returns a const pointer to the primitives list.
+     *  \return mPrimitives
+     */
+    inline const PrimitiveList<> *getPrimitives(void) const;
+
     /*! This method is called immediately prior to rendering
      *  and calls mPrimitive->finalize()
      */
@@ -141,6 +164,14 @@ class Scene
      *      to own this list?
      */
     boost::shared_ptr<SurfacePrimitiveList> mSensors;
+
+    /*! A Scene contains a list of surfaces.
+     */
+    boost::shared_ptr<SurfacePrimitiveList> mSurfaces;
+
+    /*! A Scene contains a list of all Primitives.
+     */
+    boost::shared_ptr<PrimitiveList<> > mPrimitives;
 
     /*! This counts the number of Rays intersected against this Scene.
      */

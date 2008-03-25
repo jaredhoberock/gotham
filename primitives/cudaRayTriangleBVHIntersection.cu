@@ -8,7 +8,6 @@
 #include "cudaRayTriangleBVHIntersection.h"
 #include <waldbikkerintersection/cudaWaldBikkerIntersection.h>
 #include <stdcuda/vector_math.h>
-#include <stdcuda/vector_dev.h>
 
 inline __device__ bool intersectBox(const float3 &o,
                                     const float3 &invDir,
@@ -59,8 +58,6 @@ __global__ void kernel(const unsigned int NULL_NODE,
     float b1 = -1, b2 = -1;
     float4 minBoundsHit, maxBoundsMiss;
     float4 v0Axis;
-
-    int j = 0;
 
     // XXX PERF: it might be possible to eliminate these temporaries
     float tempT, tempB1, tempB2;

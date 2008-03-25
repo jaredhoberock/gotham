@@ -10,11 +10,12 @@
 
 class BoundingBox;
 class Ray;
-class Intersection;
 #include "../geometry/DifferentialGeometry.h"
 #include "../geometry/Transform.h"
 #include <spectrum/Spectrum.h>
 #include <boost/functional/hash.hpp>
+#include "Intersection.h"
+#include "PrimitiveHandle.h"
 
 /*! \class Primitive
  *  \brief The Primitive base class bridges geometry processing and shading.  It provides an interface
@@ -23,46 +24,6 @@ class Intersection;
 class Primitive
 {
   public:
-    /*! \class Intersection
-     *  \brief Intersection records information about a Ray's intersection with a Primitive.
-     */
-    class Intersection
-    {
-      public:
-        /*! This method returns a const reference to mDifferentialGeometry.
-         *  \return mDifferentialGeometry.
-         */
-        inline const DifferentialGeometry &getDifferentialGeometry(void) const;
-
-        /*! This method returns a reference to mDifferentialGeometry.
-         *  \return mDifferentialGeometry.
-         */
-        inline DifferentialGeometry &getDifferentialGeometry(void);
-
-        /*! This method sets mDifferentialGeometry.
-         *  \param dg Sets mDifferentialGeometry.
-         */
-        inline void setDifferentialGeometry(const DifferentialGeometry &dg);
-
-        /*! This method returns mPrimitive.
-         *  \return mPrimitive
-         */
-        inline const Primitive *getPrimitive(void) const;
-
-        /*! This method sets mPrimitive.
-         *  \param p Sets mPrimitive.
-         */
-        inline void setPrimitive(const Primitive *p);
-
-      protected:
-        /*! An Intersection keeps a record of the DifferentialGeometry of the surface hit.
-         */
-        DifferentialGeometry mDifferentialGeometry;
-
-        /*! An Intersection keeps a pointer to the Primitive hit. */
-        const Primitive *mPrimitive;
-    }; // end class Intersection
-
     /*! \brief Null constructor does nothing.
      */
     inline Primitive(void);
@@ -99,8 +60,7 @@ class Primitive
      */
     inline virtual void intersect(Ray *rays,
                                   Intersection *intersections,
-                                  int *stencil,
-                                  const size_t n) const;
+                                  int *stencil, const size_t n) const;
 
     /*! If a Primitive is intersectable, it must provide a way to query for a Ray intersection.
      *  \param r The Ray to intersect.
@@ -130,7 +90,22 @@ class Primitive
      */
     inline virtual void finalize(void);
 
+    /*! This method sets mPrimitiveHandle.
+     *  \param p Sets mPrimitiveHandle.
+     */
+    inline void setPrimitiveHandle(const PrimitiveHandle p);
+
+    /*! This method returns mPrimitiveHandle.
+     *  \return mPrimitiveHandle.
+     */
+    inline PrimitiveHandle getPrimitiveHandle(void) const;
+
   protected:
+    /*! A PrimitiveHandle to uniquely identify this
+     *  Primitive in the set of all Primitives.
+     */
+    PrimitiveHandle mPrimitiveHandle;
+
     /*! A name, possibly the null string, associated with this Primitive.
      */
     std::string mName;

@@ -22,10 +22,3 @@ Point
   ;
 } // end Point::Point()
 
-Point Point
-  ::infinity(void)
-{
-  float inf = ::std::numeric_limits<float>::infinity();
-  return Point(inf, inf, inf);
-} // end Point::infinity()
-

@@ -11,8 +11,9 @@
 #include <cstdlib>
 
 class Spectrum;
-class DifferentialGeometry;
 class Vector;
+
+#include "../geometry/DifferentialGeometry.h"
 
 class RussianRoulette
 {

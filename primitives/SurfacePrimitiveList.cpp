@@ -33,7 +33,7 @@ float SurfacePrimitiveList
 } // end SurfacePrimitiveList::evaluateSurfaceAreaPdf()
 
 void SurfacePrimitiveList
-  ::push_back(boost::shared_ptr<SurfacePrimitive> &p)
+  ::push_back(const boost::shared_ptr<SurfacePrimitive> &p)
 {
   Parent::push_back(p);
   mSurfaceArea += p->getSurfaceArea();
@@ -45,6 +45,11 @@ void SurfacePrimitiveList
 {
   Parent::finalize();
   buildSurfaceAreaPdf();
+
+  for(size_t i = 0; i != size(); ++i)
+  {
+    (*this)[i]->setSurfacePrimitiveHandle(i);
+  } // end for i
 } // end SurfacePrimitive::finalize()
 
 void SurfacePrimitiveList

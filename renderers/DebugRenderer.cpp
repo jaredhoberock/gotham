@@ -45,7 +45,7 @@ void DebugRenderer
   Normal n;
   float pdf;
   bool delta;
-  Primitive::Intersection inter;
+  Intersection inter;
   float2 uv(0,0); 
 
   // sample from the list of sensors
@@ -79,12 +79,13 @@ void DebugRenderer
       // intersect the Scene
       if(mScene->intersect(r, inter))
       {
-        const Primitive *prim = inter.getPrimitive();
-        ScatteringDistributionFunction *f = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
+        PrimitiveHandle prim = inter.getPrimitive();
+        const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*mScene->getPrimitives())[prim].get());
+        ScatteringDistributionFunction *f = sp->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
 
         // add emission
-        ScatteringDistributionFunction *e = static_cast<const SurfacePrimitive*>(prim)->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
+        ScatteringDistributionFunction *e = sp->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
         L += e->evaluate(-d, inter.getDifferentialGeometry());
       } // end if
 

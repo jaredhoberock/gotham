@@ -9,6 +9,7 @@
 
 #include "SIMDRenderer.h"
 #include "../primitives/Primitive.h"
+#include "../primitives/Primitive.h"
 #include <spectrum/Spectrum.h>
 
 class SIMDDebugRenderer
@@ -43,7 +44,7 @@ class SIMDDebugRenderer
                        const size_t threadIdx,
                        const Ray *rays,
                        const float *pdfs,
-                       const Primitive::Intersection *intersections,
+                       const Intersection *intersections,
                        const int *stencil,
                        Spectrum *results) const;
 
@@ -52,7 +53,7 @@ class SIMDDebugRenderer
                          const Spectrum *results);
 
     virtual void intersect(Ray *rays,
-                           Primitive::Intersection *intersections,
+                           Intersection *intersections,
                            int *stencil);
 
 }; // end SIMDDebugRenderer

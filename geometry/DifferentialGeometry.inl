@@ -5,170 +5,290 @@
 
 #include "DifferentialGeometry.h"
 
-DifferentialGeometry
-  ::DifferentialGeometry(void)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  DifferentialGeometryBase<P3,V3,P2,N3>
+    ::DifferentialGeometryBase(void)
 {
   ;
-} // end DifferentialGeometry::DifferentialGeometry()
+} // end DifferentialGeometryBase::DifferentialGeometryBase()
 
-DifferentialGeometry
-  ::DifferentialGeometry(const Point &p,
-                         const Vector3 &dpdu, const Vector3 &dpdv,
-                         const Vector3 &dndu, const Vector3 &dndv,
-                         const ParametricCoordinates &uv,
-                         const SurfacePrimitive *s)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  DifferentialGeometryBase<P3,V3,P2,N3>
+    ::DifferentialGeometryBase(const Point &p,
+                           const Vector &dpdu, const Vector &dpdv,
+                           const Vector &dndu, const Vector &dndv,
+                           const ParametricCoordinates &uv,
+                           const float a,
+                           const float invA)
 {
   setPoint(p);
   setPointPartials(dpdu, dpdv);
   setNormalVectorPartials(dndu, dndv);
   setParametricCoordinates(uv);
-  setSurface(s);
+  setSurfaceArea(a);
+  setInverseSurfaceArea(invA);
 
   // compute the normal from its partials
   setNormal(dndu.cross(dndv).normalize());
-} // end DifferentialGeometry::DifferentialGeometry()
+} // end DifferentialGeometryBase::DifferentialGeometryBase()
 
-DifferentialGeometry
-  ::DifferentialGeometry(const Point &p, const Normal &n,
-                         const Vector3 &dpdu, const Vector3 &dpdv,
-                         const Vector3 &dndu, const Vector3 &dndv,
-                         const ParametricCoordinates &uv,
-                         const SurfacePrimitive *s)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  DifferentialGeometryBase<P3,V3,P2,N3>
+    ::DifferentialGeometryBase(const Point &p, const Normal &n,
+                               const Vector &dpdu, const Vector &dpdv,
+                               const Vector &dndu, const Vector &dndv,
+                               const ParametricCoordinates &uv,
+                               const float a,
+                               const float invA)
 {
   setPoint(p);
   setNormal(n);
   setPointPartials(dpdu, dpdv);
   setNormalVectorPartials(dndu, dndv);
   setParametricCoordinates(uv);
-  setSurface(s);
-} // end DifferentialGeometry::DifferentialGeometry()
+  setSurfaceArea(a);
+  setInverseSurfaceArea(invA);
+} // end DifferentialGeometryBase::DifferentialGeometryBase()
 
-void DifferentialGeometry
-  ::setPoint(const Point &p)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setPoint(const Point &p)
 {
   mPoint = p;
-} // end DifferentialGeometry::setPoint()
+} // end DifferentialGeometryBase::setPoint()
 
-Point &DifferentialGeometry
-  ::getPoint(void)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  typename DifferentialGeometryBase<P3,V3,P2,N3>::Point &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getPoint(void)
 {
   return mPoint;
-} // end DifferentialGeometry::getPoint()
+} // end DifferentialGeometryBase::getPoint()
 
-const Point &DifferentialGeometry
-  ::getPoint(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Point &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getPoint(void) const
 {
   return mPoint;
-} // end DifferentialGeometry::getPoint()
+} // end DifferentialGeometryBase::getPoint()
 
-void DifferentialGeometry
-  ::setNormal(const Normal &n)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setNormal(const Normal &n)
 {
   mNormal= n;
-} // end DifferentialGeometry::setNormal()
+} // end DifferentialGeometryBase::setNormal()
 
-Normal &DifferentialGeometry
-  ::getNormal(void)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  typename DifferentialGeometryBase<P3,V3,P2,N3>::Normal &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getNormal(void)
 {
   return mNormal;
-} // end DifferentialGeometry::getNormal()
+} // end DifferentialGeometryBase::getNormal()
 
-const Normal &DifferentialGeometry
-  ::getNormal(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Normal &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getNormal(void) const
 {
   return mNormal;
-} // end DifferentialGeometry::getNormal()
+} // end DifferentialGeometryBase::getNormal()
 
-void DifferentialGeometry
-  ::setParametricCoordinates(const ParametricCoordinates &uv)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setParametricCoordinates(const ParametricCoordinates &uv)
 {
   mParametricCoordinates = uv;
-} // end DifferentialGeometry::setParametricCoordinates()
+} // end DifferentialGeometryBase::setParametricCoordinates()
 
-const ParametricCoordinates &DifferentialGeometry
-  ::getParametricCoordinates(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::ParametricCoordinates &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getParametricCoordinates(void) const
 {
   return mParametricCoordinates;
-} // end DifferentialGeometry::getParametricCoordinates()
+} // end DifferentialGeometryBase::getParametricCoordinates()
 
-ParametricCoordinates &DifferentialGeometry
-  ::getParametricCoordinates(void)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  typename DifferentialGeometryBase<P3,V3,P2,N3>::ParametricCoordinates &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getParametricCoordinates(void)
 {
   return mParametricCoordinates;
-} // end DifferentialGeometry::getParametricCoordinates()
+} // end DifferentialGeometryBase::getParametricCoordinates()
 
-void DifferentialGeometry
-  ::setSurface(const SurfacePrimitive *s)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setSurfaceArea(const float a)
 {
-  mSurface = s;
-} // end DifferentialGeometry::setSurface()
+  mSurfaceArea = a;
+} // end DifferentialGeometryBase::setSurfaceArea()
 
-const SurfacePrimitive *DifferentialGeometry
-  ::getSurface(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  float DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getSurfaceArea(void) const
 {
-  return mSurface;
-} // end DifferentialGeometry::getSurface()
+  return mSurfaceArea;
+} // end DifferentialGeometryBase::getSurfaceArea()
 
-void DifferentialGeometry
-  ::setPointPartials(const Vector3 &dpdu, const Vector3 &dpdv)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setInverseSurfaceArea(const float invA)
+{
+  mInverseSurfaceArea = invA;
+} // end DifferentialGeometryBase::setInverseSurfaceArea()
+
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  float DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getInverseSurfaceArea(void) const
+{
+  return mInverseSurfaceArea;
+} // end DifferentialGeometryBase::getInverseSurfaceArea()
+
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setPointPartials(const Vector &dpdu, const Vector &dpdv)
 {
   mPointPartials[0] = dpdu;
   mPointPartials[1] = dpdv;
-} // end DifferentialGeometry::setPointPartials()
+} // end DifferentialGeometryBase::setPointPartials()
 
-const Vector3 *DifferentialGeometry
-  ::getPointPartials(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector *DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getPointPartials(void) const
 {
   return mPointPartials;
-} // end DifferentialGeometry::getPointPartials()
+} // end DifferentialGeometryBase::getPointPartials()
 
-Vector3 *DifferentialGeometry
-  ::getPointPartials(void)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector *DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getPointPartials(void)
 {
   return mPointPartials;
-} // end DifferentialGeometry::getPointPartials()
+} // end DifferentialGeometryBase::getPointPartials()
 
-void DifferentialGeometry
-  ::setNormalVectorPartials(const Vector3 &dndu, const Vector3 &dndv)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setNormalVectorPartials(const Vector &dndu, const Vector &dndv)
 {
   mNormalVectorPartials[0] = dndu;
   mNormalVectorPartials[1] = dndv;
-} // end DifferentialGeometry::setNormalVectorPartials()
+} // end DifferentialGeometryBase::setNormalVectorPartials()
 
-const Vector3 *DifferentialGeometry
-  ::getNormalVectorPartials(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector *DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getNormalVectorPartials(void) const
 {
   return mNormalVectorPartials;
-} // end DifferentialGeometry::getNormalVectorPartials()
+} // end DifferentialGeometryBase::getNormalVectorPartials()
 
-Vector3 *DifferentialGeometry
-  ::getNormalVectorPartials(void)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector *DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getNormalVectorPartials(void)
 { 
   return mNormalVectorPartials;
-} // end DifferentialGeometry::getNormalVectorPartials()
+} // end DifferentialGeometryBase::getNormalVectorPartials()
 
-void DifferentialGeometry
-  ::setTangent(const Vector &t)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setTangent(const Vector &t)
 {
   mTangent = t;
-} // end DifferentialGeometry::setTangent()
+} // end DifferentialGeometryBase::setTangent()
 
-const Vector &DifferentialGeometry
-  ::getTangent(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getTangent(void) const
 {
   return mTangent;
-} // end DifferentialGeometry::getTangent()
+} // end DifferentialGeometryBase::getTangent()
 
-void DifferentialGeometry
-  ::setBinormal(const Vector &b)
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  void DifferentialGeometryBase<P3,V3,P2,N3>
+    ::setBinormal(const Vector &b)
 {
   mBinormal = b;
-} // end DifferentialGeometry::setBinormal()
+} // end DifferentialGeometryBase::setBinormal()
 
-const Vector &DifferentialGeometry
-  ::getBinormal(void) const
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getBinormal(void) const
 {
   return mBinormal;
-} // end DifferentialGeometry::getBinormal()
+} // end DifferentialGeometryBase::getBinormal()
 
 

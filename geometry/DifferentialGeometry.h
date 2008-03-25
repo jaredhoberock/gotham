@@ -12,19 +12,29 @@
 #include "Vector.h"
 #include "Normal.h"
 #include "ParametricCoordinates.h"
-class SurfacePrimitive;
 
-/*! \class DifferentialGeometry
- *  \brief DifferentialGeometry encapsulates the description
+/*! \class DifferentialGeometryBase
+ *  \brief DifferentialGeometryBase encapsulates the description
  *         of the differential geometric properties of a surface
  *         at a particular Point.
+ *  \note This is made a template so we can substitute CUDA vector
+ *        types.  Thanks, CUDA!
  */
-class DifferentialGeometry
+template<typename P3 = Point,
+         typename V3 = Vector,
+         typename P2 = ParametricCoordinates,
+         typename N3 = Normal>
+  class DifferentialGeometryBase
 {
   public:
+    typedef P3 Point;
+    typedef V3 Vector;
+    typedef P2 ParametricCoordinates;
+    typedef N3 Normal;
+
     /*! Null constructor does nothing.
      */
-    inline DifferentialGeometry(void);
+    inline DifferentialGeometryBase(void);
 
     /*! Constructor accepts a Point, Point and Normal partials, ParametricCoordinates, and a Surface.
      *  \param p Sets mPoint.
@@ -33,14 +43,16 @@ class DifferentialGeometry
      *  \param dndu Sets mNormalVectorPartials[0].
      *  \param dndv Sets mNormalVectorPartials[1].
      *  \param uv Sets mParametricCoordinates.
-     *  \param s Sets mSurface.
+     *  \param a Sets mSurfaceArea.
+     *  \param invA Sets mInverseSurfaceArea.
      *  \note mNormalVector is computed and set as a side effect.
      */
-    inline DifferentialGeometry(const Point &p,
-                                const Vector3 &dpdu, const Vector3 &dpdv,
-                                const Vector3 &dndu, const Vector3 &dndv,
-                                const ParametricCoordinates &uv,
-                                const SurfacePrimitive *s);
+    inline DifferentialGeometryBase(const Point &p,
+                                    const Vector &dpdu, const Vector &dpdv,
+                                    const Vector &dndu, const Vector &dndv,
+                                    const ParametricCoordinates &uv,
+                                    const float a,
+                                    const float invA);
 
     /*! Constructor accepts a Point, Normal, Point and Normal partials, ParametricCoordinates, and a Surface.
      *  \param p Sets mPoint.
@@ -50,14 +62,16 @@ class DifferentialGeometry
      *  \param dndu Sets mNormalVectorPartials[0].
      *  \param dndv Sets mNormalVectorPartials[1].
      *  \param uv Sets mParametricCoordinates.
-     *  \param s Sets mSurface.
+     *  \param a Sets mSurfaceArea.
+     *  \param invA Sets mInverseSurfaceArea.
      *  \note Use this constructor when dpdu x dpdv is suspect, or you have an analytic Normal vector.
      */
-    inline DifferentialGeometry(const Point &p, const Normal &n,
-                                const Vector3 &dpdu, const Vector3 &dpdv,
-                                const Vector3 &dndu, const Vector3 &dndv,
-                                const ParametricCoordinates &uv,
-                                const SurfacePrimitive *s);
+    inline DifferentialGeometryBase(const Point &p, const Normal &n,
+                                    const Vector &dpdu, const Vector &dpdv,
+                                    const Vector &dndu, const Vector &dndv,
+                                    const ParametricCoordinates &uv,
+                                    const float a,
+                                    const float invA);
 
     /*! This method sets mPoint.
      *  \param p Sets mPoint.
@@ -104,47 +118,57 @@ class DifferentialGeometry
      */
     inline ParametricCoordinates &getParametricCoordinates(void);
 
-    /*! This method sets mSurface.
-     *  \param s Sets mSurface.
+    /*! This method sets mSurfaceArea.
+     *  \param a Sets mSurfaceArea.
      */
-    inline void setSurface(const SurfacePrimitive *s);
+    inline void setSurfaceArea(const float a);
 
-    /*! This method returns mSurface.
-     *  \return mSurface
+    /*! This method returns mSurfaceArea.
+     *  \return mSurfaceArea.
      */
-    inline const SurfacePrimitive *getSurface(void) const;
+    inline float getSurfaceArea(void) const;
+
+    /*! This method sets mInverseSurfaceArea.
+     *  \param invA Sets mInverseSurfaceArea.
+     */
+    inline void setInverseSurfaceArea(const float invA);
+
+    /*! This method returns mInverseSurfaceArea.
+     *  \return mInverseSurfaceArea.
+     */
+    inline float getInverseSurfaceArea(void) const;
 
     /*! This method sets mPointPartials.
      *  \param dpdu Sets mPointPartials[0].
      *  \param dpdv Sets mPointPartials[1].
      */
-    inline void setPointPartials(const Vector3 &dpdu, const Vector3 &dpdv);
+    inline void setPointPartials(const Vector &dpdu, const Vector &dpdv);
 
     /*! This method returns a const pointer to mPointPartials.
      *  \return mPointPartials.
      */
-    inline const Vector3 *getPointPartials(void) const;
+    inline const Vector *getPointPartials(void) const;
 
     /*! This method returns a pointer to mPointPartials.
      *  \return mPointPartials.
      */
-    inline Vector3 *getPointPartials(void);
+    inline Vector *getPointPartials(void);
 
     /*! This method sets mNormalVectorPartials.
      *  \param dndu Sets mNormalVectorPartials[0].
      *  \param dndv Sets mNormalVectorPartials[1].
      */
-    inline void setNormalVectorPartials(const Vector3 &dndu, const Vector3 &dndv);
+    inline void setNormalVectorPartials(const Vector &dndu, const Vector &dndv);
 
     /*! This method returns a const pointer to mNormalVectorPartials.
      *  \return mNormalVectorPartials.
      */
-    inline const Vector3 *getNormalVectorPartials(void) const;
+    inline const Vector *getNormalVectorPartials(void) const;
 
     /*! This method returns a pointer to mNormalVectorPartials.
      *  \return mNormalVectorPartials.
      */
-    inline Vector3 *getNormalVectorPartials(void);
+    inline Vector *getNormalVectorPartials(void);
 
     /*! This method sets mTangent.
      *  \param t Sets mTangent.
@@ -190,25 +214,31 @@ class DifferentialGeometry
      */
     ParametricCoordinates mParametricCoordinates;
 
-    /*! The surface whose geometry we are describing.
-     *  XXX this does not belong here
+    /*! The area of the surface whose geometry we are describing.
      */
-    const SurfacePrimitive *mSurface;
+    float mSurfaceArea;
+
+    /*! The inverse of the surface area of the surface whose geometry
+     *  we are describing.
+     */
+    float mInverseSurfaceArea;
 
     /*! The partial derivatives of mPoint with respect to
      *  mParametricCoordinates[0] and mParametricCoordinates[1],
      *  respectively.
      */
-    Vector3 mPointPartials[2];
+    Vector mPointPartials[2];
 
     /*! The partial derivatives of mNormalVector with respect
      *  to mParametricCoordinates[0] and mParametricCoordinates[1],
      *  respectively.
      */
-    Vector3 mNormalVectorPartials[2];
-}; // end class DifferentialGeometry
+    Vector mNormalVectorPartials[2];
+}; // end class DifferentialGeometryBase
 
 #include "DifferentialGeometry.inl"
+
+typedef DifferentialGeometryBase<> DifferentialGeometry;
 
 #endif // DIFFERENTIAL_GEOMETRY_H
 

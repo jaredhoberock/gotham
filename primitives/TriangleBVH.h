@@ -26,7 +26,7 @@ class TriangleBVH
      *  \note If p's Surface is not triangulatable, it is not added to this
      *        TriangleList.
      */
-    virtual void push_back(boost::shared_ptr<ListElement> &p);
+    virtual void push_back(const boost::shared_ptr<ListElement> &p);
 
     /*! This method finalizes this TriangleBVH.
      */
@@ -54,7 +54,7 @@ class TriangleBVH
 
     struct Triangle
     {
-      size_t mPrimitiveIndex;
+      PrimitiveHandle mPrimitiveHandle;
       size_t mTriangleIndex;
     }; // end Triangle
 
