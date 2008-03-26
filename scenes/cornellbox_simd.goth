@@ -57,14 +57,6 @@ Rotate(90, 0, 0, 1)
 Mesh(unitSquare[0], unitSquare[1])
 PopMatrix()
 
-PushMatrix()
-Translate(0,-0.95,0)
-Scale(5,5,5)
-(verts, parms, indices) = objtogoth.objtogoth(open("../../../data/geometry/obj/bunny.obj"))
-Mesh(verts, parms, indices)
-PopMatrix()
-
-
 # light
 Material('light', 'power', (20,20,20))
 PushMatrix()

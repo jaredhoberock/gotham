@@ -7,7 +7,7 @@
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../primitives/PrimitiveBSP.h"
 #include "TriangleBVH.h"
-#include "CUDATriangleBVH.h"
+#include "../cuda/primitives/CUDATriangleBVH.h"
 #include <algorithm>
 
 using namespace boost;

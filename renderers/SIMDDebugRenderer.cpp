@@ -11,6 +11,7 @@
 #include "../records/RenderFilm.h"
 #include "../shading/Material.h"
 #include "../shading/ScatteringDistributionFunction.h"
+#include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/SurfacePrimitiveList.h"
 
@@ -46,7 +47,8 @@ void SIMDDebugRenderer
   sensor->sampleSurfaceArea(0,0,0,dgSensor,pdf);
 
   // generate a Ray
-  ScatteringDistributionFunction &s = *sensor->getMaterial()->evaluateSensor(dgSensor);
+  const MaterialList &materials = mScene->getMaterials();
+  ScatteringDistributionFunction &s = *materials[sensor->getMaterial()]->evaluateSensor(dgSensor);
 
   // sample a sensing direction
   bool delta;
@@ -56,32 +58,99 @@ void SIMDDebugRenderer
 } // end SIMDDebugRenderer::sampleEyeRay()
 
 void SIMDDebugRenderer
-  ::shade(const size_t batchIdx,
-          const size_t threadIdx,
-          const Ray *rays,
+  ::evaluate(ScatteringDistributionFunction **f,
+             const ::Vector *wo,
+             const DifferentialGeometry *dg,
+             const ::Vector *wi,
+             const int *stencil,
+             Spectrum *results,
+             const size_t n) const
+{
+  // evaluate the functions into results
+  for(size_t i = 0; i != n; ++i)
+  {
+    if(stencil[i])
+    {
+      // bidirectional scattering
+      results[i] = f[i]->evaluate(wo[i], dg[i], wi[i]);
+    } // end if
+  } // end for
+} // end SIMDDebugRenderer::evaluate()
+
+void SIMDDebugRenderer
+  ::evaluate(ScatteringDistributionFunction **f,
+             const ::Vector *wo,
+             const DifferentialGeometry *dg,
+             const int *stencil,
+             Spectrum *results,
+             const size_t n) const
+{
+  // evaluate the functions into results
+  for(size_t i = 0; i != n; ++i)
+  {
+    if(stencil[i])
+    {
+      // unidirectional scattering
+      results[i] = f[i]->evaluate(wo[i], dg[i]);
+    } // end if
+  } // end for
+} // end SIMDDebugRenderer::evaluate()
+                
+
+void SIMDDebugRenderer
+  ::shade(const Ray *rays,
           const float *pdfs,
           const Intersection *intersections,
           const int *stencil,
-          Spectrum *results) const
+          Spectrum *results,
+          const size_t n) const
 {
-  size_t i = batchIdx * mWorkBatchSize + threadIdx;
-  if(stencil[i])
+  std::vector<ScatteringDistributionFunction*> f(n);
+  std::vector<ScatteringDistributionFunction*> e(n);
+
+  const PrimitiveList<> &primitives = *mScene->getPrimitives();
+  const MaterialList &materials = mScene->getMaterials();
+
+  // create the list of MaterialHandles and DifferentialGeometry
+  std::vector<MaterialHandle> handles(n);
+  std::vector<DifferentialGeometry> dg(n);
+  for(size_t i = 0; i != n; ++i)
   {
-    const Intersection &inter = intersections[i];
-    PrimitiveHandle prim = inter.getPrimitive();
-    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*mScene->getPrimitives())[prim].get());
+    if(stencil[i])
+    {
+      PrimitiveHandle ph = intersections[i].getPrimitive();
+      const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>(primitives[ph].get());
+      handles[i] = sp->getMaterial();
+      dg[i] = intersections[i].getDifferentialGeometry();
+    } // end if
+  } // end for i
 
-    Spectrum &L = results[i];
-    const ::Vector &d = rays[i].getDirection();
+  // evaluate scattering
+  materials.evaluateScattering(&dg[0], &handles[0], stencil, &f[0], n);
 
-    // evaluate scattering
-    ScatteringDistributionFunction *f = sp->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
-    L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
+  // evaluate emission
+  materials.evaluateEmission(&dg[0], &handles[0], stencil, &e[0], n);
 
-    // add emission
-    ScatteringDistributionFunction *e = sp->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
-    L += e->evaluate(-d, inter.getDifferentialGeometry());
-  } // end if
+  std::vector< ::Vector> wo(n);
+  std::vector< ::Vector> wi(n);
+  for(size_t i = 0; i != n; ++i)
+  {
+    wo[i] = -rays[i].getDirection();
+    wi[i] = -rays[i].getDirection();
+  } // end for i
+
+  // evaluate scattering
+  evaluate(&f[0], &wo[0], &dg[0], &wi[0], stencil, &results[0], n);
+
+  // evaluate emission
+  std::vector<Spectrum> emission(n, Spectrum::black());
+  evaluate(&e[0], &wo[0], &dg[0], stencil, &emission[0], n );
+
+  // add in emission
+  for(size_t i = 0; i != n; ++i)
+  {
+    results[i] += emission[i];
+  } // end for i
 } // end SIMDDebugRenderer::shade()
 
 void SIMDDebugRenderer
@@ -92,7 +161,6 @@ void SIMDDebugRenderer
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
   size2 imageDim(film->getWidth(),film->getHeight());
   size_t i = batchIdx * mWorkBatchSize + threadIdx;
-
 
   // convert thread index to pixel index
   size2 pixelIndex(i % imageDim[0],
@@ -144,15 +212,18 @@ void SIMDDebugRenderer
   ScatteringDistributionFunction::mPool.freeAll();
   progress += totalWork % mWorkBatchSize;
 
+  // intersect en masse
   intersect(&rays[0], &intersections[0], &stencil[0]);
   progress += totalWork;
 
   for(size_t i = 0; i != numBatches; ++i)
   {
-    for(size_t j = 0; j != mWorkBatchSize; ++j)
-    {
-      shade(i,j, &rays[0], &pdfs[0], &intersections[0], &stencil[0], &results[0]);
-    } // end for j
+    shade(&rays[i * mWorkBatchSize],
+          &pdfs[i * mWorkBatchSize],
+          &intersections[i * mWorkBatchSize],
+          &stencil[i * mWorkBatchSize],
+          &results[i * mWorkBatchSize],
+          mWorkBatchSize);
 
     // purge all malloc'd memory for this batch
     ScatteringDistributionFunction::mPool.freeAll();
@@ -160,10 +231,13 @@ void SIMDDebugRenderer
     progress += mWorkBatchSize;
   } // end for i
 
-  for(size_t j = 0; j != totalWork % mWorkBatchSize; ++j)
-  {
-    shade(numBatches, j, &rays[0], &pdfs[0], &intersections[0], &stencil[0], &results[0]);
-  } // end for j
+  // shade the last partial batch
+  shade(&rays[numBatches * mWorkBatchSize],
+        &pdfs[numBatches * mWorkBatchSize],
+        &intersections[numBatches * mWorkBatchSize],
+        &stencil[numBatches * mWorkBatchSize],
+        &results[numBatches * mWorkBatchSize],
+        totalWork % mWorkBatchSize);
   progress += totalWork % mWorkBatchSize;
 
   // purge all malloc'd memory for the last partial batch

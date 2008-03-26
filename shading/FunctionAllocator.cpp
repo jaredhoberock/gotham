@@ -46,22 +46,22 @@ FunctionAllocator
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelDielectric));
   //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelConductor));
 
-  assert(sizeof(Block) >= sizeof(PerspectiveSensor));
-  assert(sizeof(Block) >= sizeof(Lambertian));
-  assert(sizeof(Block) >= sizeof(SphericalEmission));
-  assert(sizeof(Block) >= sizeof(HemisphericalEmission));
-  assert(sizeof(Block) >= sizeof(SpecularReflection));
-  assert(sizeof(Block) >= sizeof(SpecularTransmission));
-  assert(sizeof(Block) >= sizeof(PhongReflection));
-  assert(sizeof(Block) >= sizeof(PhongTransmission));
-  assert(sizeof(Block) >= sizeof(CompositeDistributionFunction));
-  assert(sizeof(Block) >= sizeof(TransparentTransmission));
-  assert(sizeof(Block) >= sizeof(PerfectGlass));
-  assert(sizeof(Block) >= sizeof(ThinGlass));
-  assert(sizeof(Block) >= sizeof(AshikhminShirleyReflection));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PerspectiveSensor));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(Lambertian));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(SphericalEmission));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(HemisphericalEmission));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(SpecularReflection));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(SpecularTransmission));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PhongReflection));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PhongTransmission));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(CompositeDistributionFunction));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(TransparentTransmission));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PerfectGlass));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(ThinGlass));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(AshikhminShirleyReflection));
 
-  assert(sizeof(Block) >= sizeof(FresnelDielectric));
-  assert(sizeof(Block) >= sizeof(FresnelConductor));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(FresnelDielectric));
+  assert(sizeof(ScatteringFunctionBlock) >= sizeof(FresnelConductor));
   
   reserve(32678);
 } // end FunctionAllocator::FunctionAllocator()

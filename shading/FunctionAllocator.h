@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "exportShading.h"
+#include "ScatteringFunctionBlock.h"
 
 // XXX this is nasty: kill it
 #ifndef WIN32
@@ -47,16 +48,9 @@ class FunctionAllocator
      */
     void freeAll(void);
 
-    template<unsigned int size>
-      struct DLLAPI Accomodator
-    {
-      unsigned char mFill[size];
-    }; // end Accomodator
-
-    typedef Accomodator<18 * sizeof(int)> Block;
+    typedef ScatteringFunctionBlock Block;
 
   protected:
-
 #ifdef WIN32
     // EXPORT/IMPORT std::vector stuff
     template class DLLAPI std::allocator<Block>;

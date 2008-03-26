@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "PrimitiveHandle.h"
+#include "../../primitives/PrimitiveHandle.h"
 #include "CudaIntersection.h"
 
 extern "C"

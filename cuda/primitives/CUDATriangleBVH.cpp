@@ -9,7 +9,7 @@
 #include "cudaRayTriangleBVHIntersection.h"
 #include "cudaCreateIntersections.h"
 #include <stdcuda/cuda_algorithm.h>
-#include "SurfacePrimitive.h"
+#include "../../primitives/SurfacePrimitive.h"
 #include "CudaIntersection.h"
 
 void CUDATriangleBVH

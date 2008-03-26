@@ -19,6 +19,9 @@ env.Append(LIBS = ['surfaces'])
 env.Append(LIBS = ['shading'])
 env.Append(LIBS = ['geometry'])
 
+# cuda Gotham libraries
+env.Append(LIBS = ['cudaprimitives'])
+
 # openexr libraries
 env.Append(LIBS = ['Iex'])
 env.Append(LIBS = ['IlmImf'])
@@ -47,6 +50,7 @@ env.Append(LIBS = ['GLU'])
 env.Append(LIBS = ['GLEW'])
 env.Append(LIBS = ['QGLViewer'])
 
+# Gotham library paths
 env.Append(LIBPATH = ['../geometry',
                       '../importance',
                       '../path',
@@ -58,6 +62,10 @@ env.Append(LIBPATH = ['../geometry',
                       '../renderers',
                       '../shading',
                       '../surfaces'])
+
+# CUDA Gotham library paths
+env.Append(LIBPATH = ['../cuda/primitives',
+                      '../shading'])
 
 # create a shared library
 gothamLib = env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp', 'ShaderApi.cpp'])

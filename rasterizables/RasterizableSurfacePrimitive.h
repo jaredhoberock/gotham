@@ -30,7 +30,7 @@ class RasterizableSurfacePrimitive
      *  \param m Sets Parent0::mMaterial.
      */
     RasterizableSurfacePrimitive(boost::shared_ptr<Surface> s,
-                                 boost::shared_ptr<Material> m);
+                                 const MaterialHandle &m);
 
     /*! This method calls Parent0::mSurface->rasterize() if
      *  Parent0::mSurface implements Rasterizable.

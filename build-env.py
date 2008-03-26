@@ -74,10 +74,13 @@ def GothamEnvironment():
   mode = 'release'
   env = Environment(tools = getTools())
 
+  # figure out the absolute path of this file
+  thisFile = inspect.getabsfile(GothamEnvironment)
+  # include the directory above the one containing this file
+  path = os.path.dirname(os.path.dirname(thisFile)) + '/cudascons'
+
   # enable nvcc
-  # XXX hack: provide two paths to the tool file so we can
-  #     build from a subdirectory
-  env.Tool('nvcc', toolpath = ['../cudascons', '../../cudascons'])
+  env.Tool('nvcc', toolpath = [path])
 
   if ARGUMENTS.get('mode'):
     mode = ARGUMENTS['mode']

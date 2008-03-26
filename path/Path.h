@@ -137,6 +137,7 @@ class Path
      *  - inserts a PathVertex at the given index by sampling from a
      *    SurfacePrimitive list.
      *  \param i The index at which to insert the PathVertex.
+     *  \param scene The Scene containing the Path.
      *  \param surfaces The SurfacePrimitiveList to sample from.
      *  \param emission If this is true, the new PathVertex is initialized
      *                  with an EmissionFunction; otherwise, a SensorFunction.
@@ -149,6 +150,7 @@ class Path
      *  \return i if a new PathVertex could be inserted; INSERT_FAILED, otherwise.
      */
     unsigned int insert(const unsigned int i,
+                        const Scene *scene,
                         const SurfacePrimitiveList *surfaces,
                         const bool emission,
                         const float u0,
@@ -159,6 +161,7 @@ class Path
     /*! This method:
      *  - inserts a PathVertex at the given index by sampling from a SurfacePrimitive.
      *  \param i The index at which to insert the PathVertex.
+     *  \param scene The Scene containing this Path.
      *  \param surfaces The SurfacePrimitiveList to sample from.
      *  \param emission If this is true, the new PathVertex is initialized
      *                  with an EmissionFunction; otherwise, a SensorFunction.
@@ -170,6 +173,7 @@ class Path
      *  \return i if a new PathVertex could be inserted; INSERT_FAILED, otherwise.
      */
     unsigned int insert(const unsigned int i,
+                        const Scene *scene,
                         const SurfacePrimitive *prim,
                         const bool emission,
                         const float u0,

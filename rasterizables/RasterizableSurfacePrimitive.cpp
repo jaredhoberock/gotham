@@ -7,7 +7,7 @@
 
 RasterizableSurfacePrimitive
   ::RasterizableSurfacePrimitive(boost::shared_ptr<Surface> s,
-                                 boost::shared_ptr<Material> m)
+                                 const MaterialHandle &m)
     :Parent0(s,m),Parent1()
 {
   ;

@@ -48,6 +48,9 @@ void DebugRenderer
   Intersection inter;
   float2 uv(0,0); 
 
+  // get the list of Materials
+  const MaterialList &materials = mScene->getMaterials();
+
   // sample from the list of sensors
   const SurfacePrimitive *sensor = 0;
   float temp;
@@ -68,7 +71,7 @@ void DebugRenderer
       sensor->sampleSurfaceArea(0,0,0,dgSensor,pdf);
 
       // generate a Ray
-      ScatteringDistributionFunction &s = *sensor->getMaterial()->evaluateSensor(dgSensor);
+      ScatteringDistributionFunction &s = *materials[sensor->getMaterial()]->evaluateSensor(dgSensor);
 
       // sample a sensing direction
       s.sample(dgSensor, uv[0], uv[1], 0.5f, d, pdf, delta);
@@ -81,11 +84,11 @@ void DebugRenderer
       {
         PrimitiveHandle prim = inter.getPrimitive();
         const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*mScene->getPrimitives())[prim].get());
-        ScatteringDistributionFunction *f = sp->getMaterial()->evaluateScattering(inter.getDifferentialGeometry());
+        ScatteringDistributionFunction *f = materials[sp->getMaterial()]->evaluateScattering(inter.getDifferentialGeometry());
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
 
         // add emission
-        ScatteringDistributionFunction *e = sp->getMaterial()->evaluateEmission(inter.getDifferentialGeometry());
+        ScatteringDistributionFunction *e = materials[sp->getMaterial()]->evaluateEmission(inter.getDifferentialGeometry());
         L += e->evaluate(-d, inter.getDifferentialGeometry());
       } // end if
 

@@ -12,6 +12,8 @@
 #include "../primitives/Primitive.h"
 #include <spectrum/Spectrum.h>
 
+class ScatteringDistributionFunction;
+
 class SIMDDebugRenderer
   : public SIMDRenderer
 {
@@ -40,13 +42,27 @@ class SIMDDebugRenderer
                               Ray *rays,
                               float *pdfs) const;
 
-    virtual void shade(const size_t batchIdx,
-                       const size_t threadIdx,
-                       const Ray *rays,
+    virtual void shade(const Ray *rays,
                        const float *pdfs,
                        const Intersection *intersections,
                        const int *stencil,
-                       Spectrum *results) const;
+                       Spectrum *results,
+                       const size_t n) const;
+
+    virtual void evaluate(ScatteringDistributionFunction **f,
+                          const Vector *wo,
+                          const DifferentialGeometry *dg,
+                          const Vector *wi,
+                          const int *stencil,
+                          Spectrum *results,
+                          const size_t n) const;
+
+    virtual void evaluate(ScatteringDistributionFunction **f,
+                          const Vector *wo,
+                          const DifferentialGeometry *dg,
+                          const int *stencil,
+                          Spectrum *results,
+                          const size_t n) const;
 
     virtual void deposit(const size_t batchIdx,
                          const size_t threadIdx,

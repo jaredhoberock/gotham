@@ -74,10 +74,10 @@ void Gotham
   mAttributeStack.clear();
 
   // clear materials
-  mMaterials.clear();
+  mMaterials.reset(new MaterialList());
 
   // create the default material
-  mMaterials.push_back(shared_ptr<Material>(new DefaultMaterial()));
+  mMaterials->push_back(shared_ptr<Material>(new DefaultMaterial()));
 
   // push default attributes
   AttributeMap attr;
@@ -206,7 +206,8 @@ void Gotham
   s->setPrimitive(listPtr);
   s->setPrimitives(listPtr);
 
-  list->finalize();
+  // hand over the Materials
+  s->setMaterials(mMaterials);
 
   // give the surfaces to the scene
   s->setSurfaces(mSurfaces);
@@ -298,10 +299,10 @@ void Gotham
   ::material(Material *m)
 {
   // add m to mMaterials
-  mMaterials.push_back(shared_ptr<Material>(m));
+  mMaterials->push_back(shared_ptr<Material>(m));
 
   // note the current material
-  mAttributeStack.back()["material"] = lexical_cast<std::string>(mMaterials.size() - 1);
+  mAttributeStack.back()["material"] = lexical_cast<std::string>(mMaterials->size() - 1);
 } // end Gotham::material)
 
 void Gotham
@@ -317,8 +318,7 @@ void Gotham
   shared_ptr<Surface> surface(new RasterizableSphere(c, radius));
 
   AttributeMap &attr = mAttributeStack.back();
-  shared_ptr<Material> m = mMaterials[lexical_cast<size_t>(attr["material"])];
-  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, lexical_cast<MaterialHandle>(attr["material"])));
 } // end Gotham::sphere()
 
 void Gotham
@@ -336,12 +336,13 @@ void Gotham
   // add to list of all SurfacePrimitives
   mSurfaces->push_back(surfacePrim);
 
-  if(prim->getMaterial()->isEmitter())
+  const Material &m = *(*mMaterials)[surfacePrim->getMaterial()];
+  if(m.isEmitter())
   {
     mEmitters->push_back(surfacePrim);
   } // end if
 
-  if(prim->getMaterial()->isSensor())
+  if(m.isSensor())
   {
     mSensors->push_back(surfacePrim);
   } // end if
@@ -393,8 +394,7 @@ void Gotham
   shared_ptr<Surface> surface(mesh);
 
   AttributeMap &attr = mAttributeStack.back();
-  shared_ptr<Material> m = mMaterials[lexical_cast<size_t>(attr["material"])];
-  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, lexical_cast<MaterialHandle>(attr["material"])));
 } // end Gotham::mesh()
 
 void Gotham
@@ -452,8 +452,7 @@ void Gotham
   shared_ptr<Surface> surface(mesh);
 
   AttributeMap &attr = mAttributeStack.back();
-  shared_ptr<Material> m = mMaterials[lexical_cast<size_t>(attr["material"])];
-  surfacePrimitive(new RasterizableSurfacePrimitive(surface, m));
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, lexical_cast<MaterialHandle>(attr["material"])));
 } // end Gotham::mesh()
 
 void Gotham

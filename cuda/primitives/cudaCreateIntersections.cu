@@ -4,6 +4,7 @@
  */
 
 #include "cudaCreateIntersections.h"
+#include "../geometry/CudaDifferentialGeometry.h"
 #include <stdcuda/vector_math.h>
 #include <stdio.h>
 
@@ -43,7 +44,7 @@ __global__ void k(const float4 *o,
     float2 uv1 = p1[triIndex];
     float2 uv2 = p2[triIndex];
 
-    CudaIntersection::DifferentialGeometry dg;
+    CudaDifferentialGeometry dg;
 
     // XXX compute partial derivatives
 

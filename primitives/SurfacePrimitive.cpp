@@ -8,7 +8,7 @@
 
 SurfacePrimitive
   ::SurfacePrimitive(boost::shared_ptr<Surface> s,
-                     boost::shared_ptr<Material> m)
+                     const MaterialHandle &m)
     :mSurface(s),mMaterial(m)
 {
   ;
@@ -20,10 +20,10 @@ SurfacePrimitive
   ;
 } // end SurfacePrimitive::SurfacePrimitive()
 
-const Material *SurfacePrimitive
+MaterialHandle SurfacePrimitive
   ::getMaterial(void) const
 {
-  return mMaterial.get();
+  return mMaterial;
 } // end SurfacePrimitive::getMaterial()
 
 void SurfacePrimitive

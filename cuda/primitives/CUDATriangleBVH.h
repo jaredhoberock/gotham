@@ -8,7 +8,7 @@
 #ifndef CUDA_TRIANGLE_BVH_H
 #define CUDA_TRIANGLE_BVH_H
 
-#include "TriangleBVH.h"
+#include "../../primitives/TriangleBVH.h"
 
 // this defines the CUDA vector types
 #include <vector_types.h>

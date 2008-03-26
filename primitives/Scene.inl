@@ -96,6 +96,12 @@ void Scene
   mPrimitives = p;
 } // end Scene::setPrimitives()
 
+void Scene
+  ::setMaterials(const boost::shared_ptr<MaterialList> m)
+{
+  mMaterials = m;
+} // end Scene::setMaterials()
+
 const SurfacePrimitiveList *Scene
   ::getEmitters(void) const
 {
@@ -119,6 +125,12 @@ const PrimitiveList<> *Scene
 {
   return mPrimitives.get();
 } // end Scene::getPrimitives()
+
+const MaterialList &Scene
+  ::getMaterials(void) const
+{
+  return *mMaterials;
+} // end Scene::getMaterials()
 
 bool Scene
   ::intersect(Ray &r, Intersection &inter) const

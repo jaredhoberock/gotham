@@ -13,6 +13,7 @@
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitiveList.h"
+#include "../shading/MaterialList.h"
 #include "../renderers/Renderer.h"
 #include "../records/PhotonMap.h"
 #include <boost/shared_ptr.hpp>
@@ -210,7 +211,7 @@ class Gotham
 
     /*! The list of Materials created for this Scene.
      */
-    std::vector<boost::shared_ptr<Material> > mMaterials;
+    boost::shared_ptr<MaterialList> mMaterials;
 
     /*! A list of Primitives.
      */

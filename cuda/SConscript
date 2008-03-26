@@ -1,0 +1,4 @@
+Import('env')
+SConscript(['primitives/SConscript',
+            'shading/SConscript'],
+           exports = {'env':env})

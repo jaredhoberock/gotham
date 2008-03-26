@@ -29,11 +29,11 @@ bool KelemenSampler
   const RussianRoulette *roulette = mRoulette.get();
 
   // insert an eye vertex
-  if(p.insert(0, scene.getSensors(), false,
+  if(p.insert(0, &scene, scene.getSensors(), false,
               x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // insert a light vertex
-  if(p.insert(p.size()-1, scene.getEmitters(), true,
+  if(p.insert(p.size()-1, &scene, scene.getEmitters(), true,
               x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   size_t i = 2;
@@ -77,7 +77,7 @@ bool KelemenSampler
   const RussianRoulette *roulette = mRoulette.get();
 
   // insert an eye vertex
-  if(p.insert(0, scene.getSensors(), false,
+  if(p.insert(0, &scene, scene.getSensors(), false,
               x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // treat every other coordinate of x as an eye coordinate
@@ -113,7 +113,7 @@ bool KelemenSampler
   const RussianRoulette *roulette = mRoulette.get();
 
   // insert a light vertex
-  if(p.insert(p.size()-1, scene.getEmitters(), true,
+  if(p.insert(p.size()-1, &scene, scene.getEmitters(), true,
               x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   // treat every other coordinate of x as a light coordinate

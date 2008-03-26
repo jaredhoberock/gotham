@@ -11,6 +11,7 @@ SConscript(['geometry/SConscript',
             'renderers/SConscript',
             'shading/SConscript',
             'surfaces/SConscript',
+            'cuda/SConscript',
             'api/SConscript'], exports={'env':env})
 
 # XXX why doesn't this do anything???

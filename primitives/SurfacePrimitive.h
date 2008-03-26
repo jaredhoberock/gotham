@@ -12,6 +12,7 @@
 #include <boost/shared_ptr.hpp>
 #include "../surfaces/Surface.h"
 #include "PrimitiveHandle.h"
+#include "../shading/MaterialHandle.h"
 
 class SurfacePrimitive
   : public Primitive
@@ -22,22 +23,21 @@ class SurfacePrimitive
      */
     typedef Primitive Parent;
 
-    /*! Constructor accepts a Surface and a Material.
+    /*! Constructor accepts a Surface and a MaterialHandle.
      *  \param s Sets mSurface.
      *  \param m Sets mMaterial.
      */
     SurfacePrimitive(boost::shared_ptr<Surface> s,
-                     boost::shared_ptr<Material> m);
+                     const MaterialHandle &m);
 
     /*! Null destructor does nothing.
      */
     virtual ~SurfacePrimitive(void);
 
-    /*! This method returns a const pointer to mMaterial.
+    /*! This method returns mMaterial.
      *  \return mMaterial.
-     *  XXX Should this return a shared_ptr?
      */
-    const Material *getMaterial(void) const;
+    MaterialHandle getMaterial(void) const;
 
     /*! This method returns a const pointer to mSurface.
      *  \return mSurface.
@@ -121,9 +121,9 @@ class SurfacePrimitive
      */
     boost::shared_ptr<Surface> mSurface;
 
-    /*! A SurfacePrimitive keeps a pointer to a Material.
+    /*! A SurfacePrimitive keeps a handle to a Material.
      */
-    boost::shared_ptr<Material> mMaterial;
+    MaterialHandle mMaterial;
 
     /*! A PrimitiveHandle to uniquely identify this
      *  SurfacePrimitive in the set of all SurfacePrimitives.

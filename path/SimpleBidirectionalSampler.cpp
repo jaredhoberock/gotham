@@ -174,7 +174,7 @@ bool SimpleBidirectionalSampler
     {
       // we define the pixel location to come as the first coordinate
       // so use the next coordinate to pick an aperture point
-      justAdded = p.insert(0, scene.getSensors(), false,
+      justAdded = p.insert(0, &scene, scene.getSensors(), false,
                            x[1][0], x[1][1], x[1][2], x[1][3]);
     } // end if
     else if(i == 1)
@@ -218,7 +218,7 @@ bool SimpleBidirectionalSampler
   {
     if(j == 0)
     {
-      justAdded = p.insert(justAdded, scene.getEmitters(), true,
+      justAdded = p.insert(justAdded, &scene, scene.getEmitters(), true,
                            x[i][0], x[i][1], x[i][2], x[i][3]);
     } // end if
     else if(j == 1)

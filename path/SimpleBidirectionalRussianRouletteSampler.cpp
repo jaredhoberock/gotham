@@ -41,7 +41,7 @@ bool SimpleBidirectionalRussianRouletteSampler
     // we MUST return a failure; otherwise, we will bias results
     // towards shorter paths
     // XXX TODO make a similar insert() method which accepts a RussianRoulette object
-    justAdded[0] = p.insert(0, scene.getSensors(), false, x[2][0], x[2][1], x[2][2], x[2][3]);
+    justAdded[0] = p.insert(0, &scene, scene.getSensors(), false, x[2][0], x[2][1], x[2][2], x[2][3]);
     if(justAdded[0] == Path::INSERT_FAILED) return false;
     p[justAdded[0]].mPdf *= rr;
     p[justAdded[0]].mAccumulatedPdf *= rr;
@@ -60,7 +60,7 @@ bool SimpleBidirectionalRussianRouletteSampler
     // we MUST return a failure; otherwise, we will bias results
     // towards shorter paths
     // XXX TODO make a similar insert() method which accepts a RussianRoulette object
-    justAdded[1] = p.insert(p.size()-1, scene.getEmitters(), true, x[1][0], x[1][1], x[1][2], x[1][3]);
+    justAdded[1] = p.insert(p.size()-1, &scene, scene.getEmitters(), true, x[1][0], x[1][1], x[1][2], x[1][3]);
     if(justAdded[1] == Path::INSERT_FAILED) return false;
     p[justAdded[1]].mPdf *= rr;
     p[justAdded[1]].mAccumulatedPdf *= rr;

@@ -14,6 +14,7 @@
 // XXX refactor this method and the next
 unsigned int Path
   ::insert(const unsigned int i,
+           const Scene *scene,
            const SurfacePrimitive *prim,
            const bool emission,
            const float u0,
@@ -27,9 +28,10 @@ unsigned int Path
   prim->sampleSurfaceArea(u0, u1, u2, vert.mDg, vert.mPdf);
 
   // initialize the integrand
-  vert.mEmission = vert.mSurface->getMaterial()->evaluateEmission(vert.mDg);
-  vert.mScattering = vert.mSurface->getMaterial()->evaluateScattering(vert.mDg);
-  vert.mSensor = vert.mSurface->getMaterial()->evaluateSensor(vert.mDg);
+  const Material &m = *scene->getMaterials()[prim->getMaterial()];
+  vert.mEmission = m.evaluateEmission(vert.mDg);
+  vert.mScattering = m.evaluateScattering(vert.mDg);
+  vert.mSensor = m.evaluateSensor(vert.mDg);
 
   // init delta
   // XXX implement delta for surface area pdfs
@@ -55,6 +57,7 @@ unsigned int Path
 
 unsigned int Path
   ::insert(const unsigned int i,
+           const Scene *scene,
            const SurfacePrimitiveList *surfaces,
            const bool emission,
            const float u0,
@@ -71,9 +74,10 @@ unsigned int Path
                                  vert.mPdf))
   {
     // initialize the integrand
-    vert.mEmission = vert.mSurface->getMaterial()->evaluateEmission(vert.mDg);
-    vert.mScattering = vert.mSurface->getMaterial()->evaluateScattering(vert.mDg);
-    vert.mSensor = vert.mSurface->getMaterial()->evaluateSensor(vert.mDg);
+    const Material &m = *scene->getMaterials()[vert.mSurface->getMaterial()];
+    vert.mEmission = m.evaluateEmission(vert.mDg);
+    vert.mScattering = m.evaluateScattering(vert.mDg);
+    vert.mSensor = m.evaluateSensor(vert.mDg);
 
     // init delta
     // XXX implement delta for surface area pdfs
@@ -167,12 +171,12 @@ unsigned int Path
     PrimitiveHandle prim = inter.getPrimitive();
     const SurfacePrimitive *surface =
       dynamic_cast<const SurfacePrimitive*>((*scene->getPrimitives())[prim].get());
-    const Material *material = surface->getMaterial();
+    const Material &material = *scene->getMaterials()[surface->getMaterial()];
     const DifferentialGeometry &dg = inter.getDifferentialGeometry();
 
-    ScatteringDistributionFunction *emission = material->evaluateEmission(dg);
-    ScatteringDistributionFunction *scattering = material->evaluateScattering(dg);
-    ScatteringDistributionFunction *sensor = material->evaluateSensor(dg);
+    ScatteringDistributionFunction *emission = material.evaluateEmission(dg);
+    ScatteringDistributionFunction *scattering = material.evaluateScattering(dg);
+    ScatteringDistributionFunction *sensor = material.evaluateSensor(dg);
 
     // convert pdf to projected solid angle measure
     // XXX this division is by zero at the silhouette
