@@ -4,10 +4,10 @@
  *         abstracting the Fresnel functions.
  */
 
-#ifndef FRESNEL_H
-#define FRESNEL_H
-
+#pragma once
 #include <spectrum/Spectrum.h>
+
+class FunctionAllocator;
 
 class Fresnel
 {
@@ -44,7 +44,7 @@ class Fresnel
 
     /*! Overload the new operator.
      */
-    void *operator new(size_t size);
+    void *operator new(size_t size, FunctionAllocator &alloc);
 }; // end Fresnel
 
 class FresnelDielectric
@@ -73,6 +73,4 @@ class FresnelConductor
 }; // end FresnelConductor
 
 #include "Fresnel.inl"
-
-#endif // FRESNEL_H
 

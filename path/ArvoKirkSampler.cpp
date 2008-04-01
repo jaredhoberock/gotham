@@ -19,6 +19,7 @@ ArvoKirkSampler
 
 bool ArvoKirkSampler
   ::constructPath(const Scene &scene,
+                  ShadingContext &context,
                   const HyperPoint &x,
                   Path &p)
 {
@@ -29,7 +30,7 @@ bool ArvoKirkSampler
   // reserve the 0th coordinate to choose
   // the film plane
   // XXX remove the need for this
-  unsigned int lastPosition = p.insert(0, &scene, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]);
+  unsigned int lastPosition = p.insert(0, &scene, context, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]);
 
   if(lastPosition == Path::INSERT_FAILED) return false;
 
@@ -39,7 +40,7 @@ bool ArvoKirkSampler
   float u2 = x[0][2];
   float u3 = x[0][3];
   size_t coord = 2;
-  while((p.insertRussianRoulette(lastPosition, &scene, true, lastPosition != 0, 
+  while((p.insertRussianRoulette(lastPosition, &scene, context, true, lastPosition != 0, 
                                  u0, u1, u2, u3, rr))
         < mMaxEyeLength - 1)
   {
@@ -55,7 +56,7 @@ bool ArvoKirkSampler
   // last eye vertex
   // use the final coordinate to choose the light vertex
   const HyperPoint::value_type &c = x[x.size()-1];
-  lastPosition = p.insert(p.getSubpathLengths()[0], &scene, scene.getEmitters(), true,
+  lastPosition = p.insert(p.getSubpathLengths()[0], &scene, context, scene.getEmitters(), true,
                           c[0], c[1], c[2], c[3]);
 
   return lastPosition != Path::INSERT_FAILED;

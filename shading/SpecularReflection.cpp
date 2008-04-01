@@ -8,19 +8,21 @@
 
 SpecularReflection
   ::SpecularReflection(const Spectrum &r,
-                       const float eta)
+                       const float eta,
+                       FunctionAllocator &alloc)
     :Parent(),mReflectance(r)
 {
-  mFresnel = new FresnelConductor(mReflectance, Spectrum(eta,eta,eta));
+  mFresnel = new(alloc) FresnelConductor(mReflectance, Spectrum(eta,eta,eta));
 } // end SpecularReflection::SpecularReflection()
 
 SpecularReflection
   ::SpecularReflection(const Spectrum &r,
                        const float etai,
-                       const float etat)
+                       const float etat,
+                       FunctionAllocator &alloc)
     :Parent(),mReflectance(r)
 {
-  mFresnel = new FresnelDielectric(etai, etat);
+  mFresnel = new(alloc) FresnelDielectric(etai, etat);
 } // end SpecularReflection::SpecularReflection()
 
 Spectrum SpecularReflection

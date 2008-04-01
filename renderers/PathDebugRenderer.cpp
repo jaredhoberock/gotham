@@ -97,7 +97,7 @@ void PathDebugRenderer
     x[0][1] = py;
 
     // sample a path
-    if(mSampler->constructPath(*s, x, p))
+    if(mSampler->constructPath(*s, getShadingContext(), x, p))
     {
       results.clear();
       mSampler->evaluate(*s, p, results);
@@ -105,7 +105,7 @@ void PathDebugRenderer
     } // end if
 
     // purge all malloc'd memory for this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     ++mNumSamples;
   } // end for i

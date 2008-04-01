@@ -26,6 +26,12 @@ class ShirleySampler
     virtual void evaluate(const Scene &scene,
                           const Path &p,
                           std::vector<Result> &results) const;
+
+  protected:
+    /*! ShirleySampler needs access to a ShadingContext because it
+     *  evaluates emission shaders inside of evaluate().
+     */
+    ShadingContext *mShadingContext;
 }; // end ShirleySampler
 
 #endif // SHRILEY_SAMPLER_H

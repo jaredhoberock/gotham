@@ -6,7 +6,7 @@
  */
 
 #include "noise.h"
-#include "stdshader.h"
+#include "../include/stdshader.h"
 #include <bittricks/bittricks.h>
 
 #define NOISE_PERM_SIZE 256
@@ -51,9 +51,6 @@ static float grad(int hash, float x, float y, float z)
   return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 } // end grad()
 
-namespace gotham
-{
-
 float noise(float x, float y, float z)
 {
   int ix = ifloor(x);
@@ -85,4 +82,3 @@ float noise(float x, float y, float z)
                                  grad(p[BB+1], x-1, y-1, z-1 ))));
 } // end noise()
 
-} // end gotham

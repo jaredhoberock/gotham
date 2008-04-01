@@ -47,11 +47,12 @@ float TargetImportance
 void TargetImportance
   ::preprocess(const boost::shared_ptr<RandomSequence> &r,
                const boost::shared_ptr<const Scene> &scene,
+               const boost::shared_ptr<ShadingContext> &context,
                const boost::shared_ptr<PathMutator> &mutator,
                MetropolisRenderer &renderer)
 {
-  mEstimateImportance.preprocess(r,scene,mutator,renderer);
-  Parent::preprocess(r,scene,mutator,renderer);
+  mEstimateImportance.preprocess(r,scene,context,mutator,renderer);
+  Parent::preprocess(r,scene,context,mutator,renderer);
 } // end TargetImportance::preprocess()
 
 void TargetImportance

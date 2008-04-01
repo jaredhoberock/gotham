@@ -10,20 +10,22 @@
 PhongReflection
   ::PhongReflection(const Spectrum &r,
                     const float eta,
-                    const float exponent)
+                    const float exponent,
+                    FunctionAllocator &alloc)
     :mReflectance(r),mExponent(exponent)
 {
-  mFresnel = new FresnelConductor(mReflectance, Spectrum(eta,eta,eta));
+  mFresnel = new(alloc) FresnelConductor(mReflectance, Spectrum(eta,eta,eta));
 } // end PhongReflection::PhongReflection()
 
 PhongReflection
   ::PhongReflection(const Spectrum &r,
                     const float etai,
                     const float etat,
-                    const float exponent)
+                    const float exponent,
+                    FunctionAllocator &alloc)
     :mReflectance(r),mExponent(exponent)
 {
-  mFresnel = new FresnelDielectric(etai, etat);
+  mFresnel = new(alloc) FresnelDielectric(etai, etat);
 } // end PhongReflection::PhongReflection()
 
 Spectrum PhongReflection

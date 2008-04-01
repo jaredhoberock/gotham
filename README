@@ -15,10 +15,6 @@ export GOTHAMHOME=<absolute root here>/src/gotham
 # update PATH to point to gotham's bin directory
 export PATH=$PATH:$GOTHAMHOME/bin
 
-# update PYTHONPATH and LD_LIBRARY_PATH to point to gotham's lib directory
-export PYTHONPATH=$PYTHONPATH:$GOTHAMHOME/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GOTHAMHOME/lib
-
 # install scons, our build system
 sudo apt-get install scons
 

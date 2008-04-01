@@ -34,6 +34,11 @@ class HemisphericalEmission
     using Parent::evaluate;
     Spectrum evaluate(const Vector3 &w,
                       const DifferentialGeometry &dg) const;
+
+    /*! This method returns a const reference to mRadiance.
+     *  \return mRadiance
+     */
+    const Spectrum &getRadiance(void) const;
     
   protected:
     Spectrum mRadiance;

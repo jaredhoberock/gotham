@@ -18,6 +18,7 @@ void ScalarImportance
 void ScalarImportance
   ::preprocess(const shared_ptr<RandomSequence> &r,
                const shared_ptr<const Scene> &scene,
+               const shared_ptr<ShadingContext> &context,
                const shared_ptr<PathMutator> &mutator,
                MetropolisRenderer &renderer)
 {
@@ -26,13 +27,14 @@ void ScalarImportance
   mInvNormalizationConstant = 1.0f;
 
   // now integrate
-  mNormalizationConstant = estimateNormalizationConstant(*r.get(), scene, mutator, 10000);
+  mNormalizationConstant = estimateNormalizationConstant(*r.get(), scene, context, mutator, 10000);
   mInvNormalizationConstant = 1.0f / mNormalizationConstant;
 } // end ScalarImportance::preprocess()
 
 float ScalarImportance
   ::estimateNormalizationConstant(const boost::shared_ptr<RandomSequence> &r,
                                   const boost::shared_ptr<const Scene> &scene,
+                                  const boost::shared_ptr<ShadingContext> &context,
                                   const boost::shared_ptr<PathMutator> &mutator,
                                   const size_t n,
                                   FunctionAllocator &allocator,
@@ -57,7 +59,7 @@ float ScalarImportance
     PathSampler::constructHyperPoint(*r, x);
 
     // create a Path
-    if(sampler->constructPath(*scene, x, xPath))
+    if(sampler->constructPath(*scene, *context, x, xPath))
     {
       // evaluate the Path
       resultList.clear();
@@ -71,7 +73,7 @@ float ScalarImportance
     } // end if
 
     // free all integrands allocated in this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    context->freeAll();
   } // end for i
 
   // pick a seed
@@ -80,13 +82,13 @@ float ScalarImportance
                    seedImportance.begin(), seedImportance.end());
   x = aliasTable((*r)());
   Path temp;
-  sampler->constructPath(*scene, x, temp);
+  sampler->constructPath(*scene, *context, x, temp);
 
   // copy temp to x
   temp.clone(xPath, allocator);
 
   // free all integrands that were allocated in the estimate
-  ScatteringDistributionFunction::mPool.freeAll();
+  context->freeAll();
   
   return result / n;
 } // end ScalarImportance::estimateNormalizationConstant()
@@ -94,6 +96,7 @@ float ScalarImportance
 float ScalarImportance
   ::estimateNormalizationConstant(RandomSequence &r,
                                   const boost::shared_ptr<const Scene> &scene,
+                                  const boost::shared_ptr<ShadingContext> &context,
                                   const boost::shared_ptr<PathMutator> &mutator,
                                   const size_t n)
 {
@@ -113,7 +116,7 @@ float ScalarImportance
     PathSampler::constructHyperPoint(r, x);
 
     // create a Path
-    if(sampler->constructPath(*scene, x, xPath))
+    if(sampler->constructPath(*scene, *context, x, xPath))
     {
       // evaluate the Path
       resultList.clear();
@@ -124,7 +127,7 @@ float ScalarImportance
     } // end if
 
     // free all integrands allocated in this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    context->freeAll();
   } // end for i
 
   return result / n;

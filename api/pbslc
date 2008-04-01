@@ -143,6 +143,7 @@ def stripComments(shaderLines):
 
 def compile(filename):
   globalVariables = '''
+gContext = &context;
 const Point &P = dg.getPoint();
 const Normal &N = dg.getNormal();
 const Vector &T = dg.getTangent();
@@ -174,7 +175,7 @@ const Vector3 &dpdv = dg.getPointPartials()[1];
   if scatteringBody != '':
     # rebuild a shader string
     scatteringString = '''
-virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeometry &dg) const
+virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
   ScatteringDistributionFunction *F = 0;
   '''
@@ -192,7 +193,7 @@ virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeo
   (emissionParametersList, emissionBody) = parseFunction('emission', shaderString)
   if emissionBody != '':
     emissionString = '''
- virtual ScatteringDistributionFunction *evaluateEmission(const DifferentialGeometry &dg) const
+ virtual ScatteringDistributionFunction *evaluateEmission(ShadingInterface &context, const DifferentialGeometry &dg) const
  {
    ScatteringDistributionFunction *E = 0;
  '''
@@ -214,7 +215,7 @@ virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeo
   (sensorParametersList, sensorBody) = parseFunction('sensor', shaderString)
   if sensorBody != '':
     sensorString = '''
-virtual ScatteringDistributionFunction *evaluateSensor(const DifferentialGeometry &dg) const
+virtual ScatteringDistributionFunction *evaluateSensor(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
   ScatteringDistributionFunction *S = 0;
 '''
@@ -233,6 +234,9 @@ virtual bool isSensor(void) const
   
   # standard includes
   compileMe = '''
+class ShadingInterface;
+ShadingInterface *gContext;
+#include "Material.h"
 #include "stdshader.h"
 '''
   
@@ -301,7 +305,7 @@ BOOST_PYTHON_MODULE(%s)
   #     with an include directory. point to that.
   makefile = '''
 import os
-includes = [os.environ['GOTHAMHOME'] + '/shading']
+includes = [os.environ['GOTHAMHOME'] + '/include']
 if os.name == 'posix':
   includes += ['/home/jared/dev/src', '/usr/include/python2.5']
 elif os.name == 'nt':

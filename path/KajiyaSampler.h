@@ -29,6 +29,7 @@ class KajiyaSampler
     KajiyaSampler(const unsigned int maxEyeLength = Path::static_size - 1);
 
     virtual bool constructPath(const Scene &scene,
+                               ShadingContext &context,
                                const HyperPoint &x,
                                Path &p);
 

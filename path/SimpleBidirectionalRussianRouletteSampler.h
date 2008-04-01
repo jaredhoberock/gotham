@@ -34,12 +34,14 @@ class SimpleBidirectionalRussianRouletteSampler
      *  Scene of interest.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param p The constructed Path will be returned here.
      *  \return true if a Path could be constructed; false, otherwise.
      */
     virtual bool constructPath(const Scene &scene,
+                               ShadingContext &context,
                                const HyperPoint &x,
                                Path &p);
 

@@ -7,9 +7,9 @@
 #include "ScatteringDistributionFunction.h"
 
 void *Fresnel
-  ::operator new(size_t size)
+  ::operator new(size_t size, FunctionAllocator &alloc)
 {
-  return ScatteringDistributionFunction::mPool.malloc();
+  return alloc.malloc();
 } // end Fresnel::operator new()
 
 FresnelDielectric

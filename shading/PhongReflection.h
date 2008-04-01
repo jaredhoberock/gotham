@@ -26,10 +26,12 @@ class PhongReflection
      *  \param t The transmittance of this PhongReflection.
      *  \param eta Sets the index of refraction of the Fresnel conductor.
      *  \param exponent The Phong exponent of this PhongReflection.
+     *  \param alloc A FunctionAllocator object for allocating the Fresnel object.
      */
     PhongReflection(const Spectrum &t,
                     const float eta,
-                    const float exponent);
+                    const float exponent,
+                    FunctionAllocator &alloc);
 
     /*! Constructor accepts a reflectance, indices of refraction,
      *  and a Phong exponent to create a glossy Fresnel dielectric.
@@ -37,11 +39,13 @@ class PhongReflection
      *  \param etai Sets the index of refraction of the space surrounding the dielectric.
      *  \param etat Sets the index of refraction of the Fresnel dielectric medium.
      *  \param exponent The Phong exponent of this PhongReflection.
+     *  \param alloc A FunctionAllocator object for allocating the Fresnel object.
      */
     PhongReflection(const Spectrum &t,
                     const float etai,
                     const float etat,
-                    const float exponent);
+                    const float exponent,
+                    FunctionAllocator &alloc);
 
     /*! This method evaluates this PhongReflection function.
      *  \param wi A vector pointing towards the direction of incoming radiance.

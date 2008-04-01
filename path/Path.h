@@ -12,6 +12,7 @@
 #include "../geometry/Vector.h"
 #include "../geometry/DifferentialGeometry.h"
 #include "../shading/ScatteringDistributionFunction.h"
+#include "../shading/ShadingContext.h"
 #include <spectrum/Spectrum.h>
 #include <boost/array.hpp>
 
@@ -138,6 +139,7 @@ class Path
      *    SurfacePrimitive list.
      *  \param i The index at which to insert the PathVertex.
      *  \param scene The Scene containing the Path.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param surfaces The SurfacePrimitiveList to sample from.
      *  \param emission If this is true, the new PathVertex is initialized
      *                  with an EmissionFunction; otherwise, a SensorFunction.
@@ -151,6 +153,7 @@ class Path
      */
     unsigned int insert(const unsigned int i,
                         const Scene *scene,
+                        ShadingContext &context,
                         const SurfacePrimitiveList *surfaces,
                         const bool emission,
                         const float u0,
@@ -162,6 +165,7 @@ class Path
      *  - inserts a PathVertex at the given index by sampling from a SurfacePrimitive.
      *  \param i The index at which to insert the PathVertex.
      *  \param scene The Scene containing this Path.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param surfaces The SurfacePrimitiveList to sample from.
      *  \param emission If this is true, the new PathVertex is initialized
      *                  with an EmissionFunction; otherwise, a SensorFunction.
@@ -174,6 +178,7 @@ class Path
      */
     unsigned int insert(const unsigned int i,
                         const Scene *scene,
+                        ShadingContext &context,
                         const SurfacePrimitive *prim,
                         const bool emission,
                         const float u0,
@@ -185,6 +190,7 @@ class Path
      *    sampling the previous PathVertex's integrand.
      *  \param previous The index of the previous vertex.
      *  \param scene A pointer to the Scene containing this Path.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param after Whether or not to insert the new PathVertex before
      *               or after previous.
      *  \param scatter Whether or not to perform bidirectional scattering
@@ -197,6 +203,7 @@ class Path
      */
     unsigned int insert(const unsigned int previous,
                         const Scene *scene,
+                        ShadingContext &context,
                         const bool after,
                         const bool scatter,
                         const float u0,
@@ -208,6 +215,7 @@ class Path
      *    sampling the previous PathVertex's integrand and applying Russian roulette.
      *  \param previous The index of the previous vertex.
      *  \param scene A pointer to the Scene containing this Path.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param after Whether or not to insert the new PathVertex before
      *               or after previous.
      *  \param scatter Whether or not to perform bidirectional scattering
@@ -224,6 +232,7 @@ class Path
      */
     unsigned int insertRussianRoulette(const unsigned int previous,
                                        const Scene *scene,
+                                       ShadingContext &context,
                                        const bool after,
                                        const bool scatter,
                                        const float u0,
@@ -236,6 +245,7 @@ class Path
      *  using Russian roulette.  The termination probability is also returned.
      *  \param previous The index of the previous vertex.
      *  \param scene A pointer to the Scene containing this Path.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param after Whether or not to insert the new PathVertex before
      *               or after previous.
      *  \param scatter Whether or not to perform bidirectional scattering
@@ -254,6 +264,7 @@ class Path
      */
     unsigned int insertRussianRouletteWithTermination(const unsigned int previous,
                                                       const Scene *scene,
+                                                      ShadingContext &context,
                                                       const bool after,
                                                       const bool scatter,
                                                       const float u0,
@@ -266,6 +277,7 @@ class Path
 
     template<typename RNG>
       bool construct(const Scene *scene,
+                     ShadingContext &context,
                      const unsigned int eyeSubpathLength,
                      const unsigned int lightSubpathLength,
                      const float p0,
@@ -374,6 +386,7 @@ class Path
     //     pass them in the new PathVertex
     unsigned int insert(const unsigned int previous,
                         const Scene *scene,
+                        ShadingContext &context,
                         const bool after,
                         const Vector &dir,
                         const Spectrum &f,

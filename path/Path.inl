@@ -15,6 +15,7 @@ PathVertex
 template<typename RNG>
   bool Path
     ::construct(const Scene *scene,
+                ShadingContext &context,
                 const unsigned int eyeSubpathLength,
                 const unsigned int lightSubpathLength,
                 const float p0,
@@ -42,7 +43,7 @@ template<typename RNG>
         u2 = p2;
       } // end if
      
-      if(insert(i, scene, true, scatter, u0, u1, u2) == INSERT_FAILED) return false;
+      if(insert(i, scene, context, true, scatter, u0, u1, u2) == INSERT_FAILED) return false;
     } // end for i
   } // end if
 

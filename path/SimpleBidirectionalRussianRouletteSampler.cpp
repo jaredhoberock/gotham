@@ -21,6 +21,7 @@ SimpleBidirectionalRussianRouletteSampler
 
 bool SimpleBidirectionalRussianRouletteSampler
   ::constructPath(const Scene &scene,
+                  ShadingContext &context,
                   const HyperPoint &x,
                   Path &p)
 {
@@ -41,7 +42,7 @@ bool SimpleBidirectionalRussianRouletteSampler
     // we MUST return a failure; otherwise, we will bias results
     // towards shorter paths
     // XXX TODO make a similar insert() method which accepts a RussianRoulette object
-    justAdded[0] = p.insert(0, &scene, scene.getSensors(), false, x[2][0], x[2][1], x[2][2], x[2][3]);
+    justAdded[0] = p.insert(0, &scene, context, scene.getSensors(), false, x[2][0], x[2][1], x[2][2], x[2][3]);
     if(justAdded[0] == Path::INSERT_FAILED) return false;
     p[justAdded[0]].mPdf *= rr;
     p[justAdded[0]].mAccumulatedPdf *= rr;
@@ -60,7 +61,7 @@ bool SimpleBidirectionalRussianRouletteSampler
     // we MUST return a failure; otherwise, we will bias results
     // towards shorter paths
     // XXX TODO make a similar insert() method which accepts a RussianRoulette object
-    justAdded[1] = p.insert(p.size()-1, &scene, scene.getEmitters(), true, x[1][0], x[1][1], x[1][2], x[1][3]);
+    justAdded[1] = p.insert(p.size()-1, &scene, context, scene.getEmitters(), true, x[1][0], x[1][1], x[1][2], x[1][3]);
     if(justAdded[1] == Path::INSERT_FAILED) return false;
     p[justAdded[1]].mPdf *= rr;
     p[justAdded[1]].mAccumulatedPdf *= rr;
@@ -80,17 +81,17 @@ bool SimpleBidirectionalRussianRouletteSampler
     {
       if(i == 2)
       {
-        justAdded[subpath] = p.insertRussianRouletteWithTermination(justAdded[subpath], &scene, true, false,
+        justAdded[subpath] = p.insertRussianRouletteWithTermination(justAdded[subpath], &scene, context, true, false,
                                                                     x[0][0], x[0][1], x[0][2], x[0][3], roulette, termination[subpath]);
       } // end if
       else if(i == 3)
       {
-        justAdded[subpath] = p.insertRussianRouletteWithTermination(justAdded[subpath], &scene, false, false,
+        justAdded[subpath] = p.insertRussianRouletteWithTermination(justAdded[subpath], &scene, context, false, false,
                                                                     x[i][0], x[i][1], x[i][2], x[i][3], roulette, termination[subpath]);
       } // end else if
       else
       {
-        justAdded[subpath] = p.insertRussianRouletteWithTermination(justAdded[subpath], &scene, !subpath, true,
+        justAdded[subpath] = p.insertRussianRouletteWithTermination(justAdded[subpath], &scene, context, !subpath, true,
                                                                     x[i][0], x[i][1], x[i][2], x[i][3], roulette, termination[subpath]);
       } // end else
     } // end if

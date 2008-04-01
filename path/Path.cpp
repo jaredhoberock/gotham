@@ -15,6 +15,7 @@
 unsigned int Path
   ::insert(const unsigned int i,
            const Scene *scene,
+           ShadingContext &context,
            const SurfacePrimitive *prim,
            const bool emission,
            const float u0,
@@ -28,10 +29,9 @@ unsigned int Path
   prim->sampleSurfaceArea(u0, u1, u2, vert.mDg, vert.mPdf);
 
   // initialize the integrand
-  const Material &m = *scene->getMaterials()[prim->getMaterial()];
-  vert.mEmission = m.evaluateEmission(vert.mDg);
-  vert.mScattering = m.evaluateScattering(vert.mDg);
-  vert.mSensor = m.evaluateSensor(vert.mDg);
+  vert.mEmission = context.evaluateEmission(prim->getMaterial(), vert.mDg);
+  vert.mScattering = context.evaluateScattering(prim->getMaterial(), vert.mDg);
+  vert.mSensor = context.evaluateSensor(prim->getMaterial(), vert.mDg);
 
   // init delta
   // XXX implement delta for surface area pdfs
@@ -58,6 +58,7 @@ unsigned int Path
 unsigned int Path
   ::insert(const unsigned int i,
            const Scene *scene,
+           ShadingContext &context,
            const SurfacePrimitiveList *surfaces,
            const bool emission,
            const float u0,
@@ -74,10 +75,9 @@ unsigned int Path
                                  vert.mPdf))
   {
     // initialize the integrand
-    const Material &m = *scene->getMaterials()[vert.mSurface->getMaterial()];
-    vert.mEmission = m.evaluateEmission(vert.mDg);
-    vert.mScattering = m.evaluateScattering(vert.mDg);
-    vert.mSensor = m.evaluateSensor(vert.mDg);
+    vert.mEmission = context.evaluateEmission(vert.mSurface->getMaterial(), vert.mDg);
+    vert.mScattering = context.evaluateScattering(vert.mSurface->getMaterial(), vert.mDg);
+    vert.mSensor = context.evaluateSensor(vert.mSurface->getMaterial(), vert.mDg);
 
     // init delta
     // XXX implement delta for surface area pdfs
@@ -107,6 +107,7 @@ unsigned int Path
 unsigned int Path
   ::insert(const unsigned int previous,
            const Scene *scene,
+           ShadingContext &context,
            const bool after,
            const bool scatter,
            const float u0,
@@ -140,7 +141,7 @@ unsigned int Path
   } // end else
 
   unsigned int result = INSERT_FAILED;
-  if(!f.isBlack()) result = insert(previous, scene, after, w, f, pdf, delta, component);
+  if(!f.isBlack()) result = insert(previous, scene, context, after, w, f, pdf, delta, component);
 
   return result;
 } // end Path::insert()
@@ -148,6 +149,7 @@ unsigned int Path
 unsigned int Path
   ::insert(const unsigned int previous,
            const Scene *scene,
+           ShadingContext &context,
            const bool after,
            const Vector &dir,
            const Spectrum &f,
@@ -171,12 +173,11 @@ unsigned int Path
     PrimitiveHandle prim = inter.getPrimitive();
     const SurfacePrimitive *surface =
       dynamic_cast<const SurfacePrimitive*>((*scene->getPrimitives())[prim].get());
-    const Material &material = *scene->getMaterials()[surface->getMaterial()];
     const DifferentialGeometry &dg = inter.getDifferentialGeometry();
 
-    ScatteringDistributionFunction *emission = material.evaluateEmission(dg);
-    ScatteringDistributionFunction *scattering = material.evaluateScattering(dg);
-    ScatteringDistributionFunction *sensor = material.evaluateSensor(dg);
+    ScatteringDistributionFunction *emission = context.evaluateEmission(surface->getMaterial(), dg);
+    ScatteringDistributionFunction *scattering = context.evaluateScattering(surface->getMaterial(), dg);
+    ScatteringDistributionFunction *sensor = context.evaluateSensor(surface->getMaterial(), dg);
 
     // convert pdf to projected solid angle measure
     // XXX this division is by zero at the silhouette
@@ -363,6 +364,7 @@ void Path
 unsigned int Path
   ::insertRussianRoulette(const unsigned int previous,
                           const Scene *scene,
+                          ShadingContext &context,
                           const bool after,
                           const bool scatter,
                           const float u0,
@@ -405,7 +407,7 @@ unsigned int Path
   unsigned int result = ROULETTE_TERMINATED;
   if(u3 < rr)
   {
-    result = insert(previous, scene, after, w, f, pdf * rr, delta, component);
+    result = insert(previous, scene, context, after, w, f, pdf * rr, delta, component);
   } // end if
 
   return result;
@@ -414,6 +416,7 @@ unsigned int Path
 unsigned int Path
   ::insertRussianRouletteWithTermination(const unsigned int previous,
                                          const Scene *scene,
+                                         ShadingContext &context,
                                          const bool after,
                                          const bool scatter,
                                          const float u0,
@@ -457,7 +460,7 @@ unsigned int Path
   unsigned int result = ROULETTE_TERMINATED;
   if(u3 < rr)
   {
-    result = insert(previous, scene, after, w, f, pdf * rr, delta, component);
+    result = insert(previous, scene, context, after, w, f, pdf * rr, delta, component);
   } // end if
 
   termination = 1.0f - rr;

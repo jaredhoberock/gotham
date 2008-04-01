@@ -72,7 +72,7 @@ void BatchMeansRenderer
   ResultList xResults, yResults;
 
   // estimate normalization constant and pick a seed
-  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mMutator,
+  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mShadingContext, mMutator,
                                                        10000, mLocalPool, x, xPath);
   float invB = 1.0f / b;
 
@@ -193,7 +193,7 @@ void BatchMeansRenderer
     } // end if
 
     // purge all malloc'd memory for this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     ++mNumSamples;
 

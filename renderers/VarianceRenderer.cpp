@@ -289,7 +289,7 @@ void VarianceRenderer
 
     // sample a path
     results.clear();
-    if(mSampler->constructPath(*s, x, p))
+    if(mSampler->constructPath(*s, *mShadingContext, x, p))
     {
       mSampler->evaluate(*s, p, results);
       mRecord->record(1.0f, x, p, results);
@@ -309,7 +309,7 @@ void VarianceRenderer
     ++n;
 
     // purge all malloc'd memory for this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     ++mNumSamples;
     ++progress;

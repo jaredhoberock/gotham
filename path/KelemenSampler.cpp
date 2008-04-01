@@ -5,7 +5,6 @@
 
 #include "KelemenSampler.h"
 #include "../geometry/Ray.h"
-#include "../shading/Material.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../primitives/Scene.h"
@@ -22,6 +21,7 @@ KelemenSampler
 
 bool KelemenSampler
   ::constructPathInterleaved(const Scene &scene,
+                             ShadingContext &context,
                              const HyperPoint &x,
                              Path &p) const
 {
@@ -29,11 +29,11 @@ bool KelemenSampler
   const RussianRoulette *roulette = mRoulette.get();
 
   // insert an eye vertex
-  if(p.insert(0, &scene, scene.getSensors(), false,
+  if(p.insert(0, &scene, context, scene.getSensors(), false,
               x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // insert a light vertex
-  if(p.insert(p.size()-1, &scene, scene.getEmitters(), true,
+  if(p.insert(p.size()-1, &scene, context, scene.getEmitters(), true,
               x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   size_t i = 2;
@@ -46,17 +46,17 @@ bool KelemenSampler
     {
       if(i == 2)
       {
-        justAdded[subpath] = p.insertRussianRoulette(justAdded[subpath], &scene, true, false,
+        justAdded[subpath] = p.insertRussianRoulette(justAdded[subpath], &scene, context, true, false,
                                                      x[0][0], x[0][1], x[0][2], x[0][3], roulette);
       } // end if
       else if(i == 3)
       {
-        justAdded[subpath] = p.insertRussianRoulette(justAdded[subpath], &scene, false, false,
+        justAdded[subpath] = p.insertRussianRoulette(justAdded[subpath], &scene, context, false, false,
                                                      x[i][0], x[i][1], x[i][2], x[i][3], roulette);
       } // end else if
       else
       {
-        justAdded[subpath] = p.insertRussianRoulette(justAdded[subpath], &scene, !subpath, true,
+        justAdded[subpath] = p.insertRussianRoulette(justAdded[subpath], &scene, context, !subpath, true,
                                                      x[i][0], x[i][1], x[i][2], x[i][3], roulette);
       } // end else
     } // end if
@@ -70,6 +70,7 @@ bool KelemenSampler
 
 bool KelemenSampler
   ::constructEyePath(const Scene &scene,
+                     ShadingContext &context,
                      const HyperPoint &x,
                      Path &p) const
 {
@@ -77,7 +78,7 @@ bool KelemenSampler
   const RussianRoulette *roulette = mRoulette.get();
 
   // insert an eye vertex
-  if(p.insert(0, &scene, scene.getSensors(), false,
+  if(p.insert(0, &scene, context, scene.getSensors(), false,
               x[2][0], x[2][1], x[2][2], x[2][3]) == Path::INSERT_FAILED) return false;
 
   // treat every other coordinate of x as an eye coordinate
@@ -89,12 +90,12 @@ bool KelemenSampler
   {
     if(i == 2)
     {
-      justAdded = p.insertRussianRoulette(justAdded, &scene, true, p.getSubpathLengths()[0] != 1,
+      justAdded = p.insertRussianRoulette(justAdded, &scene, context, true, p.getSubpathLengths()[0] != 1,
                                           x[0][0], x[0][1], x[0][2], x[0][3], roulette);
     } // end if
     else
     {
-      justAdded = p.insertRussianRoulette(justAdded, &scene, true, true,
+      justAdded = p.insertRussianRoulette(justAdded, &scene, context, true, true,
                                           x[i][0], x[i][1], x[i][2], x[i][3], roulette);
     } // end else
 
@@ -106,6 +107,7 @@ bool KelemenSampler
 
 bool KelemenSampler
   ::constructLightPath(const Scene &scene,
+                       ShadingContext &context,
                        const HyperPoint &x,
                        Path &p) const
 {
@@ -113,7 +115,7 @@ bool KelemenSampler
   const RussianRoulette *roulette = mRoulette.get();
 
   // insert a light vertex
-  if(p.insert(p.size()-1, &scene, scene.getEmitters(), true,
+  if(p.insert(p.size()-1, &scene, context, scene.getEmitters(), true,
               x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   // treat every other coordinate of x as a light coordinate
@@ -125,12 +127,12 @@ bool KelemenSampler
   {
     if(i == 3)
     {
-      justAdded = p.insertRussianRoulette(justAdded, &scene, false, false,
+      justAdded = p.insertRussianRoulette(justAdded, &scene, context, false, false,
                                           x[i][0], x[i][1], x[i][2], x[i][3], roulette);
     } // end if
     else
     {
-      justAdded = p.insertRussianRoulette(justAdded, &scene, false, true,
+      justAdded = p.insertRussianRoulette(justAdded, &scene, context, false, true,
                                           x[i][0], x[i][1], x[i][2], x[i][3], roulette);
     } // end else
 
@@ -142,13 +144,14 @@ bool KelemenSampler
 
 bool KelemenSampler
   ::constructPath(const Scene &scene,
+                  ShadingContext &context,
                   const HyperPoint &x,
                   Path &p)
 {
   p.clear();
   //constructEyePath(scene, x, p);
   //constructLightPath(scene, x, p);
-  if(constructPathInterleaved(scene, x, p))
+  if(constructPathInterleaved(scene, context, x, p))
   {
     // shuffle the light path so its last vertex
     // immediately follows the last eye vertex

@@ -8,7 +8,6 @@
 #define SURFACE_PRIMITIVE_H
 
 #include "Primitive.h"
-#include "../shading/Material.h"
 #include <boost/shared_ptr.hpp>
 #include "../surfaces/Surface.h"
 #include "PrimitiveHandle.h"

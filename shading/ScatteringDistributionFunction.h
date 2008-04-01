@@ -229,7 +229,9 @@ class ScatteringDistributionFunction
      */
     virtual bool isSpecular(void) const;
 
-    static FunctionAllocator mPool;
+    /*! Overload the new operator.
+     */
+    void *operator new(size_t size, FunctionAllocator &alloc);
 
     /*! This method clones this ScatteringDistributionFunction.
      *  \param allocator The FunctionAllocator to allocate from.
@@ -238,15 +240,7 @@ class ScatteringDistributionFunction
      */
     virtual ScatteringDistributionFunction *clone(FunctionAllocator &allocator) const;
 
-    /*! Allow access to operator new() to ShaderApi.
-     */
-    friend class ShaderApi;
-
   protected:
-    /*! Overload the new operator.
-     */
-    void *operator new(size_t size);
-
     /*! This method evaluates the geometric term common to microfacet scattering models.
      *  \param nDotWo
      *  \param nDotWi

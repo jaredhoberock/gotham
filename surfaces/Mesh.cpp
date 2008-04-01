@@ -260,6 +260,7 @@ void Mesh
                       float &pdf) const
 {
   const Triangle &t = *mTriangleTable(u1);
+
   const Point &v0 = mPoints[t[0]];
   const Point &v1 = mPoints[t[1]];
   const Point &v2 = mPoints[t[2]];

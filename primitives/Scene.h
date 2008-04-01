@@ -12,7 +12,6 @@
 #include "Intersection.h"
 #include "Primitive.h"
 #include "PrimitiveList.h"
-#include "../shading/MaterialList.h"
 class BoundingBox;
 class SurfacePrimitiveList;
 
@@ -98,11 +97,6 @@ class Scene
      */
     inline void setPrimitives(boost::shared_ptr<PrimitiveList<> > p);
 
-    /*! This method sets mMaterials.
-     *  \param m Sets mMaterials.
-     */
-    inline void setMaterials(const boost::shared_ptr<MaterialList> p);
-
     /*! This method returns mRaysCast.
      *  \return mRaysCast
      */
@@ -149,11 +143,6 @@ class Scene
      */
     inline const PrimitiveList<> *getPrimitives(void) const;
 
-    /*! This method returns a const reference to the materials list.
-     *  \return mMaterials
-     */
-    inline const MaterialList &getMaterials(void) const;
-
     /*! This method is called immediately prior to rendering
      *  and calls mPrimitive->finalize()
      */
@@ -183,10 +172,6 @@ class Scene
     /*! A Scene contains a list of all Primitives.
      */
     boost::shared_ptr<PrimitiveList<> > mPrimitives;
-
-    /*! A Scene contains a list of all Materials.
-     */
-    boost::shared_ptr<MaterialList> mMaterials;
 
     /*! This counts the number of Rays intersected against this Scene.
      */

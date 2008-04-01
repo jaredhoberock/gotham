@@ -43,8 +43,8 @@ bool SeededMutator
 
   y = mSeedPoints[i];
 
-  // clone using the global pool
-  mSeeds[i]->clone(b, ScatteringDistributionFunction::mPool);
+  // clone using mShadingContext's allocator
+  mSeeds[i]->clone(b, mShadingContext->getAllocator());
 
   return true;
 } // end SeededMutator::largeStep()
@@ -66,7 +66,7 @@ void SeededMutator
   for(size_t i = 0; i < mNumRejectionSamples; ++i)
   {
     PathSampler::constructHyperPoint(*mRandomSequence, x);
-    if(mSampler->constructPath(*mScene, x, xPath))
+    if(mSampler->constructPath(*mScene, *mShadingContext, x, xPath))
     {
       // evaluate the Path
       results.clear();
@@ -83,7 +83,7 @@ void SeededMutator
     } // end if
 
     // free all integrands allocated in this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
   } // end for i
 } // end SeededMutator::preprocess()
 

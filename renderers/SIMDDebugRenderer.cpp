@@ -9,7 +9,6 @@
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../records/RenderFilm.h"
-#include "../shading/Material.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitive.h"
@@ -47,8 +46,7 @@ void SIMDDebugRenderer
   sensor->sampleSurfaceArea(0,0,0,dgSensor,pdf);
 
   // generate a Ray
-  const MaterialList &materials = mScene->getMaterials();
-  ScatteringDistributionFunction &s = *materials[sensor->getMaterial()]->evaluateSensor(dgSensor);
+  ScatteringDistributionFunction &s = *mShadingContext->evaluateSensor(sensor->getMaterial(), dgSensor);
 
   // sample a sensing direction
   bool delta;
@@ -56,46 +54,6 @@ void SIMDDebugRenderer
   s.sample(dgSensor, uv[0], uv[1], 0.5f, d, pdf, delta);
   rays[i] = Ray(dgSensor.getPoint(), d);
 } // end SIMDDebugRenderer::sampleEyeRay()
-
-void SIMDDebugRenderer
-  ::evaluate(ScatteringDistributionFunction **f,
-             const ::Vector *wo,
-             const DifferentialGeometry *dg,
-             const ::Vector *wi,
-             const int *stencil,
-             Spectrum *results,
-             const size_t n) const
-{
-  // evaluate the functions into results
-  for(size_t i = 0; i != n; ++i)
-  {
-    if(stencil[i])
-    {
-      // bidirectional scattering
-      results[i] = f[i]->evaluate(wo[i], dg[i], wi[i]);
-    } // end if
-  } // end for
-} // end SIMDDebugRenderer::evaluate()
-
-void SIMDDebugRenderer
-  ::evaluate(ScatteringDistributionFunction **f,
-             const ::Vector *wo,
-             const DifferentialGeometry *dg,
-             const int *stencil,
-             Spectrum *results,
-             const size_t n) const
-{
-  // evaluate the functions into results
-  for(size_t i = 0; i != n; ++i)
-  {
-    if(stencil[i])
-    {
-      // unidirectional scattering
-      results[i] = f[i]->evaluate(wo[i], dg[i]);
-    } // end if
-  } // end for
-} // end SIMDDebugRenderer::evaluate()
-                
 
 void SIMDDebugRenderer
   ::shade(const Ray *rays,
@@ -109,7 +67,6 @@ void SIMDDebugRenderer
   std::vector<ScatteringDistributionFunction*> e(n);
 
   const PrimitiveList<> &primitives = *mScene->getPrimitives();
-  const MaterialList &materials = mScene->getMaterials();
 
   // create the list of MaterialHandles and DifferentialGeometry
   std::vector<MaterialHandle> handles(n);
@@ -125,11 +82,11 @@ void SIMDDebugRenderer
     } // end if
   } // end for i
 
-  // evaluate scattering
-  materials.evaluateScattering(&dg[0], &handles[0], stencil, &f[0], n);
+  // evaluate scattering shader
+  mShadingContext->evaluateScattering(&handles[0], &dg[0], stencil, &f[0], n);
 
-  // evaluate emission
-  materials.evaluateEmission(&dg[0], &handles[0], stencil, &e[0], n);
+  // evaluate emission shader
+  mShadingContext->evaluateEmission(&handles[0], &dg[0], stencil, &e[0], n);
 
   std::vector< ::Vector> wo(n);
   std::vector< ::Vector> wi(n);
@@ -139,17 +96,21 @@ void SIMDDebugRenderer
     wi[i] = -rays[i].getDirection();
   } // end for i
 
-  // evaluate scattering
-  evaluate(&f[0], &wo[0], &dg[0], &wi[0], stencil, &results[0], n);
+  // evaluate scattering bsdf
+  std::vector<Spectrum> scattering(n, Spectrum::black());
+  mShadingContext->evaluateBidirectionalScattering(&f[0], &wo[0], &dg[0], &wi[0], stencil, &scattering[0], n);
 
-  // evaluate emission
+  // evaluate emission bsdf
   std::vector<Spectrum> emission(n, Spectrum::black());
-  evaluate(&e[0], &wo[0], &dg[0], stencil, &emission[0], n );
+  mShadingContext->evaluateUnidirectionalScattering(&e[0], &wo[0], &dg[0], stencil, &emission[0], n );
 
-  // add in emission
+  // sum
   for(size_t i = 0; i != n; ++i)
   {
-    results[i] += emission[i];
+    if(stencil[i])
+    {
+      results[i] = scattering[i] + emission[i];
+    } // end if
   } // end for i
 } // end SIMDDebugRenderer::shade()
 
@@ -201,7 +162,7 @@ void SIMDDebugRenderer
     } // end for j
 
     // purge all malloc'd memory for this batch
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     progress += mWorkBatchSize;
   } // end for i
@@ -209,7 +170,7 @@ void SIMDDebugRenderer
     sampleEyeRay(numBatches, j, &rays[0], &pdfs[0]);
 
   // purge all malloc'd memory for the last partial batch
-  ScatteringDistributionFunction::mPool.freeAll();
+  mShadingContext->freeAll();
   progress += totalWork % mWorkBatchSize;
 
   // intersect en masse
@@ -226,7 +187,7 @@ void SIMDDebugRenderer
           mWorkBatchSize);
 
     // purge all malloc'd memory for this batch
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     progress += mWorkBatchSize;
   } // end for i
@@ -241,7 +202,7 @@ void SIMDDebugRenderer
   progress += totalWork % mWorkBatchSize;
 
   // purge all malloc'd memory for the last partial batch
-  ScatteringDistributionFunction::mPool.freeAll();
+  mShadingContext->freeAll();
 
   for(size_t i = 0; i != numBatches; ++i)
   {

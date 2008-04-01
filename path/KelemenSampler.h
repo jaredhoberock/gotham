@@ -32,16 +32,19 @@ class KelemenSampler
      *  specifying a Path in a Scene of interest.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param p The constructed Path will be returned here.
      *  \return true if a Path could be constructed; false, otherwise.
      */
     virtual bool constructPath(const Scene &scene,
+                               ShadingContext &context,
                                const HyperPoint &x,
                                Path &p);
 
     virtual bool constructPathInterleaved(const Scene &scene,
+                                          ShadingContext &context,
                                           const HyperPoint &x,
                                           Path &p) const;
 
@@ -60,6 +63,7 @@ class KelemenSampler
     /*! This method constructs the eye subpath of a given Path.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param p This Path's eye subpath will be updated to
@@ -68,12 +72,14 @@ class KelemenSampler
      *          false, otherwise.
      */
     virtual bool constructEyePath(const Scene &scene,
+                                  ShadingContext &context,
                                   const HyperPoint &x,
                                   Path &p) const;
 
     /*! This method constructs the light subpath of a given Path.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param p This Path's light subpath will be updated to
@@ -82,6 +88,7 @@ class KelemenSampler
      *          false, otherwise.
      */
     virtual bool constructLightPath(const Scene &scene,
+                                    ShadingContext &context,
                                     const HyperPoint &x,
                                     Path &p) const;
 

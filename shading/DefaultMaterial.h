@@ -8,7 +8,7 @@
 #ifndef DEFAULT_MATERIAL_H
 #define DEFAULT_MATERIAL_H
 
-#include "Material.h"
+#include "../include/Material.h"
 
 class DefaultMaterial
   : public Material
@@ -20,7 +20,8 @@ class DefaultMaterial
     typedef Material Parent;
 
     virtual const char *getName(void) const;
-    virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeometry &dg) const;
+    virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const;
 }; // end DefaultMaterial
 
 #endif // DEFAULT_MATERIAL_H
+

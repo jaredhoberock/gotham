@@ -95,14 +95,14 @@ void EnergyRedistributionRenderer
 
     // sample a path
     Path temp;
-    if(((PathSampler*)smallStepper.getSampler())->constructPath(*mScene, x, temp))
+    if(((PathSampler*)smallStepper.getSampler())->constructPath(*mScene, getShadingContext(), x, temp))
     {
       // safely temp to xPath
       saveMonteCarloSample.freeAll();
       temp.clone(xPath, saveMonteCarloSample);
 
       // purge all memory alloc'd for temp
-      ScatteringDistributionFunction::mPool.freeAll();
+      mShadingContext->freeAll();
 
       // get a monte carlo estimate
       xResults.clear();
@@ -199,7 +199,7 @@ void EnergyRedistributionRenderer
             } // end if
 
             // purge all malloc'd memory for this sample
-            ScatteringDistributionFunction::mPool.freeAll();
+            mShadingContext->freeAll();
 
             ++mNumSamples;
           } // end for j

@@ -31,11 +31,13 @@ class ArvoKirkSampler
     /*! This method constructs a Path using forward path tracing and termination
      *  with Russian roulette.
      *  \param scene The Scene containing the Path.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x The HyperPoint uniquely describing a new Path to create.
      *  \param p The constructed Path will be returned here.
      *  \return true, if p could be successfully constructed; false, otherwise.
      */
     virtual bool constructPath(const Scene &scene,
+                               ShadingContext &context,
                                const HyperPoint &x,
                                Path &p);
 

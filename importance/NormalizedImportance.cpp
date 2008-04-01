@@ -21,6 +21,7 @@ using namespace gpcpu;
 void NormalizedImportance
   ::preprocess(const shared_ptr<RandomSequence> &r,
                const shared_ptr<const Scene> &scene,
+               const shared_ptr<ShadingContext> &context,
                const shared_ptr<PathMutator> &mutator,
                MetropolisRenderer &renderer)
 {
@@ -56,7 +57,7 @@ void NormalizedImportance
   } // end for i
 
   // now call the Parent
-  Parent::preprocess(r, scene, mutator, renderer);
+  Parent::preprocess(r, scene, context, mutator, renderer);
 } // end NormalizedImportance::preprocess()
 
 float NormalizedImportance

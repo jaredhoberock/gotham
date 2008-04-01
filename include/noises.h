@@ -6,23 +6,27 @@
 #ifndef NOISES_H
 #define NOISES_H
 
-#include "noise.h"
 #include "stdshader.h"
+#include "ShadingInterface.h"
 #include "../geometry/Point.h"
+
+// A hook into the ShadingInterface
+// XXX This is probably not reentrant
+extern ShadingInterface *gContext;
 
 inline float snoise(const Point &x)
 {
-  return gotham::noise(x[0], x[1], x[2]);
+  return gContext->noise(x[0], x[1], x[2]);
 } // end snoise()
 
 inline float snoise(float x, float y, float z)
 {
-  return gotham::noise(x,y,z);
+  return gContext->noise(x,y,z);
 } // end snoise()
 
 inline float snoise(const float x)
 {
-  return gotham::noise(x,0,0);
+  return gContext->noise(x,0,0);
 } // end snoise()
 
 inline Vector vsnoise(const Point &x)

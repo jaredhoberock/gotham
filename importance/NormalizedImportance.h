@@ -25,10 +25,12 @@ class NormalizedImportance
     /*! This method is to be called prior to rendering.
      *  \param r A sequence of random numbers.
      *  \param scene The Scene to be rendered.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param mutator The PathMutator to be used in the rendering process.
      */
     virtual void preprocess(const boost::shared_ptr<RandomSequence> &r,
                             const boost::shared_ptr<const Scene> &scene,
+                            const boost::shared_ptr<ShadingContext> &context,
                             const boost::shared_ptr<PathMutator> &mutator,
                             MetropolisRenderer &renderer);
 

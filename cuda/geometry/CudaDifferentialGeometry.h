@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../geometry/DifferentialGeometry.h"
+#include <vector_types.h>
 
 typedef DifferentialGeometryBase<float3, float3, float2, float3> CudaDifferentialGeometry;
 

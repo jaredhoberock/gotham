@@ -8,10 +8,8 @@
 #include <boost/spirit/core.hpp>
 #include <boost/spirit/actor/push_back_actor.hpp>
 
-#include "../shading/exportShading.h"
-#include "../shading/Material.h"
+#include "../include/exportShading.h"
 #include "../shading/DefaultMaterial.h"
-#include "../shading/stdshader.h"
 #include "../surfaces/Mesh.h"
 #include "../surfaces/SmallMesh.h"
 #include "../surfaces/Sphere.h"
@@ -20,6 +18,7 @@
 #include "../viewers/RenderViewer.h"
 #include "../renderers/RendererApi.h"
 #include "../records/RecordApi.h"
+#include "../shading/ShadingApi.h"
 #include "../rasterizables/RasterizableScene.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../rasterizables/RasterizableSurfacePrimitive.h"
@@ -56,14 +55,6 @@ Gotham
 void Gotham
   ::init(void)
 {
-  // XXX HACK this is completely retarded, but
-  //     noise() won't get exported to gotham.lib
-  //     unless we actually use it somewhere in the code that gets compiled
-  //     into the dll
-  //     thanks msvc!
-  float x = gotham::noise(0,0,0);
-  x += x;
-
   // clear the Matrix stack
   mMatrixStack.clear();
 
@@ -206,9 +197,6 @@ void Gotham
   s->setPrimitive(listPtr);
   s->setPrimitives(listPtr);
 
-  // hand over the Materials
-  s->setMaterials(mMaterials);
-
   // give the surfaces to the scene
   s->setSurfaces(mSurfaces);
 
@@ -225,9 +213,14 @@ void Gotham
   shared_ptr<Record> record;
   record.reset(RecordApi::record(mAttributeStack.back()));
 
+  // create a ShadingContext
+  shared_ptr<ShadingContext> context;
+  context.reset(ShadingApi::context(mAttributeStack.back(), mMaterials));
+
   // give everything to the renderer
   mRenderer->setScene(s);
   mRenderer->setRecord(record);
+  mRenderer->setShadingContext(context);
 
   // headless render?
   bool headless = (attr["viewer"] == std::string("false"));

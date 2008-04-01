@@ -100,7 +100,7 @@ float NoiseAwareMetropolisRenderer
   // update invB
   // XXX we shouldn't have to use a separate sequence
   RandomSequence seq(13u);
-  float invB = mImportance->estimateNormalizationConstant(seq, mScene, mMutator, 10000);
+  float invB = mImportance->estimateNormalizationConstant(seq, mScene, mShadingContext, mMutator, 10000);
   invB = 1.0f / invB;
 
   // update x's importance & pdf

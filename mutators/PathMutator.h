@@ -67,6 +67,11 @@ class PathMutator
      */
     void setScene(const boost::shared_ptr<const Scene> &s);
 
+    /*! This method sets mShadingContext.
+     *  \param s Sets mShadingContext.
+     */
+    void setShadingContext(const boost::shared_ptr<ShadingContext> &s);
+
     /*! This method sets mSampler.
      *  \param s Sets mSampler.
      */
@@ -91,6 +96,8 @@ class PathMutator
     boost::shared_ptr<RandomSequence> mRandomSequence;
 
     boost::shared_ptr<const Scene> mScene;
+
+    boost::shared_ptr<ShadingContext> mShadingContext;
 
     /*! A PathSampler for generating Paths.
      */

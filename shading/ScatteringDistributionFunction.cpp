@@ -6,9 +6,6 @@
 #include "ScatteringDistributionFunction.h"
 #include "../geometry/Mappings.h"
 
-// initialize the pool
-FunctionAllocator ScatteringDistributionFunction::mPool = FunctionAllocator();
-
 Spectrum ScatteringDistributionFunction
   ::evaluate(const Vector3 &wo,
              const DifferentialGeometry &dg,
@@ -25,9 +22,9 @@ Spectrum ScatteringDistributionFunction
 } // end ScatteringDistributionFunction::evaluate()
 
 void *ScatteringDistributionFunction
-  ::operator new(size_t size)
+  ::operator new(size_t size, FunctionAllocator &alloc)
 {
-  return mPool.malloc();
+  return alloc.malloc();
 } // end ScatteringDistributionFunction::operator new()
 
 float ScatteringDistributionFunction

@@ -4,17 +4,16 @@
  */
 
 #include "AshikhminShirleyReflection.h"
-#include "Fresnel.h"
 #include "../geometry/Mappings.h"
 
 AshikhminShirleyReflection
   ::AshikhminShirleyReflection(const Spectrum &r,
-                    const float eta,
-                    const float uExponent,
-                    const float vExponent)
-    :mReflectance(r),mNu(uExponent),mNv(vExponent)
+                               const float eta,
+                               const float uExponent,
+                               const float vExponent)
+    :mReflectance(r),mNu(uExponent),mNv(vExponent),mFresnel(mReflectance, Spectrum(eta,eta,eta))
 {
-  mFresnel = new FresnelConductor(mReflectance, Spectrum(eta,eta,eta));
+  ;
 } // end AshikhminShirleyReflection::AshikhminShirleyReflection()
 
 Spectrum AshikhminShirleyReflection
@@ -60,7 +59,7 @@ Spectrum AshikhminShirleyReflection
   // Walter et al, 2007, equation 20
   // note we can use either wi or wo here because they are reflections about wh
   float whDotWi = wh.dot(wi);
-  Spectrum result = mReflectance * mFresnel->evaluate(whDotWi) * G * D;
+  Spectrum result = mReflectance * mFresnel.evaluate(whDotWi) * G * D;
   result /= (4.0f * nDotWo * nDotWi);
 
   return result;
@@ -104,7 +103,7 @@ Spectrum AshikhminShirleyReflection
   float G = 1.0f;
 
   // Walter et al, 2007, equation 20
-  Spectrum result = mReflectance * mFresnel->evaluate(cosThetaH) * G * D;
+  Spectrum result = mReflectance * mFresnel.evaluate(cosThetaH) * G * D;
   result /= (4.0f * nDotWo * nDotWi);
 
   return result;
@@ -140,7 +139,7 @@ Spectrum AshikhminShirleyReflection
   float G = 1.0f;
 
   // Walter et al, 2007, equation 20
-  Spectrum result = mReflectance * mFresnel->evaluate(cosThetaH) * G * D;
+  Spectrum result = mReflectance * mFresnel.evaluate(cosThetaH) * G * D;
   result /= (4.0f * nDotWo * nDotWi);
 
   return result;
@@ -164,26 +163,4 @@ float AshikhminShirleyReflection
   return J * Mappings::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
                                                        dg.getTangent(), dg.getBinormal(), dg.getNormal());
 } // end AshikhminShirleyReflection::evaluatePdf()
-
-ScatteringDistributionFunction *AshikhminShirleyReflection
-  ::clone(FunctionAllocator &allocator) const
-{
-  AshikhminShirleyReflection *result = static_cast<AshikhminShirleyReflection*>(Parent::clone(allocator));
-  if(result != 0)
-  {
-    // clone the Fresnel
-    result->mFresnel = static_cast<Fresnel*>(allocator.malloc());
-    if(result->mFresnel != 0)
-    {
-      memcpy(result->mFresnel, mFresnel, sizeof(FunctionAllocator::Block));
-    } // end if
-    else
-    {
-      // failure
-      result = 0;
-    } // end else
-  } // end if
-
-  return result;
-} // end AshikhminShirleyReflection::clone()
 

@@ -50,7 +50,7 @@ bool KelemenMutator
   largeStep(y);
 
   // sample a new Path
-  return mSampler->constructPath(*mScene.get(), y, b);
+  return mSampler->constructPath(*mScene, *mShadingContext, y, b);
 } // end KelemenMutator::largeStep()
 
 bool KelemenMutator
@@ -63,7 +63,7 @@ bool KelemenMutator
   smallStep(x,y);
 
   // sample a new Path
-  return mSampler->constructPath(*mScene.get(), y, b);
+  return mSampler->constructPath(*mScene, *mShadingContext, y, b);
 } // end KelemenMutator::smallStep()
 
 void KelemenMutator

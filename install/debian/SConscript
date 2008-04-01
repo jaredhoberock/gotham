@@ -20,12 +20,7 @@ DEBDESC = "An unbiased photorealistic renderer"
 
 install_base = 'usr/local/gotham/'
 
-DEBFILES = [
-# bin/*
-# lib/*.py lib/*.so
-# include/*.h
-# shaders/*.pbsl shaders/*.so
-]
+DEBFILES = []
 
 src_base = "../../"
 

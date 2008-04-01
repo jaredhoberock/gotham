@@ -44,12 +44,14 @@ class TargetImportance
      *  the Parent.
      *  \param r A sequence of RandomNumbers.
      *  \param scene The Scene to be rendered.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param mutator The PathMutator to be used duing the rendering process.
      *  \param renderer A reference to the MetropolisRenderer owning this
      *                  ScalarImportance.
      */
     virtual void preprocess(const boost::shared_ptr<RandomSequence> &r,
                             const boost::shared_ptr<const Scene> &scene,
+                            const boost::shared_ptr<ShadingContext> &context,
                             const boost::shared_ptr<PathMutator> &mutator,
                             MetropolisRenderer &renderer);
 

@@ -5,7 +5,7 @@
 
 #include "DefaultMaterial.h"
 #include "Lambertian.h"
-#include "../api/ShaderApi.h"
+#include "../include/ShadingInterface.h"
 
 const char *DefaultMaterial
   ::getName(void) const
@@ -14,8 +14,8 @@ const char *DefaultMaterial
 } // end DefaultMaterial::getName()
 
 ScatteringDistributionFunction *DefaultMaterial
-  ::evaluateScattering(const DifferentialGeometry &dg) const
+  ::evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
-  return ShaderApi::diffuse(Spectrum::white());
+  return context.diffuse(Spectrum::white());
 } // end DefaultMaterial::evaluate()
 

@@ -9,7 +9,6 @@
 #include <vector>
 #include <list>
 #include "../geometry/Transform.h"
-#include "../shading/Material.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitiveList.h"

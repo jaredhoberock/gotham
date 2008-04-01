@@ -9,6 +9,7 @@
 
 class Scene;
 class Record;
+class ShadingContext;
 
 #ifdef WIN32
 #define WINDOWS_LEAN_AND_MEAN
@@ -82,6 +83,21 @@ class Renderer
      */
     inline void setRecord(boost::shared_ptr<Record> f);
 
+    /*! This method sets mShadingContext.
+     *  \param s Sets mShadingContext.
+     */
+    inline virtual void setShadingContext(const boost::shared_ptr<ShadingContext> &s);
+
+    /*! This method returns a const reference to mShadingContext.
+     *  \return mShadingContext.
+     */
+    inline const ShadingContext &getShadingContext(void) const;
+
+    /*! This method returns a reference to mShadingContext.
+     *  \return mShadingContext.
+     */
+    inline ShadingContext &getShadingContext(void);
+
     /*! This method returns mRecord.
      *  \return mRecord.
      */
@@ -130,6 +146,10 @@ class Renderer
     /*! A Renderer keeps a pointer to the RandomAccessFilm to which mScene is rendered.
      */
     boost::shared_ptr<Record> mRecord;
+
+    /*! A Renderer keeps a pointer to a ShadingContext for evaluating shaders.
+     */
+    boost::shared_ptr<ShadingContext> mShadingContext;
 
     /*! The number of samples to take per pixel.
      *  XXX remove this.

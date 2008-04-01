@@ -9,7 +9,7 @@
 #define ASHIKHMIN_SHIRLEY_REFLECTION_H
 
 #include "ScatteringDistributionFunction.h"
-class Fresnel;
+#include "Fresnel.h"
 
 class AshikhminShirleyReflection
   : public ScatteringDistributionFunction
@@ -99,13 +99,6 @@ class AshikhminShirleyReflection
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;
 
-    /*! This method clones this AshikhminShirleyReflection.
-     *  \param allocator The FunctionAllocator to allocate from.
-     *  \return a pointer to a newly-allocated clone of this AshikhminShirleyReflection; 0,
-     *          if no memory could be allocated.
-     */
-    virtual ScatteringDistributionFunction *clone(FunctionAllocator &allocator) const;
-
   protected:
     /*! The reflectance.
      */
@@ -118,7 +111,7 @@ class AshikhminShirleyReflection
 
     /*! The Fresnel object.
      */
-    Fresnel *mFresnel;
+    FresnelConductor mFresnel;
 }; // end AshikhminShirleyReflection
 
 #endif // ASHIKHMIN_SHIRLEY_REFLECTION_H

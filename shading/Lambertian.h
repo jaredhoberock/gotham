@@ -51,6 +51,11 @@ class Lambertian
                       const ComponentIndex component,
                       float &pdf) const;
 
+    /*! This method returns a const reference to mAlbedo.
+     *  \return mAlbedo.
+     */
+    const Spectrum &getAlbedo(void) const;
+
   protected:
     Spectrum mAlbedo;
 

@@ -40,3 +40,9 @@ Spectrum Lambertian
   return result;
 } // end Lambertian::evaluate()
 
+const Spectrum &Lambertian
+  ::getAlbedo(void) const
+{
+  return mAlbedo;
+} // end Lambertian::getAlbedo()
+

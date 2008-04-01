@@ -51,6 +51,24 @@ boost::shared_ptr<const Record> Renderer
 } // end Renderer::getRecord()
 
 void Renderer
+  ::setShadingContext(const boost::shared_ptr<ShadingContext> &s)
+{
+  mShadingContext = s;
+} // end Renderer::setShadingContext()
+
+const ShadingContext &Renderer
+  ::getShadingContext(void) const
+{
+  return *mShadingContext;
+} // end Renderer::setShadingContext()
+
+ShadingContext &Renderer
+  ::getShadingContext(void)
+{
+  return *mShadingContext;
+} // end Renderer::setShadingContext()
+
+void Renderer
   ::setSamplesPerPixel(const unsigned int spp)
 {
   mSamplesPerPixel = spp;

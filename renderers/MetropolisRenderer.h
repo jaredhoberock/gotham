@@ -66,6 +66,11 @@ class MetropolisRenderer
      */
     virtual void setScene(const boost::shared_ptr<const Scene> &s);
 
+    /*! This method sets Renderer::mShadingContext and calls mMutator.setShadingContext(s).
+     *  \param s Sets mShadingContext.
+     */
+    virtual void setShadingContext(const boost::shared_ptr<ShadingContext> &s);
+
     /*! This method calls the Parent's method and also hands the
      *  RandomSequence to mMutator.
      *  \param s Sets mRandomSequence.

@@ -49,21 +49,6 @@ class SIMDDebugRenderer
                        Spectrum *results,
                        const size_t n) const;
 
-    virtual void evaluate(ScatteringDistributionFunction **f,
-                          const Vector *wo,
-                          const DifferentialGeometry *dg,
-                          const Vector *wi,
-                          const int *stencil,
-                          Spectrum *results,
-                          const size_t n) const;
-
-    virtual void evaluate(ScatteringDistributionFunction **f,
-                          const Vector *wo,
-                          const DifferentialGeometry *dg,
-                          const int *stencil,
-                          Spectrum *results,
-                          const size_t n) const;
-
     virtual void deposit(const size_t batchIdx,
                          const size_t threadIdx,
                          const Spectrum *results);

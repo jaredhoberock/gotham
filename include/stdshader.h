@@ -6,22 +6,12 @@
 #define STDSHADER_H
 
 #include "exportShading.h"
-#include "Lambertian.h"
-#include "SpecularReflection.h"
-#include "SpecularTransmission.h"
-#include "TransparentTransmission.h"
-#include "PhongReflection.h"
-#include "AshikhminShirleyReflection.h"
-#include "PhongTransmission.h"
-#include "Material.h"
-#include "HemisphericalEmission.h"
-#include "PerspectiveSensor.h"
-#include "CompositeDistributionFunction.h"
+
 #include <spectrum/Spectrum.h>
 #include "../geometry/Point.h"
 #include "../geometry/Vector.h"
-#include "../surfaces/Surface.h"
-#include "../primitives/SurfacePrimitive.h"
+#include <gpcpu/floatmxn.h>
+
 #include "stdmaterial.h"
 #include "noises.h"
 #include "patterns.h"

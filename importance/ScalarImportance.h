@@ -24,12 +24,14 @@ class ScalarImportance
     /*! This method is called prior to rendering.
      *  \param r A sequence of RandomNumbers.
      *  \param scene The Scene to be rendered.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param mutator The PathMutator to be used duing the rendering process.
      *  \param renderer A reference to the MetropolisRenderer owning this
      *                  ScalarImportance.
      */
     virtual void preprocess(const boost::shared_ptr<RandomSequence> &r,
                             const boost::shared_ptr<const Scene> &scene,
+                            const boost::shared_ptr<ShadingContext> &context,
                             const boost::shared_ptr<PathMutator> &mutator,
                             MetropolisRenderer &renderer);
 
@@ -73,6 +75,7 @@ class ScalarImportance
      *  function and chooses a seed Path proportional to its importance.
      *  \param r A sequence of RandomNumbers.
      *  \param scene The Scene to be rendered.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param mutator The PathMutator to be used duing the rendering process.
      *  \param n The number of samples to use in the estimation.
      *  \param allocator A FunctionAllocator to use when allocating scattering functions
@@ -85,6 +88,7 @@ class ScalarImportance
      */
     virtual float estimateNormalizationConstant(const boost::shared_ptr<RandomSequence> &r,
                                                 const boost::shared_ptr<const Scene> &scene,
+                                                const boost::shared_ptr<ShadingContext> &context,
                                                 const boost::shared_ptr<PathMutator> &mutator,
                                                 const size_t n,
                                                 FunctionAllocator &allocator,
@@ -95,12 +99,14 @@ class ScalarImportance
      *  function but does not choose a seed Path proportional to its importance.
      *  \param r A sequence of RandomNumbers.
      *  \param scene The Scene to be rendered.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param mutator The PathMutator to be used duing the rendering process.
      *  \param n The number of samples to use in the estimation.
      *  \return The estimate of the normalization constant.
      */
     virtual float estimateNormalizationConstant(RandomSequence &r,
                                                 const boost::shared_ptr<const Scene> &scene,
+                                                const boost::shared_ptr<ShadingContext> &context,
                                                 const boost::shared_ptr<PathMutator> &mutator,
                                                 const size_t n);
 

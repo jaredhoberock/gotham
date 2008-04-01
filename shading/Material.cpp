@@ -2,10 +2,9 @@
  *  \author Jared Hoberock
  *  \brief Implementation of Material class.
  */
-#include "Material.h"
-#include <iostream>
-#include "ScatteringDistributionFunction.h"
-#include "../api/ShaderApi.h"
+
+#include "../include/Material.h"
+#include "../include/ShadingInterface.h"
 
 Material
   ::~Material(void)
@@ -14,21 +13,21 @@ Material
 } // end Material::~Material()
 
 ScatteringDistributionFunction *Material
-  ::evaluateScattering(const DifferentialGeometry &dg) const
+  ::evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
-  return ShaderApi::null();
+  return context.null();
 } // end Material::evaluate()
 
 ScatteringDistributionFunction *Material
-  ::evaluateEmission(const DifferentialGeometry &dg) const
+  ::evaluateEmission(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
-  return ShaderApi::null();
+  return context.null();
 } // end Material::evaluateEmission()
 
 ScatteringDistributionFunction *Material
-  ::evaluateSensor(const DifferentialGeometry &dg) const
+  ::evaluateSensor(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
-  return ShaderApi::null();
+  return context.null();
 } // end Material::evaluateSensor()
 
 const char *Material

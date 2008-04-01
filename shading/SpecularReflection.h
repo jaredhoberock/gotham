@@ -23,15 +23,17 @@ class SpecularReflection
     /*! This constructor creates a SpecularReflection conductor.
      *  \param r Sets mReflectance.
      *  \param eta Sets the index of refraction of the Fresnel conductor.
+     *  \param alloc A FunctionAllocator for creating the Fresnel object.
      */
-    SpecularReflection(const Spectrum &r, const float eta);
+    SpecularReflection(const Spectrum &r, const float eta, FunctionAllocator &alloc);
 
     /*! This constructor creates a SpecularReflection dielectric.
      *  \param r Sets mReflectance.
      *  \param etai Sets the index of refraction of the space surrounding the dielectric.
      *  \param etat Sets the index of refraction of the Fresnel dielectric medium.
+     *  \param alloc A FunctionAllocator for creating the Fresnel object.
      */
-    SpecularReflection(const Spectrum &r, const float etai, const float etat);
+    SpecularReflection(const Spectrum &r, const float etai, const float etat, FunctionAllocator &alloc);
 
     /*! This method evaluates a SpecularReflection reflectange function.
      *  \param wi A vector pointing towards the direction of incoming radiance.

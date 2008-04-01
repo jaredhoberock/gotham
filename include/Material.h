@@ -7,16 +7,20 @@
 #define MATERIAL_H
 
 #include "exportShading.h"
+
+// XXX don't require another #include here for DifferentialGeometry
+//class DifferentialGeometry;
 #include "../geometry/DifferentialGeometry.h"
+class ShadingInterface;
 class ScatteringDistributionFunction;
 
 class Material
 {
   public:
     virtual ~Material(void);
-    virtual ScatteringDistributionFunction *evaluateScattering(const DifferentialGeometry &dg) const;
-    virtual ScatteringDistributionFunction *evaluateEmission(const DifferentialGeometry &dg) const;
-    virtual ScatteringDistributionFunction *evaluateSensor(const DifferentialGeometry &dg) const;
+    virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const;
+    virtual ScatteringDistributionFunction *evaluateEmission(ShadingInterface &context, const DifferentialGeometry &dg) const;
+    virtual ScatteringDistributionFunction *evaluateSensor(ShadingInterface &context, const DifferentialGeometry &dg) const;
     virtual const char *getName(void) const;
 
     /*! XXX Is there a more elegant way to do this?

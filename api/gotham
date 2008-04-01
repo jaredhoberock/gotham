@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import sys
+import inspect
+import os
 
 def options():
   pass
@@ -9,6 +11,21 @@ def usage():
   options()
   exit(-1)
 
+# XXX i don't know if this is a hack or not, but we basically
+#     require that api and other libraries reside in a known
+#     directory relative to this script
+
+# figure out the absolute path of the directory containing this script
+dir = os.path.dirname(inspect.getabsfile(usage))
+
+# the directory we want to include is ../lib
+dir = os.path.join(os.path.dirname(dir), 'lib')
+
+# save the state of sys.path
+oldpath = sys.path
+sys.path += [dir]
+
+# do the import
 # we may want to do this after parsing the arguments
 # so we can intercept a "silence" command
 from api import *
@@ -21,4 +38,7 @@ if len(sys.argv) < 2:
 
 for arg in sys.argv[1:]:
   exec open(arg)
+
+# restore the state of sys.path
+sys.path = oldpath
 

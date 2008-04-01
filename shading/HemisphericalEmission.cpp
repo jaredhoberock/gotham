@@ -19,3 +19,9 @@ Spectrum HemisphericalEmission
   return w.dot(dg.getNormal()) > 0 ? mRadiance : Spectrum::black();
 } // end HemisphericalEmission::evaluate()
 
+const Spectrum &HemisphericalEmission
+  ::getRadiance(void) const
+{
+  return mRadiance;
+} // end HemisphericalEmission::evaluate()
+

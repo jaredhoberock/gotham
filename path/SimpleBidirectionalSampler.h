@@ -36,12 +36,14 @@ class SimpleBidirectionalSampler
      *  Scene of interest.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param p The constructed Path will be returned here.
      *  \return true if a Path could be constructed; false, otherwise.
      */
     virtual bool constructPath(const Scene &scene,
+                               ShadingContext &context,
                                const HyperPoint &x,
                                Path &p);
 
@@ -61,6 +63,7 @@ class SimpleBidirectionalSampler
     /*! This method constructs the eye subpath of a given Path.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param numVertices The number of vertices to include
@@ -71,6 +74,7 @@ class SimpleBidirectionalSampler
      *          false, otherwise.
      */
     virtual bool constructEyePath(const Scene &scene,
+                                  ShadingContext &context,
                                   const HyperPoint &x,
                                   const size_t numVertices,
                                   Path &p) const;
@@ -78,6 +82,7 @@ class SimpleBidirectionalSampler
     /*! This method constructs the light subpath of a given Path.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param numVertices The number of vertices to include
@@ -88,6 +93,7 @@ class SimpleBidirectionalSampler
      *          false, otherwise.
      */
     virtual bool constructLightPath(const Scene &scene,
+                                    ShadingContext &context,
                                     const HyperPoint &x,
                                     const size_t numVertices,
                                     Path &p) const;

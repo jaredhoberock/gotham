@@ -10,7 +10,16 @@
 
 class CudaLambertian
 {
-  Spectrum mAlbedo;
-  Spectrum mAlbedoOverPi;
+  public:
+    /*! Constructor accepts an albedo.
+     *  \param albedo Sets mAlbedo.
+     */
+    inline __host__ __device__ CudaLambertian(const Spectrum &albedo);
+
+  //protected:
+    Spectrum mAlbedo;
+    Spectrum mAlbedoOverPi;
 }; // end CudaLambertian
+
+#include "CudaLambertian.inl"
 

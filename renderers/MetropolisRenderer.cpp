@@ -68,6 +68,13 @@ void MetropolisRenderer
 } // end MetropolisRenderer::setScene()
 
 void MetropolisRenderer
+  ::setShadingContext(const shared_ptr<ShadingContext> &s)
+{
+  Parent::setShadingContext(s);
+  mMutator->setShadingContext(s);
+} // end MetropolisRenderer::setShadingContext()
+
+void MetropolisRenderer
   ::kernel(ProgressCallback &progress)
 {
   PathSampler::HyperPoint x, y;
@@ -76,7 +83,7 @@ void MetropolisRenderer
   ResultList xResults, yResults;
 
   // estimate normalization constant and pick a seed
-  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mMutator,
+  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mShadingContext, mMutator,
                                                        10000, mLocalPool, x, xPath);
   float invB = 1.0f / b;
 
@@ -187,7 +194,7 @@ void MetropolisRenderer
     } // end if
 
     // purge all malloc'd memory for this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     ++mNumSamples;
   } // end for i
@@ -238,7 +245,7 @@ void MetropolisRenderer
   mMutator->preprocess();
 
   // preprocess the scalar importance
-  mImportance->preprocess(mRandomSequence, mScene, mMutator, *this);
+  mImportance->preprocess(mRandomSequence, mScene, mShadingContext, mMutator, *this);
 } // end MetropolisRenderer::preprocess()
 
 void MetropolisRenderer
@@ -267,7 +274,7 @@ void MetropolisRenderer
     // to agree on an estimate
     RandomSequence seq(13u);
 
-    float b = luminance.estimateNormalizationConstant(seq, mScene, mMutator, 10000);
+    float b = luminance.estimateNormalizationConstant(seq, mScene, mShadingContext, mMutator, 10000);
     float s = b / film->computeMean().luminance();
     film->scale(Spectrum(s,s,s));
   } // end if

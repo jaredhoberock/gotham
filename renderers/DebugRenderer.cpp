@@ -9,7 +9,6 @@
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../records/RenderFilm.h"
-#include "../shading/Material.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/SurfacePrimitiveList.h"
@@ -48,9 +47,6 @@ void DebugRenderer
   Intersection inter;
   float2 uv(0,0); 
 
-  // get the list of Materials
-  const MaterialList &materials = mScene->getMaterials();
-
   // sample from the list of sensors
   const SurfacePrimitive *sensor = 0;
   float temp;
@@ -71,7 +67,7 @@ void DebugRenderer
       sensor->sampleSurfaceArea(0,0,0,dgSensor,pdf);
 
       // generate a Ray
-      ScatteringDistributionFunction &s = *materials[sensor->getMaterial()]->evaluateSensor(dgSensor);
+      ScatteringDistributionFunction &s = *mShadingContext->evaluateSensor(sensor->getMaterial(), dgSensor);
 
       // sample a sensing direction
       s.sample(dgSensor, uv[0], uv[1], 0.5f, d, pdf, delta);
@@ -84,18 +80,18 @@ void DebugRenderer
       {
         PrimitiveHandle prim = inter.getPrimitive();
         const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*mScene->getPrimitives())[prim].get());
-        ScatteringDistributionFunction *f = materials[sp->getMaterial()]->evaluateScattering(inter.getDifferentialGeometry());
+        ScatteringDistributionFunction *f = mShadingContext->evaluateScattering(sp->getMaterial(), inter.getDifferentialGeometry());
         L = f->evaluate(-d,inter.getDifferentialGeometry(),-d);
 
         // add emission
-        ScatteringDistributionFunction *e = materials[sp->getMaterial()]->evaluateEmission(inter.getDifferentialGeometry());
+        ScatteringDistributionFunction *e = mShadingContext->evaluateEmission(sp->getMaterial(), inter.getDifferentialGeometry());
         L += e->evaluate(-d, inter.getDifferentialGeometry());
       } // end if
 
       film->deposit(x,y,L);
 
       // purge all malloc'd memory for this sample
-      ScatteringDistributionFunction::mPool.freeAll();
+      mShadingContext->freeAll();
 
       ++progress;
     } // end for x

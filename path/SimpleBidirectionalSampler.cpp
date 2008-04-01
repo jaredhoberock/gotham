@@ -5,7 +5,6 @@
 
 #include "SimpleBidirectionalSampler.h"
 #include "../geometry/Ray.h"
-#include "../shading/Material.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../primitives/Scene.h"
@@ -112,6 +111,7 @@ void SimpleBidirectionalSampler
 
 bool SimpleBidirectionalSampler
   ::constructPath(const Scene &scene,
+                  ShadingContext &context,
                   const HyperPoint &x,
                   Path &p)
 {
@@ -131,8 +131,8 @@ bool SimpleBidirectionalSampler
 
   // construct the paths
   p.clear();
-  if(!constructEyePath(scene, x, subpathLengths.first, p)) return false;
-  if(!constructLightPath(scene, x, subpathLengths.second, p)) return false;
+  if(!constructEyePath(scene, context, x, subpathLengths.first, p)) return false;
+  if(!constructLightPath(scene, context, x, subpathLengths.second, p)) return false;
 
   // tack length pdfs onto the end of the eye subpath (if it exists)
   // else, put it on the end of the light path (which happens to be the first vertex)
@@ -159,6 +159,7 @@ bool SimpleBidirectionalSampler
 
 bool SimpleBidirectionalSampler
   ::constructEyePath(const Scene &scene,
+                     ShadingContext &context,
                      const HyperPoint &x,
                      const size_t numVertices,
                      Path &p) const
@@ -174,19 +175,19 @@ bool SimpleBidirectionalSampler
     {
       // we define the pixel location to come as the first coordinate
       // so use the next coordinate to pick an aperture point
-      justAdded = p.insert(0, &scene, scene.getSensors(), false,
+      justAdded = p.insert(0, &scene, context, scene.getSensors(), false,
                            x[1][0], x[1][1], x[1][2], x[1][3]);
     } // end if
     else if(i == 1)
     {
       // we define the pixel location to come as the first coordinate,
       // so use the 0th coordinate to pick a pixel location
-      justAdded = p.insert(justAdded, &scene, true, false,
+      justAdded = p.insert(justAdded, &scene, context, true, false,
                            x[0][0], x[0][1], x[0][2]);
     } // end else if
     else
     {
-      justAdded = p.insert(justAdded, &scene, true, true,
+      justAdded = p.insert(justAdded, &scene, context, true, true,
                            x[i][0], x[i][1], x[i][2]);
     } // end else
 
@@ -202,6 +203,7 @@ bool SimpleBidirectionalSampler
 
 bool SimpleBidirectionalSampler
   ::constructLightPath(const Scene &scene,
+                       ShadingContext &context,
                        const HyperPoint &x,
                        const size_t numVertices,
                        Path &p) const
@@ -218,17 +220,17 @@ bool SimpleBidirectionalSampler
   {
     if(j == 0)
     {
-      justAdded = p.insert(justAdded, &scene, scene.getEmitters(), true,
+      justAdded = p.insert(justAdded, &scene, context, scene.getEmitters(), true,
                            x[i][0], x[i][1], x[i][2], x[i][3]);
     } // end if
     else if(j == 1)
     {
-      justAdded = p.insert(justAdded, &scene, false, false,
+      justAdded = p.insert(justAdded, &scene, context, false, false,
                            x[i][0], x[i][1], x[i][2]);
     } // end else if
     else
     {
-      justAdded = p.insert(justAdded, &scene, false, true,
+      justAdded = p.insert(justAdded, &scene, context, false, true,
                            x[i][0], x[i][1], x[i][2]);
     } // end else
 

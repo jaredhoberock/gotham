@@ -8,8 +8,9 @@ def getTools():
     result = ['default', 'msvc']
   elif os.name == 'posix':
     #result = ['default', 'intelc']
-    # XXX BUG after upgrading Ubuntu to Gutsy
-    #         gotham segfaults when compiled with icc
+    # XXX BUG boost_random produces negative numbers in
+    #         icc optimized code (-O2 and above)
+    # see http://lists.boost.org/Archives/boost/2007/07/124815.php for details
     result = ['default']
   return result
 
@@ -18,7 +19,8 @@ def getReleaseCPPFLAGS():
   if os.name == 'nt':
     result = ['/EHsc', '/MD']
   elif os.name == 'posix':
-    result = ['-O3', '-fPIC', '-Wall']
+    #result = ['-O3', '-fPIC', '-Wall']
+    result = ['-O3', '-fPIC']
   return result
 
 def getDebugCPPFLAGS():

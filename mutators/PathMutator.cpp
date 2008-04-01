@@ -70,3 +70,10 @@ void PathMutator
 {
   ;
 } // end PathMutator::postprocess()
+
+void PathMutator
+  ::setShadingContext(const boost::shared_ptr<ShadingContext> &s)
+{
+  mShadingContext = s;
+} // end PathMutator::setShadingContext()
+

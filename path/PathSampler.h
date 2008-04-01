@@ -41,6 +41,7 @@ class PathSampler
      *  of interest.
      *  \param scene The Scene containing the environment to
      *               construct a Path in.
+     *  \param context A ShadingContext for evaluating shaders.
      *  \param x A HyperPoint uniquely specifying the Path to
      *           construct.
      *  \param p The constructed Path will be returned here.
@@ -48,6 +49,7 @@ class PathSampler
      *  \note This method must be implemented in a derived class.
      */
     virtual bool constructPath(const Scene &scene,
+                               ShadingContext &context,
                                const HyperPoint &x,
                                Path &p) = 0;
 

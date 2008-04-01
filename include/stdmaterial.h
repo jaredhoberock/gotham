@@ -1,20 +1,27 @@
 /*! \file stdmaterial.h
  *  \author Jared Hoberock
- *  \brief Thunk functions for hiding ShaderApi nastiness from shaders.
+ *  \brief Thunk functions for hiding ShadingInterface nastiness from shaders.
  */
 
-#include "../api/ShaderApi.h"
+#include "ShadingInterface.h"
+
+// The idea here is that we need an allocator for the different
+// ScatteringDistributionFunctions
+// So we will require that the shader set this at the beginning of its
+// function before calling any of these functions.
+// XXX This is probably not reentrant
+extern ShadingInterface *gContext;
 
 inline ScatteringDistributionFunction *diffuse(const Spectrum &Kd)
 {
-  return ShaderApi::diffuse(Kd);
+  return gContext->diffuse(Kd);
 } // end ScatteringDistributionFunction::diffuse()
 
 inline ScatteringDistributionFunction *glossy(const Spectrum &Kr,
                                               const float eta,
                                               const float exponent)
 {
-  return ShaderApi::glossy(Kr, eta, exponent);
+  return gContext->glossy(Kr, eta, exponent);
 } // end ScatteringDistributionFunction::glossy()
 
 inline ScatteringDistributionFunction *glossy(const Spectrum &Kr,
@@ -22,7 +29,7 @@ inline ScatteringDistributionFunction *glossy(const Spectrum &Kr,
                                               const float uExponent,
                                               const float vExponent)
 {
-  return ShaderApi::glossy(Kr, eta, uExponent, vExponent);
+  return gContext->glossy(Kr, eta, uExponent, vExponent);
 } // end ScatteringDistributionFunction::glossy()
 
 inline ScatteringDistributionFunction *glossyRefraction(const Spectrum &Kt,
@@ -30,39 +37,39 @@ inline ScatteringDistributionFunction *glossyRefraction(const Spectrum &Kt,
                                                         const float etat,
                                                         const float exponent)
 {
-  return ShaderApi::glossyRefraction(Kt, etai, etat, exponent);
+  return gContext->glossyRefraction(Kt, etai, etat, exponent);
 } // end glossyRefraction()
 
 inline ScatteringDistributionFunction *glass(const float eta,
                                              const Spectrum &Kr,
                                              const Spectrum &Kt)
 {
-  return ShaderApi::glass(eta, Kr, Kt);
+  return gContext->glass(eta, Kr, Kt);
 } // end glass()
 
 inline ScatteringDistributionFunction *thinGlass(const float eta,
                                                  const Spectrum &Kr,
                                                  const Spectrum &Kt)
 {
-  return ShaderApi::thinGlass(eta, Kr, Kt);
+  return gContext->thinGlass(eta, Kr, Kt);
 } // end thinGlass()
 
 inline ScatteringDistributionFunction *mirror(const Spectrum &Kr,
                                               const float eta)
 {
-  return ShaderApi::mirror(Kr, eta);
+  return gContext->mirror(Kr, eta);
 } // end mirror()
 
 inline ScatteringDistributionFunction *refraction(const Spectrum &Kr,
                                                   const float etai,
                                                   const float etat)
 {
-  return ShaderApi::refraction(Kr, etai, etat);
+  return gContext->refraction(Kr, etai, etat);
 } // end refraction()
 
 inline ScatteringDistributionFunction *transparent(const Spectrum &Kt)
 {
-  return ShaderApi::transparent(Kt);
+  return gContext->transparent(Kt);
 } // end transparent()
 
 inline ScatteringDistributionFunction *uber(const Spectrum &Kd,
@@ -70,14 +77,14 @@ inline ScatteringDistributionFunction *uber(const Spectrum &Kd,
                                             const float uShininess,
                                             const float vShininess)
 {
-  return ShaderApi::uber(Kd, Ks, uShininess, vShininess);
+  return gContext->uber(Kd, Ks, uShininess, vShininess);
 } // end uber()
 
 inline ScatteringDistributionFunction *uber(const Spectrum &Kd,
                                             const Spectrum &Ks,
                                             const float shininess)
 {
-  return ShaderApi::uber(Kd, Ks, shininess);
+  return gContext->uber(Kd, Ks, shininess);
 } // end uber()
 
 inline ScatteringDistributionFunction *uber(const Spectrum &Ks,
@@ -85,7 +92,7 @@ inline ScatteringDistributionFunction *uber(const Spectrum &Ks,
                                             const Spectrum &Kr,
                                             const float eta)
 {
-  return ShaderApi::uber(Ks, shininess, Kr, eta);
+  return gContext->uber(Ks, shininess, Kr, eta);
 } // end uber()
 
 inline ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
@@ -94,11 +101,11 @@ inline ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
                                                          const Vector &right,
                                                          const Vector &up)
 {
-  return ShaderApi::perspectiveSensor(Ks, aspect, origin, right, up);
+  return gContext->perspectiveSensor(Ks, aspect, origin, right, up);
 } // end perspective()
 
 inline ScatteringDistributionFunction *hemisphericalEmission(const Spectrum &Ke)
 {
-  return ShaderApi::hemisphericalEmission(Ke);
+  return gContext->hemisphericalEmission(Ke);
 } // end hemisphericalEmission()
 

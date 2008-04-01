@@ -1,4 +1,7 @@
+#!/usr/bin/env python
 #!/usr/bin/env gotham
+
+from api import *
 
 # set up a unit square we can use for the walls of the box
 # four vertices

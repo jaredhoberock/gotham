@@ -47,7 +47,7 @@ void MultiStageMetropolisRenderer
   // to agree on an estimate
   // XXX we shouldn't have to do this
   RandomSequence seq(13u);
-  float bLuminance = luminanceImportance.estimateNormalizationConstant(seq, mScene, mMutator, 10000);
+  float bLuminance = luminanceImportance.estimateNormalizationConstant(seq, mScene, mShadingContext, mMutator, 10000);
 
   // now integrate the importance function that we are going to be using
   // XXX we should really choose a init path proportional to this function, not the luminance function
@@ -55,7 +55,7 @@ void MultiStageMetropolisRenderer
   //float b = mImportance->estimateNormalizationConstant(mSeedPoints, mSeedPaths, mSeedResults);
   //x = mSeedPoints[initialPathIndex];
   //mSeedPaths[initialPathIndex].clone(xPath, mLocalPool); 
-  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mMutator,
+  float b = mImportance->estimateNormalizationConstant(mRandomSequence, mScene, mShadingContext, mMutator,
                                                        10000, mLocalPool, x, xPath);
 
   float invB = 1.0f / b;
@@ -230,7 +230,7 @@ void MultiStageMetropolisRenderer
     } // end if
 
     // purge all malloc'd memory for this sample
-    ScatteringDistributionFunction::mPool.freeAll();
+    mShadingContext->freeAll();
 
     // update the number of samples we've taken so far
     ++mNumSamples;
@@ -291,7 +291,7 @@ float MultiStageMetropolisRenderer
   mImportance.reset(new EstimateImportance(*lowResEstimate));
 
   // preprocess the importance and grab b
-  mImportance->preprocess(mRandomSequence, mScene, mMutator, *this);
+  mImportance->preprocess(mRandomSequence, mScene, mShadingContext, mMutator, *this);
   //mImportance->preprocess(mSeedPoints, mSeedPaths, mSeedResults);
   float invB = mImportance->getInvNormalizationConstant();
 

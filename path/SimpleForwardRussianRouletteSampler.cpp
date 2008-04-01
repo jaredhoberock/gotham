@@ -22,6 +22,7 @@ SimpleForwardRussianRouletteSampler
 
 bool SimpleForwardRussianRouletteSampler
   ::constructPath(const Scene &scene,
+                  ShadingContext &context,
                   const HyperPoint &x,
                   Path &p)
 {
@@ -35,7 +36,7 @@ bool SimpleForwardRussianRouletteSampler
   // reserve the 0th coordinate to choose
   // the film plane
   // XXX remove the need for this
-  if(p.insert(0, &scene, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
+  if(p.insert(0, &scene, context, scene.getSensors(), false, x[1][0], x[1][1], x[1][2], x[1][3]) == Path::INSERT_FAILED) return false;
 
   unsigned int lastPosition = 0;
 
@@ -49,7 +50,7 @@ bool SimpleForwardRussianRouletteSampler
   do
   {
     lastPosition =
-      p.insertRussianRouletteWithTermination(lastPosition, &scene, true, lastPosition != 0, 
+      p.insertRussianRouletteWithTermination(lastPosition, &scene, context, true, lastPosition != 0, 
                                              u0, u1, u2, u3, rr, termination[0]);
     u0 = x[coord][0];
     u1 = x[coord][1];
@@ -86,7 +87,7 @@ bool SimpleForwardRussianRouletteSampler
     // last eye vertex
     // use the final coordinate to choose the light vertex
     const HyperPoint::value_type &c = x[x.size()-1];
-    if(p.insert(p.getSubpathLengths()[0], &scene, scene.getEmitters(), true,
+    if(p.insert(p.getSubpathLengths()[0], &scene, context, scene.getEmitters(), true,
                 c[0], c[1], c[2], c[3]) == Path::INSERT_FAILED) return false;
   } // end else
 
