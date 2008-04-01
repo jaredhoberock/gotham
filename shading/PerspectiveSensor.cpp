@@ -117,6 +117,10 @@ float PerspectiveSensor
   float t = -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
             -dg.getNormal().dot(ws);
 
+  // if t is negative, then ws came from 'behind the camera',
+  // and there is zero pdf of generating such directions
+  if(t < 0) return 0;
+
   // compute q the intersection with the ray and the window
   Point q = dg.getPoint() + t * ws;
   Point coords = q - mWindowOrigin;
@@ -148,8 +152,9 @@ Spectrum PerspectiveSensor
   // evaluate the pdf at ws, and if it is not zero, return mResponse
   // divide by dot product to remove the vignetting effect
   //return evaluatePdf(ws, dg) > 0 ? (mResponse / dg.getNormal().absDot(ws)) : Spectrum::black();
+  Spectrum result = evaluatePdf(ws, dg) > 0 ? (mResponse) : Spectrum::black();
 
-  return evaluatePdf(ws, dg) > 0 ? (mResponse) : Spectrum::black();
+  return result;
 } // end PerspectiveSensor::evaluate()
 
 Vector PerspectiveSensor
