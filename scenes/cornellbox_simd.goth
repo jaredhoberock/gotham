@@ -83,7 +83,6 @@ Attribute("renderer:threads", "192")
 
 # let's render to a 512x512 image
 (w,h) = (512,512)
-#(w,h) = (64,64)
 Attribute("record:width",  w)
 Attribute("record:height", h)
 

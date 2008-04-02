@@ -9,15 +9,22 @@
 #define HEMISPHERICAL_EMISSION_H
 
 #include "ScatteringDistributionFunction.h"
+#include "functions/HemisphericalEmissionBase.h"
 
 class HemisphericalEmission
-  : public ScatteringDistributionFunction
+  : public ScatteringDistributionFunction,
+    public HemisphericalEmissionBase<Vector,Spectrum,DifferentialGeometry>
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef ScatteringDistributionFunction Parent;
+    typedef ScatteringDistributionFunction Parent0;
+
+    /*! \typedef Parent1
+     *  \brief Shorthand.
+     */
+    typedef HemisphericalEmissionBase<Vector,Spectrum,DifferentialGeometry> Parent1;
 
     /*! Constructor accepts a radiance.
      *  \param radiosity The sum of radiance emitted from this
@@ -31,17 +38,9 @@ class HemisphericalEmission
      *  \param w  The outgoing direction of emission.
      *  \param dg The DifferentialGeometry at the Point of interest.
      */
-    using Parent::evaluate;
+    using Parent0::evaluate;
     Spectrum evaluate(const Vector3 &w,
                       const DifferentialGeometry &dg) const;
-
-    /*! This method returns a const reference to mRadiance.
-     *  \return mRadiance
-     */
-    const Spectrum &getRadiance(void) const;
-    
-  protected:
-    Spectrum mRadiance;
 }; // end HemisphericalEmission
 
 #endif // HEMISPHERICAL_EMISSION_H

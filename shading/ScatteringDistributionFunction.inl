@@ -11,12 +11,13 @@ ScatteringDistributionFunction
   ;
 } // end ScatteringDistributionFunction::~ScatteringDistributionFunction()
 
-bool ScatteringDistributionFunction
-  ::areSameHemisphere(const Vector3 &wo,
-                      const Normal &n,
-                      const Vector3 &wi)
+template<typename V3, typename N3>
+  bool ScatteringDistributionFunction
+    ::areSameHemisphere(const V3 &wo,
+                        const N3 &n,
+                        const V3 &wi)
 {
-  return areSameHemisphere(wo.dot(n), wi.dot(n));
+  return areSameHemisphere(dot(wo,n), dot(wi,n));
 } // end ScatteringDistributionFunction::areSameHemisphere()
 
 bool ScatteringDistributionFunction

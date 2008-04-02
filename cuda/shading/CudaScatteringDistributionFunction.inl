@@ -3,16 +3,23 @@
  *  \brief Inline file for CudaScatteringDistributionFunction.h.
  */
 
+// XXX this is terribly shitty, but when compiled by anything
+//     other than nvcc, we get compiler complaints about
+//     dot product for CUDA vectors
+#ifdef __CUDACC__
+
 #include "CudaScatteringDistributionFunction.h"
-#include "CudaLambertian.h"
 #include "CudaHemisphericalEmission.h"
 #include <vector_functions.h>
+#include "CudaLambertian.h"
 
 //Spectrum CudaScatteringDistributionFunction
 float3 CSDF
   ::evaluate(const float3 &wo,
              const CudaDifferentialGeometry &dg,
-             const float3 &wi) const { float3 result;
+             const float3 &wi) const
+{
+  float3 result;
 
   // do a naive switch for now
   switch(mType)
@@ -20,8 +27,7 @@ float3 CSDF
     case LAMBERTIAN:
     {
       const CudaLambertian &lambertian = (const CudaLambertian&)mFunction;
-      const float3 &albedo = (const float3&)lambertian.mAlbedoOverPi;
-      result = albedo;
+      result = lambertian.evaluate(wo,dg,wi);
       break;
     } // end LAMBERTIAN
 
@@ -49,8 +55,7 @@ float3 CSDF
     case HEMISPHERICAL_EMISSION:
     {
       const CudaHemisphericalEmission &he = (const CudaHemisphericalEmission&)mFunction;
-      const float3 &r = (const float3&)he.mRadiance;
-      result = r;
+      result = he.evaluate(wo,dg);
       break;
     } // end HEMISPHERICAL_EMISSION
 
@@ -64,4 +69,6 @@ float3 CSDF
 
   return result;
 } // end CudaScatteringDistributionFunction::evaluate()
+
+#endif // __CUDACC__
 

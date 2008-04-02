@@ -8,15 +8,12 @@
 
 #include "../../shading/ScatteringFunctionBlock.h"
 #include "../geometry/CudaDifferentialGeometry.h"
-#include <spectrum/Spectrum.h>
-
-// this defines the CUDA vector types
-#include <vector_types.h>
 
 enum ScatteringType
 {
   LAMBERTIAN,
-  HEMISPHERICAL_EMISSION
+  HEMISPHERICAL_EMISSION,
+  NULL_SCATTERING
 }; // end ScatteringType
 
 //struct CudaScatteringDistributionFunction

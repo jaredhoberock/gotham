@@ -12,6 +12,7 @@
 #include "evaluateBidirectionalScattering.h"
 #include "evaluateUnidirectionalScattering.h"
 #include <stdcuda/cuda_algorithm.h>
+#include <vector_functions.h>
 
 CudaShadingContext
   ::CudaShadingContext(const boost::shared_ptr<MaterialList> &materials)
@@ -115,7 +116,10 @@ CudaScatteringDistributionFunction CudaShadingContext
     const Lambertian *l = static_cast<const Lambertian*>(f);
     CudaLambertian *cl = reinterpret_cast<CudaLambertian*>(&result.mFunction);
 
-    *cl = CudaLambertian(l->getAlbedo());
+    // XXX it's a shame we can't just do a straight copy
+    Spectrum a = l->getAlbedo();
+    float3 albedo = make_float3(a[0],a[1],a[2]);
+    *cl = CudaLambertian(albedo);
 
     result.mType = LAMBERTIAN;
   } // end if
@@ -124,10 +128,17 @@ CudaScatteringDistributionFunction CudaShadingContext
     const HemisphericalEmission *he = static_cast<const HemisphericalEmission*>(f);
     CudaHemisphericalEmission *che = reinterpret_cast<CudaHemisphericalEmission*>(&result.mFunction);
 
-    *che = CudaHemisphericalEmission(he->getRadiance());
+    // XXX it's a shame we can't just do a straight copy
+    Spectrum r = he->getRadiosity();
+    float3 radiosity = make_float3(r[0],r[1],r[2]);
+    *che = CudaHemisphericalEmission(radiosity);
 
     result.mType = HEMISPHERICAL_EMISSION;
   } // end else if
+  else
+  {
+    result.mType = NULL_SCATTERING;
+  } // end else
 
   return result;
 } // end CudaShadingContext::createCudaScatteringDistributionFunction()

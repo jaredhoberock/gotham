@@ -6,19 +6,6 @@
 
 #pragma once
 
-#include <spectrum/Spectrum.h>
-
-class CudaHemisphericalEmission
-{
-  public:
-    /*! Constructor accepts a radiance.
-     *  \param r Sets mRadiance.
-     */
-    inline __host__ __device__ CudaHemisphericalEmission(const Spectrum &r);
-
-  //protected:
-    Spectrum mRadiance;
-}; // end CudaHemisphericalEmission
-
-#include "CudaHemisphericalEmission.inl"
+#include "../../shading/functions/HemisphericalEmissionBase.h"
+typedef HemisphericalEmissionBase<float3,float3,CudaDifferentialGeometry> CudaHemisphericalEmission;
 

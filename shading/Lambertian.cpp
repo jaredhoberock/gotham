@@ -8,9 +8,9 @@
 
 Lambertian
   ::Lambertian(const Spectrum &albedo)
+    :Parent0(),Parent1(albedo)
 {
-  mAlbedo = albedo;
-  mAlbedoOverPi = mAlbedo / PI;
+  ;
 } // end Lambertian::Lambertian()
 
 Spectrum Lambertian
@@ -18,7 +18,7 @@ Spectrum Lambertian
              const DifferentialGeometry &dg,
              const Vector3 &wi) const
 {
-  return areSameHemisphere(wi,dg.getNormal(),wo) ? mAlbedoOverPi : Spectrum::black();
+  return Parent1::evaluate(wo,dg,wi);
 } // end Lambertian::evaluate()
 
 Spectrum Lambertian
@@ -39,10 +39,4 @@ Spectrum Lambertian
 
   return result;
 } // end Lambertian::evaluate()
-
-const Spectrum &Lambertian
-  ::getAlbedo(void) const
-{
-  return mAlbedo;
-} // end Lambertian::getAlbedo()
 

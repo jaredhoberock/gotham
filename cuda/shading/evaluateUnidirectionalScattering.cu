@@ -6,11 +6,9 @@
 // XXX hack total
 #define inline inline __host__ __device__
 
-#include "evaluateUnidirectionalScattering.h"
+#include <stdcuda/vector_math.h>
 #include "CudaScatteringDistributionFunction.h"
-#include "CudaLambertian.h"
-#include "../geometry/CudaDifferentialGeometry.h"
-#include <spectrum/Spectrum.h>
+#include "evaluateUnidirectionalScattering.h"
 
 #undef inline
 

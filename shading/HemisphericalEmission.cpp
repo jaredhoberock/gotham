@@ -7,7 +7,7 @@
 
 HemisphericalEmission
   ::HemisphericalEmission(const Spectrum &radiosity)
-    :mRadiance(radiosity / PI)
+    :Parent0(),Parent1(radiosity)
 {
   ;
 } // end HemisphericalEmission::HemisphericalEmission()
@@ -16,12 +16,6 @@ Spectrum HemisphericalEmission
   ::evaluate(const Vector3 &w,
              const DifferentialGeometry &dg) const
 {
-  return w.dot(dg.getNormal()) > 0 ? mRadiance : Spectrum::black();
-} // end HemisphericalEmission::evaluate()
-
-const Spectrum &HemisphericalEmission
-  ::getRadiance(void) const
-{
-  return mRadiance;
+  return Parent1::evaluate(w,dg);
 } // end HemisphericalEmission::evaluate()
 

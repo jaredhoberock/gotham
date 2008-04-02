@@ -8,15 +8,22 @@
 #define LAMBERTIAN_H
 
 #include "ScatteringDistributionFunction.h"
+#include "functions/LambertianBase.h"
 
 class Lambertian
-  : public ScatteringDistributionFunction
+  : public ScatteringDistributionFunction,
+    public LambertianBase<Vector, Spectrum, DifferentialGeometry>
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef ScatteringDistributionFunction Parent;
+    typedef ScatteringDistributionFunction Parent0;
+
+    /*! \typedef Parent1
+     *  \brief Shorthand.
+     */
+    typedef LambertianBase<Vector, Spectrum, DifferentialGeometry> Parent1;
 
     /*! Constructor accepts an albedo.
      *  \param albedo Sets mAlbedo.
@@ -30,7 +37,7 @@ class Lambertian
      *  \return mAlbedo / PI if wi & wo are in the same hemisphere;
      *          0, otherwise.
      */
-    using Parent::evaluate;
+    using Parent0::evaluate;
     Spectrum evaluate(const Vector3 &wo,
                       const DifferentialGeometry &dg,
                       const Vector3 &wi) const;
@@ -50,18 +57,6 @@ class Lambertian
                       const bool delta,
                       const ComponentIndex component,
                       float &pdf) const;
-
-    /*! This method returns a const reference to mAlbedo.
-     *  \return mAlbedo.
-     */
-    const Spectrum &getAlbedo(void) const;
-
-  protected:
-    Spectrum mAlbedo;
-
-    /*! mAlbedo / PI
-     */
-    Spectrum mAlbedoOverPi;
 }; // end Lambertian
 
 #endif // LAMBERTIAN_H
