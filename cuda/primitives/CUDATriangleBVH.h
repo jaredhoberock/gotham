@@ -9,19 +9,26 @@
 #define CUDA_TRIANGLE_BVH_H
 
 #include "../../primitives/TriangleBVH.h"
+#include "CudaPrimitive.h"
 
 // this defines the CUDA vector types
 #include <vector_types.h>
 #include <stdcuda/vector_dev.h>
 
 class CUDATriangleBVH
-  : public TriangleBVH
+  : public TriangleBVH,
+    public CudaPrimitive
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef TriangleBVH Parent;
+    typedef TriangleBVH Parent0;
+
+    /*! \typedef Parent1
+     *  \brief Shorthand.
+     */
+    typedef CudaPrimitive Parent1;
 
     /*! This method provides a SIMD path for intersect(). It intersects more than
      *  one Ray against this Primitive en masse.
@@ -38,6 +45,26 @@ class CUDATriangleBVH
                            int *stencil,
                            size_t n) const;
 
+    /*! This method provides a SIMD path for intersect() with
+     *  types that explicitly reside on a CUDA device. It intersects
+     *  a set of Rays against this CudaPrimitive en masse.
+     *  \param originsAndMinT A list of ray origins. The fourth
+     *         component is interpreted as the minimum of the
+     *         valid parametric interval.
+     *  \param directionsAndMaxT A list of ray directions. The fourth
+     *         component is interpreted as the maximum of the
+     *         valid parametric interval.
+     *  \param intersections If an intersection for a Ray exists,
+     *         a CudaIntersection record storing information about
+     *         the first intersection encountered is returned here.
+     *  \param stencil If a Ray hits something, this is set to true.
+     *  \param n The length of the lists.
+     */
+    virtual void intersect(stdcuda::device_ptr<const float4> originsAndMinT,
+                           stdcuda::device_ptr<const float4> directionsAndMaxT,
+                           stdcuda::device_ptr<CudaIntersection> intersections,
+                           stdcuda::device_ptr<int> stencil,
+                           const size_t n) const;
 
     /*! This method intializes various CUDA data structures to prepare
      *  for processing.
@@ -59,23 +86,6 @@ class CUDATriangleBVH
      *  for each call to intersect().
      */
     virtual void createScratchSpace(void);
-
-    /*! This method transforms the results of cudaRayTriangleBVHIntersection()
-     *  into Intersection objects.
-     *  \param rayOriginsAndMinT A list of ray origins.
-     *  \param rayDirectionsAndMaxT A list of ray directions.
-     *  \param timeBarycentricsAndTriangleIndex The results of cudaRayTriangleBVHIntersection.
-     *  \param stencil A filter to control which results need to be written.
-     *  \param intersections If an intersection for a Ray exists, a Primitive::Intersection record storing information about the first
-     *         intersection encountered is returned here.
-     *  \param n The length of the lists.
-     */
-    virtual void createIntersections(stdcuda::const_device_pointer<float4> rayOriginsAndMinT,
-                                     stdcuda::const_device_pointer<float4> rayDirectionsAndMaxT,
-                                     stdcuda::const_device_pointer<float4> timeBarycentricsAndTriangleIndex,
-                                     stdcuda::const_device_pointer<int> stencil,
-                                     Intersection *intersections,
-                                     const size_t n) const;
 
     // These are copies of the corresponding lists in the Parents which
     // are resident on the CUDA device

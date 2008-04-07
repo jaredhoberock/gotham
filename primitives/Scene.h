@@ -50,7 +50,7 @@ class Scene
 
     /*! This method provides a SIMD path for ray intersection.
      *  \param rays A list of Rays to intersect.
-     *  \param intersections Af an intersection for a Ray exists, a Primitive::Intersection record storing information about the first
+     *  \param intersections If an intersection for a Ray exists, a Primitive::Intersection record storing information about the first
      *         intersection encountered is returned here.
      *  \param stencil If a Ray hits something, this is set to true.
      *  \param n The length of lists rays, intersections, and stencil.
@@ -69,7 +69,7 @@ class Scene
     /*! This method sets mPrimitive.
      *  \param g Sets mPrimitive.
      */
-    inline void setPrimitive(boost::shared_ptr<Primitive> g);
+    inline virtual void setPrimitive(boost::shared_ptr<Primitive> g);
 
     /*! Returns a const pointer to mPrimitive.
      *  \return mPrimitive

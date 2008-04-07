@@ -4,10 +4,14 @@
  */
 
 #include "PrimitiveApi.h"
+#include "../rasterizables/RasterizableScene.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../primitives/PrimitiveBSP.h"
 #include "TriangleBVH.h"
 #include "../cuda/primitives/CUDATriangleBVH.h"
+#include "../cuda/primitives/CudaScene.h"
+#include "Scene.h"
+#include "UnshadowedScene.h"
 #include <algorithm>
 
 using namespace boost;
@@ -22,9 +26,8 @@ PrimitiveList<> *PrimitiveApi
 
   if(numThreads > 1)
   {
-    TriangleBVH *bvh = new RasterizablePrimitiveList< TriangleBVH >();
-    //CUDATriangleBVH *bvh = new RasterizablePrimitiveList<CUDATriangleBVH>();
-    //bvh->setWorkBatchSize(numThreads);
+    CUDATriangleBVH *bvh = new RasterizablePrimitiveList<CUDATriangleBVH>();
+    bvh->setWorkBatchSize(numThreads);
     result = bvh;
   } // end if
   else
@@ -37,4 +40,30 @@ PrimitiveList<> *PrimitiveApi
 
   return result;
 } // end PrimitiveApi::list()
+
+Scene *PrimitiveApi
+  ::scene(Gotham::AttributeMap &attr)
+{
+  Scene *result = 0;
+
+  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
+
+  if(numThreads > 1)
+  {
+    result = new RasterizableScene<CudaScene>();
+  } // end if
+  else
+  {
+    if(attr["scene:castshadows"] == std::string("false"))
+    {
+      result = new RasterizableScene<UnshadowedScene>();
+    } // end if
+    else
+    {
+      result = new RasterizableScene<Scene>();
+    } // end else
+  } // end else
+
+  return result;
+} // end PrimitiveApi::scene()
 

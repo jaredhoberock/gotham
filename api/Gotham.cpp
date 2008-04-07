@@ -19,7 +19,6 @@
 #include "../renderers/RendererApi.h"
 #include "../records/RecordApi.h"
 #include "../shading/ShadingApi.h"
-#include "../rasterizables/RasterizableScene.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../rasterizables/RasterizableSurfacePrimitive.h"
 #include "../rasterizables/RasterizableMesh.h"
@@ -178,15 +177,7 @@ void Gotham
   AttributeMap &attr = mAttributeStack.back();
 
   // create a new Scene
-  shared_ptr<Scene> s;
-  if(attr["scene:castshadows"] == std::string("false"))
-  {
-    s.reset(new RasterizableScene<UnshadowedScene>());
-  } // end if
-  else
-  {
-    s.reset(new RasterizableScene<Scene>());
-  } // end else
+  shared_ptr<Scene> s(PrimitiveApi::scene(mAttributeStack.back()));
 
   // create a final PrimitiveList
   PrimitiveList<> *list = PrimitiveApi::list(mAttributeStack.back(),

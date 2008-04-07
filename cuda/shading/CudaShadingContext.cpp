@@ -14,12 +14,41 @@
 #include <stdcuda/cuda_algorithm.h>
 #include <vector_functions.h>
 
+using namespace stdcuda;
+
 CudaShadingContext
   ::CudaShadingContext(const boost::shared_ptr<MaterialList> &materials)
     :Parent(materials)
 {
   ;
 } // end CudaShadingContext::CudaShadingContext()
+
+void CudaShadingContext
+  ::evaluateBidirectionalScattering(device_ptr<const CudaScatteringDistributionFunction> f,
+                                    device_ptr<const float3> wo,
+                                    device_ptr<const CudaDifferentialGeometry> dg,
+                                    device_ptr<const float3> wi,
+                                    device_ptr<const int> stencil,
+                                    device_ptr<float3> results,
+                                    const size_t n)
+{
+  // just pass to the kernel
+  ::evaluateBidirectionalScattering(f, wo, dg, wi, stencil, results, n);
+} // end CudaShadingContext::evaluateBidirectionalScattering()
+
+void CudaShadingContext
+  ::evaluateBidirectionalScattering(device_ptr<const CudaScatteringDistributionFunction> f,
+                                    device_ptr<const float3> wo,
+                                    device_ptr<const CudaDifferentialGeometry> dg,
+                                    const size_t dgStride,
+                                    device_ptr<const float3> wi,
+                                    device_ptr<const int> stencil,
+                                    device_ptr<float3> results,
+                                    const size_t n)
+{
+  // just pass to the kernel
+  ::evaluateBidirectionalScatteringStride(f, wo, dg, dgStride, wi, stencil, results, n);
+} // end CudaShadingContext::evaluateBidirectionalScattering()
 
 void CudaShadingContext
   ::evaluateBidirectionalScattering(ScatteringDistributionFunction **f,
@@ -44,18 +73,45 @@ void CudaShadingContext
   stdcuda::copy(dg, dg + n, dgDevice.begin());
   stdcuda::copy(stencil, stencil + n, stencilDevice.begin());
 
-  stdcuda::vector_dev<Spectrum> resultsDevice(n);
-  ::evaluateBidirectionalScattering(&cf[0],
-                                    &woDevice[0],
-                                    &dgDevice[0],
-                                    &wiDevice[0],
-                                    &stencilDevice[0],
-                                    &resultsDevice[0],
-                                    n);
+  stdcuda::vector_dev<float3> resultsDevice(n);
+  evaluateBidirectionalScattering(&cf[0],
+                                  &woDevice[0],
+                                  &dgDevice[0],
+                                  &wiDevice[0],
+                                  &stencilDevice[0],
+                                  &resultsDevice[0],
+                                  n);
 
   // copy results back to host
-  stdcuda::copy(resultsDevice.begin(), resultsDevice.end(), &results[0]);
+  // XXX this is a bit of a hack, but it will work
+  float3 *hostPtr = reinterpret_cast<float3*>(&results[0]);
+  stdcuda::copy(resultsDevice.begin(), resultsDevice.end(), hostPtr);
 } // end CudaShadingContext::evaluateBidirectionalScattering()
+
+void CudaShadingContext
+  ::evaluateUnidirectionalScattering(device_ptr<const CudaScatteringDistributionFunction> f,
+                                     device_ptr<const float3> wo,
+                                     device_ptr<const CudaDifferentialGeometry> dg,
+                                     device_ptr<const int> stencil,
+                                     device_ptr<float3> results,
+                                     const size_t n)
+{
+  // just pass to the kernel
+  ::evaluateUnidirectionalScattering(f, wo, dg, stencil, results, n);
+} // end CudaShadingContext::evaluateUnidirectionalScattering()
+
+void CudaShadingContext
+  ::evaluateUnidirectionalScattering(device_ptr<const CudaScatteringDistributionFunction> f,
+                                     device_ptr<const float3> wo,
+                                     device_ptr<const CudaDifferentialGeometry> dg,
+                                     const size_t dgStride,
+                                     device_ptr<const int> stencil,
+                                     device_ptr<float3> results,
+                                     const size_t n)
+{
+  // just pass to the kernel
+  ::evaluateUnidirectionalScatteringStride(f, wo, dg, dgStride, stencil, results, n);
+} // end CudaShadingContext::evaluateUnidirectionalScattering()
 
 void CudaShadingContext
   ::evaluateUnidirectionalScattering(ScatteringDistributionFunction **f,
@@ -77,13 +133,13 @@ void CudaShadingContext
   stdcuda::copy(dg, dg + n, dgDevice.begin());
   stdcuda::copy(stencil, stencil + n, stencilDevice.begin());
 
-  stdcuda::vector_dev<Spectrum> resultsDevice(n);
-  ::evaluateUnidirectionalScattering(&cf[0],
-                                     &woDevice[0],
-                                     &dgDevice[0],
-                                     &stencilDevice[0],
-                                     &resultsDevice[0],
-                                     n);
+  stdcuda::vector_dev<float3> resultsDevice(n);
+  evaluateUnidirectionalScattering(&cf[0],
+                                   &woDevice[0],
+                                   &dgDevice[0],
+                                   &stencilDevice[0],
+                                   &resultsDevice[0],
+                                   n);
 
   // copy results back to host
   stdcuda::copy(resultsDevice.begin(), resultsDevice.end(), &results[0]);

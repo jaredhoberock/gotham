@@ -43,6 +43,23 @@ class CudaShadingContext
                                                  Spectrum *results,
                                                  const size_t n);
 
+    virtual void evaluateBidirectionalScattering(stdcuda::device_ptr<const CudaScatteringDistributionFunction> f,
+                                                 stdcuda::device_ptr<const float3> wo,
+                                                 stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
+                                                 stdcuda::device_ptr<const float3> wi,
+                                                 stdcuda::device_ptr<const int> stencil,
+                                                 stdcuda::device_ptr<float3> results,
+                                                 const size_t n);
+
+    virtual void evaluateBidirectionalScattering(stdcuda::device_ptr<const CudaScatteringDistributionFunction> f,
+                                                 stdcuda::device_ptr<const float3> wo,
+                                                 stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
+                                                 const size_t dgStride,
+                                                 stdcuda::device_ptr<const float3> wi,
+                                                 stdcuda::device_ptr<const int> stencil,
+                                                 stdcuda::device_ptr<float3> results,
+                                                 const size_t n);
+
     /*! This method evaluates the unidirectional scattering of a batch of
      *  scattering jobs in a SIMD fashion on a CUDA device.
      *  \param f A list of ScatteringDistributionFunction objects.
@@ -59,7 +76,21 @@ class CudaShadingContext
                                                   Spectrum *results,
                                                   const size_t n);
 
-  protected:
+    virtual void evaluateUnidirectionalScattering(stdcuda::device_ptr<const CudaScatteringDistributionFunction> f,
+                                                  stdcuda::device_ptr<const float3> wo,
+                                                  stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
+                                                  stdcuda::device_ptr<const int> stencil,
+                                                  stdcuda::device_ptr<float3> results,
+                                                  const size_t n);
+
+    virtual void evaluateUnidirectionalScattering(stdcuda::device_ptr<const CudaScatteringDistributionFunction> f,
+                                                  stdcuda::device_ptr<const float3> wo,
+                                                  stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
+                                                  const size_t dgStride,
+                                                  stdcuda::device_ptr<const int> stencil,
+                                                  stdcuda::device_ptr<float3> results,
+                                                  const size_t n);
+
     /*! This method creates a list of CudaScatteringDistributionFunctions given
      *  a list of ScatteringDistributionFunctions.
      *  \param f The input list of ScatteringDistributionFunctions.
@@ -71,6 +102,7 @@ class CudaShadingContext
                                                            const int *stencil,
                                                            const size_t n,
                                                            stdcuda::vector_dev<CudaScatteringDistributionFunction> &cf);
+  protected:
 
     virtual CudaScatteringDistributionFunction createCudaScatteringDistributionFunction(const ScatteringDistributionFunction *f);
 }; // end CudaShadingContext

@@ -15,7 +15,16 @@ extern "C" void evaluateUnidirectionalScattering(const CudaScatteringDistributio
                                                  const float3 *wo,
                                                  const CudaDifferentialGeometry *dg,
                                                  const int *stencil,
-                                                 Spectrum *results,
+                                                 float3 *results,
                                                  const size_t n);
+
+
+extern "C" void evaluateUnidirectionalScatteringStride(const CudaScatteringDistributionFunction *f,
+                                                       const float3 *wo,
+                                                       const CudaDifferentialGeometry *dg,
+                                                       const size_t dgStride,
+                                                       const int *stencil,
+                                                       float3 *results,
+                                                       const size_t n);
 
 

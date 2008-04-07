@@ -9,6 +9,7 @@
 #include "MetropolisRenderer.h"
 #include "DebugRenderer.h"
 #include "SIMDDebugRenderer.h"
+#include "../cuda/renderers/CudaDebugRenderer.h"
 #include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
@@ -158,7 +159,8 @@ Renderer *RendererApi
   {
     if(numThreads > 1)
     {
-      SIMDDebugRenderer *r= new SIMDDebugRenderer();
+      //SIMDDebugRenderer *r= new SIMDDebugRenderer();
+      CudaDebugRenderer *r = new CudaDebugRenderer();
       r->setWorkBatchSize(numThreads);
       result = r;
     } // end if
