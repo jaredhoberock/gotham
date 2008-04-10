@@ -11,138 +11,143 @@ import re
 import tempfile
 import shutil
 
-def parseDeclaration(decl):
-  # strip leading and ending whitespace
-  decl = decl.lstrip()
-  decl = decl.rstrip()
-  try:
-    # split decl into "type expression"
-    (type, whitespace, expression) = decl.partition(' ')
-    identifier = ""
-    # set default values to 0 for now
-    default = "0.0f"
-    try:
-      # split barexpr into "identifier [= default]"
-      (identifier, default) = tuple(expression.split("="))
-    except:
-      # assume we only encountered an identifier
-      identifier = expression
+class ShaderCompiler:
+  def parseDeclaration(self, decl):
     # strip leading and ending whitespace
-    type = type.lstrip()
-    type = type.rstrip()
-    identifier = identifier.lstrip()
-    identifier = identifier.rstrip()
-    default = default.lstrip()
-    default = default.rstrip()
-    # set the result
-    result = (type, identifier, default)
-  except:
-    raise ValueError, 'Error: Expected a declaration.'
-  return result
-
-def parseParameters(parameters):
-  result = []
-  # first check for void parameters
-  voidParameters = re.compile('^\s*$|^\s*void\s*$')
-  if voidParameters.search(parameters) != None:
+    decl = decl.lstrip()
+    decl = decl.rstrip()
+    try:
+      # split decl into "type expression"
+      (type, whitespace, expression) = decl.partition(' ')
+      identifier = ""
+      # set default values to 0 for now
+      default = "0.0f"
+      try:
+        # split barexpr into "identifier [= default]"
+        (identifier, default) = tuple(expression.split("="))
+      except:
+        # assume we only encountered an identifier
+        identifier = expression
+      # strip leading and ending whitespace
+      type = type.lstrip()
+      type = type.rstrip()
+      identifier = identifier.lstrip()
+      identifier = identifier.rstrip()
+      default = default.lstrip()
+      default = default.rstrip()
+      # set the result
+      result = (type, identifier, default)
+    except:
+      raise ValueError, 'Error: Expected a declaration.'
     return result
-  i = 0
-  while i < len(parameters):
-    # slurp characters until we find a ','
-    # at our current depth
-    decl = ''
-    depth = 0
+  
+  def parseParameters(self, parameters):
+    result = []
+    # first check for void parameters
+    voidParameters = re.compile('^\s*$|^\s*void\s*$')
+    if voidParameters.search(parameters) != None:
+      return result
+    i = 0
     while i < len(parameters):
-      c = parameters[i]
-      i += 1
-      if c == '(':
+      # slurp characters until we find a ','
+      # at our current depth
+      decl = ''
+      depth = 0
+      while i < len(parameters):
+        c = parameters[i]
+        i += 1
+        if c == '(':
+          depth += 1
+        elif c == ')':
+          depth -= 1
+        if c == ',' and depth == 0:
+          break
+        decl += c
+      result.append(self.parseDeclaration(decl))
+    return result
+  
+  def parseFunction(self, name, source):
+    # split the source at the function name
+    (stuffBeforeFunctionName, funcName, stuffAfterFunctionName) = source.partition(name)
+    if funcName != name:
+      return ([], '')
+  
+    # split the stuff after the function name into (parameters) and then body
+    try:
+      (params, openBrace, searchMeForBody) = stuffAfterFunctionName.partition('{')
+    except:
+      raise ValueError, "Error: expected '{' after function '%s' declaration." % name
+  
+    # split the parameters into '(' parametersList ')'
+    (stuffBeforeOpenParens, firstOpenParens, stuffAfterOpenParens) = params.partition('(')
+    (parameters, lastCloseParens, stuffAfterFinalCloseParens) = stuffAfterOpenParens.rpartition(')')
+  
+    # parse the parameters string into a list of parameters
+    parametersList = self.parseParameters(parameters)
+  
+    # strip off the leading whitespace of the function body
+    searchMeForBody = searchMeForBody.lstrip()
+    depth = 1
+    body = ''
+    for c in searchMeForBody:
+      if c == '{':
         depth += 1
-      elif c == ')':
-        depth -= 1
-      if c == ',' and depth == 0:
+      elif c == '}': depth -= 1
+      if depth == 0:
         break
-      decl += c
-    result.append(parseDeclaration(decl))
-  return result
+      body += c
+    if depth != 0:
+      raise ValueError, "Error: EOF reached before end of function '%s'." % name
+    return (parametersList, body)
+  
+  def makeShaderParameterCode(self, parameterType, parameterName):
+    # declare the parameter
+    result = '%s %s;\n' % (parameterType, parameterName)
+    # make a setter method for it
+    if parameterType == "Vector" or parameterType == "Point" or parameterType == "Spectrum":
+      result += 'void set_%s(const float x, const float y, const float z){%s = %s(x,y,z);}\n' % (parameterName, parameterName, parameterType)
+    elif parameterType == "float":
+      result += 'void set_%s(const %s &v){%s = v;}\n' % (parameterName, parameterType, parameterName)
+    else:
+      print "Error: Unknown type %s for parameter %s." % (parameterType, parameterName)
+      exit()
+    return result
+  
+  def makeNullConstructorCode(self, className, parameterList):
+    result = ''
+    result += className + '(void)\n'
+    if len(parameterList) > 0:
+      result += ':\n'
+      for param in parameterList[0:-1]:
+        result += param[1] + '(' + param[2] + '),\n'
+      result += parameterList[-1][1] + '(' + parameterList[-1][2] + ')\n'
+    # give it an empty body
+    result += '{;}\n'
+    return result
+  
+  def stripComments(self, shaderLines):
+    stripped = ''
+    for line in shaderLines:
+      # begin a new line
+      stripped += '\n'
+      for i in range(0, len(line)):
+        c = line[i]
+        nextC = ''
+        if i+1 != len(line):
+          nextC = line[i+1]
+        if c == '#' or (c == '/' and nextC == '/'):
+          break
+        lastC = c
+        stripped += c
+    return stripped
 
-def parseFunction(name, source):
-  # split the source at the function name
-  (stuffBeforeFunctionName, funcName, stuffAfterFunctionName) = source.partition(name)
-  if funcName != name:
-    return ([], '')
+  def createCppCode(self, shaderString, baseName):
+    # add 'Shader' to the end of the basename to make it unique
+    # from any of our c++ identifiers
+    className = baseName + 'Shader'
 
-  # split the stuff after the function name into (parameters) and then body
-  try:
-    (params, openBrace, searchMeForBody) = stuffAfterFunctionName.partition('{')
-  except:
-    raise ValueError, "Error: expected '{' after function '%s' declaration." % name
-
-  # split the parameters into '(' parametersList ')'
-  (stuffBeforeOpenParens, firstOpenParens, stuffAfterOpenParens) = params.partition('(')
-  (parameters, lastCloseParens, stuffAfterFinalCloseParens) = stuffAfterOpenParens.rpartition(')')
-
-  # parse the parameters string into a list of parameters
-  parametersList = parseParameters(parameters)
-
-  # strip off the leading whitespace of the function body
-  searchMeForBody = searchMeForBody.lstrip()
-  depth = 1
-  body = ''
-  for c in searchMeForBody:
-    if c == '{':
-      depth += 1
-    elif c == '}': depth -= 1
-    if depth == 0:
-      break
-    body += c
-  if depth != 0:
-    raise ValueError, "Error: EOF reached before end of function '%s'." % name
-  return (parametersList, body)
-
-
-def makeShaderParameterCode(parameterType, parameterName):
-  # declare the parameter
-  result = '%s %s;\n' % (parameterType, parameterName)
-  # make a setter method for it
-  if parameterType == "Vector" or parameterType == "Point" or parameterType == "Spectrum":
-    result += 'void set_%s(const float x, const float y, const float z){%s = %s(x,y,z);}\n' % (parameterName, parameterName, parameterType)
-  elif parameterType == "float":
-    result += 'void set_%s(const %s &v){%s = v;}\n' % (parameterName, parameterType, parameterName)
-  else:
-    print "Error: Unknown type %s for parameter %s." % (parameterType, parameterName)
-    exit()
-  return result
-
-def makeNullConstructorCode(className, parameterList):
-  result = ''
-  result += className + '(void)\n'
-  if len(parameterList) > 0:
-    result += ':\n'
-    for param in parameterList[0:-1]:
-      result += param[1] + '(' + param[2] + '),\n'
-    result += parameterList[-1][1] + '(' + parameterList[-1][2] + ')\n'
-  # give it an empty body
-  result += '{;}\n'
-  return result
-
-def stripComments(shaderLines):
-  stripped = ''
-  for line in shaderLines:
-    # begin a new line
-    stripped += '\n'
-    for i in range(0, len(line)):
-      c = line[i]
-      nextC = ''
-      if i+1 != len(line):
-        nextC = line[i+1]
-      if c == '#' or (c == '/' and nextC == '/'):
-        break
-      lastC = c
-      stripped += c
-  return stripped
-
-def compile(filename):
-  globalVariables = '''
+    # define some global variables defined in all shaders
+    globalVariables = '''
 gContext = &context;
 const Point &P = dg.getPoint();
 const Normal &N = dg.getNormal();
@@ -154,74 +159,62 @@ const Vector3 &dpdv = dg.getPointPartials()[1];
       float area = dg.getSurfaceArea();
       float invArea = dg.getInverseSurfaceArea();
   '''
+    
+    # try to parse 'scattering'
+    scatteringString = ''
+    scatteringParametersList = []
   
-  # open the file
-  basename = os.path.basename(filename)
-  basename = basename.split('.')[0]
-
-  # add 'Shader' to the end of the basename to make it unique
-  # from any of our c++ identifiers
-  className = basename + 'Shader'
-  infile = open(filename)
-  
-  # strip out '//' and '#' comments
-  shaderString = stripComments(infile.readlines())
-  
-  # try to parse 'scattering'
-  scatteringString = ''
-  scatteringParametersList = []
-
-  (scatteringParametersList, scatteringBody) = parseFunction('scattering', shaderString)
-  if scatteringBody != '':
-    # rebuild a shader string
-    scatteringString = '''
+    (scatteringParametersList, scatteringBody) = self.parseFunction('scattering', shaderString)
+    if scatteringBody != '':
+      # rebuild a shader string
+      scatteringString = '''
 virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
   ScatteringDistributionFunction *F = 0;
   '''
-    scatteringString += globalVariables
-    scatteringString += scatteringBody
-    scatteringString += '''
+      scatteringString += globalVariables
+      scatteringString += scatteringBody
+      scatteringString += '''
   return F;
 }
 '''
+    
+    # try to parse 'emission'
+    emissionString = ''
+    emissionParametersList = []
   
-  # try to parse 'emission'
-  emissionString = ''
-  emissionParametersList = []
-
-  (emissionParametersList, emissionBody) = parseFunction('emission', shaderString)
-  if emissionBody != '':
-    emissionString = '''
- virtual ScatteringDistributionFunction *evaluateEmission(ShadingInterface &context, const DifferentialGeometry &dg) const
- {
-   ScatteringDistributionFunction *E = 0;
- '''
-    emissionString += globalVariables
-    emissionString += emissionBody
-    emissionString += '''
-   return E;
- }
- virtual bool isEmitter(void) const
- {
-   return true;
- }
- '''
+    (emissionParametersList, emissionBody) = self.parseFunction('emission', shaderString)
+    if emissionBody != '':
+      emissionString = '''
+virtual ScatteringDistributionFunction *evaluateEmission(ShadingInterface &context, const DifferentialGeometry &dg) const
+{
+  ScatteringDistributionFunction *E = 0;
+'''
+      emissionString += globalVariables
+      emissionString += emissionBody
+      emissionString += '''
+  return E;
+}
+virtual bool isEmitter(void) const
+{
+  return true;
+}
+'''
+    
+    # try to parse 'sensor'
+    sensorString = ''
+    sensorParametersList = []
   
-  # try to parse 'sensor'
-  sensorString = ''
-  sensorParametersList = []
-
-  (sensorParametersList, sensorBody) = parseFunction('sensor', shaderString)
-  if sensorBody != '':
-    sensorString = '''
+    (sensorParametersList, sensorBody) = self.parseFunction('sensor', shaderString)
+    if sensorBody != '':
+      sensorString = '''
 virtual ScatteringDistributionFunction *evaluateSensor(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
   ScatteringDistributionFunction *S = 0;
 '''
-    sensorString += globalVariables
-    sensorString += sensorBody
-    sensorString += '''
+      sensorString += globalVariables
+      sensorString += sensorBody
+      sensorString += '''
   return S;
 }
 virtual bool isSensor(void) const
@@ -229,81 +222,96 @@ virtual bool isSensor(void) const
   return true;
 }
 '''
-  
-  # XXX we need to put the preamble outside of the class definition
-  
-  # standard includes
-  compileMe = '''
+    
+    # XXX we need to put the preamble outside of the class definition
+    
+    # standard includes
+    compileMe = '''
 class ShadingInterface;
 ShadingInterface *gContext;
 #include "Material.h"
 #include "stdshader.h"
 '''
-  
-  # XXX put the preamble just before the class definition
-  #compileMe += preamble
-  
-  compileMe += 'class %s : public Material\n' % className
-  compileMe += '{\n'
-  compileMe += 'public:\n'
-  compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % basename
-  compileMe += scatteringString
-  compileMe += emissionString
-  compileMe += sensorString
-  # add parameters
-  for param in scatteringParametersList:
-    compileMe += makeShaderParameterCode(param[0], param[1])
-  for param in emissionParametersList:
-    compileMe += makeShaderParameterCode(param[0], param[1])
-  for param in sensorParametersList:
-    compileMe += makeShaderParameterCode(param[0], param[1])
-  # create null constructor
-  compileMe += makeNullConstructorCode(className, scatteringParametersList + emissionParametersList + sensorParametersList)
-  compileMe += '};\n'
-  
-  # create shared library export
-  compileMe += 'extern "C" Material * createMaterial(void)\n'
-  compileMe += '{\n'
-  compileMe += '  return new %s();\n' % className
-  compileMe += '}\n'
-  
-  compileMe += '''
-#include <boost/python.hpp>
-#include <boost/python/manage_new_object.hpp>
-#include <boost/python/return_value_policy.hpp>
-using namespace boost::python;
-BOOST_PYTHON_MODULE(%s)
-{
-  def("createMaterial", createMaterial, return_value_policy<manage_new_object>());
-  class_<%s, bases<Material> >("%s")
-  ''' % (basename,className,className)
-  for param in scatteringParametersList:
-    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
-  for param in emissionParametersList:
-    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
-  for param in sensorParametersList:
-    compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
-  compileMe += '    ;\n'
-  
-  # close the module
-  compileMe += '}\n'
-  
-  #print compileMe
-  
-  # create temp files
-  dir = tempfile.mkdtemp()
+    
+    # XXX put the preamble just before the class definition
+    #compileMe += preamble
+    
+    compileMe += 'class %s : public Material\n' % className
+    compileMe += '{\n'
+    compileMe += 'public:\n'
+    compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % baseName
+    compileMe += scatteringString
+    compileMe += emissionString
+    compileMe += sensorString
+    # add parameters
+    for param in scatteringParametersList:
+      compileMe += self.makeShaderParameterCode(param[0], param[1])
+    for param in emissionParametersList:
+      compileMe += self.makeShaderParameterCode(param[0], param[1])
+    for param in sensorParametersList:
+      compileMe += self.makeShaderParameterCode(param[0], param[1])
+    # create null constructor
+    compileMe += self.makeNullConstructorCode(className, scatteringParametersList + emissionParametersList + sensorParametersList)
+    compileMe += '};\n'
+    
+    # create shared library export
+    compileMe += 'extern "C" Material * createMaterial(void)\n'
+    compileMe += '{\n'
+    compileMe += '  return new %s();\n' % className
+    compileMe += '}\n'
+    
+    compileMe += '''
+  #include <boost/python.hpp>
+  #include <boost/python/manage_new_object.hpp>
+  #include <boost/python/return_value_policy.hpp>
+  using namespace boost::python;
+  BOOST_PYTHON_MODULE(%s)
+  {
+    def("createMaterial", createMaterial, return_value_policy<manage_new_object>());
+    class_<%s, bases<Material> >("%s")
+    ''' % (baseName,className,className)
+    for param in scatteringParametersList:
+      compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+    for param in emissionParametersList:
+      compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+    for param in sensorParametersList:
+      compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+    compileMe += '    ;\n'
+    
+    # close the module
+    compileMe += '}\n'
 
-  cpppath = dir + '/' + basename + '.cpp'
-
-  # replace all \ with /
-  # XXX for some reason scons messes up if we don't do this
-  #     \ in the dir are interpreted as escape characters
-  cpppath = cpppath.replace('\\', '/')
-
-  # XXX fix this include ugliness
-  #     ideally, there's a canonical installation of gotham somewhere
-  #     with an include directory. point to that.
-  makefile = '''
+    return compileMe
+  
+  def compile(self, filename):
+    # open the file
+    baseName = os.path.basename(filename)
+    baseName = baseName.split('.')[0]
+  
+    infile = open(filename)
+    
+    # strip out '//' and '#' comments
+    shaderString = self.stripComments(infile.readlines())
+    
+    # create the c++ code
+    compileMe = self.createCppCode(shaderString, baseName)
+    
+    #print compileMe
+    
+    # create temp files
+    dir = tempfile.mkdtemp()
+  
+    cpppath = dir + '/' + baseName + '.cpp'
+  
+    # replace all \ with /
+    # XXX for some reason scons messes up if we don't do this
+    #     \ in the dir are interpreted as escape characters
+    cpppath = cpppath.replace('\\', '/')
+  
+    # XXX fix this include ugliness
+    #     ideally, there's a canonical installation of gotham somewhere
+    #     with an include directory. point to that.
+    makefile = '''
 import os
 includes = [os.environ['GOTHAMHOME'] + '/include']
 if os.name == 'posix':
@@ -349,31 +357,31 @@ if os.name == 'nt':
   env.AddPostAction(result, 'del.exe ${TARGET.filebase}.lib')
   # delete the .exp library
   env.AddPostAction(result, 'del.exe ${TARGET.filebase}.exp')
-''' % (cpppath, basename)
-  
-  cppfile = open(cpppath, 'w')
-  cppfile.write(compileMe)
-  cppfile.close()
-  
-  sconstruct = open(dir + '/' + 'SConstruct', 'w')
-  sconstruct.write(makefile)
-  sconstruct.close()
-  
-  # call scons
-  # XXX cygwin has a fit if you call it scons when its name is scons.bat
-  #     fix this nonsense
-  pathToScons = ''
-  if os.name == 'posix':
-    pathToScons = 'scons'
-    command = 'scons -Q -f %s' % dir + '/' + 'SConstruct' 
-  elif os.name == 'nt':
-    pathToScons = 'c:/Python25/scons.bat'
-    command = 'c:/Python25/scons.bat -Q -f %s' % dir + '/' + 'SConstruct' 
-  os.system(command)
-  #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
-  
-  # kill the tempfiles
-  shutil.rmtree(dir, True)
+''' % (cpppath, baseName)
+    
+    cppfile = open(cpppath, 'w')
+    cppfile.write(compileMe)
+    cppfile.close()
+    
+    sconstruct = open(dir + '/' + 'SConstruct', 'w')
+    sconstruct.write(makefile)
+    sconstruct.close()
+    
+    # call scons
+    # XXX cygwin has a fit if you call it scons when its name is scons.bat
+    #     fix this nonsense
+    pathToScons = ''
+    if os.name == 'posix':
+      pathToScons = 'scons'
+      command = 'scons -Q -f %s' % dir + '/' + 'SConstruct' 
+    elif os.name == 'nt':
+      pathToScons = 'c:/Python25/scons.bat'
+      command = 'c:/Python25/scons.bat -Q -f %s' % dir + '/' + 'SConstruct' 
+    os.system(command)
+    #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
+    
+    # kill the tempfiles
+    shutil.rmtree(dir, True)
   
 
 def usage():
@@ -384,6 +392,7 @@ if len(sys.argv) < 2:
   usage()
   exit()
 
+compiler = ShaderCompiler()
 for file in sys.argv[1:]:
-  compile(file)
+  compiler.compile(file)
 
