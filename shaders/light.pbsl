@@ -1,7 +1,6 @@
 emission(Spectrum power)
 {
-  Spectrum radiosity = invArea * power;
-  E = hemisphericalEmission(radiosity);
+  E = hemisphericalEmission(invArea * power);
 } // end emission()
 
 //scattering(void)
