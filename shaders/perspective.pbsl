@@ -1,9 +1,14 @@
-sensor(float aspect, float fovy, Point center, Vector right, Vector up, Vector look)
+sensor(float aspect, float fovy, Point lowerLeft)
 {
-  float near = 1.0f / tan(0.5f * fovy);
+  // B is equivalent to a camera's 'right' direction
+  // T is equivalent to a camera's 'up' direction
+  // N is equivalent to a camera's 'look' direction
+  // P is approximately equivalent to a camera's 'eye' point for small apertures
 
   // compute the origin of the film plane
-  Point o = center + near * look - aspect * right - up;
-  S = perspectiveSensor(invArea * Spectrum::white(), aspect, o, right, up);
+  //Point lowerLeft = center + near * look - aspect * right - up;
+  //Point lowerLeft = P + near * N - aspect * B - T;
+  //Point lowerLeft = center + near * N - aspect * B - T;
+  S = perspectiveSensor(invArea * Spectrum::white(), aspect, lowerLeft);
 }
 

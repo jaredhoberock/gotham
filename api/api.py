@@ -180,6 +180,7 @@ class Gotham2(Gotham):
     # the aperture starts out as a unit square with normal pointing in the 
     # -z direction
     points = [-0.5, -0.5, 0,  -0.5, 0.5, 0,  0.5, 0.5, 0,  0.5, -0.5, 0]
+    uv = [0,0,  1,0,  1,1,  0,1]
     triangles = [0, 1, 3,  1, 2, 3]
     Gotham.pushMatrix(self)
     Gotham.scale(self, apertureRadius/2, apertureRadius/2, apertureRadius/2)
@@ -201,17 +202,21 @@ class Gotham2(Gotham):
     Gotham.pushAttributes(self)
     # convert to radians
     fovyRadians = fovy * (math.pi/180.0)
+    # compute the location of the lower-left corner of the viewport,
+    # in world coordinates
+    near = 1.0 / math.tan(0.5 * fovyRadians)
+    #ll = c + near * look - aspect * right - up
+    ll = (c[0] + near * look[0] - aspect * right[0] - up[0],
+          c[1] + near * look[1] - aspect * right[1] - up[1],
+          c[2] + near * look[2] - aspect * right[2] - up[2])
     Gotham2.material(self,
                      'perspective',
                      'aspect',aspect,
                      'fovy',fovyRadians,
-                     'center',(c[0],c[1],c[2]),
-                     'up', up,
-                     'right', right,
-                     'look', look)
+                     'lowerLeft', ll)
     # name the camera
     Gotham.attribute(self, "name", "camera")
-    Gotham2.mesh(self, points, triangles)
+    Gotham2.mesh(self, points, uv, triangles)
     Gotham.popAttributes(self)
     Gotham.popMatrix(self)
     # hint to the viewer after we've popped the attributes

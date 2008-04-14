@@ -14,14 +14,10 @@ PerspectiveSensor
 PerspectiveSensor
   ::PerspectiveSensor(const Spectrum &response,
                       const float aspect,
-                      const Point &origin,
-                      const Vector3 &right,
-                      const Vector3 &up)
+                      const Point &origin)
     :mAspectRatio(aspect),
      mInverseWindowSurfaceArea(1.0f/(2.0f*2.0f*aspect)),
      mWindowOrigin(origin),
-     mRight(right),
-     mUp(up),
      mResponse(response)
 {
   ;
@@ -48,8 +44,8 @@ Spectrum PerspectiveSensor
   delta = false;
   Point q;
   sampleWindow(u0,u1,
-               mRight,
-               mUp,
+               dg.getBinormal(),
+               dg.getTangent(),
                dg.getNormal(),
                q,
                pdf);
@@ -89,8 +85,8 @@ void PerspectiveSensor
   q -= mWindowOrigin;
   q *= 0.5f;
 
-  u0 = q.dot(mRight) / mAspectRatio;
-  u1 = q.dot(mUp);
+  u0 = q.dot(dg.getBinormal()) / mAspectRatio;
+  u1 = q.dot(dg.getTangent());
 } // end PerspectiveSensor::invert()
 
 void PerspectiveSensor
@@ -126,8 +122,8 @@ float PerspectiveSensor
   Point coords = q - mWindowOrigin;
   coords *= 0.5f;
 
-  float u = coords.dot(mRight) / mAspectRatio;
-  float v = coords.dot(mUp);
+  float u = coords.dot(dg.getBinormal()) / mAspectRatio;
+  float v = coords.dot(dg.getTangent());
 
   // if the ray does not pass through the window,
   // then there is zero probability of having generated it
@@ -156,16 +152,4 @@ Spectrum PerspectiveSensor
 
   return result;
 } // end PerspectiveSensor::evaluate()
-
-Vector PerspectiveSensor
-  ::getRight(void) const
-{
-  return mRight;
-} // end PerspectiveSensor::getRight()
-
-Vector PerspectiveSensor
-  ::getUp(void) const
-{
-  return mUp;
-} // end PerspectiveSensor::getUp()
 

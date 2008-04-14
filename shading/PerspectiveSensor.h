@@ -27,14 +27,10 @@ class PerspectiveSensor
      *  \param response A constant response to radiance.
      *  \param aspect Sets mAspectRatio.
      *  \param origin Sets mWindowOrigin.
-     *  \param right Sets mRight.
-     *  \param up Sets mUp.
      */
     PerspectiveSensor(const Spectrum &response,
                       const float aspect,
-                      const Point &origin,
-                      const Vector3 &right,
-                      const Vector3 &up);
+                      const Point &origin);
 
     /*! This method sets the members of this PerspectiveSensor.
      *  \param aspect Sets mAspectRatio.
@@ -98,16 +94,6 @@ class PerspectiveSensor
     virtual float evaluatePdf(const Vector3 &ws,
                               const DifferentialGeometry &dg) const;
 
-    /*! This method returns mRight.
-     *  \return mRight.
-     */
-    Vector getRight(void) const;
-
-    /*! This method returns mUp.
-     *  \return mUp.
-     */
-    Vector getUp(void) const;
-
   protected:
     /*! This method samples the surface area of the window.
      *  \param u A real number in [0,1).
@@ -144,16 +130,6 @@ class PerspectiveSensor
     /*! The origin (lower left hand corner) of the sensor window.
      */
     Point mWindowOrigin;
-
-    /*! A unit vector pointing in the right direction.
-     *  XXX would love to get around the need for this
-     */
-    Vector3 mRight;
-
-    /*! A unit vector pointing in the up direction.
-     *  XXX would love to get around the need for this
-     */
-    Vector3 mUp;
 
     /*! The response to radiance.
      */

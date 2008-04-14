@@ -75,9 +75,7 @@ class ShadingInterface
 
     virtual ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
                                                               const float aspect,
-                                                              const Point &origin,
-                                                              const Vector &right,
-                                                              const Vector &up) = 0;
+                                                              const Point &origin) = 0;
 
     virtual ScatteringDistributionFunction *hemisphericalEmission(const Spectrum &Ke) = 0;
 

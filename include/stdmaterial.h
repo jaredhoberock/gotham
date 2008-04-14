@@ -97,11 +97,9 @@ inline ScatteringDistributionFunction *uber(const Spectrum &Ks,
 
 inline ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
                                                          const float aspect,
-                                                         const Point &origin,
-                                                         const Vector &right,
-                                                         const Vector &up)
+                                                         const Point &origin)
 {
-  return gContext->perspectiveSensor(Ks, aspect, origin, right, up);
+  return gContext->perspectiveSensor(Ks, aspect, origin);
 } // end perspective()
 
 inline ScatteringDistributionFunction *hemisphericalEmission(const Spectrum &Ke)
