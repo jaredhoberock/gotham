@@ -15,6 +15,8 @@ def readMtllib(filename):
       # given by the 2nd word
       currentMaterial = words[1]
       result[currentMaterial] = {}
+    elif(words[0] == 'map_Kd'):
+      print "Warning: Ignoring unsupported 'map_Kd' parameter."
     elif len(words) == 2:
       result[currentMaterial][words[0]] = float(words[1])
     elif len(words) == 4:
