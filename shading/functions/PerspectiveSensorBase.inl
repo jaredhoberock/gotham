@@ -55,16 +55,16 @@ template<typename V3, typename S3, typename DG>
                pdf);
   ws = q - dg.getPoint();
   float d2 = ws.norm2();
-  ws /= sqrt(d2);
+  ws /= sqrtf(d2);
 
   // compute surface area pdf to solid angle pdf
   pdf *= d2;
 
   // this removes the vignetting effect, but is it correct?
-  pdf *= dg.getNormal().dot(ws);
+  pdf *= dot(dg.getNormal(),ws);
 
   //// divide the response by the dot product to remove the vignette effect
-  //return mResponse / dg.getNormal().dot(ws);
+  //return mResponse / dot(dg.getNormal(),ws);
   return mResponse;
 } // end PerspectiveSensorBase::sample()
 
@@ -79,8 +79,10 @@ template<typename V3, typename S3, typename DG>
   // time t
   // remember that the normal points in the -look direction
   float t =
-    -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
-    -dg.getNormal().dot(w);
+    //-dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
+    -dot(dg.getNormal(), mWindowOrigin - dg.getPoint()) /
+    //-dg.getNormal().dot(w);
+    -dot(dg.getNormal(),w);
 
   // compute q the intersection with the ray and the plane
   Point q = dg.getPoint() + t * w;
@@ -90,8 +92,8 @@ template<typename V3, typename S3, typename DG>
   q -= mWindowOrigin;
   q *= 0.5f;
 
-  u0 = q.dot(dg.getBinormal()) / mAspectRatio;
-  u1 = q.dot(dg.getTangent());
+  u0 = dot(q,dg.getBinormal()) / mAspectRatio;
+  u1 = dot(q,dg.getTangent());
 } // end PerspectiveSensorBase::invert()
 
 template<typename V3, typename S3, typename DG>
@@ -117,8 +119,10 @@ template<typename V3, typename S3, typename DG>
 {
   // intersect a ray through dg in direction ws with the sensor window
   // remember that the normal points in the -look direction
-  float t = -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
-            -dg.getNormal().dot(ws);
+  //float t = -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
+  //          -dg.getNormal().dot(ws);
+  float t = -dot(dg.getNormal(), mWindowOrigin - dg.getPoint()) /
+            -dot(dg.getNormal(), ws);
 
   // if t is negative, then ws came from 'behind the camera',
   // and there is zero pdf of generating such directions
@@ -129,8 +133,8 @@ template<typename V3, typename S3, typename DG>
   Point coords = q - mWindowOrigin;
   coords *= 0.5f;
 
-  float u = coords.dot(dg.getBinormal()) / mAspectRatio;
-  float v = coords.dot(dg.getTangent());
+  float u = dot(coords,dg.getBinormal()) / mAspectRatio;
+  float v = dot(coords,dg.getTangent());
 
   // if the ray does not pass through the window,
   // then there is zero probability of having generated it
@@ -138,12 +142,12 @@ template<typename V3, typename S3, typename DG>
   if(v < 0.0f || v >= 1.0f) return 0.0f;
 
   // compute solid angle pdf
-  Vector3 wi = q - dg.getPoint();
-  float pdf = wi.norm2();
+  Vector wi = q - dg.getPoint();
+  float pdf = dot(wi,wi);
   pdf *= mInverseWindowSurfaceArea;
 
   // this removes the vignetting effect, but is it correct?
-  pdf *= dg.getNormal().absDot(ws);
+  pdf *= fabs(dot(dg.getNormal(),ws));
 
   return pdf;
 } // end PerspectiveSensorBase::evaluatePdf()
@@ -156,7 +160,17 @@ template<typename V3, typename S3, typename DG>
   // evaluate the pdf at ws, and if it is not zero, return mResponse
   // divide by dot product to remove the vignetting effect
   //return evaluatePdf(ws, dg) > 0 ? (mResponse / dg.getNormal().absDot(ws)) : Spectrum::black();
-  Spectrum result = evaluatePdf(ws, dg) > 0 ? (mResponse) : Spectrum::black();
+  
+  // XXX this is shitty but we have to do it to be compatible with CUDA vectors
+  Spectrum result;
+  ((float*)&result)[0] = 0;
+  ((float*)&result)[1] = 0;
+  ((float*)&result)[2] = 0;
+
+  if(evaluatePdf(ws,dg) <= 0)
+  {
+    result = mResponse;
+  } // end if
 
   return result;
 } // end PerspectiveSensorBase::evaluate()

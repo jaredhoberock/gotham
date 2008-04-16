@@ -1,0 +1,324 @@
+#!/usr/bin/env python
+
+import inspect
+
+# XXX this blows, but so does import
+exec open('/home/jared/dev/src/gotham/bin/pbslc')
+
+class CudaShaderCompiler(ShaderCompiler):
+  # define some global variables defined in all shaders
+  __globalCudaVariables__ = '''
+int i = blockIdx.x * blockDim.x + threadIdx.x;
+const char *ptr = reinterpret_cast<const char *>(dg) + i*dgStride;
+const CudaDifferentialGeometry &diffG = *reinterpret_cast<const CudaDifferentialGeometry*>(ptr);
+const float3 &P  = diffG.getPoint();
+const float3 &N  = diffG.getNormal();
+const float3 &T  = diffG.getTangent();
+const float3 &B  = diffG.getBinormal();
+const float2 &UV = diffG.getParametricCoordinates();
+//const float3 &dpdu = diffG.getPointPartials()[0];
+//const float3 &dpdv = diffG.getPointPartials()[1];
+      float area = diffG.getSurfaceArea();
+      float invArea = diffG.getInverseSurfaceArea();
+'''
+  # define the global variables defined in scattering shaders
+  __globalScatteringCudaVariables__ = __globalCudaVariables__ + 'CudaScatteringDistributionFunction &F = f[i];\n'
+
+  # define the global variables defined in emission shaders
+  __globalEmissionCudaVariables__ = __globalCudaVariables__ + 'CudaScatteringDistributionFunction &E = f[i];\n'
+
+  # define the global variables define in sensor shaders
+  __globalSensingCudaVariables__ = __globalCudaVariables__ + 'CudaScatteringDistributionFunction &S = f[i];\n'
+
+  def createCudaIncludeCode(self):
+    return '''
+#include "../geometry/CudaDifferentialGeometry.h"
+#include "../shading/CudaScatteringDistributionFunction.h"
+#include "CudaShadingInterface.h"
+#include "stdcudamaterial.h"
+'''
+
+  def createShaderParametersDeclarations(self, parametersList):
+    declarations = ''
+    # pass copies instead of references because the kernel can't deal with
+    # references
+    for param in parametersList:
+      if param[0] == 'Vector' or param[0] == 'Point' or param[0] == 'Spectrum':
+        declarations += ',\n const float3 %s' % param[1]
+      else:
+        declarations += ',\n const %s %s' % (param[0], param[1])
+    return declarations
+
+  def createThunkHeader(self, name, parametersList):
+    result = '''
+// make sure this name gets mangled correctly
+extern "C" void %sThunk(CudaShadingInterface &context,
+                        const CudaDifferentialGeometry *dg,
+                        const size_t dgStride,
+                        const int *stencil,
+                        CudaScatteringDistributionFunction *f,
+                        const size_t n
+                        %s)''' 
+
+    # substitute in the name and parameter declarations
+    result = result % (name, self.createShaderParametersDeclarations(parametersList))
+    return result
+
+  def createCppIncludeCode(self, scatteringParametersList, emissionParametersList, sensorParametersList):
+    # XXX perhaps the thunk forward declaration doesn't belong here
+    result = ShaderCompiler.createCppIncludeCode(self, scatteringParametersList, emissionParametersList, sensorParametersList)
+    result += '''
+#include <vector_functions.h>
+#include "CudaMaterial.h"
+'''
+    result += self.createThunkHeader('Scattering', scatteringParametersList) + ';\n'
+    result += self.createThunkHeader('Emission', emissionParametersList) + ';\n'
+    result += self.createThunkHeader('Sensor', sensorParametersList) + ';\n'
+    return result
+
+  def createCppClassParentName(self):
+    return 'CudaMaterial'
+
+  def createShaderCppCode(self, name, globals, body, returnName, parametersList, type):
+    # get the ordinary cpp string
+    shaderString = ShaderCompiler.createShaderCppCode(self, name, globals, body, returnName, parametersList, type)
+
+    # add our own special sauce
+    shaderString += '''
+virtual void evaluate%s(CudaShadingInterface &context,
+                        const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
+                        const size_t dgStride,
+                        const stdcuda::device_ptr<const int> &stencil,
+                        const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
+                        const size_t n) const
+{
+  %sThunk(context, dg, dgStride, stencil, f, n
+'''
+    # substitute in name
+    shaderString = shaderString % (name, name)
+
+    # deal with shader parameters
+    for param in parametersList:
+      if param[0] == 'Vector' or param[0] == 'Point' or param[0] == 'Spectrum':
+        shaderString += ', make_float3(%s[0],%s[1],%s[2])' % (param[1],param[1],param[1])
+      else:
+        shaderString += ', %s' % param[1]
+
+    # close the function
+    shaderString += ');'
+    shaderString += '''
+}
+'''
+    return shaderString
+
+  def createShaderCudaCode(self, className, shaderName, shaderBody, shaderParametersList, shaderGlobalVariables):
+    kernelDefinition = '''
+__global__ void %sK(const CudaDifferentialGeometry *dg,
+                    const int dgStride,
+                    const int *stencil,
+                    CudaScatteringDistributionFunction *f
+                    // shader parameters follow
+                    %s)
+{
+  // global variables follow
+  %s 
+  if(stencil[i])
+  {
+    // shader body follows
+    %s
+  }
+}
+'''
+    # substitute into kernelDefinition
+    kernelDefinition = kernelDefinition % (shaderName,
+                                           self.createShaderParametersDeclarations(shaderParametersList),
+                                           shaderGlobalVariables,
+                                           shaderBody)
+
+    # define the thunk
+    thunkDefinition = '''
+%s
+{
+  dim3 grid = dim3(1,1,1);
+  dim3 block = dim3(n,1,1);
+
+  // XXX rename this due to ptxas stack smashing bug
+  %sK<<<grid,block>>>(dg, dgStride, stencil, f %s);
+}
+'''
+    # construct the parameter passing
+    shaderParameterPassing = ''
+    for param in shaderParametersList:
+      shaderParameterPassing += ', %s' % param[1]
+    # substitute into thunkDefinition
+    thunkDefinition = thunkDefinition % (self.createThunkHeader(shaderName, shaderParametersList),
+                                         shaderName,
+                                         shaderParameterPassing)
+
+    return kernelDefinition + thunkDefinition
+
+  def createCudaCode(self, shaderString, baseName):
+    # add 'Shader' to the end of the basename to make it unique
+    # from any of our c++ identifiers
+    className = baseName + 'Shader'
+
+    # XXX this is a lot of duplicated work
+    # try to parse 'scattering'
+    scatteringString = ''
+    scatteringParametersList = []
+    (scatteringParametersList, scatteringBody) = self.parseFunction('scattering', shaderString)
+    if scatteringBody != '':
+      # rebuild a shader string
+      scatteringString = self.createShaderCudaCode(className,
+                                                   'Scattering',
+                                                   scatteringBody,
+                                                   scatteringParametersList,
+                                                   self.__globalScatteringCudaVariables__)
+
+    # try to parse 'emission'
+    emissionString = ''
+    emissionParametersList = []
+    (emissionParametersList, emissionBody) = self.parseFunction('emission', shaderString)
+    if emissionBody != '':
+      emissionString = self.createShaderCudaCode(className,
+                                                 'Emission',
+                                                 emissionBody,
+                                                 emissionParametersList,
+                                                 self.__globalEmissionCudaVariables__)
+
+    # try to parse 'sensor'
+    sensorString = ''
+    sensorParametersList = []
+    (sensorParametersList, sensorBody) = self.parseFunction('sensor', shaderString)
+    if sensorBody != '':
+      sensorString = self.createShaderCudaCode(className,
+                                               'Sensor',
+                                               sensorBody,
+                                               sensorParametersList,
+                                               self.__globalSensingCudaVariables__)
+
+    # standard includes
+    compileMe = ''
+
+    # add cuda #includes
+    compileMe += self.createCudaIncludeCode()
+
+    compileMe += scatteringString
+    compileMe += emissionString
+    compileMe += sensorString
+
+    return compileMe
+    
+  def createSourceFiles(self, shaderString, baseName, dir):
+    # create the parent's source
+    sources = ShaderCompiler.createSourceFiles(self, shaderString, baseName, dir)
+
+    # create Cuda code
+    compileMe = self.createCudaCode(shaderString, baseName)
+
+    cudapath = dir + '/' + baseName + '_cuda.cu'
+
+    # replace all \ with /
+    # XXX for some reason scons messes up if we don't do this
+    #     \ in the dir are interpreted as escape characters
+    cudapath = cudapath.replace('\\', '/')
+  
+    cudafile = open(cudapath, 'w')
+    cudafile.write(compileMe)
+    cudafile.close()
+
+    # add the cuda file to the list
+    return sources + [cudapath]
+
+  def createMakefileString(self, sources, baseName):
+    ## get the parent's makefile string
+    #makefile = ShaderCompiler.createMakefileString(self, sources, baseName)
+    ## enable nvcc
+    ## XXX this sucks: ship cudascons with gotham
+    #makefile += "env.Tool('nvcc', toolpath = ['/home/jared/dev/src/cudascons'])\n"
+    ## add includes for cuda
+    ## XXX this sucks
+    #includes = ['/home/jared/dev/src/gotham/cuda/include', '/usr/local/cuda/include']
+    #makefile += 'includes = ' + `includes` + '\n'
+    #makefile += 'env.Append(CPPPATH = includes)\n'
+    #return makefile
+    # XXX fix this include ugliness
+    #     ideally, there's a canonical installation of gotham somewhere
+    #     with an include directory. point to that.
+    makefile = '''
+import os
+includes = [os.environ['GOTHAMHOME'] + '/include']
+if os.name == 'posix':
+  includes += ['/home/jared/dev/src', '/usr/include/python2.5']
+elif os.name == 'nt':
+  includes += ['c:/dev/src', 'c:/dev/include', 'c:/Python25/include']
+libpath = os.environ["GOTHAMHOME"] + '/lib'
+if os.name == 'posix':
+  libs = [File(libpath + '/libgotham.so'), 'boost_python']
+elif os.name == 'nt':
+  # on windows, we need to link to the import library
+  libs = ['gotham']
+# XXX TODO fix these path issues
+if os.name == 'nt':
+  libpath += ['c:/dev/lib', 'c:/Python25/libs']
+env = None
+if os.name == 'posix':
+  env = Environment(CPPPATH = includes,
+                    CPPFLAGS = '-O3',
+                    LIBS = libs,
+                    LIBPATH = libpath,
+                    SHLIBPREFIX = '',
+                    # we should automatically pick between icc and whatever is the default
+                    #tools = ['default', 'intelc'])
+                    tools = ['default'])
+elif os.name == 'nt':
+  env = Environment(CPPPATH = includes,
+                    CPPFLAGS = ['/Ox', '/EHsc', '/MD', '/DIMPORTDLL=1'],
+                    LIBS = libs,
+                    LIBPATH = libpath,
+                    SHLIBPREFIX = '',
+                    SHLIBSUFFIX = '.pyd',
+                    WINDOWS_INSERT_MANIFEST = True)
+'''
+    makefile += "env.Tool('nvcc', toolpath = ['/home/jared/dev/src/cudascons'])\n"
+    includes = ['/home/jared/dev/src/gotham/cuda/include',
+                '/home/jared/dev/src/gotham/shading',
+                '/home/jared/dev/src/gotham/geometry',
+                '/usr/local/cuda/include']
+    makefile += 'includes = ' + `includes` + '\n'
+    makefile += 'env.Append(CPPPATH = includes)\n'
+
+    makefile += 'sources = ' + `sources`
+
+    makefile += '''
+result = env.SharedLibrary('%s', sources)
+if os.name == 'nt':
+  # we must explicitly embed the "manifest" after building the dll
+  # from http://www.scons.org/wiki/EmbedManifestIntoTarget 
+  env.AddPostAction(result, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+  # delete the manifest file
+  env.AddPostAction(result, 'del.exe ${TARGET}.manifest')
+  # delete the import library - we don't need it
+  env.AddPostAction(result, 'del.exe ${TARGET.filebase}.lib')
+  # delete the .exp library
+  env.AddPostAction(result, 'del.exe ${TARGET.filebase}.exp')
+''' % baseName
+
+    return makefile
+
+def usage():
+  pass
+
+# run the compiler if this file was invoked
+# as an executable
+if sys.argv[0] == inspect.getsourcefile(usage):
+  if len(sys.argv) < 2:
+    print 'Error: No input file specified.'
+    usage()
+    exit()
+  
+  # create a compiler
+  compiler = CudaShaderCompiler()
+  for file in sys.argv[1:]:
+    compiler.compile(file)
+

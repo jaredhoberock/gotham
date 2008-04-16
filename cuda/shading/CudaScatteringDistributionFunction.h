@@ -13,6 +13,7 @@ enum ScatteringType
 {
   LAMBERTIAN,
   HEMISPHERICAL_EMISSION,
+  PERSPECTIVE_SENSOR,
   NULL_SCATTERING
 }; // end ScatteringType
 

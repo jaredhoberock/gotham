@@ -27,41 +27,41 @@ FunctionAllocator
   ::FunctionAllocator(void)
 {
   // XXX TODO get these lines to compile on 64b (they should all assert true)
-  //// assert that any known ScatteringDistributionFunction will fit into a Block
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerspectiveSensor));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(Lambertian));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SphericalEmission));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(HemisphericalEmission));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularReflection));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularTransmission));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PhongReflection));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PhongTransmission));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(CompositeDistributionFunction));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(TransparentTransmission));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerfectGlass));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(ThinGlass));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(AshikhminShirleyReflection));
+  // assert that any known ScatteringDistributionFunction will fit into a Block
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerspectiveSensor));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(Lambertian));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SphericalEmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(HemisphericalEmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularReflection));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(SpecularTransmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PhongReflection));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PhongTransmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(CompositeDistributionFunction));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(TransparentTransmission));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(PerfectGlass));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(ThinGlass));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(AshikhminShirleyReflection));
   
-  //// assert that either Fresnel will fit into a block
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelDielectric));
-  //BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelConductor));
+  // assert that either Fresnel will fit into a block
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelDielectric));
+  BOOST_STATIC_ASSERT(sizeof(Block) >= sizeof(FresnelConductor));
 
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PerspectiveSensor));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(Lambertian));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(SphericalEmission));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(HemisphericalEmission));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(SpecularReflection));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(SpecularTransmission));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PhongReflection));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PhongTransmission));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(CompositeDistributionFunction));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(TransparentTransmission));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(PerfectGlass));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(ThinGlass));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(AshikhminShirleyReflection));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(PerspectiveSensor));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(Lambertian));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(SphericalEmission));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(HemisphericalEmission));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(SpecularReflection));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(SpecularTransmission));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(PhongReflection));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(PhongTransmission));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(CompositeDistributionFunction));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(TransparentTransmission));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(PerfectGlass));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(ThinGlass));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(AshikhminShirleyReflection));
 
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(FresnelDielectric));
-  assert(sizeof(ScatteringFunctionBlock) >= sizeof(FresnelConductor));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(FresnelDielectric));
+  //assert(sizeof(ScatteringFunctionBlock) >= sizeof(FresnelConductor));
   
   reserve(32678);
 } // end FunctionAllocator::FunctionAllocator()

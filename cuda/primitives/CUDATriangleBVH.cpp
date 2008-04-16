@@ -30,6 +30,10 @@ void CUDATriangleBVH
 
   createPerTriangleGeometricData();
   createScratchSpace();
+  createPrimitiveHandleToMaterialHandleMap();
+
+  // call the other parent
+  Parent2::finalize();
 } // end CUDATriangleBVH::finalize()
 
 void CUDATriangleBVH
@@ -67,6 +71,9 @@ void CUDATriangleBVH
   cudaCreateIntersections(originsAndMinT, directionsAndMaxT,
                           &mTimeBarycentricsAndTriangleIndex[0],
                           &mGeometricNormalDevice[0],
+                          &mFirstVertex[0],
+                          &mSecondVertex[0],
+                          &mThirdVertex[0],
                           &mFirstVertexParmsDevice[0],
                           &mSecondVertexParmsDevice[0],
                           &mThirdVertexParmsDevice[0],
@@ -136,6 +143,10 @@ void CUDATriangleBVH
   mPrimitiveInvSurfaceAreaDevice.resize(n);
   mPrimitiveHandlesDevice.resize(n);
 
+  Parent2::mFirstVertex.resize(n);
+  Parent2::mSecondVertex.resize(n);
+  Parent2::mThirdVertex.resize(n);
+
   // XXX perf this copy up
   for(size_t i = 0; i != n; ++i)
   {
@@ -145,14 +156,18 @@ void CUDATriangleBVH
     PrimitiveHandle prim = globalTri.mPrimitiveHandle;
     size_t localTriIndex = globalTri.mTriangleIndex;
 
-    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[prim].get());
+    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>(Parent0::operator[](prim).get());
 
     const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
     const Mesh::PointList &points = mesh->getPoints();
     const Mesh::Triangle &tri = mesh->getTriangles()[localTriIndex];
 
-    Vector e1 = points[tri[1]] - points[tri[0]];
-    Vector e2 = points[tri[2]] - points[tri[0]];
+    Point v0 = points[tri[0]];
+    Point v1 = points[tri[1]];
+    Point v2 = points[tri[2]];
+
+    Vector e1 = v1 - v0;
+    Vector e2 = v2 - v0;
     Vector n = e1.cross(e2).normalize();
 
     ParametricCoordinates uv0, uv1, uv2;
@@ -165,6 +180,10 @@ void CUDATriangleBVH
     mThirdVertexParmsDevice[i]        = make_float2(uv2[0], uv2[1]);
     mPrimitiveHandlesDevice[i]        = prim;
     mPrimitiveInvSurfaceAreaDevice[i] = sp->getInverseSurfaceArea();
+
+    Parent2::mFirstVertex[i]  = make_float3(v0[0], v0[1], v0[2]);
+    Parent2::mSecondVertex[i] = make_float3(v1[0], v1[1], v1[2]);
+    Parent2::mThirdVertex[i]  = make_float3(v2[0], v2[1], v2[2]);
   } // end for i
 } // end CUDATriangleBVH::createPerTriangleGeometricData()
 
@@ -173,4 +192,19 @@ void CUDATriangleBVH
 {
   mWorkBatchSize = b;
 } // end CUDATriangleBVH::setWorkBatchSize()
+
+void CUDATriangleBVH
+  ::createPrimitiveHandleToMaterialHandleMap(void)
+{
+  Parent2::mPrimitiveHandleToMaterialHandle.resize(size());
+
+  PrimitiveHandle h = 0;
+  for(const_iterator prim = begin();
+      prim != end();
+      ++prim, ++h)
+  {
+    const SurfacePrimitive *sp = dynamic_cast<const SurfacePrimitive*>(prim->get());
+    Parent2::mPrimitiveHandleToMaterialHandle[h] = sp->getMaterial();
+  } // end for i
+} // end CUDATriangleBVH::createPrimitiveHandleToMaterialHandleMap()
 

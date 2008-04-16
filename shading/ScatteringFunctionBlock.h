@@ -18,5 +18,5 @@ template<unsigned int size>
   unsigned char mFill[size];
 }; // end Accomodator
 
-typedef Accomodator<18 * sizeof(int)> ScatteringFunctionBlock;
+typedef Accomodator<16 * sizeof(int)> ScatteringFunctionBlock;
 

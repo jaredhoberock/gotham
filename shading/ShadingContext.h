@@ -30,11 +30,6 @@ class ShadingContext
      */
     virtual ~ShadingContext(void);
 
-    /*! Constructor accepts a list of Materials.
-     *  \param materials Sets mMaterials.
-     */
-    ShadingContext(const boost::shared_ptr<MaterialList> &materials);
-
     ScatteringDistributionFunction *null(void);
 
     ScatteringDistributionFunction *diffuse(const Spectrum &Kd);
@@ -87,9 +82,7 @@ class ShadingContext
 
     ScatteringDistributionFunction *perspectiveSensor(const Spectrum &Ks,
                                                       const float aspect,
-                                                      const Point &origin,
-                                                      const Vector &right,
-                                                      const Vector &up);
+                                                      const Point &origin);
 
     ScatteringDistributionFunction *hemisphericalEmission(const Spectrum &Ke);
 
@@ -211,6 +204,10 @@ class ShadingContext
                                                   Spectrum *results,
                                                   const size_t n);
 
+    /*! This method copies the Materials in the given list into mMaterials.
+     *  \param materials The MaterialList to copy.
+     */
+    virtual void setMaterials(const boost::shared_ptr<MaterialList> &materials);
 
   protected:
     FunctionAllocator mAllocator;

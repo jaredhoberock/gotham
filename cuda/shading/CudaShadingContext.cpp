@@ -7,6 +7,8 @@
 #include "CudaScatteringDistributionFunction.h"
 #include "CudaLambertian.h"
 #include "CudaHemisphericalEmission.h"
+#include "../include/CudaMaterial.h"
+#include "CudaDefaultMaterial.h"
 #include "../../shading/Lambertian.h"
 #include "../../shading/HemisphericalEmission.h"
 #include "evaluateBidirectionalScattering.h"
@@ -16,12 +18,27 @@
 
 using namespace stdcuda;
 
-CudaShadingContext
-  ::CudaShadingContext(const boost::shared_ptr<MaterialList> &materials)
-    :Parent(materials)
+void CudaShadingContext
+  ::setMaterials(const boost::shared_ptr<MaterialList> &materials)
 {
-  ;
-} // end CudaShadingContext::CudaShadingContext()
+  mMaterials.reset(new MaterialList());
+
+  // go through the Materials; only add one if it is a CudaMaterial
+  // if it is not, create a CudaMaterial in its stead
+  for(MaterialList::iterator m = materials->begin();
+      m != materials->end();
+      ++m)
+  {
+    if(dynamic_cast<CudaMaterial*>(m->get()) || (*m)->isSensor() || (*m)->isEmitter())
+    {
+      mMaterials->push_back(*m);
+    } // end if
+    else
+    {
+      mMaterials->push_back(boost::shared_ptr<Material>(new CudaDefaultMaterial()));
+    } // end else
+  } // end for i
+} // end CudaShadingContext::setMaterials()
 
 void CudaShadingContext
   ::evaluateBidirectionalScattering(device_ptr<const CudaScatteringDistributionFunction> f,
@@ -170,30 +187,29 @@ CudaScatteringDistributionFunction CudaShadingContext
   if(dynamic_cast<const Lambertian*>(f) != 0)
   {
     const Lambertian *l = static_cast<const Lambertian*>(f);
-    CudaLambertian *cl = reinterpret_cast<CudaLambertian*>(&result.mFunction);
 
     // XXX it's a shame we can't just do a straight copy
     Spectrum a = l->getAlbedo();
     float3 albedo = make_float3(a[0],a[1],a[2]);
-    *cl = CudaLambertian(albedo);
 
-    result.mType = LAMBERTIAN;
+    // create a diffuse scattering object
+    Parent1::diffuse(albedo, result);
   } // end if
   else if(dynamic_cast<const HemisphericalEmission*>(f) != 0)
   {
     const HemisphericalEmission *he = static_cast<const HemisphericalEmission*>(f);
-    CudaHemisphericalEmission *che = reinterpret_cast<CudaHemisphericalEmission*>(&result.mFunction);
 
     // XXX it's a shame we can't just do a straight copy
     Spectrum r = he->getRadiosity();
     float3 radiosity = make_float3(r[0],r[1],r[2]);
-    *che = CudaHemisphericalEmission(radiosity);
 
-    result.mType = HEMISPHERICAL_EMISSION;
+    // create a hemispherical emission object
+    Parent1::hemisphericalEmission(radiosity, result);
   } // end else if
   else
   {
-    result.mType = NULL_SCATTERING;
+    // create a null scattering object
+    Parent1::null(result);
   } // end else
 
   return result;

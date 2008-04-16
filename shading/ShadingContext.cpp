@@ -20,12 +20,15 @@
 #include "Fresnel.h"
 #include "noise.h"
 
-ShadingContext
-  ::ShadingContext(const boost::shared_ptr<MaterialList> &materials)
-    :mMaterials(materials)
+void ShadingContext
+  ::setMaterials(const boost::shared_ptr<MaterialList> &materials)
 {
-  ;
-} // end ShadingContext::ShadingContext()
+  // keep our own list
+  mMaterials.reset(new MaterialList());
+
+  // copy the Materials
+  *mMaterials = *materials;
+} // end ShadingContext::setMaterials()
 
 ShadingContext
   ::~ShadingContext(void)
@@ -250,11 +253,9 @@ ScatteringDistributionFunction *ShadingContext
 ScatteringDistributionFunction *ShadingContext
   ::perspectiveSensor(const Spectrum &Ks,
                       const float aspect,
-                      const Point &origin,
-                      const Vector &right,
-                      const Vector &up)
+                      const Point &origin)
 {
-  return new(mAllocator) PerspectiveSensor(Ks, aspect, origin, right, up);
+  return new(mAllocator) PerspectiveSensor(Ks, aspect, origin);
 } // end ShadingContext::perspectiveSensor()
 
 ScatteringDistributionFunction *ShadingContext

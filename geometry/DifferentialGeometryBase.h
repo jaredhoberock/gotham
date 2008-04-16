@@ -1,17 +1,11 @@
-/*! \file DifferentialGeometry.h
+/*! \file DifferentialGeometryBase.h
  *  \author Jared Hoberock
  *  \brief Defines the interface to a class describing the differential geometric properties of a point on a surface.
  *         XXX clean up this interface
  */
 
-#ifndef DIFFERENTIAL_GEOMETRY_H
-#define DIFFERENTIAL_GEOMETRY_H
-
-#include <gpcpu/Vector.h>
-#include "Point.h"
-#include "Vector.h"
-#include "Normal.h"
-#include "ParametricCoordinates.h"
+#ifndef DIFFERENTIAL_GEOMETRY_BASE_H
+#define DIFFERENTIAL_GEOMETRY_BASE_H
 
 /*! \class DifferentialGeometryBase
  *  \brief DifferentialGeometryBase encapsulates the description
@@ -20,10 +14,10 @@
  *  \note This is made a template so we can substitute CUDA vector
  *        types.  Thanks, CUDA!
  */
-template<typename P3 = Point,
-         typename V3 = Vector,
-         typename P2 = ParametricCoordinates,
-         typename N3 = Normal>
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
   class DifferentialGeometryBase
 {
   public:
@@ -236,9 +230,7 @@ template<typename P3 = Point,
     Vector mNormalVectorPartials[2];
 }; // end class DifferentialGeometryBase
 
-#include "DifferentialGeometry.inl"
+#include "DifferentialGeometryBase.inl"
 
-typedef DifferentialGeometryBase<> DifferentialGeometry;
-
-#endif // DIFFERENTIAL_GEOMETRY_H
+#endif // DIFFERENTIAL_GEOMETRY_BASE_H
 

@@ -21,11 +21,11 @@ template<typename P3,
          typename N3>
   DifferentialGeometryBase<P3,V3,P2,N3>
     ::DifferentialGeometryBase(const Point &p,
-                           const Vector &dpdu, const Vector &dpdv,
-                           const Vector &dndu, const Vector &dndv,
-                           const ParametricCoordinates &uv,
-                           const float a,
-                           const float invA)
+                               const Vector &dpdu, const Vector &dpdv,
+                               const Vector &dndu, const Vector &dndv,
+                               const ParametricCoordinates &uv,
+                               const float a,
+                               const float invA)
 {
   setPoint(p);
   setPointPartials(dpdu, dpdv);

@@ -1,0 +1,16 @@
+import os
+import glob
+
+# find all .cpps in the current directory
+sources = []
+extensions = ['.cpp', '.cu']
+for ext in extensions:
+  pattern = os.path.join(os.getcwd(), "*" + ext)
+  for fullpath in glob.glob(pattern):
+    basename = os.path.basename(fullpath)
+    sources.append(basename)
+
+# create a library 
+Import('env')
+env.Library('cudarenderers', sources)
+

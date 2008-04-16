@@ -10,6 +10,7 @@
 
 #include "../../primitives/TriangleBVH.h"
 #include "CudaPrimitive.h"
+#include "CudaTriangleList.h"
 
 // this defines the CUDA vector types
 #include <vector_types.h>
@@ -17,7 +18,8 @@
 
 class CUDATriangleBVH
   : public TriangleBVH,
-    public CudaPrimitive
+    public CudaPrimitive,
+    public CudaTriangleList
 {
   public:
     /*! \typedef Parent0
@@ -29,6 +31,11 @@ class CUDATriangleBVH
      *  \brief Shorthand.
      */
     typedef CudaPrimitive Parent1;
+
+    /*! \typedef Parent2
+     *  \brief Shorthand.
+     */
+    typedef CudaTriangleList Parent2;
 
     /*! This method provides a SIMD path for intersect(). It intersects more than
      *  one Ray against this Primitive en masse.
@@ -87,20 +94,16 @@ class CUDATriangleBVH
      */
     virtual void createScratchSpace(void);
 
+    /*! This method creates the list which maps PrimitiveHandles to
+     *  MaterialHandles.
+     */
+    virtual void createPrimitiveHandleToMaterialHandleMap();
+
     // These are copies of the corresponding lists in the Parents which
     // are resident on the CUDA device
     stdcuda::vector_dev< ::float4> mMinBoundHitIndexDevice;
     stdcuda::vector_dev< ::float4> mMaxBoundMissIndexDevice;
     stdcuda::vector_dev< ::float4> mFirstVertexDominantAxisDevice;
-
-    // these are per-triangle lists of data
-    // XXX some of this is redundant and should be per-primitive
-    stdcuda::vector_dev< ::float3>       mGeometricNormalDevice;
-    stdcuda::vector_dev< ::float2>       mFirstVertexParmsDevice;
-    stdcuda::vector_dev< ::float2>       mSecondVertexParmsDevice;
-    stdcuda::vector_dev< ::float2>       mThirdVertexParmsDevice;
-    stdcuda::vector_dev<float>           mPrimitiveInvSurfaceAreaDevice;
-    stdcuda::vector_dev<PrimitiveHandle> mPrimitiveHandlesDevice;
 
     /*! This parameter controls the batch size of the workload.
      */

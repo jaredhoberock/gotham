@@ -6,8 +6,13 @@
 
 #pragma once
 
-#include "../../geometry/DifferentialGeometry.h"
+#include <host_defines.h>
 #include <vector_types.h>
+
+// XXX hack hack
+#define inline inline __host__ __device__
+#include "../../geometry/DifferentialGeometryBase.h"
+#undef inline
 
 typedef DifferentialGeometryBase<float3, float3, float2, float3> CudaDifferentialGeometry;
 

@@ -10,8 +10,32 @@ import os
 import re
 import tempfile
 import shutil
+import inspect
 
 class ShaderCompiler:
+  # define some global variables defined in all shaders
+  __globalCppVariables__ = '''
+gContext = &context;
+const Point &P = dg.getPoint();
+const Normal &N = dg.getNormal();
+const Vector &T = dg.getTangent();
+const Vector &B = dg.getBinormal();
+const ParametricCoordinates &UV = dg.getParametricCoordinates();
+const Vector3 &dpdu = dg.getPointPartials()[0];
+const Vector3 &dpdv = dg.getPointPartials()[1];
+      float area = dg.getSurfaceArea();
+      float invArea = dg.getInverseSurfaceArea();
+  '''
+
+  # define some global variables defined in all scattering shaders
+  __globalScatteringCppVariables__ = __globalCppVariables__ + 'ScatteringDistributionFunction *F = 0;'
+
+  # define some global variables defined in all emission shaders
+  __globalEmissionCppVariables__ = __globalCppVariables__ + 'ScatteringDistributionFunction *E = 0;'
+
+  # define some global variables defined in all sensor shaders
+  __globalSensingCppVariables__ = __globalCppVariables__ + 'ScatteringDistributionFunction *S = 0;'
+    
   def parseDeclaration(self, decl):
     # strip leading and ending whitespace
     decl = decl.lstrip()
@@ -141,43 +165,48 @@ class ShaderCompiler:
         stripped += c
     return stripped
 
+  def createShaderCppCode(self, name, globals, body, returnName, parametersList, type):
+    result = '''
+virtual ScatteringDistributionFunction *evaluate%s(ShadingInterface &context, const DifferentialGeometry &dg) const
+{
+  // globals follow
+  %s
+  // body follows
+  %s
+  // return follows
+  return %s;
+}
+virtual bool is%s(void) const {return true;}
+'''
+    result = result % (name, globals, body, returnName, type)
+    return result
+
+  def createCppIncludeCode(self, scatteringParametersList, emissionParametersList, sensorParametersList):
+    return '''
+#include "Material.h"
+#include "stdshader.h"
+'''
+
+  def createCppClassParentName(self):
+    return 'Material'
+
   def createCppCode(self, shaderString, baseName):
     # add 'Shader' to the end of the basename to make it unique
     # from any of our c++ identifiers
     className = baseName + 'Shader'
 
-    # define some global variables defined in all shaders
-    globalVariables = '''
-gContext = &context;
-const Point &P = dg.getPoint();
-const Normal &N = dg.getNormal();
-const Vector &T = dg.getTangent();
-const Vector &B = dg.getBinormal();
-const ParametricCoordinates &UV = dg.getParametricCoordinates();
-const Vector3 &dpdu = dg.getPointPartials()[0];
-const Vector3 &dpdv = dg.getPointPartials()[1];
-      float area = dg.getSurfaceArea();
-      float invArea = dg.getInverseSurfaceArea();
-  '''
-    
     # try to parse 'scattering'
     scatteringString = ''
     scatteringParametersList = []
   
     (scatteringParametersList, scatteringBody) = self.parseFunction('scattering', shaderString)
     if scatteringBody != '':
-      # rebuild a shader string
-      scatteringString = '''
-virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const
-{
-  ScatteringDistributionFunction *F = 0;
-  '''
-      scatteringString += globalVariables
-      scatteringString += scatteringBody
-      scatteringString += '''
-  return F;
-}
-'''
+      scatteringString = self.createShaderCppCode('Scattering',
+                                                  self.__globalScatteringCppVariables__,
+                                                  scatteringBody,
+                                                  'F',
+                                                  scatteringParametersList,
+                                                  'Scatterer')
     
     # try to parse 'emission'
     emissionString = ''
@@ -185,21 +214,12 @@ virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &con
   
     (emissionParametersList, emissionBody) = self.parseFunction('emission', shaderString)
     if emissionBody != '':
-      emissionString = '''
-virtual ScatteringDistributionFunction *evaluateEmission(ShadingInterface &context, const DifferentialGeometry &dg) const
-{
-  ScatteringDistributionFunction *E = 0;
-'''
-      emissionString += globalVariables
-      emissionString += emissionBody
-      emissionString += '''
-  return E;
-}
-virtual bool isEmitter(void) const
-{
-  return true;
-}
-'''
+      emissionString = self.createShaderCppCode('Emission',
+                                                self.__globalEmissionCppVariables__,
+                                                emissionBody,
+                                                'E',
+                                                emissionParametersList,
+                                                'Emitter')
     
     # try to parse 'sensor'
     sensorString = ''
@@ -207,21 +227,12 @@ virtual bool isEmitter(void) const
   
     (sensorParametersList, sensorBody) = self.parseFunction('sensor', shaderString)
     if sensorBody != '':
-      sensorString = '''
-virtual ScatteringDistributionFunction *evaluateSensor(ShadingInterface &context, const DifferentialGeometry &dg) const
-{
-  ScatteringDistributionFunction *S = 0;
-'''
-      sensorString += globalVariables
-      sensorString += sensorBody
-      sensorString += '''
-  return S;
-}
-virtual bool isSensor(void) const
-{
-  return true;
-}
-'''
+      sensorString = self.createShaderCppCode('Sensor',
+                                              self.__globalSensingCppVariables__,
+                                              sensorBody,
+                                              'S',
+                                              sensorParametersList,
+                                              'Sensor')
     
     # XXX we need to put the preamble outside of the class definition
     
@@ -229,14 +240,19 @@ virtual bool isSensor(void) const
     compileMe = '''
 class ShadingInterface;
 ShadingInterface *gContext;
-#include "Material.h"
-#include "stdshader.h"
 '''
+
+    # add c++ #includes
+    compileMe += self.createCppIncludeCode(scatteringParametersList,
+                                           emissionParametersList,
+                                           sensorParametersList)
     
     # XXX put the preamble just before the class definition
     #compileMe += preamble
+
+    parentName = self.createCppClassParentName()
     
-    compileMe += 'class %s : public Material\n' % className
+    compileMe += 'class %s : public %s\n' % (className, parentName)
     compileMe += '{\n'
     compileMe += 'public:\n'
     compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % baseName
@@ -282,32 +298,8 @@ ShadingInterface *gContext;
     compileMe += '}\n'
 
     return compileMe
-  
-  def compile(self, filename):
-    # open the file
-    baseName = os.path.basename(filename)
-    baseName = baseName.split('.')[0]
-  
-    infile = open(filename)
-    
-    # strip out '//' and '#' comments
-    shaderString = self.stripComments(infile.readlines())
-    
-    # create the c++ code
-    compileMe = self.createCppCode(shaderString, baseName)
-    
-    #print compileMe
-    
-    # create temp files
-    dir = tempfile.mkdtemp()
-  
-    cpppath = dir + '/' + baseName + '.cpp'
-  
-    # replace all \ with /
-    # XXX for some reason scons messes up if we don't do this
-    #     \ in the dir are interpreted as escape characters
-    cpppath = cpppath.replace('\\', '/')
-  
+
+  def createMakefileString(self, sources, baseName):
     # XXX fix this include ugliness
     #     ideally, there's a canonical installation of gotham somewhere
     #     with an include directory. point to that.
@@ -345,7 +337,11 @@ elif os.name == 'nt':
                     SHLIBPREFIX = '',
                     SHLIBSUFFIX = '.pyd',
                     WINDOWS_INSERT_MANIFEST = True)
-sources = ['%s']
+'''
+
+    makefile += 'sources = ' + `sources`
+
+    makefile += '''
 result = env.SharedLibrary('%s', sources)
 if os.name == 'nt':
   # we must explicitly embed the "manifest" after building the dll
@@ -357,12 +353,50 @@ if os.name == 'nt':
   env.AddPostAction(result, 'del.exe ${TARGET.filebase}.lib')
   # delete the .exp library
   env.AddPostAction(result, 'del.exe ${TARGET.filebase}.exp')
-''' % (cpppath, baseName)
+''' % baseName
+
+    return makefile
+
+  def createSourceFiles(self, shaderString, baseName, dir):
+    # create the c++ code
+    compileMe = self.createCppCode(shaderString, baseName)
     
+    #print compileMe
+    
+    cpppath = dir + '/' + baseName + '.cpp'
+  
+    # replace all \ with /
+    # XXX for some reason scons messes up if we don't do this
+    #     \ in the dir are interpreted as escape characters
+    cpppath = cpppath.replace('\\', '/')
+  
     cppfile = open(cpppath, 'w')
     cppfile.write(compileMe)
     cppfile.close()
+
+    return [cpppath]
+  
+  def compile(self, filename):
+    # open the file
+    baseName = os.path.basename(filename)
+    baseName = baseName.split('.')[0]
+  
+    infile = open(filename)
     
+    # strip out '//' and '#' comments
+    # XXX this will disallow us from using '#include' in a shader
+    shaderString = self.stripComments(infile.readlines())
+
+    # create a temporary directory to hold source files
+    dir = tempfile.mkdtemp()
+
+    # create the source files
+    sources = self.createSourceFiles(shaderString, baseName, dir)
+
+    # draft the makefile
+    makefile = self.createMakefileString(sources, baseName)
+    
+    # write it to disk
     sconstruct = open(dir + '/' + 'SConstruct', 'w')
     sconstruct.write(makefile)
     sconstruct.close()
@@ -381,18 +415,21 @@ if os.name == 'nt':
     #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
     
     # kill the tempfiles
-    shutil.rmtree(dir, True)
+    #shutil.rmtree(dir, True)
   
-
 def usage():
   pass
 
-if len(sys.argv) < 2:
-  print 'Error: No input file specified.'
-  usage()
-  exit()
-
-compiler = ShaderCompiler()
-for file in sys.argv[1:]:
-  compiler.compile(file)
+# run the compiler if this file was invoked
+# as an executable
+if sys.argv[0] == inspect.getsourcefile(usage):
+  if len(sys.argv) < 2:
+    print 'Error: No input file specified.'
+    usage()
+    exit()
+  
+  # create a compiler
+  compiler = ShaderCompiler()
+  for file in sys.argv[1:]:
+    compiler.compile(file)
 

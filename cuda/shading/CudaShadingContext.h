@@ -7,23 +7,60 @@
 
 #pragma once
 
-#include "../../shading/ShadingContext.h"
 #include "CudaScatteringDistributionFunction.h"
+#include "../../shading/ShadingContext.h"
+#include "../include/CudaShadingInterface.h"
 #include <stdcuda/vector_dev.h>
 
 class CudaShadingContext
-  : public ShadingContext
+  : public ShadingContext,
+    public CudaShadingInterface
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef ShadingContext Parent;
+    typedef ShadingContext Parent0;
 
-    /*! Constructor accepts a list of materials.
-     *  \param materials Sets Parent::mMaterials.
+    /*! \typedef Parent1
+     *  \brief Shorthand.
      */
-    CudaShadingContext(const boost::shared_ptr<MaterialList> &materials);
+    typedef CudaShadingInterface Parent1;
+
+    /*! This method evaluates a batch of scattering shader jobs in SIMD fashion
+     *  on a CUDA device.
+     *  \param m A list of MaterialHandles.
+     *  \param dg A list of CudaDifferentialGeometry objects.
+     *  \param dgStride Stride size for elements in the dg list.
+     *  \param stencil A stencil to control job processing.
+     *  \param f The results of shading operations will be returned to this list.
+     *  \param n The size of each list.
+     */
+    using Parent0::evaluateScattering;
+    virtual void evaluateScattering(const stdcuda::device_ptr<const MaterialHandle> &m,
+                                    const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
+                                    const size_t dgStride,
+                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const stdcuda::device_ptr<CudaScatteringDistributionFunction> &g,
+                                    const size_t n) = 0;
+
+    /*! This method evaluates a batch of emission shader jobs in SIMD fashion
+     *  on a CUDA device.
+     *  \param m A list of MaterialHandles.
+     *  \param dg A list of CudaDifferentialGeometry objects.
+     *  \param dgStride Stride size for elements in the dg list.
+     *  \param stencil A stencil to control job processing.
+     *  \param f The results of shading operations will be returned to this list.
+     *  \param n The size of each list.
+     */
+    using Parent0::evaluateEmission;
+    virtual void evaluateEmission(const stdcuda::device_ptr<const MaterialHandle> &m,
+                                  const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
+                                  const size_t dgStride,
+                                  const stdcuda::device_ptr<const int> &stencil,
+                                  const stdcuda::device_ptr<CudaScatteringDistributionFunction> &g,
+                                  const size_t n) = 0;
+
 
     /*! This method evaluates the bidirectional scattering of a batch of
      *  scattering jobs in a SIMD fashion on a CUDA device.
@@ -102,6 +139,14 @@ class CudaShadingContext
                                                            const int *stencil,
                                                            const size_t n,
                                                            stdcuda::vector_dev<CudaScatteringDistributionFunction> &cf);
+
+    /*! This method copies the CudaMaterials from the given MaterialList into this
+     *  CudaShadingContext's MaterialList. If a Material in the given list is not a
+     *  CudaMaterial, a default one is created in its place.
+     *  \param materials The list to copy.
+     */
+    virtual void setMaterials(const boost::shared_ptr<MaterialList> &materials);
+
   protected:
 
     virtual CudaScatteringDistributionFunction createCudaScatteringDistributionFunction(const ScatteringDistributionFunction *f);

@@ -1,4 +1,4 @@
-sensor(float aspect, float fovy, Point lowerLeft)
+sensor(float aspect, float fovy, Point lowerLeft, Spectrum response = Spectrum(1,1,1))
 {
   // B is equivalent to a camera's 'right' direction
   // T is equivalent to a camera's 'up' direction
@@ -9,6 +9,6 @@ sensor(float aspect, float fovy, Point lowerLeft)
   //Point lowerLeft = center + near * look - aspect * right - up;
   //Point lowerLeft = P + near * N - aspect * B - T;
   //Point lowerLeft = center + near * N - aspect * B - T;
-  S = perspectiveSensor(invArea * Spectrum::white(), aspect, lowerLeft);
+  S = perspectiveSensor(invArea * response, aspect, lowerLeft);
 }
 

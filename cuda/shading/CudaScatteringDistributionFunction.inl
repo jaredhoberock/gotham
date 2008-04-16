@@ -11,7 +11,10 @@
 #include "CudaScatteringDistributionFunction.h"
 #include "CudaHemisphericalEmission.h"
 #include <vector_functions.h>
+#include <stdcuda/vector_math.h>
 #include "CudaLambertian.h"
+#include "CudaPerspectiveSensor.h"
+#include "CudaNullScattering.h"
 
 //Spectrum CudaScatteringDistributionFunction
 float3 CSDF
@@ -31,10 +34,17 @@ float3 CSDF
       break;
     } // end LAMBERTIAN
 
+    case NULL_SCATTERING:
+    {
+      const CudaNullScattering &null = (const CudaNullScattering&)mFunction;
+      result = null.evaluate(wo,dg,wi);
+      break;
+    } // end NULL_SCATTERING
+
     default:
     {
       // XXX this should probably be a nan
-      result = make_float3(0,0,0);
+      result = make_float3(1.0f,0.5f,0.25f);
       break;
     } // end default
   } // end switch
@@ -59,10 +69,24 @@ float3 CSDF
       break;
     } // end HEMISPHERICAL_EMISSION
 
+    case PERSPECTIVE_SENSOR:
+    {
+      const CudaPerspectiveSensor &ps = (const CudaPerspectiveSensor&)mFunction;
+      result = ps.evaluate(wo,dg);
+      break;
+    } // end PERSPECTIVE_SENSOR
+
+    case NULL_SCATTERING:
+    {
+      const CudaNullScattering &ns = (const CudaNullScattering&)mFunction;
+      result = ns.evaluate(wo,dg);
+      break;
+    } // end NULL_SCATTERING
+
     default:
     {
       // XXX this should probably be a nan
-      result = make_float3(0,0,0);
+      result = make_float3(0.25f,0.5f,1.0f);
       break;
     } // end default
   } // end switch
