@@ -66,7 +66,7 @@ void SIMDDebugRenderer
   std::vector<ScatteringDistributionFunction*> f(n);
   std::vector<ScatteringDistributionFunction*> e(n);
 
-  const PrimitiveList<> &primitives = *mScene->getPrimitives();
+  const PrimitiveList &primitives = *mScene->getPrimitives();
 
   // create the list of MaterialHandles and DifferentialGeometry
   std::vector<MaterialHandle> handles(n);

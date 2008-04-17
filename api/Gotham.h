@@ -214,7 +214,7 @@ class Gotham
 
     /*! A list of Primitives.
      */
-    boost::shared_ptr<PrimitiveList<> > mPrimitives;
+    boost::shared_ptr<PrimitiveList> mPrimitives;
 
     /*! A list of SurfacePrimitives.
      */

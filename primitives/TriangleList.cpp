@@ -9,7 +9,7 @@
 #include "../surfaces/Mesh.h"
 
 void TriangleList
-  ::push_back(const boost::shared_ptr<ListElement> &p)
+  ::push_back(const boost::shared_ptr<Primitive> &p)
 {
   // XXX DESIGN this sucks
   const SurfacePrimitive *sp = dynamic_cast<const SurfacePrimitive*>(p.get());

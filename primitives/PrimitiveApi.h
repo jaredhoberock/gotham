@@ -20,8 +20,8 @@ class PrimitiveApi
      *  \param prims A PrimitiveList to copy from.
      *  \return A new PrimitiveList.
      */
-    static PrimitiveList<> *list(Gotham::AttributeMap &attr,
-                                 const PrimitiveList<> &prims);
+    static PrimitiveList *list(Gotham::AttributeMap &attr,
+                               const PrimitiveList &prims);
 
     /*! This static method creates a new Scene 
      *  according to the options in the given AttributeMap.

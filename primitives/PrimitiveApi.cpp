@@ -16,11 +16,11 @@
 
 using namespace boost;
 
-PrimitiveList<> *PrimitiveApi
+PrimitiveList *PrimitiveApi
   ::list(Gotham::AttributeMap &attr,
-         const PrimitiveList<> &prims)
+         const PrimitiveList &prims)
 {
-  PrimitiveList<> *result = 0;
+  PrimitiveList *result = 0;
 
   size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
 
@@ -32,7 +32,7 @@ PrimitiveList<> *PrimitiveApi
   } // end if
   else
   {
-    result = new RasterizablePrimitiveList< PrimitiveBSP<> >();
+    result = new RasterizablePrimitiveList<PrimitiveBSP>();
   } // end else
 
   // copy the prims

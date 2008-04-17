@@ -6,19 +6,17 @@
 #include "PrimitiveBSP.h"
 #include "../geometry/Ray.h"
 
-template<typename PrimitiveType>
-  PrimitiveBSP<PrimitiveType>
-    ::PrimitiveBSP(void)
-      :Parent0(),Parent1()
+PrimitiveBSP
+  ::PrimitiveBSP(void)
+    :Parent0(),Parent1()
 {
   ;
 } // end PrimitiveBSP::PrimitiveBSP()
 
-template<typename PrimitiveType>
-  float PrimitiveBSP<PrimitiveType>::Bounder
-    ::operator()(unsigned int axis,
-                 bool min,
-                 const Primitive *p) const
+float PrimitiveBSP::Bounder
+  ::operator()(unsigned int axis,
+               bool min,
+               const Primitive *p) const
 {
   BoundingBox b;
   p->getBoundingBox(b);
@@ -26,14 +24,13 @@ template<typename PrimitiveType>
   return corner[axis];
 } // end PrimitiveBounder::operator()()
 
-template<typename PrimitiveType>
-  void PrimitiveBSP<PrimitiveType>
-    ::finalize(void)
+void PrimitiveBSP
+  ::finalize(void)
 {
   // build the bsp
   Bounder bounder;
-  std::vector<const PrimitiveType*> temp;
-  for(typename Parent0::const_iterator i = Parent0::begin();
+  std::vector<const Primitive*> temp;
+  for(Parent0::const_iterator i = Parent0::begin();
       i != Parent0::end();
       ++i)
   {
@@ -43,12 +40,11 @@ template<typename PrimitiveType>
   Parent1::buildTree(temp.begin(),temp.end(),bounder);
 } // end PrimitiveBSP::finalize()
 
-template<typename PrimitiveType>
-  bool PrimitiveBSP<PrimitiveType>::Shadower
-    ::operator()(const Point &anchor, const Point &dir,
-                 const Primitive **begin,
-                 const Primitive **end,
-                 float minT, float maxT)
+bool PrimitiveBSP::Shadower
+  ::operator()(const Point &anchor, const Point &dir,
+               const Primitive **begin,
+               const Primitive **end,
+               float minT, float maxT)
 {
   // XXX PERF it's really wasteful to construct this extra Ray
   // XXX DESIGN consider another standard intersection interface
@@ -68,9 +64,8 @@ template<typename PrimitiveType>
   return false;
 } // end Shadower::operator()()
 
-template<typename PrimitiveType>
-  bool PrimitiveBSP<PrimitiveType>
-    ::intersect(const Ray &r) const
+bool PrimitiveBSP
+  ::intersect(const Ray &r) const
 {
   // create a Shadower
   Shadower shadower;
@@ -82,13 +77,12 @@ template<typename PrimitiveType>
   return false;
 } // end PrimitiveBSP::intersect()
 
-template<typename PrimitiveType>
-  bool PrimitiveBSP<PrimitiveType>::Intersector
-    ::operator()(const Point &anchor,
-                 const Point &dir,
-                 const Primitive** begin,
-                 const Primitive** end,
-                 float minT, float maxT)
+bool PrimitiveBSP::Intersector
+  ::operator()(const Point &anchor,
+               const Point &dir,
+               const Primitive** begin,
+               const Primitive** end,
+               float minT, float maxT)
 {
   bool result = false;
   // XXX PERF same critique here as above
@@ -115,9 +109,8 @@ template<typename PrimitiveType>
   return result;
 } // end Intersector::operator()()
 
-template<typename PrimitiveType>
-  bool PrimitiveBSP<PrimitiveType>
-    ::intersect(Ray &r, Intersection &inter) const
+bool PrimitiveBSP
+  ::intersect(Ray &r, Intersection &inter) const
 {
   // create an intersector
   Intersector intersector;

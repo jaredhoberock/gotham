@@ -91,7 +91,7 @@ void Scene
 } // end Scene::setSensors()
 
 void Scene
-  ::setPrimitives(boost::shared_ptr<PrimitiveList<> > p)
+  ::setPrimitives(boost::shared_ptr<PrimitiveList> p)
 {
   mPrimitives = p;
 } // end Scene::setPrimitives()
@@ -114,7 +114,7 @@ const SurfacePrimitiveList *Scene
   return mSurfaces.get();
 } // end Scene::getSurfaces()
 
-const PrimitiveList<> *Scene
+const PrimitiveList *Scene
   ::getPrimitives(void) const
 {
   return mPrimitives.get();

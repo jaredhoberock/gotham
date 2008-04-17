@@ -13,13 +13,13 @@
 #include <aliastable/AliasTable.h>
 
 class SurfacePrimitiveList
-  : public PrimitiveList<SurfacePrimitive>
+  : public PrimitiveList
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef PrimitiveList<SurfacePrimitive> Parent;
+    typedef PrimitiveList Parent;
 
     /*! Null constructor sets mSurfaceArea to zero.
      */
@@ -77,8 +77,10 @@ class SurfacePrimitiveList
     /*! This method adds a new SurfacePrimitive to this
      *  SurfacePrimitiveList.
      *  \param p The SurfacePrimitive to add.
+     *  \note p must be an instance of SurfacePrimitive, otherwise,
+     *          calling this method has no effect.
      */
-    virtual void push_back(const boost::shared_ptr<SurfacePrimitive> &p);
+    virtual void push_back(const boost::shared_ptr<Primitive> &p);
 
     /*! This method finalizes this SurfacePrimitiveList.
      */

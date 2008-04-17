@@ -12,21 +12,20 @@
 #include "PrimitiveList.h"
 #include <rayCaster/bsp.h>
 
-template<typename PrimitiveType = Primitive>
-  class PrimitiveBSP
-    : public PrimitiveList<PrimitiveType>,
-      protected bspTree<const PrimitiveType*,Point>
+class PrimitiveBSP
+  : public PrimitiveList,
+    protected bspTree<const Primitive*,Point>
 {
   public:
     /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef PrimitiveList<PrimitiveType> Parent0;
+    typedef PrimitiveList Parent0;
 
     /*! \typedef Parent1
      *  \brief Shorthand.
      */
-    typedef bspTree<const PrimitiveType*,Point> Parent1;
+    typedef bspTree<const Primitive*,Point> Parent1;
 
     /*! Null constructor calls the Parents.
      */

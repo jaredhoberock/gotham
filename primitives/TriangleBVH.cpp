@@ -8,7 +8,7 @@
 #include "SurfacePrimitive.h"
 
 void TriangleBVH
-  ::push_back(const boost::shared_ptr<ListElement> &p)
+  ::push_back(const boost::shared_ptr< ::Primitive> &p)
 {
   // check that p is triangulatable
   // XXX DESIGN this sucks

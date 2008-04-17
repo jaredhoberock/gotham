@@ -33,11 +33,15 @@ float SurfacePrimitiveList
 } // end SurfacePrimitiveList::evaluateSurfaceAreaPdf()
 
 void SurfacePrimitiveList
-  ::push_back(const boost::shared_ptr<SurfacePrimitive> &p)
+  ::push_back(const boost::shared_ptr<Primitive> &p)
 {
-  Parent::push_back(p);
-  mSurfaceArea += p->getSurfaceArea();
-  mOneOverSurfaceArea = 1.0f / mSurfaceArea;
+  const SurfacePrimitive *sp = dynamic_cast<SurfacePrimitive*>(p.get());
+  if(sp)
+  {
+    Parent::push_back(p);
+    mSurfaceArea += sp->getSurfaceArea();
+    mOneOverSurfaceArea = 1.0f / mSurfaceArea;
+  } // end if
 } // end SurfacePrimitive::push_back()
 
 void SurfacePrimitiveList
@@ -48,7 +52,7 @@ void SurfacePrimitiveList
 
   for(size_t i = 0; i != size(); ++i)
   {
-    (*this)[i]->setSurfacePrimitiveHandle(i);
+    dynamic_cast<SurfacePrimitive*>((*this)[i].get())->setSurfacePrimitiveHandle(i);
   } // end for i
 } // end SurfacePrimitive::finalize()
 
@@ -61,8 +65,9 @@ void SurfacePrimitiveList
       p != end();
       ++p)
   {
-    pointers.push_back((*p).get());
-    area.push_back((*p)->getSurfaceArea());
+    const SurfacePrimitive *sp = dynamic_cast<const SurfacePrimitive*>((*p).get());
+    pointers.push_back(sp);
+    area.push_back(sp->getSurfaceArea());
   } // end for t
 
   mSurfaceAreaPdf.build(pointers.begin(), pointers.end(),

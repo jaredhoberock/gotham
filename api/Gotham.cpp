@@ -75,13 +75,13 @@ void Gotham
   getDefaultAttributes(mAttributeStack.back());
 
   // create the PrimitiveList
-  mPrimitives.reset(new RasterizablePrimitiveList< PrimitiveList<> >());
+  mPrimitives.reset(new RasterizablePrimitiveList<PrimitiveList>());
 
   // create the emitters list
-  mEmitters.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
+  mEmitters.reset(new RasterizablePrimitiveList<SurfacePrimitiveList>());
 
   // create the sensors list
-  mSensors.reset(new RasterizablePrimitiveList< SurfacePrimitiveList >());
+  mSensors.reset(new RasterizablePrimitiveList<SurfacePrimitiveList>());
 
   // create the surfaces list
   mSurfaces.reset(new SurfacePrimitiveList());
@@ -180,11 +180,11 @@ void Gotham
   shared_ptr<Scene> s(PrimitiveApi::scene(mAttributeStack.back()));
 
   // create a final PrimitiveList
-  PrimitiveList<> *list = PrimitiveApi::list(mAttributeStack.back(),
-                                             *mPrimitives);
+  PrimitiveList *list = PrimitiveApi::list(mAttributeStack.back(),
+                                           *mPrimitives);
 
   // hand over the primitives
-  shared_ptr<PrimitiveList<> > listPtr(list);
+  shared_ptr<PrimitiveList> listPtr(list);
   s->setPrimitive(listPtr);
   s->setPrimitives(listPtr);
 

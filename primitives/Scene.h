@@ -95,7 +95,7 @@ class Scene
     /*! This method sets mPrimitives.
      *  \param p Sets mPrimitives.
      */
-    inline void setPrimitives(boost::shared_ptr<PrimitiveList<> > p);
+    inline void setPrimitives(boost::shared_ptr<PrimitiveList> p);
 
     /*! This method returns mRaysCast.
      *  \return mRaysCast
@@ -141,7 +141,7 @@ class Scene
     /*! This method returns a const pointer to the primitives list.
      *  \return mPrimitives
      */
-    inline const PrimitiveList<> *getPrimitives(void) const;
+    inline const PrimitiveList *getPrimitives(void) const;
 
     /*! This method is called immediately prior to rendering
      *  and calls mPrimitive->finalize()
@@ -171,7 +171,7 @@ class Scene
 
     /*! A Scene contains a list of all Primitives.
      */
-    boost::shared_ptr<PrimitiveList<> > mPrimitives;
+    boost::shared_ptr<PrimitiveList> mPrimitives;
 
     /*! This counts the number of Rays intersected against this Scene.
      */

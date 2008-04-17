@@ -6,24 +6,21 @@
 #include "PrimitiveList.h"
 #include "../geometry/BoundingBox.h"
 
-template<typename PrimitiveType>
-  PrimitiveList<PrimitiveType>
-    ::~PrimitiveList(void)
+PrimitiveList
+  ::~PrimitiveList(void)
 {
   ;
 } // end PrimitiveList::~PrimitiveList()
 
-template<typename PrimitiveType>
-  void PrimitiveList<PrimitiveType>
-    ::clear(void)
+void PrimitiveList
+  ::clear(void)
 {
   Parent1::clear();
   mBoundingBox.setEmpty();
 } // end PrimitiveList::clear()
 
-template<typename PrimitiveType>
-  void PrimitiveList<PrimitiveType>
-    ::push_back(const boost::shared_ptr<ListElement> &p)
+void PrimitiveList
+  ::push_back(const boost::shared_ptr<Primitive> &p)
 {
   Parent1::push_back(p);
 
@@ -33,19 +30,17 @@ template<typename PrimitiveType>
   mBoundingBox.addPoint(b[1]);
 } // end PrimitiveList::push_back()
 
-template<typename PrimitiveType>
-  void PrimitiveList<PrimitiveType>
-    ::getBoundingBox(BoundingBox &b) const
+void PrimitiveList
+  ::getBoundingBox(BoundingBox &b) const
 {
   b = mBoundingBox;
 } // end PrimitiveList::getBoundingBox()
 
-template<typename PrimitiveType>
-  bool PrimitiveList<PrimitiveType>
-    ::intersect(Ray &r, Intersection &inter) const
+bool PrimitiveList
+  ::intersect(Ray &r, Intersection &inter) const
 {
   bool result = false;
-  for(typename Parent1::const_iterator p = Parent1::begin();
+  for(Parent1::const_iterator p = Parent1::begin();
       p != Parent1::end();
       ++p)
   {
@@ -55,11 +50,10 @@ template<typename PrimitiveType>
   return result;
 } // end PrimitiveList::intersect()
 
-template<typename PrimitiveType>
-  bool PrimitiveList<PrimitiveType>
-    ::intersect(const Ray &r) const
+bool PrimitiveList
+  ::intersect(const Ray &r) const
 {
-  for(typename Parent1::const_iterator p = Parent1::begin();
+  for(Parent1::const_iterator p = Parent1::begin();
       p != Parent1::end();
       ++p)
   {
@@ -69,9 +63,8 @@ template<typename PrimitiveType>
   return false;
 } // end PrimitiveList::intersect()
 
-template<typename PrimitiveType>
-  void PrimitiveList<PrimitiveType>
-    ::finalize(void)
+void PrimitiveList
+  ::finalize(void)
 {
   Parent0::finalize();
 
