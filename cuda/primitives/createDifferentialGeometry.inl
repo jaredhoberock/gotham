@@ -33,16 +33,12 @@ void createDifferentialGeometry(const float3 &p,
   float3 dp1 = v0[triIndex] - v2[triIndex], 
          dp2 = v1[triIndex] - v2[triIndex];
   float determinant = du1 * dv2 - dv1 * du2;
-  if(determinant == 0)
-  {
-    // handle zero determinant case
-  } // end if
-  else
-  {
-    float invDet = 1.0f / determinant;
-    dg.getPointPartials()[0] = ( dv2*dp1 - dv1*dp2) * invDet;
-    dg.getPointPartials()[1] = (-du2*dp1 + du1*dp2) * invDet;
-  } // end else
+  float invDet = 1.0f / determinant;
+
+  float3 dpdu = ( dv2*dp1 - dv1*dp2) * invDet;
+  float3 dpdv = (-du2*dp1 + du1*dp2) * invDet;
+
+  dg.setPointPartials(dpdu,dpdv);
 
   // interpolate uv using barycentric coordinates
   float2 uv;
@@ -53,10 +49,12 @@ void createDifferentialGeometry(const float3 &p,
   dg.setPoint(p);
   dg.setNormal(ng);
   dg.setParametricCoordinates(uv);
-  dg.setTangent(normalize(dg.getPointPartials()[0]));
+
+  float3 tangent = normalize(dpdu);
+  dg.setTangent(tangent);
 
   // force an orthonormal basis
-  dg.setBinormal(cross(ng, dg.getTangent()));
+  dg.setBinormal(cross(ng, tangent));
 
   // set the inverse surface area of the primitive
   float invA = inverseSurfaceArea[triIndex];

@@ -28,8 +28,8 @@ void CudaTriangleList
 
     float a = 0.5f * e1.cross(e2).norm();
 
-    triangleAreas.push_back(i);
-    triangleAreas.push_back(i);
+    triangleAreas.push_back(a);
+    triangleIndices.push_back(i);
   } // end for i
 
   mSurfaceAreaPdf.build(triangleIndices.begin(), triangleIndices.end(),

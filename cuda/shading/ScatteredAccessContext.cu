@@ -29,6 +29,20 @@ __global__ void selectMaterial(const int *stencil,
   result[i] = r;
 } // end selectMaterial()
 
+__global__ void selectMaterial(const MaterialHandle *handles,
+                               const MaterialHandle h,
+                               int *result)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int r = 0;
+  if(handles[i] == h)
+  {
+    r = 1;
+  } // end if
+
+  result[i] = r;
+} // end selectMaterial()
+
 void ScatteredAccessContext
   ::evaluateScattering(const device_ptr<const MaterialHandle> &m,
                        const device_ptr<const CudaDifferentialGeometry> &dg,
@@ -104,4 +118,38 @@ void ScatteredAccessContext
     } // end if
   } // end for i
 } // end ScatteredAccessContext::evaluateEmission()
+
+void ScatteredAccessContext
+  ::evaluateSensor(const device_ptr<const MaterialHandle> &m,
+                   const device_ptr<const CudaDifferentialGeometry> &dg,
+                   const size_t dgStride,
+                   const device_ptr<CudaScatteringDistributionFunction> &f,
+                   const size_t n)
+{
+  vector_dev<int> materialStencil(n);
+  const CudaMaterial *material = 0;
+
+  // for each Material, create a new stencil
+  // which is the logical AND of stencil and h
+  // then, run the Material's kernel with the new stencil
+  MaterialHandle h = 0;
+  for(MaterialList::const_iterator mPtr = mMaterials->begin();
+      mPtr != mMaterials->end();
+      ++mPtr, ++h)
+  {
+    material = dynamic_cast<const CudaMaterial*>(mPtr->get());
+
+    if(material)
+    {
+      // materialStencil = (i == h)
+      dim3 grid = dim3(1,1,1);
+      dim3 block = dim3(n,1,1);
+      selectMaterial<<<grid,block>>>(m,h,&materialStencil[0]);
+
+      // run the shader
+      // normal stride
+      material->evaluateSensor(*this, dg, dgStride, &materialStencil[0], f, n);
+    } // end if
+  } // end for
+} // end ScatteredAccessContext::evaluateSensor()
 

@@ -398,3 +398,9 @@ void ShadingContext
   } // end for i
 } // end ShadingContext::evaluateUnidirectionalScattering()
 
+const Material *ShadingContext
+  ::getMaterial(const MaterialHandle &h) const
+{
+  return (*mMaterials)[h].get();
+} // end ShadingContext::getMaterial()
+

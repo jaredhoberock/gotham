@@ -26,17 +26,36 @@ struct Parameters
   const PrimitiveHandle *primitiveHandles;
 };
 
-__global__ void kernel(const Parameters p)
+struct Mesh
+{
+  const float3 *v0;
+  const float3 *v1;
+  const float3 *v2;
+  const float3 *n;
+  const float2 *uv0;
+  const float2 *uv1;
+  const float2 *uv2;
+  const float *inverseSurfaceArea;
+  const PrimitiveHandle *primitiveHandles;
+  //CudaTriangleList::TriangleTable table;
+};
+
+__global__ void k(const float4 *uniformFloats,
+                  const Mesh m,
+                  PrimitiveHandle *prims,
+                  CudaDifferentialGeometry *dgs,
+                  float *pdfs)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-  float4 u = p.u[i];
+  float4 u = uniformFloats[i];
 
   // sample a triangle index
-  unsigned int triIndex = p.table(u.x, p.pdf[i]);
+  //unsigned int triIndex = m.table(u.x, pdfs[i]);
+  unsigned int triIndex = 0;
 
   // get that triangle's PrimitiveHandle
-  p.prims[i] = p.primitiveHandles[triIndex];
+  prims[i] = m.primitiveHandles[triIndex];
 
   // sample the isoceles right triangle
   float2 b;
@@ -45,20 +64,20 @@ __global__ void kernel(const Parameters p)
   b.y = u.z * su;
 
   // transform to this particular triangle
-  float3 x = b.x * p.v0[triIndex]
-           + b.y * p.v1[triIndex]
-           + (1.0f - b.x - b.y) * p.v2[triIndex];
+  float3 x = b.x * m.v0[triIndex]
+           + b.y * m.v1[triIndex]
+           + (1.0f - b.x - b.y) * m.v2[triIndex];
 
   // create DifferentialGeometry
   CudaDifferentialGeometry dg;
   createDifferentialGeometry(x, b, triIndex,
-                             p.v0, p.v1, p.v2, p.n,
-                             p.uv0, p.uv1, p.uv2,
-                             p.inverseSurfaceArea,
+                             m.v0, m.v1, m.v2, m.n,
+                             m.uv0, m.uv1, m.uv2,
+                             m.inverseSurfaceArea,
                              dg);
 
   // write back
-  p.dg[i] = dg;
+  dgs[i] = dg;
 } // end kernel()
 
 void CudaTriangleList
@@ -71,21 +90,19 @@ void CudaTriangleList
   dim3 grid(1,1,1);
   dim3 block(n,1,1);
 
-  Parameters p = {u,
-                  prims,
-                  dg,
-                  pdf,
-                  mSurfaceAreaPdf,
-                  &mFirstVertex[0],
-                  &mSecondVertex[0],
-                  &mThirdVertex[0],
-                  &mGeometricNormalDevice[0],
-                  &mFirstVertexParmsDevice[0],
-                  &mSecondVertexParmsDevice[0],
-                  &mThirdVertexParmsDevice[0],
-                  &mPrimitiveInvSurfaceAreaDevice[0],
-                  &mPrimitiveHandlesDevice[0]};
+  Mesh m = {
+            &mFirstVertex[0],
+            &mSecondVertex[0],
+            &mThirdVertex[0],
+            &mGeometricNormalDevice[0],
+            &mFirstVertexParmsDevice[0],
+            &mSecondVertexParmsDevice[0],
+            &mThirdVertexParmsDevice[0],
+            &mPrimitiveInvSurfaceAreaDevice[0],
+            &mPrimitiveHandlesDevice[0]//,
+            //mSurfaceAreaPdf
+           };
 
-  kernel<<<grid,block>>>(p);
+  k<<<grid,block>>>(u, m, prims, dg, pdf);
 } // end CudaTriangleList::sampleSurfaceArea()
 

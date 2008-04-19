@@ -12,54 +12,113 @@
 #include "../shading/CudaShadingContext.h"
 #include "../shading/CudaScatteringDistributionFunction.h"
 #include "../primitives/CudaSurfacePrimitiveList.h"
+#include "cudaDebugRendererUtil.h"
 
 using namespace stdcuda;
 
 void CudaDebugRenderer
-  ::sampleEyeRay(const size_t batchIdx,
-                 const size_t threadIdx,
-                 Ray *rays,
-                 float *pdfs) const
+  ::generateHyperPoints(stdcuda::vector_dev<float4> &u0,
+                        stdcuda::vector_dev<float4> &u1,
+                        const size_t n) const
 {
-  size_t i = batchIdx * mWorkBatchSize + threadIdx;
-
-  // XXX TODO: kill this
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
   gpcpu::size2 imageDim(film->getWidth(),film->getHeight());
 
-  // convert thread index to pixel index
-  gpcpu::size2 pixelIndex(i % imageDim[0],
-                          i / imageDim[0]);
+  std::vector<float4> tempU0(n), tempU1(n);
+  for(size_t i = 0; i != n; ++i)
+  {
+    // convert thread index to pixel index
+    gpcpu::size2 pixelIndex(i % imageDim[0],
+                            i / imageDim[0]);
 
-  // convert pixel index to location in unit square
-  gpcpu::float2 uv(static_cast<float>(pixelIndex[0]) / imageDim[0],
-                   static_cast<float>(pixelIndex[1]) / imageDim[1]); 
+    // convert pixel index to location in unit square
+    gpcpu::float2 uv(static_cast<float>(pixelIndex[0]) / imageDim[0],
+                     static_cast<float>(pixelIndex[1]) / imageDim[1]); 
 
-  // sample from the list of sensors
-  const SurfacePrimitive *sensor = 0;
-  float &pdf = pdfs[i];
-  mScene->getSensors()->sampleSurfaceArea(0, &sensor, pdf);
+    tempU0[i] = make_float4(0,0,0,0);
+    tempU1[i] = make_float4(uv[0], uv[1], 0, 0);
+  } // end for i
 
-  // sample a point on the sensor
-  DifferentialGeometry dgSensor;
-  sensor->sampleSurfaceArea(0,0,0,dgSensor,pdf);
+  u0.resize(n);
+  u1.resize(n);
 
-  // generate a Ray
-  ScatteringDistributionFunction &s = *mShadingContext->evaluateSensor(sensor->getMaterial(), dgSensor);
+  stdcuda::copy(tempU0.begin(), tempU0.end(), u0.begin());
+  stdcuda::copy(tempU1.begin(), tempU1.end(), u1.begin());
+} // end CudaDebugRenderer::generateHyperPoints()
 
-  // sample a sensing direction
-  bool delta;
-  ::Vector d;
-  s.sample(dgSensor, uv[0], uv[1], 0.5f, d, pdf, delta);
-  rays[i] = Ray(dgSensor.getPoint(), d);
+void CudaDebugRenderer
+  ::sampleEyeRays(const device_ptr<const float4> &u0,
+                  const device_ptr<const float4> &u1,
+                  const device_ptr<float4> &originsAndMinT,
+                  const device_ptr<float4> &directionsAndMaxT,
+                  const device_ptr<float> &pdfs,
+                  const size_t n) const
+{
+  // get the sensors
+  const CudaSurfacePrimitiveList &sensors = dynamic_cast<const CudaSurfacePrimitiveList&>(*mScene->getSensors());
+
+  vector_dev<PrimitiveHandle> prims(n);
+  vector_dev<CudaDifferentialGeometry> dg(n);
+
+  // sample eye points
+  sensors.sampleSurfaceArea(u0, &prims[0], &dg[0], pdfs, n);
+
+  // get a list of MaterialHandles
+  const CudaSurfacePrimitiveList &primitives = dynamic_cast<const CudaSurfacePrimitiveList&>(*mScene->getPrimitives());
+  vector_dev<MaterialHandle> materials(n);
+  primitives.getMaterialHandles(&prims[0],
+                                &materials[0],
+                                n);
+
+  // evaluate sensor shader
+  // allocate space for sensor functions
+  vector_dev<CudaScatteringDistributionFunction> sensorFunctions(n);
+
+  // evaluate sensor shader
+  CudaShadingContext *context = dynamic_cast<CudaShadingContext*>(mShadingContext.get());
+  context->evaluateSensor(&materials[0],
+                          &dg[0],
+                          sizeof(CudaDifferentialGeometry),
+                          &sensorFunctions[0],
+                          n);
+
+  // reinterpret directionsAndMaxT into a float3 *
+  float4 *temp = directionsAndMaxT;
+  device_ptr<float3> wo(reinterpret_cast<float3*>(temp));
+
+  // reinterpret u1 into a float3 *
+  const float4 *temp2 = u1;
+  device_ptr<const float3> u1AsAFloat3(reinterpret_cast<const float3*>(temp2));
+
+  // sample the scattering functions
+  vector_dev<bool> delta(n);
+  vector_dev<float3> s(n);
+  context->sampleUnidirectionalScattering(&sensorFunctions[0],
+                                          &dg[0],
+                                          sizeof(CudaDifferentialGeometry),
+                                          u1AsAFloat3,
+                                          sizeof(float4),
+                                          &s[0],
+                                          sizeof(float3),
+                                          wo,
+                                          sizeof(float4),
+                                          &pdfs[0],
+                                          sizeof(float),
+                                          &delta[0],
+                                          sizeof(bool),
+                                          n);
+
+  // copy from differential geometry into originsAndMinT
+  // set min t to epsilon
+  // set max t to infinity
+  sampleEyeRaysEpilogue(&dg[0], &originsAndMinT[0], &directionsAndMaxT[0], n);
 } // end CudaDebugRenderer::sampleEyeRay()
 
 void CudaDebugRenderer
-  ::shade(const Ray *rays,
-          const float *pdfs,
+  ::shade(device_ptr<const float4> directionsAndMaxT,
           device_ptr<const CudaIntersection> intersectionsDevice,
           device_ptr<const int> stencilDevice,
-          Spectrum *results,
+          device_ptr<float3> results,
           const size_t n) const
 {
   CudaShadingContext *context = dynamic_cast<CudaShadingContext*>(mShadingContext.get());
@@ -107,16 +166,11 @@ void CudaDebugRenderer
                             &ce[0],
                             n);
 
-  std::vector< ::Vector> wo(n);
-  for(size_t i = 0; i != n; ++i)
-  {
-    wo[i] = -rays[i].getDirection();
-  } // end for i
-
   // XXX kill these temps
-  vector_dev<float3> woDevice(n), wiDevice(n);
-  stdcuda::copy(wo.begin(), wo.end(), woDevice.begin());
-  stdcuda::copy(woDevice.begin(), woDevice.end(), wiDevice.begin());
+  vector_dev<float3> woDevice(n);
+  rayDirectionsToWo(&directionsAndMaxT[0],
+                    &woDevice[0],
+                    n);
 
   // evaluate scattering bsdf
   vector_dev<float3> scatteringDevice(n);
@@ -124,15 +178,10 @@ void CudaDebugRenderer
                                            &woDevice[0],
                                            firstDg,
                                            sizeof(CudaIntersection),
-                                           &wiDevice[0],
+                                           &woDevice[0],
                                            &stencilDevice[0],
                                            &scatteringDevice[0],
                                            n);
-
-  // XXX kill this temp
-  std::vector<Spectrum> scattering(n);
-  float3 *hostPtr = reinterpret_cast<float3*>(&scattering[0]);
-  stdcuda::copy(scatteringDevice.begin(), scatteringDevice.end(), hostPtr);
 
   // evaluate emission bsdf
   vector_dev<float3> emissionDevice(n);
@@ -144,19 +193,12 @@ void CudaDebugRenderer
                                             &emissionDevice[0],
                                             n);
 
-  // XXX kill this temp
-  std::vector<Spectrum> emission(n);
-  hostPtr = reinterpret_cast<float3*>(&emission[0]);
-  stdcuda::copy(emissionDevice.begin(), emissionDevice.end(), hostPtr);
-
-  // sum
-  for(size_t i = 0; i != n; ++i)
-  {
-    if(stencilDevice[i])
-    {
-      results[i] = scattering[i] + emission[i];
-    } // end if
-  } // end for i
+  // sum into results
+  sumScatteringAndEmission(&scatteringDevice[0],
+                           &emissionDevice[0],
+                           &stencilDevice[0],
+                           &results[0],
+                           n);
 } // end CudaDebugRenderer::shade()
 
 void CudaDebugRenderer
@@ -188,6 +230,9 @@ void CudaDebugRenderer
   // allocate per-thread data
   stdcuda::vector_dev<float4> originsAndMinT(totalWork);
   stdcuda::vector_dev<float4> directionsAndMaxT(totalWork);
+  stdcuda::vector_dev<float> pdfsDevice(totalWork);
+  stdcuda::vector_dev<float4> u0(totalWork);
+  stdcuda::vector_dev<float4> u1(totalWork);
   std::vector<float> pdfs(totalWork);
   stdcuda::vector_dev<CudaIntersection> intersectionsDevice(totalWork);
 
@@ -202,61 +247,48 @@ void CudaDebugRenderer
   stdcuda::copy(stencil.begin(), stencil.end(), stencilDevice.begin());
 
   // init results to black
-  std::vector<Spectrum> results(totalWork, Spectrum::black());
+  std::vector<float3> resultsHost(totalWork, make_float3(0,0,0));
+  stdcuda::vector_dev<float3> results(totalWork);
+  stdcuda::copy(resultsHost.begin(), resultsHost.end(), results.begin());
 
   // sampleEyeRay + intersect + shade + deposit = 4
   progress.restart(totalWork * 4);
 
+  generateHyperPoints(u0,u1,totalWork);
+
   for(size_t i = 0; i != numBatches; ++i)
   {
-    for(size_t j = 0; j != mWorkBatchSize; ++j)
-    {
-      sampleEyeRay(i,j, &rays[0], &pdfs[0]);
-    } // end for j
+    sampleEyeRays(&u0[i * mWorkBatchSize],
+                  &u1[i * mWorkBatchSize],
+                  &originsAndMinT[i * mWorkBatchSize],
+                  &directionsAndMaxT[i * mWorkBatchSize],
+                  &pdfsDevice[i * mWorkBatchSize],
+                  mWorkBatchSize);
 
     // purge all malloc'd memory for this batch
     mShadingContext->freeAll();
 
     progress += mWorkBatchSize;
   } // end for i
-  for(size_t j = 0; j != totalWork % mWorkBatchSize; ++j)
-    sampleEyeRay(numBatches, j, &rays[0], &pdfs[0]);
+  sampleEyeRays(&u0[numBatches * mWorkBatchSize],
+                &u1[numBatches * mWorkBatchSize],
+                &originsAndMinT[numBatches * mWorkBatchSize],
+                &directionsAndMaxT[numBatches * mWorkBatchSize],
+                &pdfsDevice[numBatches * mWorkBatchSize],
+                totalWork % mWorkBatchSize);
 
   // purge all malloc'd memory for the last partial batch
   mShadingContext->freeAll();
   progress += totalWork % mWorkBatchSize;
 
-  // copy rays to device
-  // XXX eliminate this
-  for(size_t i = 0; i != rays.size(); ++i)
-  {
-    const Ray &r = rays[i];
-    originsAndMinT[i] = make_float4(r.getAnchor()[0],
-                                    r.getAnchor()[1],
-                                    r.getAnchor()[2],
-                                    r.getInterval()[0]);
-
-    directionsAndMaxT[i] = make_float4(r.getDirection()[0],
-                                       r.getDirection()[1],
-                                       r.getDirection()[2],
-                                       r.getInterval()[1]);
-  } // end for i
-
   // intersect en masse
   intersect(&originsAndMinT[0], &directionsAndMaxT[0], &intersectionsDevice[0], &stencilDevice[0], totalWork);
   progress += totalWork;
 
-  // copy back to host
-  // XXX eliminate this
-  std::vector<Intersection> intersections(totalWork);
-  CudaIntersection *hostPtr = reinterpret_cast<CudaIntersection*>(&intersections[0]);
-  stdcuda::copy(intersectionsDevice.begin(), intersectionsDevice.end(), hostPtr);
-  stdcuda::copy(stencilDevice.begin(), stencilDevice.end(), &stencil[0]);
-
+  // shade
   for(size_t i = 0; i != numBatches; ++i)
   {
-    shade(&rays[i * mWorkBatchSize],
-          &pdfs[i * mWorkBatchSize],
+    shade(&directionsAndMaxT[i * mWorkBatchSize],
           &intersectionsDevice[i * mWorkBatchSize],
           &stencilDevice[i * mWorkBatchSize],
           &results[i * mWorkBatchSize],
@@ -269,8 +301,7 @@ void CudaDebugRenderer
   } // end for i
 
   // shade the last partial batch
-  shade(&rays[numBatches * mWorkBatchSize],
-        &pdfs[numBatches * mWorkBatchSize],
+  shade(&directionsAndMaxT[numBatches * mWorkBatchSize],
         &intersectionsDevice[numBatches * mWorkBatchSize],
         &stencilDevice[numBatches * mWorkBatchSize],
         &results[numBatches * mWorkBatchSize],
@@ -280,17 +311,20 @@ void CudaDebugRenderer
   // purge all malloc'd memory for the last partial batch
   mShadingContext->freeAll();
 
+  // copy results to host
+  stdcuda::copy(results.begin(), results.end(), &resultsHost[0]);
+
   for(size_t i = 0; i != numBatches; ++i)
   {
     for(size_t j = 0; j != mWorkBatchSize; ++j)
     {
-      deposit(i,j,&results[0]);
+      deposit(i,j,(Spectrum*)&resultsHost[0]);
     } // end for j
 
     progress += mWorkBatchSize;
   } // end for i
   for(size_t j = 0; j != totalWork % mWorkBatchSize; ++j)
-    deposit(numBatches,j,&results[0]);
+    deposit(numBatches,j,(Spectrum*)&resultsHost[0]);
   progress += totalWork % mWorkBatchSize;
 } // end CudaDebugRenderer::kernel()
 

@@ -63,14 +63,3 @@ bool PrimitiveList
   return false;
 } // end PrimitiveList::intersect()
 
-void PrimitiveList
-  ::finalize(void)
-{
-  Parent0::finalize();
-
-  for(size_t i = 0; i != Parent1::size(); ++i)
-  {
-    (*this)[i]->setPrimitiveHandle(i);
-  } // end for i
-} // end PrimitiveList::finalize()
-

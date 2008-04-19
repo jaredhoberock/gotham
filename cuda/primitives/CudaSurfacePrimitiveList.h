@@ -14,10 +14,25 @@
 class CudaSurfacePrimitiveList
 {
   public:
+    /*! Null destructor does nothing.
+     */
+    virtual ~CudaSurfacePrimitiveList(void);
+
     /*! This method should be implemented in a child
      *  class to create mPrimitiveHandleToMaterialHandle.
      */
     virtual void finalize(void) = 0;
+
+    /*! This method fills requests for MaterialHandles
+     *  given a set of PrimitiveHandles.
+     *  \param prims The list of PrimitiveHandles of interest,
+     *               presumably belonging to this CudaSurfacePrimitiveList.
+     *  \param materials The list of MaterialHandles is returned here.
+     *  \param n The length of each list.
+     */
+    virtual void getMaterialHandles(const stdcuda::device_ptr<const PrimitiveHandle> &prims,
+                                    const stdcuda::device_ptr<MaterialHandle> &materials,
+                                    const size_t n) const;
 
     /*! This method fills requests for MaterialHandles
      *  given a set of PrimitiveHandles.

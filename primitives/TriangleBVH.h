@@ -54,7 +54,7 @@ class TriangleBVH
 
     struct Triangle
     {
-      PrimitiveHandle mPrimitiveHandle;
+      const SurfacePrimitive *mPrimitive;
       size_t mTriangleIndex;
     }; // end Triangle
 

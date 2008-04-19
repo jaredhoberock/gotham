@@ -209,6 +209,12 @@ class ShadingContext
      */
     virtual void setMaterials(const boost::shared_ptr<MaterialList> &materials);
 
+    /*! This method returns a const pointer to the Material of interest.
+     *  \param h The MaterialHandle of the Material of interest.
+     *  \return mMaterials[h].get()
+     */
+    const Material *getMaterial(const MaterialHandle &h) const;
+
   protected:
     FunctionAllocator mAllocator;
 

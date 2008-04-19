@@ -51,5 +51,20 @@ class ScatteredAccessContext
                                   const stdcuda::device_ptr<const int> &stencil,
                                   const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                   const size_t n);
+
+    /*! This method evaluates a batch of sensor shader jobs in SIMD fashion
+     *  on a CUDA device.
+     *  \param m A list of MaterialHandles.
+     *  \param dg A list of CudaDifferentialGeometry objects.
+     *  \param dgStride Stride size for elements in the dg list.
+     *  \param f The results of shading operations will be returned to this list.
+     *  \param n The size of each list.
+     */
+    using Parent::evaluateSensor;
+    virtual void evaluateSensor(const stdcuda::device_ptr<const MaterialHandle> &m,
+                                const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
+                                const size_t dgStride,
+                                const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
+                                const size_t n);
 }; // end ScatteredAccessContext
 

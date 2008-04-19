@@ -183,6 +183,16 @@ void Gotham
   PrimitiveList *list = PrimitiveApi::list(mAttributeStack.back(),
                                            *mPrimitives);
 
+  // set every primitive's PrimitiveHandle
+  // XXX this really sucks but i can't find a better solution
+  PrimitiveHandle h = 0;
+  for(PrimitiveList::iterator prim = list->begin();
+      prim != list->end();
+      ++prim, ++h)
+  {
+    (*prim)->setPrimitiveHandle(h);
+  } // end for i
+
   // hand over the primitives
   shared_ptr<PrimitiveList> listPtr(list);
   s->setPrimitive(listPtr);
@@ -194,8 +204,11 @@ void Gotham
   // give the lights to the scene
   s->setEmitters(mEmitters);
 
+  // create a final SurfacePrimitiveList
+  shared_ptr<SurfacePrimitiveList> sensors(PrimitiveApi::surfacesList(mAttributeStack.back(),
+                                                                      *mSensors));
   // give the sensors to the scene
-  s->setSensors(mSensors);
+  s->setSensors(sensors);
 
   // create a new Renderer
   mRenderer.reset(RendererApi::renderer(mAttributeStack.back(), mPhotonMaps));

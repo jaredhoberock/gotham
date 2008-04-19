@@ -54,7 +54,7 @@ template<typename V3, typename S3, typename DG>
                q,
                pdf);
   ws = q - dg.getPoint();
-  float d2 = ws.norm2();
+  float d2 = dot(ws,ws);
   ws /= sqrtf(d2);
 
   // compute surface area pdf to solid angle pdf

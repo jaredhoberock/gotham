@@ -94,5 +94,36 @@ float3 CSDF
   return result;
 } // end CudaScatteringDistributionFunction::evaluate()
 
+void CudaScatteringDistributionFunction
+  ::sample(const CudaDifferentialGeometry &dg,
+           const float u0,
+           const float u1,
+           const float u2,
+           float3 &s,
+           float3 &wo,
+           float &pdf,
+           bool &delta) const
+{
+  // do a naive switch for now
+  switch(mType)
+  {
+    case PERSPECTIVE_SENSOR:
+    {
+      const CudaPerspectiveSensor &ps = (const CudaPerspectiveSensor&)mFunction;
+      s = ps.sample(dg,u0,u1,u2,wo,pdf,delta);
+      break;
+    } // end PERSPECTIVE_SENSOR
+
+    default:
+    {
+      s = make_float3(0,0,0);
+      wo = make_float3(0,0,0);
+      pdf = 0;
+      delta = false;
+      break;
+    } // end default
+  } // end switch
+} // end CudaDifferentialGeometry::sample()
+
 #endif // __CUDACC__
 

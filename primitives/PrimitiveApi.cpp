@@ -41,6 +41,32 @@ PrimitiveList *PrimitiveApi
   return result;
 } // end PrimitiveApi::list()
 
+SurfacePrimitiveList *PrimitiveApi
+  ::surfacesList(Gotham::AttributeMap &attr,
+                 const SurfacePrimitiveList &surfaces)
+{
+  SurfacePrimitiveList *result = 0;
+
+  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
+
+  if(numThreads > 1)
+  {
+    // XXX no need for this to be a bvh
+    CUDATriangleBVH *bvh = new RasterizablePrimitiveList<CUDATriangleBVH>();
+    bvh->setWorkBatchSize(numThreads);
+    result = bvh;
+  } // end if
+  else
+  {
+    result = new RasterizablePrimitiveList<SurfacePrimitiveList>();
+  } // end else
+
+  // copy the prims
+  std::copy(surfaces.begin(), surfaces.end(), std::back_inserter(*result));
+
+  return result;
+} // end PrimitiveApi::surfacesList()
+
 Scene *PrimitiveApi
   ::scene(Gotham::AttributeMap &attr)
 {

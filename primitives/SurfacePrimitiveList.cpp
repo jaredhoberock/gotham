@@ -105,3 +105,19 @@ float SurfacePrimitiveList
   return result;
 } // end SurfacePrimitiveList::evaluateSurfaceAreaPdf()
 
+void SurfacePrimitiveList
+   ::sampleSurfaceArea(const gpcpu::float4 *u,
+                       const SurfacePrimitive **prims,
+                       DifferentialGeometry *dg,
+                       float *pdf,
+                       const size_t n) const
+{
+  for(size_t i = 0; i != n; ++i)
+  {
+    sampleSurfaceArea(u[i][0], u[i][1],
+                      u[i][2], u[i][3],
+                      &prims[i], dg[i],
+                      pdf[i]);
+  } // end for i
+} // end SurfacePrimitive::sampleSurfaceArea()
+

@@ -42,7 +42,7 @@ void TriangleBVH
       for(size_t i = 0; i != mesh->getTriangles().size(); ++i)
       {
         Triangle t;
-        t.mPrimitiveHandle = sp->getPrimitiveHandle();
+        t.mPrimitive = sp;
         t.mTriangleIndex = i;
         mTriangles.push_back(t);
       } // end for i
@@ -66,9 +66,8 @@ const gpcpu::float3 &TriangleBVH::TriangleVertexAccess
                const size_t vertexIndex) const
 {
   // look up the primitive
-  PrimitiveHandle prim = mBVH.mTriangles[tri].mPrimitiveHandle;
   size_t triIndex = mBVH.mTriangles[tri].mTriangleIndex;
-  const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>(mBVH[prim].get());
+  const SurfacePrimitive *sp = mBVH.mTriangles[tri].mPrimitive;
   const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
 
   // look up the Triangle
@@ -85,13 +84,11 @@ void TriangleBVH
   // figure out which triangle of which mesh we are
   // interested in
   const Triangle &globalTri = mTriangles[triIndex];
-  PrimitiveHandle prim = globalTri.mPrimitiveHandle;
   size_t localTriIndex = globalTri.mTriangleIndex;
-
-  const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>((*this)[prim].get());
+  const SurfacePrimitive *sp = globalTri.mPrimitive;
 
   // set the primitive in the intersection
-  inter.setPrimitive(prim);
+  inter.setPrimitive(sp->getPrimitiveHandle());
 
   const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
   const Mesh::PointList &points = mesh->getPoints();

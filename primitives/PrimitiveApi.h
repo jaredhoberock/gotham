@@ -23,6 +23,16 @@ class PrimitiveApi
     static PrimitiveList *list(Gotham::AttributeMap &attr,
                                const PrimitiveList &prims);
 
+    /*! This static method creates a new SurfacePrimitiveList
+     *  according to options in the given AttributeMap.
+     *  \param attr An AttributeMap describing a set of
+     *         rendering attributes.
+     *  \param surfaces A SurfacePrimitiveList to copy from.
+     *  \return A new SurfacePrimitiveList.
+     */
+    static SurfacePrimitiveList *surfacesList(Gotham::AttributeMap &attr,
+                                              const SurfacePrimitiveList &surfaces);
+
     /*! This static method creates a new Scene 
      *  according to the options in the given AttributeMap.
      *  \param attr An AttributeMap describing a set of

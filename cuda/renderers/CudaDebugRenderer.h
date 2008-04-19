@@ -11,6 +11,7 @@
 #include "../primitives/CudaIntersection.h"
 #include <spectrum/Spectrum.h>
 #include <stdcuda/stdcuda.h>
+#include <vector>
 
 class ScatteringDistributionFunction;
 class Ray;
@@ -50,16 +51,21 @@ class CudaDebugRenderer
   protected:
     virtual void kernel(ProgressCallback &progress);
 
-    virtual void sampleEyeRay(const size_t batchIdx,
-                              const size_t threadIdx,
-                              Ray *rays,
-                              float *pdfs) const;
+    virtual void sampleEyeRays(const stdcuda::device_ptr<const float4> &u0,
+                               const stdcuda::device_ptr<const float4> &u1,
+                               const stdcuda::device_ptr<float4> &originsAndMinT,
+                               const stdcuda::device_ptr<float4> &directionsAndMaxT,
+                               const stdcuda::device_ptr<float> &pdfs,
+                               const size_t n) const;
 
-    virtual void shade(const Ray *rays,
-                       const float *pdfs,
+    virtual void generateHyperPoints(stdcuda::vector_dev<float4> &u0,
+                                     stdcuda::vector_dev<float4> &u1,
+                                     const size_t n) const;
+
+    virtual void shade(stdcuda::device_ptr<const float4> directionsAndMaxT,
                        stdcuda::device_ptr<const CudaIntersection> intersectionsDevice,
                        stdcuda::device_ptr<const int> stencilDevice,
-                       Spectrum *results,
+                       stdcuda::device_ptr<float3> results,
                        const size_t n) const;
 
     virtual void deposit(const size_t batchIdx,

@@ -50,3 +50,16 @@ void CudaMaterial
   fill_if(f.get(), f.get() + n, stencil.get(), value);
 } // end CudaMaterial::evaluateEmission()
 
+void CudaMaterial
+  ::evaluateSensor(CudaShadingInterface &context,
+                   const device_ptr<const CudaDifferentialGeometry> &dg,
+                   const size_t dgStride,
+                   const device_ptr<const int> &stencil,
+                   const device_ptr<CudaScatteringDistributionFunction> &f,
+                   const size_t n) const
+{
+  CudaScatteringDistributionFunction value;
+  context.null(value);
+  fill_if(f.get(), f.get() + n, stencil.get(), value);
+} // end CudaMaterial::evaluateSensor()
+

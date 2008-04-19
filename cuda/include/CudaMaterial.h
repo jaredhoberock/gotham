@@ -60,5 +60,21 @@ class CudaMaterial
                                   const stdcuda::device_ptr<const int> &stencil,
                                   const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                   const size_t n) const;
+
+    /*! This method evaluates this CudaMaterial's sensor shader on a
+     *  list of CudaDifferentialGeometrys in SIMD fashion.
+     *  \param context A context for shader evaluation.
+     *  \param dg A list of shading points.
+     *  \param stencil A stencil to control which jobs get processed.
+     *  \param f The result of each shading jo is returned to this list.
+     *  \param n The size of the lists.
+     */
+    using Parent::evaluateSensor;
+    virtual void evaluateSensor(CudaShadingInterface &context,
+                                const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
+                                const size_t dgStride,
+                                const stdcuda::device_ptr<const int> &stencil,
+                                const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
+                                const size_t n) const;
 }; // end CudaMaterial
 

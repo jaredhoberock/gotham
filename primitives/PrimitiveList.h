@@ -31,11 +31,6 @@ class PrimitiveList
     inline virtual bool intersect(Ray &r, Intersection &inter) const;
     inline virtual bool intersect(const Ray &r) const;
 
-    /*! This method calls setPrimitiveHandle on each element of this
-     *  PrimitiveList.
-     */
-    inline virtual void finalize(void);
-
   private:
     typedef std::vector<boost::shared_ptr<Primitive> > Parent1;
     BoundingBox mBoundingBox;

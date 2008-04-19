@@ -86,6 +86,22 @@ class SurfacePrimitiveList
      */
     virtual void finalize(void);
 
+    /*! This method provides a SIMD path for sampling the surface area
+     *  of this SurfacePrimitiveList.
+     *  \param u A list of points in [0,1)^4.
+     *  \param prims The primitive sampled will be returned to this list.
+     *  \param dg The DifferentialGeometry at each sampled Point will be
+     *            returned to this list.
+     *  \param pdf The surface area pdf at each sampled Point will be
+     *             returned to this list.
+     *  \param n The length of each list
+     */
+    virtual void sampleSurfaceArea(const gpcpu::float4 *u,
+                                   const SurfacePrimitive **prims,
+                                   DifferentialGeometry *dg,
+                                   float *pdf,
+                                   const size_t n) const;
+
   protected:
     /*! This method builds mSurfaceAreaPdf.
      */

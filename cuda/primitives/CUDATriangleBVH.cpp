@@ -153,10 +153,8 @@ void CUDATriangleBVH
     // figure out which triangle of which mesh we are
     // interested in
     const Triangle &globalTri = mTriangles[i];
-    PrimitiveHandle prim = globalTri.mPrimitiveHandle;
     size_t localTriIndex = globalTri.mTriangleIndex;
-
-    const SurfacePrimitive *sp = static_cast<const SurfacePrimitive*>(Parent0::operator[](prim).get());
+    const SurfacePrimitive *sp = globalTri.mPrimitive;
 
     const Mesh *mesh = static_cast<const Mesh *>(sp->getSurface());
     const Mesh::PointList &points = mesh->getPoints();
@@ -178,7 +176,7 @@ void CUDATriangleBVH
     mFirstVertexParmsDevice[i]        = make_float2(uv0[0], uv0[1]);
     mSecondVertexParmsDevice[i]       = make_float2(uv1[0], uv1[1]);
     mThirdVertexParmsDevice[i]        = make_float2(uv2[0], uv2[1]);
-    mPrimitiveHandlesDevice[i]        = prim;
+    mPrimitiveHandlesDevice[i]        = sp->getPrimitiveHandle();
     mPrimitiveInvSurfaceAreaDevice[i] = sp->getInverseSurfaceArea();
 
     Parent2::mFirstVertex[i]  = make_float3(v0[0], v0[1], v0[2]);

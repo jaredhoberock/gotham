@@ -16,8 +16,8 @@ const float3 &N  = diffG.getNormal();
 const float3 &T  = diffG.getTangent();
 const float3 &B  = diffG.getBinormal();
 const float2 &UV = diffG.getParametricCoordinates();
-//const float3 &dpdu = diffG.getPointPartials()[0];
-//const float3 &dpdv = diffG.getPointPartials()[1];
+const float3 &dpdu = diffG.getDPDU();
+const float3 &dpdv = diffG.getDPDV();
       float area = diffG.getSurfaceArea();
       float invArea = diffG.getInverseSurfaceArea();
 '''
