@@ -80,8 +80,8 @@ template<typename V3, typename S3, typename DG>
   // remember that the normal points in the -look direction
   float t =
     //-dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
-    -dot(dg.getNormal(), mWindowOrigin - dg.getPoint()) /
     //-dg.getNormal().dot(w);
+    -dot(dg.getNormal(), mWindowOrigin - dg.getPoint()) /
     -dot(dg.getNormal(),w);
 
   // compute q the intersection with the ray and the plane
@@ -167,7 +167,7 @@ template<typename V3, typename S3, typename DG>
   ((float*)&result)[1] = 0;
   ((float*)&result)[2] = 0;
 
-  if(evaluatePdf(ws,dg) <= 0)
+  if(evaluatePdf(ws,dg) > 0)
   {
     result = mResponse;
   } // end if
