@@ -182,18 +182,21 @@ void Mesh
   float dv2 = uv1[1] - uv2[1];
   Vector dp1 = p1 - p3, dp2 = p2 - p3;
   float determinant = du1 * dv2 - dv1 * du2;
+  Vector dpdu, dpdv;
   if(determinant == 0.0)
   {
     // handle zero determinant case
-    dg.getPointPartials()[0] = ng.orthogonalVector();
-    dg.getPointPartials()[1] = ng.cross(dg.getPointPartials()[0]).normalize();
+    dpdu = ng.orthogonalVector();
+    dpdv = ng.cross(dpdu).normalize();
   } // end if
   else
   {
     float invDet = 1.0f / determinant;
-    dg.getPointPartials()[0] = ( dv2*dp1 - dv1*dp2) * invDet;
-    dg.getPointPartials()[1] = (-du2*dp1 + du1*dp2) * invDet;
+    dpdu = ( dv2*dp1 - dv1*dp2) * invDet;
+    dpdv = (-du2*dp1 + du1*dp2) * invDet;
   } // end else
+
+  dg.setPointPartials(dpdu,dpdv);
 
   // interpolate uv using barycentric coordinates
   ParametricCoordinates uv;
@@ -203,7 +206,7 @@ void Mesh
   dg.setPoint(p);
   dg.setNormal(ng);
   dg.setParametricCoordinates(uv);
-  dg.setTangent(dg.getPointPartials()[0].normalize());
+  dg.setTangent(dpdu.normalize());
 
   // force an orthonormal basis
   dg.setBinormal(ng.cross(dg.getTangent()));

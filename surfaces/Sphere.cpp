@@ -169,8 +169,7 @@ void Sphere
   float zRadius = sqrtf(n[0]*n[0] + n[1]*n[1]);
   float invZRadius, cosPhi, sinPhi;
 
-  Vector &dpdu = dg.getPointPartials()[0];
-  Vector &dpdv = dg.getPointPartials()[1];
+  Vector dpdu, dpdv;
 
   if(zRadius == 0)
   {
@@ -195,6 +194,8 @@ void Sphere
     dpdv *= (maxTheta - minTheta);
   } // end else
 
+  dg.setPointPartials(dpdu,dpdv);
+
   // 2. get partial derivatives for the Normal
   Vector d2Pduu = -(TWO_PI * TWO_PI) * Vector(n[0], n[1], 0);
   Vector d2Pduv = (maxTheta - minTheta) * n[2] * TWO_PI * Vector(-sinPhi, cosPhi, 0.0);
@@ -217,7 +218,7 @@ void Sphere
   dndv = (g*F - f*G) * invEGF2 * dpdu +
          (f*F - g*E) * invEGF2 * dpdv;
 
-  dg.setTangent(dg.getPointPartials()[0].normalize());
+  dg.setTangent(dg.getDPDU().normalize());
 
   // force an orthonormal basis
   dg.setBinormal(dg.getNormal().cross(dg.getTangent()));

@@ -196,29 +196,9 @@ template<typename P3,
   void DifferentialGeometryBase<P3,V3,P2,N3>
     ::setPointPartials(const Vector &dpdu, const Vector &dpdv)
 {
-  mPointPartials[0] = dpdu;
-  mPointPartials[1] = dpdv;
+  mDPDU = dpdu;
+  mDPDV = dpdv;
 } // end DifferentialGeometryBase::setPointPartials()
-
-template<typename P3,
-         typename V3,
-         typename P2,
-         typename N3>
-  const typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector *DifferentialGeometryBase<P3,V3,P2,N3>
-    ::getPointPartials(void) const
-{
-  return mPointPartials;
-} // end DifferentialGeometryBase::getPointPartials()
-
-template<typename P3,
-         typename V3,
-         typename P2,
-         typename N3>
-  typename DifferentialGeometryBase<P3,V3,P2,N3>::Vector *DifferentialGeometryBase<P3,V3,P2,N3>
-    ::getPointPartials(void)
-{
-  return mPointPartials;
-} // end DifferentialGeometryBase::getPointPartials()
 
 template<typename P3,
          typename V3,
@@ -291,4 +271,23 @@ template<typename P3,
   return mBinormal;
 } // end DifferentialGeometryBase::getBinormal()
 
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const V3 &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getDPDU(void) const
+{
+  return mDPDU;
+} // end DifferentialGeometryBase::getDPDU()
+
+template<typename P3,
+         typename V3,
+         typename P2,
+         typename N3>
+  const V3 &DifferentialGeometryBase<P3,V3,P2,N3>
+    ::getDPDV(void) const
+{
+  return mDPDV;
+} // end DifferentialGeometryBase::getDPDV()
 

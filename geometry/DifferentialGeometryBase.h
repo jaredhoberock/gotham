@@ -138,15 +138,15 @@ template<typename P3,
      */
     inline void setPointPartials(const Vector &dpdu, const Vector &dpdv);
 
-    /*! This method returns a const pointer to mPointPartials.
-     *  \return mPointPartials.
+    /*! This method returns a const reference to mDPDU.
+     *  \return mDPDU.
      */
-    inline const Vector *getPointPartials(void) const;
+    inline const Vector &getDPDU(void) const;
 
-    /*! This method returns a pointer to mPointPartials.
-     *  \return mPointPartials.
+    /*! This method returns a const reference to mDPDV.
+     *  \return mDPDV.
      */
-    inline Vector *getPointPartials(void);
+    inline const Vector &getDPDV(void) const;
 
     /*! This method sets mNormalVectorPartials.
      *  \param dndu Sets mNormalVectorPartials[0].
@@ -217,11 +217,13 @@ template<typename P3,
      */
     float mInverseSurfaceArea;
 
-    /*! The partial derivatives of mPoint with respect to
-     *  mParametricCoordinates[0] and mParametricCoordinates[1],
-     *  respectively.
+    /*! The partial derivative of mPoint with respect to mParametricCoordinates[0].
      */
-    Vector mPointPartials[2];
+    Vector mDPDU;
+    
+    /*! The partial derivative of mPoint with respect to mParametricCoordinates[1].
+     */
+    Vector mDPDV;
 
     /*! The partial derivatives of mNormalVector with respect
      *  to mParametricCoordinates[0] and mParametricCoordinates[1],

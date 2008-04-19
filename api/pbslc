@@ -21,8 +21,8 @@ const Normal &N = dg.getNormal();
 const Vector &T = dg.getTangent();
 const Vector &B = dg.getBinormal();
 const ParametricCoordinates &UV = dg.getParametricCoordinates();
-const Vector3 &dpdu = dg.getPointPartials()[0];
-const Vector3 &dpdv = dg.getPointPartials()[1];
+const Vector3 &dpdu = dg.getDPDU();
+const Vector3 &dpdv = dg.getDPDV();
       float area = dg.getSurfaceArea();
       float invArea = dg.getInverseSurfaceArea();
   '''
