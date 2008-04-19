@@ -82,11 +82,29 @@ void CudaShadingContext
                                    const size_t deltaStride,
                                    const size_t n)
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
   Parameters p = {f, dg, dgStride, u, uStride, s, sStride, wo, woStride, pdf, pdfStride, delta, deltaStride};
 
-  sampleUnidirectionalKernel<<<grid,block>>>(p);
+  if(gridSize)
+    sampleUnidirectionalKernel<<<gridSize,BLOCK_SIZE>>>(p);
+  if(n%BLOCK_SIZE)
+  {
+    Parameters p = {f + gridSize*BLOCK_SIZE,
+                    stride_cast(dg.get(), gridSize*BLOCK_SIZE, dgStride),
+                    dgStride,
+                    stride_cast(u.get(),  gridSize*BLOCK_SIZE, uStride),
+                    uStride,
+                    stride_cast(s.get(),  gridSize*BLOCK_SIZE, sStride),
+                    sStride,
+                    stride_cast(wo.get(), gridSize*BLOCK_SIZE, woStride),
+                    woStride,
+                    stride_cast(pdf.get(), gridSize*BLOCK_SIZE, pdfStride),
+                    pdfStride,
+                    stride_cast(delta.get(), gridSize*BLOCK_SIZE, deltaStride),
+                    deltaStride};
+    sampleUnidirectionalKernel<<<1,n%BLOCK_SIZE>>>(p);
+  } // end if
 } // end CudaDifferentialGeometry::sampleUnidirectionalScattering()
 

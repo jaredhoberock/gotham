@@ -53,10 +53,17 @@ void evaluateUnidirectionalScattering(const CudaScatteringDistributionFunction *
                                       float3 *results,
                                       const size_t n)
 {
-  dim3 grid = dim3(1,1,1);
-  dim3 block = dim3(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  k<<<grid,block>>>(f,wo,dg,stencil,(float3*)results);
+  if(gridSize)
+    k<<<gridSize,BLOCK_SIZE>>>(f,wo,dg,stencil,results);
+  if(n%BLOCK_SIZE)
+    k<<<1,n%BLOCK_SIZE>>>(f + gridSize*BLOCK_SIZE,
+                          wo + gridSize*BLOCK_SIZE,
+                          dg + gridSize*BLOCK_SIZE,
+                          stencil + gridSize*BLOCK_SIZE,
+                          results + gridSize*BLOCK_SIZE);
 } // end evaluateUnidirectionalScattering()
 
 void evaluateUnidirectionalScatteringStride(const CudaScatteringDistributionFunction *f,
@@ -67,9 +74,20 @@ void evaluateUnidirectionalScatteringStride(const CudaScatteringDistributionFunc
                                             float3 *results,
                                             const size_t n)
 {
-  dim3 grid = dim3(1,1,1);
-  dim3 block = dim3(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  ks<<<grid,block>>>(f,wo,dg,dgStride,stencil,results);
+  if(gridSize)
+    ks<<<gridSize,BLOCK_SIZE>>>(f,wo,dg,dgStride,stencil,results);
+  if(n%BLOCK_SIZE)
+  {
+    const char *temp = reinterpret_cast<const char*>(dg) + dgStride*gridSize*BLOCK_SIZE;
+    ks<<<1,n%BLOCK_SIZE>>>(f + gridSize*BLOCK_SIZE,
+                           wo + gridSize*BLOCK_SIZE,
+                           reinterpret_cast<const CudaDifferentialGeometry*>(temp),
+                           dgStride,
+                           stencil + gridSize*BLOCK_SIZE,
+                           results + gridSize*BLOCK_SIZE);
+  } // end if
 } // end evaluateUnidirectionalScattering()
 

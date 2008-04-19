@@ -1,6 +1,5 @@
 /*! \file evaluateBidirectionalScattering.cu
- *  \author Jared Hoberock
- *  \brief Implementation of evaluateBidirectionalScattering kernel.
+ *  \author Jared Hoberock *  \brief Implementation of evaluateBidirectionalScattering kernel.
  */
 
 // XXX hack total
@@ -9,8 +8,11 @@
 #include <stdcuda/vector_math.h>
 #include "CudaScatteringDistributionFunction.h"
 #include "evaluateBidirectionalScattering.h"
+#include <stdcuda/stride_cast.h>
 
 #undef inline
+
+using namespace stdcuda;
 
 void __global__ kernel(const CudaScatteringDistributionFunction *f,
                        const float3 *wo,
@@ -53,10 +55,18 @@ void evaluateBidirectionalScattering(const CudaScatteringDistributionFunction *f
                                      float3 *results,
                                      const size_t n)
 {
-  dim3 grid = dim3(1,1,1);
-  dim3 block = dim3(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  kernel<<<grid,block>>>(f,wo,dg,wi,stencil,results);
+  if(gridSize)
+    kernel<<<gridSize,BLOCK_SIZE>>>(f,wo,dg,wi,stencil,results);
+  if(n%BLOCK_SIZE)
+    kernel<<<1,n%BLOCK_SIZE>>>(f + gridSize*BLOCK_SIZE,
+                               wo + gridSize*BLOCK_SIZE,
+                               dg + gridSize*BLOCK_SIZE,
+                               wi + gridSize*BLOCK_SIZE,
+                               stencil + gridSize*BLOCK_SIZE,
+                               results + gridSize*BLOCK_SIZE);
 } // end evaluateBidirectionalScattering()
 
 void evaluateBidirectionalScatteringStride(const CudaScatteringDistributionFunction *f,
@@ -68,9 +78,18 @@ void evaluateBidirectionalScatteringStride(const CudaScatteringDistributionFunct
                                            float3 *results,
                                            const size_t n)
 {
-  dim3 grid = dim3(1,1,1);
-  dim3 block = dim3(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  ks<<<grid,block>>>(f,wo,dg,dgStride,wi,stencil,results);
+  if(gridSize)
+    ks<<<gridSize,BLOCK_SIZE>>>(f,wo,dg,dgStride,wi,stencil,results);
+  if(n%BLOCK_SIZE)
+    ks<<<1,n%BLOCK_SIZE>>>(f + gridSize*BLOCK_SIZE,
+                           wo + gridSize*BLOCK_SIZE,
+                           stride_cast(dg,gridSize*BLOCK_SIZE,dgStride),
+                           dgStride,
+                           wi + gridSize*BLOCK_SIZE,
+                           stencil + gridSize*BLOCK_SIZE,
+                           results + gridSize*BLOCK_SIZE);
 } // end evaluateBidirectionalScattering()
 

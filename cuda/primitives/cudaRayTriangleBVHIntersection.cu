@@ -141,17 +141,28 @@ void cudaRayTriangleBVHIntersection(const unsigned int NULL_NODE,
                                     float4* timeBarycentricsAndTriangleIndex,
                                     const size_t n)
 {
-  dim3 grid = dim3(1,1,1);
-  dim3 block = dim3(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n/BLOCK_SIZE;
 
-  kernel<<<grid,block>>>(NULL_NODE,
-                         rootIndex,
-                         rayOriginsAndMinT,
-                         rayDirectionsAndMaxT,
-                         minBoundHitIndex,
-                         maxBoundMissIndex,
-                         (float4*)firstVertexDominantAxis,
-                         stencil,
-                         timeBarycentricsAndTriangleIndex);
+  if(gridSize)
+    kernel<<<gridSize,BLOCK_SIZE>>>(NULL_NODE,
+                                    rootIndex,
+                                    rayOriginsAndMinT,
+                                    rayDirectionsAndMaxT,
+                                    minBoundHitIndex,
+                                    maxBoundMissIndex,
+                                    firstVertexDominantAxis,
+                                    stencil,
+                                    timeBarycentricsAndTriangleIndex);
+  if(n%BLOCK_SIZE)
+    kernel<<<1,n%BLOCK_SIZE>>>(NULL_NODE,
+                               rootIndex,
+                               rayOriginsAndMinT + gridSize*BLOCK_SIZE,
+                               rayDirectionsAndMaxT + gridSize*BLOCK_SIZE,
+                               minBoundHitIndex,
+                               maxBoundMissIndex,
+                               firstVertexDominantAxis,
+                               stencil + gridSize*BLOCK_SIZE,
+                               timeBarycentricsAndTriangleIndex + gridSize*BLOCK_SIZE);
 } // end cudaRayTriangleBVHIntersection()
 

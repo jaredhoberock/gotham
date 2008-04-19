@@ -51,6 +51,9 @@ void ScatteredAccessContext
                        const device_ptr<CudaScatteringDistributionFunction> &f,
                        const size_t n)
 {
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
+
   vector_dev<int> materialStencil(n);
 
   const CudaMaterial *material = 0;
@@ -68,12 +71,17 @@ void ScatteredAccessContext
     if(material)
     {
       // materialStencil = stencil & (i == h)
-      dim3 grid = dim3(1,1,1);
-      dim3 block = dim3(n,1,1);
-      selectMaterial<<<grid,block>>>(stencil,
-                                     m,
-                                     h,
-                                     &materialStencil[0]);
+
+      if(gridSize)
+        selectMaterial<<<gridSize,BLOCK_SIZE>>>(stencil,
+                                                m,
+                                                h,
+                                                &materialStencil[0]);
+      if(n%BLOCK_SIZE)
+        selectMaterial<<<1,n%BLOCK_SIZE>>>(stencil + gridSize*BLOCK_SIZE,
+                                           m + gridSize*BLOCK_SIZE,
+                                           h,
+                                           &materialStencil[gridSize*BLOCK_SIZE]);
 
       // run the shader
       material->evaluateScattering(*this, dg, dgStride, &materialStencil[0], f, n);
@@ -89,6 +97,9 @@ void ScatteredAccessContext
                      const device_ptr<CudaScatteringDistributionFunction> &f,
                      const size_t n)
 {
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
+
   vector_dev<int> materialStencil(n);
 
   const CudaMaterial *material = 0;
@@ -106,12 +117,16 @@ void ScatteredAccessContext
     if(material)
     {
       // materialStencil = stencil & (i == h)
-      dim3 grid = dim3(1,1,1);
-      dim3 block = dim3(n,1,1);
-      selectMaterial<<<grid,block>>>(stencil,
-                                     m,
-                                     h,
-                                     &materialStencil[0]);
+      if(gridSize)
+        selectMaterial<<<gridSize,BLOCK_SIZE>>>(stencil,
+                                                m,
+                                                h,
+                                                &materialStencil[0]);
+      if(n%BLOCK_SIZE)
+        selectMaterial<<<1,n%BLOCK_SIZE>>>(stencil + gridSize*BLOCK_SIZE,
+                                           m + gridSize*BLOCK_SIZE,
+                                           h,
+                                           &materialStencil[gridSize*BLOCK_SIZE]);
 
       // run the shader
       material->evaluateEmission(*this, dg, dgStride, &materialStencil[0], f, n);
@@ -126,6 +141,9 @@ void ScatteredAccessContext
                    const device_ptr<CudaScatteringDistributionFunction> &f,
                    const size_t n)
 {
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
+
   vector_dev<int> materialStencil(n);
   const CudaMaterial *material = 0;
 
@@ -142,9 +160,12 @@ void ScatteredAccessContext
     if(material)
     {
       // materialStencil = (i == h)
-      dim3 grid = dim3(1,1,1);
-      dim3 block = dim3(n,1,1);
-      selectMaterial<<<grid,block>>>(m,h,&materialStencil[0]);
+      if(gridSize)
+        selectMaterial<<<gridSize,BLOCK_SIZE>>>(m,h,&materialStencil[0]);
+      if(n%BLOCK_SIZE)
+        selectMaterial<<<1,n%BLOCK_SIZE>>>(m + gridSize*BLOCK_SIZE,
+                                           h,
+                                           &materialStencil[gridSize*BLOCK_SIZE]);
 
       // run the shader
       // normal stride

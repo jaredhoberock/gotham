@@ -167,8 +167,8 @@ void cudaCreateIntersections(const float4 *rayOriginsAndMinT,
                              CudaIntersection *intersections,
                              const size_t n)
 {
-  dim3 grid = dim3(1,1,1);
-  dim3 block = dim3(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / 192;
 
   Parameters p = {rayOriginsAndMinT,
                   rayDirectionsAndMaxT,
@@ -185,20 +185,17 @@ void cudaCreateIntersections(const float4 *rayOriginsAndMinT,
                   stencil,
                   intersections};
 
-  k<<<grid,block>>>(p);
-  //k<<<grid,block>>>(rayOriginsAndMinT,
-  //                  rayDirectionsAndMaxT,
-  //                  timeBarycentricsAndTriangleIndex,
-  //                  geometricNormals,
-  //                  firstVertex,
-  //                  secondVertex,
-  //                  thirdVertex,
-  //                  firstVertexParms,
-  //                  secondVertexParms,
-  //                  thirdVertexParms,
-  //                  invSurfaceArea,
-  //                  primHandles,
-  //                  stencil,
-  //                  intersections);
+  if(gridSize)
+    k<<<gridSize,BLOCK_SIZE>>>(p);
+  if(n%BLOCK_SIZE)
+  {
+    p.o += gridSize*BLOCK_SIZE;
+    p.d += gridSize*BLOCK_SIZE;
+    p.hitTimeBarycentricsTriangleIndex += gridSize*BLOCK_SIZE;
+    p.stencil += gridSize*BLOCK_SIZE;
+    p.results += gridSize*BLOCK_SIZE;
+
+    k<<<1,n%BLOCK_SIZE>>>(p);
+  } // end if
 } // end cudaCreateIntersections()
 

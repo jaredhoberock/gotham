@@ -76,10 +76,12 @@ Sphere(0.4,-0.66,0.25,0.33)
 
 Attribute("renderer:algorithm", "debug")
 #Attribute("renderer:threads", "16")
-Attribute("renderer:threads", "192")
+#Attribute("renderer:threads", "192")
 
 # breaks at 193 threads (in one block)
 #Attribute("renderer:threads", "193")
+#Attribute("renderer:threads", "200000")
+Attribute("renderer:threads", "1")
 
 # let's render to a 512x512 image
 (w,h) = (512,512)

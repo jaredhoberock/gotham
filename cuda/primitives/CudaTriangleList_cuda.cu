@@ -87,8 +87,8 @@ void CudaTriangleList
                       const device_ptr<float> &pdf,
                       const size_t n) const
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / 192;
 
   Mesh m = {
             &mFirstVertex[0],
@@ -103,6 +103,13 @@ void CudaTriangleList
             //mSurfaceAreaPdf
            };
 
-  k<<<grid,block>>>(u, m, prims, dg, pdf);
+  if(gridSize)
+    k<<<gridSize,BLOCK_SIZE>>>(u, m, prims, dg, pdf);
+  if(n%BLOCK_SIZE)
+    k<<<1,n%BLOCK_SIZE>>>(u     + gridSize*BLOCK_SIZE,
+                          m,
+                          prims + gridSize*BLOCK_SIZE,
+                          dg    + gridSize*BLOCK_SIZE,
+                          pdf   + gridSize*BLOCK_SIZE);
 } // end CudaTriangleList::sampleSurfaceArea()
 

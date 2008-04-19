@@ -25,10 +25,15 @@ void sampleEyeRaysEpilogue(const device_ptr<const CudaDifferentialGeometry> &dg,
                            const device_ptr<float4> &directionsAndMaxT,
                            const size_t n)
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  kernel<<<grid,block>>>(dg,originsAndMinT,directionsAndMaxT);
+  if(gridSize)
+    kernel<<<gridSize,BLOCK_SIZE>>>(dg,originsAndMinT,directionsAndMaxT);
+  if(n%BLOCK_SIZE)
+    kernel<<<1,n%BLOCK_SIZE>>>(dg + gridSize*BLOCK_SIZE,
+                               originsAndMinT + gridSize*BLOCK_SIZE,
+                               directionsAndMaxT + gridSize*BLOCK_SIZE);
 } // end sampleEyeRaysEpilogue()
 
 __global__ void toWo(const float4 *directionsAndMaxT,
@@ -46,10 +51,14 @@ void rayDirectionsToWo(const device_ptr<const float4> &directionsAndMaxT,
                        const device_ptr<float3> &wo,
                        const size_t n)
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  toWo<<<grid,block>>>(directionsAndMaxT, wo);
+  if(gridSize)
+    toWo<<<gridSize,BLOCK_SIZE>>>(directionsAndMaxT, wo);
+  if(n%BLOCK_SIZE)
+    toWo<<<1,n%BLOCK_SIZE>>>(directionsAndMaxT + gridSize*BLOCK_SIZE,
+                             wo + gridSize*BLOCK_SIZE);
 } // end rayDirectionsToWo()
 
 __global__ void sum(const float3 *s,
@@ -71,9 +80,15 @@ void sumScatteringAndEmission(const device_ptr<const float3> &scattering,
                               const device_ptr<float3> &result,
                               const size_t n)
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  sum<<<grid,block>>>(scattering,emission,stencil,result);
+  if(gridSize)
+    sum<<<gridSize,BLOCK_SIZE>>>(scattering,emission,stencil,result);
+  if(n%BLOCK_SIZE)
+    sum<<<1,n%BLOCK_SIZE>>>(scattering + gridSize*BLOCK_SIZE,
+                            emission + gridSize*BLOCK_SIZE,
+                            stencil + gridSize*BLOCK_SIZE,
+                            result + gridSize*BLOCK_SIZE);
 } // end sumScatteringAndEmission()
 

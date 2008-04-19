@@ -4,6 +4,7 @@
  */
 
 #include "CudaSurfacePrimitiveList.h"
+#include <stdcuda/stride_cast.h>
 
 using namespace stdcuda;
 
@@ -27,10 +28,17 @@ void CudaSurfacePrimitiveList
                        const device_ptr<MaterialHandle> &materials,
                        const size_t n) const
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / 192;
 
-  kernel<<<grid,block>>>(prims, &mPrimitiveHandleToMaterialHandle[0], materials);
+  if(gridSize)
+    kernel<<<gridSize,BLOCK_SIZE>>>(prims,
+                                    &mPrimitiveHandleToMaterialHandle[0],
+                                    materials);
+  if(n%BLOCK_SIZE)
+    kernel<<<1,n%BLOCK_SIZE>>>(prims + gridSize*BLOCK_SIZE,
+                               &mPrimitiveHandleToMaterialHandle[0],
+                               materials + gridSize*BLOCK_SIZE);
 } // end CudaSurfacePrimitiveList::getMaterialHandles()
 
 static __global__ void kernel(const PrimitiveHandle *prims,
@@ -52,13 +60,19 @@ void CudaSurfacePrimitiveList
                        const device_ptr<MaterialHandle> &materials,
                        const size_t n) const
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / 192;
 
-  kernel<<<grid,block>>>(prims,
-                         stencil,
-                         &mPrimitiveHandleToMaterialHandle[0],
-                         materials);
+  if(gridSize)
+    kernel<<<gridSize,BLOCK_SIZE>>>(prims,
+                                    stencil,
+                                    &mPrimitiveHandleToMaterialHandle[0],
+                                    materials);
+  if(n%BLOCK_SIZE)
+    kernel<<<1,n%BLOCK_SIZE>>>(prims + gridSize*BLOCK_SIZE,
+                               stencil + gridSize*BLOCK_SIZE,
+                               &mPrimitiveHandleToMaterialHandle[0],
+                               materials + gridSize*BLOCK_SIZE);
 } // end CudaSurfacePrimitiveList::getMaterialHandles()
 
 static __global__ void kernel(const PrimitiveHandle *prims,
@@ -84,14 +98,20 @@ void CudaSurfacePrimitiveList
                        const stdcuda::device_ptr<MaterialHandle> &materials,
                        const size_t n) const
 {
-  dim3 grid(1,1,1);
-  dim3 block(n,1,1);
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
 
-  kernel<<<grid,block>>>(prims,
-                         primStride,
-                         stencil,
-                         &mPrimitiveHandleToMaterialHandle[0],
-                         materials);
+  if(gridSize)
+    kernel<<<gridSize,BLOCK_SIZE>>>(prims,
+                                    primStride,
+                                    stencil,
+                                    &mPrimitiveHandleToMaterialHandle[0],
+                                    materials);
+  if(n%BLOCK_SIZE)
+    kernel<<<1,n%BLOCK_SIZE>>>(stride_cast(prims.get(),gridSize*BLOCK_SIZE,primStride),
+                               primStride,
+                               stencil + gridSize*BLOCK_SIZE,
+                               &mPrimitiveHandleToMaterialHandle[0],
+                               materials + gridSize*BLOCK_SIZE);
 } // end CudaSurfacePrimitiveList::getMaterialHandles()
-
 
