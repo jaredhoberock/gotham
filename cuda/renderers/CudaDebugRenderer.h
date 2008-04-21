@@ -6,24 +6,20 @@
 
 #pragma once
 
-#include "../../renderers/SIMDRenderer.h"
-#include "../../primitives/Intersection.h"
+#include "CudaRenderer.h"
 #include "../primitives/CudaIntersection.h"
 #include <spectrum/Spectrum.h>
 #include <stdcuda/stdcuda.h>
 #include <vector>
 
-class ScatteringDistributionFunction;
-class Ray;
-
 class CudaDebugRenderer
-  : public SIMDRenderer
+  : public CudaRenderer
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef SIMDRenderer Parent;
+    typedef CudaRenderer Parent;
 
     /*! Null constructor calls the Parent
      */
@@ -35,18 +31,6 @@ class CudaDebugRenderer
      */
     inline CudaDebugRenderer(boost::shared_ptr<const Scene>  s,
                              boost::shared_ptr<Record> r);
-
-    /*! This method sets mScene.
-     *  \param s Sets mScene.
-     *  \note s must be a CudaScene.
-     */
-    inline virtual void setScene(const boost::shared_ptr<const Scene> &s);
-
-    /*! This method sets mShadingContext.
-     *  \param s Sets mShadingContext.
-     *  \note s must be a CudaShadingContext.
-     */
-    inline virtual void setShadingContext(const boost::shared_ptr<ShadingContext> &s);
 
   protected:
     virtual void kernel(ProgressCallback &progress);
