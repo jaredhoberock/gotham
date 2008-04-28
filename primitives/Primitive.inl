@@ -28,12 +28,12 @@ bool Primitive
 void Primitive
   ::intersect(Ray *rays,
               Intersection *intersections,
-              int *stencil,
+              bool *stencil,
               const size_t n) const
 {
   Ray *r = rays;
   Intersection *inter = intersections;
-  int *s = stencil;
+  bool *s = stencil;
   Ray *end = rays + n;
   for(;
       r != end;

@@ -57,7 +57,7 @@ class Scene
      */
     inline virtual void intersect(Ray *rays,
                                   Intersection *intersections,
-                                  int *stencil,
+                                  bool *stencil,
                                   const size_t n) const;
 
     /*! This method computes whether or not an intersection between the given Ray and this scene exists.

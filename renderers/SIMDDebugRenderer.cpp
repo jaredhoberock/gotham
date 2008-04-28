@@ -59,7 +59,7 @@ void SIMDDebugRenderer
   ::shade(const Ray *rays,
           const float *pdfs,
           const Intersection *intersections,
-          const int *stencil,
+          const bool *stencil,
           Spectrum *results,
           const size_t n) const
 {
@@ -146,7 +146,9 @@ void SIMDDebugRenderer
   std::vector<Intersection> intersections(totalWork);
 
   // init stencil to 1
-  std::vector<int> stencil(totalWork, 1);
+  // XXX vector specializes bool
+  //std::vector<bool> stencil(totalWork, 1);
+  bool *stencil = (bool*)malloc(totalWork * sizeof(bool));
 
   // init results to black
   std::vector<Spectrum> results(totalWork, Spectrum::black());
@@ -216,12 +218,14 @@ void SIMDDebugRenderer
   for(size_t j = 0; j != totalWork % mWorkBatchSize; ++j)
     deposit(numBatches,j,&results[0]);
   progress += totalWork % mWorkBatchSize;
+
+  free(stencil);
 } // end SIMDDebugRenderer::kernel()
 
 void SIMDDebugRenderer
   ::intersect(Ray *rays,
               Intersection *intersections,
-              int *stencil)
+              bool *stencil)
 {
   // XXX TODO: kill this
   // compute the total work
@@ -233,7 +237,7 @@ void SIMDDebugRenderer
 
   Ray *r = rays;
   Intersection *inter = intersections;
-  int *s = stencil;
+  bool *s = stencil;
   Ray *end = rays + numBatches * mWorkBatchSize;
   for(;
       r != end;

@@ -43,7 +43,7 @@ class CudaSurfacePrimitiveList
      *  \param n The length of each list.
      */
     virtual void getMaterialHandles(const stdcuda::device_ptr<const PrimitiveHandle> &prims,
-                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<MaterialHandle> &materials,
                                     const size_t n) const;
 
@@ -58,7 +58,7 @@ class CudaSurfacePrimitiveList
      */
     virtual void getMaterialHandles(const stdcuda::device_ptr<const PrimitiveHandle> &prims,
                                     const size_t primStride,
-                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<MaterialHandle> &materials,
                                     const size_t n) const;
 

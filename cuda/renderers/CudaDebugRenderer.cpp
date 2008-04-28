@@ -117,7 +117,7 @@ void CudaDebugRenderer
 void CudaDebugRenderer
   ::shade(device_ptr<const float4> directionsAndMaxT,
           device_ptr<const CudaIntersection> intersectionsDevice,
-          device_ptr<const int> stencilDevice,
+          device_ptr<const bool> stencilDevice,
           device_ptr<float3> results,
           const size_t n) const
 {
@@ -239,12 +239,13 @@ void CudaDebugRenderer
   // XXX eliminate this
   std::vector<Ray> rays(totalWork);
 
-  // XXX eliminate this
-  std::vector<int> stencil(totalWork, 1);
 
   // init stencil to 1
-  stdcuda::vector_dev<int> stencilDevice(totalWork);
-  stdcuda::copy(stencil.begin(), stencil.end(), stencilDevice.begin());
+  stdcuda::vector_dev<bool> stencilDevice(totalWork);
+  for(size_t i = 0; i != totalWork; ++i)
+  {
+    stencilDevice[i] = true;
+  } // end for i
 
   // init results to black
   std::vector<float3> resultsHost(totalWork, make_float3(0,0,0));
@@ -332,7 +333,7 @@ void CudaDebugRenderer
   ::intersect(device_ptr<const float4> originsAndMinT,
               device_ptr<const float4> directionsAndMaxT,
               device_ptr<CudaIntersection> intersections,
-              device_ptr<int> stencil,
+              device_ptr<bool> stencil,
               const size_t n)
 {
   const CudaScene *scene = static_cast<const CudaScene*>(mScene.get());
@@ -343,7 +344,7 @@ void CudaDebugRenderer
   device_ptr<const float4> o = originsAndMinT;
   device_ptr<const float4> d = directionsAndMaxT;
   device_ptr<CudaIntersection> inter = intersections;
-  device_ptr<int> s = stencil;
+  device_ptr<bool> s = stencil;
   device_ptr<const float4> end = o + numBatches * mWorkBatchSize;
   for(;
       o != end;

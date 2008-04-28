@@ -130,7 +130,7 @@ bool Scene
 void Scene
   ::intersect(Ray *rays,
               Intersection *intersections,
-              int *stencil,
+              bool *stencil,
               const size_t n) const
 {
   mRaysCast += n;

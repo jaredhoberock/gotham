@@ -55,7 +55,7 @@ const float3 &dpdv = diffG.getDPDV();
 extern "C" void %sThunk(CudaShadingInterface &context,
                         const CudaDifferentialGeometry *dg,
                         const size_t dgStride,
-                        const int *stencil,
+                        const bool *stencil,
                         CudaScatteringDistributionFunction *f,
                         const size_t n
                         %s)''' 
@@ -88,7 +88,7 @@ extern "C" void %sThunk(CudaShadingInterface &context,
 virtual void evaluate%s(CudaShadingInterface &context,
                         const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
                         const size_t dgStride,
-                        const stdcuda::device_ptr<const int> &stencil,
+                        const stdcuda::device_ptr<const bool> &stencil,
                         const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                         const size_t n) const
 {
@@ -115,7 +115,7 @@ virtual void evaluate%s(CudaShadingInterface &context,
     kernelDefinition = '''
 __global__ void %sK(const CudaDifferentialGeometry *dg,
                     const int dgStride,
-                    const int *stencil,
+                    const bool *stencil,
                     CudaScatteringDistributionFunction *f
                     // shader parameters follow
                     %s)

@@ -23,7 +23,7 @@ extern "C"
 extern "C"
   void sumScatteringAndEmission(const stdcuda::device_ptr<const float3> &scattering,
                                 const stdcuda::device_ptr<const float3> &emission,
-                                const stdcuda::device_ptr<const int> &stencil,
+                                const stdcuda::device_ptr<const bool> &stencil,
                                 const stdcuda::device_ptr<float3> &result,
                                 const size_t n);
 

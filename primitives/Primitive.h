@@ -60,7 +60,7 @@ class Primitive
      */
     inline virtual void intersect(Ray *rays,
                                   Intersection *intersections,
-                                  int *stencil, const size_t n) const;
+                                  bool *stencil, const size_t n) const;
 
     /*! If a Primitive is intersectable, it must provide a way to query for a Ray intersection.
      *  \param r The Ray to intersect.

@@ -45,7 +45,7 @@ class SIMDDebugRenderer
     virtual void shade(const Ray *rays,
                        const float *pdfs,
                        const Intersection *intersections,
-                       const int *stencil,
+                       const bool *stencil,
                        Spectrum *results,
                        const size_t n) const;
 
@@ -55,7 +55,7 @@ class SIMDDebugRenderer
 
     virtual void intersect(Ray *rays,
                            Intersection *intersections,
-                           int *stencil);
+                           bool *stencil);
 
 }; // end SIMDDebugRenderer
 

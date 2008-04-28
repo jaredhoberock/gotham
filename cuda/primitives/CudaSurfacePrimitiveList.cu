@@ -42,7 +42,7 @@ void CudaSurfacePrimitiveList
 } // end CudaSurfacePrimitiveList::getMaterialHandles()
 
 static __global__ void kernel(const PrimitiveHandle *prims,
-                              const int *stencil,
+                              const bool *stencil,
                               const MaterialHandle *primToMaterial,
                               MaterialHandle *materials)
 {
@@ -56,7 +56,7 @@ static __global__ void kernel(const PrimitiveHandle *prims,
 
 void CudaSurfacePrimitiveList
   ::getMaterialHandles(const device_ptr<const PrimitiveHandle> &prims,
-                       const device_ptr<const int> &stencil,
+                       const device_ptr<const bool> &stencil,
                        const device_ptr<MaterialHandle> &materials,
                        const size_t n) const
 {
@@ -77,7 +77,7 @@ void CudaSurfacePrimitiveList
 
 static __global__ void kernel(const PrimitiveHandle *prims,
                               const int primStride,
-                              const int *stencil,
+                              const bool *stencil,
                               const MaterialHandle *primToMaterial,
                               MaterialHandle *materials)
 {
@@ -94,7 +94,7 @@ static __global__ void kernel(const PrimitiveHandle *prims,
 void CudaSurfacePrimitiveList
   ::getMaterialHandles(const stdcuda::device_ptr<const PrimitiveHandle> &prims,
                        const size_t primStride,
-                       const stdcuda::device_ptr<const int> &stencil,
+                       const stdcuda::device_ptr<const bool> &stencil,
                        const stdcuda::device_ptr<MaterialHandle> &materials,
                        const size_t n) const
 {

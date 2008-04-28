@@ -63,7 +63,7 @@ void rayDirectionsToWo(const device_ptr<const float4> &directionsAndMaxT,
 
 __global__ void sum(const float3 *s,
                     const float3 *e,
-                    const int *stencil,
+                    const bool *stencil,
                     float3 *r)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -76,7 +76,7 @@ __global__ void sum(const float3 *s,
 
 void sumScatteringAndEmission(const device_ptr<const float3> &scattering,
                               const device_ptr<const float3> &emission,
-                              const device_ptr<const int> &stencil,
+                              const device_ptr<const bool> &stencil,
                               const device_ptr<float3> &result,
                               const size_t n)
 {

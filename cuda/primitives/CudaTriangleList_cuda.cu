@@ -38,7 +38,36 @@ struct Mesh
   const float *inverseSurfaceArea;
   const PrimitiveHandle *primitiveHandles;
   //CudaTriangleList::TriangleTable table;
+  const CudaTriangleList::TriangleTable::Entry *table;
+  unsigned int tableSize;
+  float invTotalArea;
 };
+
+// XXX use this function while the TriangleTable is broken
+__device__ unsigned int sampleTable(const CudaTriangleList::TriangleTable::Entry *table,
+                                    const unsigned int tableSize,
+                                    const float u,
+                                    float &pdf)
+{
+  float q = static_cast<float>(tableSize) * u;
+  unsigned int i = static_cast<unsigned int>(q);
+  float u1 = q - i;
+  const CudaTriangleList::TriangleTable::Entry &e = table[i];
+
+  unsigned int result = 0;
+  if(u1 < e.mDivide)
+  {
+    result = e.mValue;
+    pdf = e.mValuePdf;
+  } // end if
+  else
+  {
+    result = e.mAlias;
+    pdf = e.mAliasPdf;
+  } // end else
+
+  return result;
+} // end sampleTable()
 
 __global__ void k(const float4 *uniformFloats,
                   const Mesh m,
@@ -51,8 +80,19 @@ __global__ void k(const float4 *uniformFloats,
   float4 u = uniformFloats[i];
 
   // sample a triangle index
+  // XXX fix this
   //unsigned int triIndex = m.table(u.x, pdfs[i]);
-  unsigned int triIndex = 0;
+
+  //unsigned int triIndex = 0;
+  //pdfs[i] = 1.0f;
+
+  // sample a triangle
+  float pdf = 0;
+  unsigned int triIndex = sampleTable(m.table, m.tableSize, u.x, pdf);
+  // XXX we should multiply by this
+  //pdf *= m.invTotalArea;
+  pdf = m.invTotalArea;
+  pdfs[i] = pdf;
 
   // get that triangle's PrimitiveHandle
   prims[i] = m.primitiveHandles[triIndex];
@@ -99,8 +139,11 @@ void CudaTriangleList
             &mSecondVertexParmsDevice[0],
             &mThirdVertexParmsDevice[0],
             &mPrimitiveInvSurfaceAreaDevice[0],
-            &mPrimitiveHandlesDevice[0]//,
+            &mPrimitiveHandlesDevice[0],
             //mSurfaceAreaPdf
+            &mSurfaceAreaPdf.getTable()[0],
+            mSurfaceAreaPdf.getTable().size(),
+            1.0f / mTotalSurfaceArea
            };
 
   if(gridSize)

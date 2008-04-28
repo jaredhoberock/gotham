@@ -49,7 +49,7 @@ class CUDATriangleBVH
      */
     virtual void intersect(Ray *rays,
                            Intersection *intersections,
-                           int *stencil,
+                           bool *stencil,
                            size_t n) const;
 
     /*! This method provides a SIMD path for intersect() with
@@ -70,7 +70,26 @@ class CUDATriangleBVH
     virtual void intersect(stdcuda::device_ptr<const float4> originsAndMinT,
                            stdcuda::device_ptr<const float4> directionsAndMaxT,
                            stdcuda::device_ptr<CudaIntersection> intersections,
-                           stdcuda::device_ptr<int> stencil,
+                           stdcuda::device_ptr<bool> stencil,
+                           const size_t n) const;
+
+    /*! This method provides a SIMD path for shadow ray intersection
+     *  for ray data that resides on a CUDA device.
+     *  \param originsAndMinT A list of ray origins. The fourth
+     *         component is interpreted as the minimum of the
+     *         valid parametric interval.
+     *  \param directionsAndMaxT A list of ray directions. The fourth
+     *         component is interpreted as the maximum of the valid
+     *         parametric interval.
+     *  \param stencil This mask controls processing.
+     *  \param results If stencil is set to 0, this is set to 0. Otherwise,
+     *                 it is set to 0 if the ray hits something; 1, otherwise.
+     *  \param n The length of the lists.
+     */
+    virtual void intersect(const stdcuda::device_ptr<const float4> &originsAndMinT,
+                           const stdcuda::device_ptr<const float4> &directionsAndMaxT,
+                           const stdcuda::device_ptr<const bool> &stencil,
+                           const stdcuda::device_ptr<bool> &results,
                            const size_t n) const;
 
     /*! This method intializes various CUDA data structures to prepare
@@ -115,7 +134,7 @@ class CUDATriangleBVH
      */
     mutable stdcuda::vector_dev<float4> mRayOriginsAndMinT;
     mutable stdcuda::vector_dev<float4> mRayDirectionsAndMaxT;
-    mutable stdcuda::vector_dev<int>    mDeviceStencil;
+    mutable stdcuda::vector_dev<bool>    mDeviceStencil;
     mutable stdcuda::vector_dev<float4> mTimeBarycentricsAndTriangleIndex;
 }; // end CUDATriangleBVH
 

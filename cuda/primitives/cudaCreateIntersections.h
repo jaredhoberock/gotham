@@ -23,7 +23,7 @@ extern "C"
                                const float2 *thirdVertexParms,
                                const float  *invSurfaceArea,
                                const PrimitiveHandle *primHandles,
-                               const int *stencil,
+                               const bool *stencil,
                                CudaIntersection *intersections,
                                const size_t n);
 

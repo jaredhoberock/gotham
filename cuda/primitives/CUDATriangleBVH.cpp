@@ -12,6 +12,8 @@
 #include "../../primitives/SurfacePrimitive.h"
 #include "CudaIntersection.h"
 
+using namespace stdcuda;
+
 void CUDATriangleBVH
   ::finalize(void)
 {
@@ -46,10 +48,33 @@ void CUDATriangleBVH
 } // end CUDATriangleBVH::createScratchSpace()
 
 void CUDATriangleBVH
+  ::intersect(const device_ptr<const float4> &originsAndMinT,
+              const device_ptr<const float4> &directionsAndMaxT,
+              const device_ptr<const bool> &stencil,
+              const device_ptr<bool> &results,
+              const size_t n) const
+{
+  // we can only do as much work as we have preallocated space
+  size_t m = std::min(n, mWorkBatchSize);
+
+  // perform intersection
+  cudaShadowRayTriangleBVHIntersectionWithStencil(NULL_NODE,
+                                                  mRootIndex,
+                                                  originsAndMinT,
+                                                  directionsAndMaxT,
+                                                  &mMinBoundHitIndexDevice[0],
+                                                  &mMinBoundHitIndexDevice[0],
+                                                  &mFirstVertexDominantAxisDevice[0],
+                                                  stencil,
+                                                  results,
+                                                  m);
+} // end CUDATriangleBVH::intersect()
+
+void CUDATriangleBVH
     ::intersect(stdcuda::device_ptr<const float4> originsAndMinT,
                 stdcuda::device_ptr<const float4> directionsAndMaxT,
                 stdcuda::device_ptr<CudaIntersection> intersections,
-                stdcuda::device_ptr<int> stencil,
+                stdcuda::device_ptr<bool> stencil,
                 const size_t n) const
 {
   // we can only do as much work as we have preallocated space
@@ -87,7 +112,7 @@ void CUDATriangleBVH
 void CUDATriangleBVH
   ::intersect(Ray *rays,
               Intersection *intersections,
-              int *stencil,
+              bool *stencil,
               size_t n) const
 {
   // we can only do as much work as we have preallocated space

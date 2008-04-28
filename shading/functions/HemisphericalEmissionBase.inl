@@ -36,13 +36,7 @@ template<typename V3, typename S3, typename DG>
   const S3 HemisphericalEmissionBase<V3,S3,DG>
     ::getRadiosity(void) const
 {
-  S3 result = getRadiance();
-
-  // XXX god this is so shitty but we have to do it to be
-  //     compatible with CUDA vectors
-  ((float*)&result)[0] *= PI;
-  ((float*)&result)[1] *= PI;
-  ((float*)&result)[2] *= PI;
+  S3 result = PI * getRadiance();
 
   return result;
 } // end HemisphericalEmissionBase::getRadiosity()

@@ -122,7 +122,7 @@ class ShadingContext
      */
     virtual void evaluateScattering(const MaterialHandle *m,
                                     const DifferentialGeometry *dg,
-                                    const int *stencil,
+                                    const bool *stencil,
                                     ScatteringDistributionFunction **f,
                                     const size_t n);
 
@@ -144,7 +144,7 @@ class ShadingContext
      */
     virtual void evaluateSensor(const MaterialHandle *m,
                                 const DifferentialGeometry *dg,
-                                const int *stencil,
+                                const bool *stencil,
                                 ScatteringDistributionFunction **f,
                                 const size_t n);
 
@@ -166,7 +166,7 @@ class ShadingContext
      */
     virtual void evaluateEmission(const MaterialHandle *m,
                                   const DifferentialGeometry *dg,
-                                  const int *stencil,
+                                  const bool *stencil,
                                   ScatteringDistributionFunction **f,
                                   const size_t n);
 
@@ -184,7 +184,7 @@ class ShadingContext
                                                  const Vector *wo,
                                                  const DifferentialGeometry *dg,
                                                  const Vector *wi,
-                                                 const int *stencil,
+                                                 const bool *stencil,
                                                  Spectrum *results,
                                                  const size_t n);
 
@@ -200,7 +200,7 @@ class ShadingContext
     virtual void evaluateUnidirectionalScattering(ScatteringDistributionFunction **f,
                                                   const Vector *wo,
                                                   const DifferentialGeometry *dg,
-                                                  const int *stencil,
+                                                  const bool *stencil,
                                                   Spectrum *results,
                                                   const size_t n);
 

@@ -201,10 +201,13 @@ void Gotham
   // give the surfaces to the scene
   s->setSurfaces(mSurfaces);
 
-  // give the lights to the scene
-  s->setEmitters(mEmitters);
+  // create a final SurfacePrimitiveList for emitters
+  shared_ptr<SurfacePrimitiveList> emitters(PrimitiveApi::surfacesList(mAttributeStack.back(),
+                                                                       *mEmitters));
+  // give the emitters to the scene
+  s->setEmitters(emitters);
 
-  // create a final SurfacePrimitiveList
+  // create a final SurfacePrimitiveList for sensors
   shared_ptr<SurfacePrimitiveList> sensors(PrimitiveApi::surfacesList(mAttributeStack.back(),
                                                                       *mSensors));
   // give the sensors to the scene

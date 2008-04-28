@@ -40,7 +40,7 @@ class CudaShadingContext
     virtual void evaluateScattering(const stdcuda::device_ptr<const MaterialHandle> &m,
                                     const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
                                     const size_t dgStride,
-                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                     const size_t n) = 0;
 
@@ -57,7 +57,7 @@ class CudaShadingContext
     virtual void evaluateEmission(const stdcuda::device_ptr<const MaterialHandle> &m,
                                   const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
                                   const size_t dgStride,
-                                  const stdcuda::device_ptr<const int> &stencil,
+                                  const stdcuda::device_ptr<const bool> &stencil,
                                   const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                   const size_t n) = 0;
 
@@ -90,7 +90,7 @@ class CudaShadingContext
                                                  const Vector *wo,
                                                  const DifferentialGeometry *dg,
                                                  const Vector *wi,
-                                                 const int *stencil,
+                                                 const bool *stencil,
                                                  Spectrum *results,
                                                  const size_t n);
 
@@ -98,7 +98,7 @@ class CudaShadingContext
                                                  stdcuda::device_ptr<const float3> wo,
                                                  stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
                                                  stdcuda::device_ptr<const float3> wi,
-                                                 stdcuda::device_ptr<const int> stencil,
+                                                 stdcuda::device_ptr<const bool> stencil,
                                                  stdcuda::device_ptr<float3> results,
                                                  const size_t n);
 
@@ -107,7 +107,7 @@ class CudaShadingContext
                                                  stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
                                                  const size_t dgStride,
                                                  stdcuda::device_ptr<const float3> wi,
-                                                 stdcuda::device_ptr<const int> stencil,
+                                                 stdcuda::device_ptr<const bool> stencil,
                                                  stdcuda::device_ptr<float3> results,
                                                  const size_t n);
 
@@ -123,14 +123,14 @@ class CudaShadingContext
     virtual void evaluateUnidirectionalScattering(ScatteringDistributionFunction **f,
                                                   const Vector *wo,
                                                   const DifferentialGeometry *dg,
-                                                  const int *stencil,
+                                                  const bool *stencil,
                                                   Spectrum *results,
                                                   const size_t n);
 
     virtual void evaluateUnidirectionalScattering(stdcuda::device_ptr<const CudaScatteringDistributionFunction> f,
                                                   stdcuda::device_ptr<const float3> wo,
                                                   stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
-                                                  stdcuda::device_ptr<const int> stencil,
+                                                  stdcuda::device_ptr<const bool> stencil,
                                                   stdcuda::device_ptr<float3> results,
                                                   const size_t n);
 
@@ -138,7 +138,7 @@ class CudaShadingContext
                                                   stdcuda::device_ptr<const float3> wo,
                                                   stdcuda::device_ptr<const CudaDifferentialGeometry> dg,
                                                   const size_t dgStride,
-                                                  stdcuda::device_ptr<const int> stencil,
+                                                  stdcuda::device_ptr<const bool> stencil,
                                                   stdcuda::device_ptr<float3> results,
                                                   const size_t n);
 
@@ -150,7 +150,7 @@ class CudaShadingContext
      *  \param cf The output list of CudaScatteringDistributionFunctions is returned here.
      */
     virtual void createCudaScatteringDistributionFunctions(ScatteringDistributionFunction **f,
-                                                           const int *stencil,
+                                                           const bool *stencil,
                                                            const size_t n,
                                                            stdcuda::vector_dev<CudaScatteringDistributionFunction> &cf);
 

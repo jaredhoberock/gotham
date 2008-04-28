@@ -12,6 +12,8 @@ void CudaTriangleList
   std::vector<unsigned int> triangleIndices;
   std::vector<float> triangleAreas;
 
+  mTotalSurfaceArea = 0;
+
   // collect triangle areas
   for(size_t i = 0; i != mFirstVertex.size(); ++i)
   {
@@ -30,6 +32,7 @@ void CudaTriangleList
 
     triangleAreas.push_back(a);
     triangleIndices.push_back(i);
+    mTotalSurfaceArea += a;
   } // end for i
 
   mSurfaceAreaPdf.build(triangleIndices.begin(), triangleIndices.end(),

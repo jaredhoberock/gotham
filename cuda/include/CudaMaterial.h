@@ -33,14 +33,14 @@ class CudaMaterial
     using Parent::evaluateScattering;
     virtual void evaluateScattering(CudaShadingInterface &context,
                                     const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                     const size_t n) const;
 
     virtual void evaluateScattering(CudaShadingInterface &context,
                                     const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
                                     const size_t dgStride,
-                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                     const size_t n) const;
 
@@ -57,7 +57,7 @@ class CudaMaterial
     virtual void evaluateEmission(CudaShadingInterface &context,
                                   const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
                                   const size_t dgStride,
-                                  const stdcuda::device_ptr<const int> &stencil,
+                                  const stdcuda::device_ptr<const bool> &stencil,
                                   const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                   const size_t n) const;
 
@@ -73,7 +73,7 @@ class CudaMaterial
     virtual void evaluateSensor(CudaShadingInterface &context,
                                 const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
                                 const size_t dgStride,
-                                const stdcuda::device_ptr<const int> &stencil,
+                                const stdcuda::device_ptr<const bool> &stencil,
                                 const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                 const size_t n) const;
 }; // end CudaMaterial

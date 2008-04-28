@@ -68,20 +68,21 @@ PopMatrix()
 
 # mirror ball
 Material('mirror', 'Kr', (1.0, 1.0, 1.0))
-Sphere(-0.4, -0.66, -0.15, 0.33)
+#Sphere(-0.4, -0.66, -0.15, 0.33)
 
 # glass ball
 Material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
-Sphere(0.4,-0.66,0.25,0.33)
+#Sphere(0.4,-0.66,0.25,0.33)
 
-Attribute("renderer:algorithm", "debug")
+#Attribute("renderer:algorithm", "debug")
 #Attribute("renderer:threads", "16")
 #Attribute("renderer:threads", "192")
 
-# breaks at 193 threads (in one block)
 #Attribute("renderer:threads", "193")
-#Attribute("renderer:threads", "200000")
-Attribute("renderer:threads", "1")
+#Attribute("renderer:threads", "100000")
+Attribute("renderer:threads", "500000")
+#Attribute("path:maxlength", 3)
+#Attribute("renderer:spp", 4)
 
 # let's render to a 512x512 image
 (w,h) = (512,512)

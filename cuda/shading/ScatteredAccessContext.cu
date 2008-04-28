@@ -11,19 +11,19 @@
 #include <stdcuda/cuda_algorithm.h>
 using namespace stdcuda;
 
-__global__ void selectMaterial(const int *stencil,
+__global__ void selectMaterial(const bool *stencil,
                                const MaterialHandle *handles,
                                const MaterialHandle h,
-                               int *result)
+                               bool *result)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
 
   // AND in the stencil with whether or not we match the handle
   //result[i] = stencil[i] & (handles[i] == h);
-  int r = 0; 
+  bool r = false; 
   if(stencil[i] && (handles[i] == h))
   {
-    r = 1;
+    r = true;
   } // end if
   
   result[i] = r;
@@ -31,13 +31,13 @@ __global__ void selectMaterial(const int *stencil,
 
 __global__ void selectMaterial(const MaterialHandle *handles,
                                const MaterialHandle h,
-                               int *result)
+                               bool *result)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
-  int r = 0;
+  bool r = false;
   if(handles[i] == h)
   {
-    r = 1;
+    r = true;
   } // end if
 
   result[i] = r;
@@ -47,14 +47,14 @@ void ScatteredAccessContext
   ::evaluateScattering(const device_ptr<const MaterialHandle> &m,
                        const device_ptr<const CudaDifferentialGeometry> &dg,
                        const size_t dgStride,
-                       const device_ptr<const int> &stencil,
+                       const device_ptr<const bool> &stencil,
                        const device_ptr<CudaScatteringDistributionFunction> &f,
                        const size_t n)
 {
   unsigned int BLOCK_SIZE = 192;
   unsigned int gridSize = n / BLOCK_SIZE;
 
-  vector_dev<int> materialStencil(n);
+  vector_dev<bool> materialStencil(n);
 
   const CudaMaterial *material = 0;
 
@@ -93,14 +93,14 @@ void ScatteredAccessContext
   ::evaluateEmission(const device_ptr<const MaterialHandle> &m,
                      const device_ptr<const CudaDifferentialGeometry> &dg,
                      const size_t dgStride,
-                     const device_ptr<const int> &stencil,
+                     const device_ptr<const bool> &stencil,
                      const device_ptr<CudaScatteringDistributionFunction> &f,
                      const size_t n)
 {
   unsigned int BLOCK_SIZE = 192;
   unsigned int gridSize = n / BLOCK_SIZE;
 
-  vector_dev<int> materialStencil(n);
+  vector_dev<bool> materialStencil(n);
 
   const CudaMaterial *material = 0;
 
@@ -144,7 +144,7 @@ void ScatteredAccessContext
   unsigned int BLOCK_SIZE = 192;
   unsigned int gridSize = n / BLOCK_SIZE;
 
-  vector_dev<int> materialStencil(n);
+  vector_dev<bool> materialStencil(n);
   const CudaMaterial *material = 0;
 
   // for each Material, create a new stencil

@@ -15,7 +15,7 @@ using namespace stdcuda;
 void CudaMaterial
   ::evaluateScattering(CudaShadingInterface &context,
                        const device_ptr<const CudaDifferentialGeometry> &dg,
-                       const device_ptr<const int> &stencil,
+                       const device_ptr<const bool> &stencil,
                        const device_ptr<CudaScatteringDistributionFunction> &f,
                        const size_t n) const
 {
@@ -28,7 +28,7 @@ void CudaMaterial
   ::evaluateScattering(CudaShadingInterface &context,
                        const device_ptr<const CudaDifferentialGeometry> &dg,
                        const size_t dgStride,
-                       const device_ptr<const int> &stencil,
+                       const device_ptr<const bool> &stencil,
                        const device_ptr<CudaScatteringDistributionFunction> &f,
                        const size_t n) const
 {
@@ -41,7 +41,7 @@ void CudaMaterial
   ::evaluateEmission(CudaShadingInterface &context,
                      const device_ptr<const CudaDifferentialGeometry> &dg,
                      const size_t dgStride,
-                     const device_ptr<const int> &stencil,
+                     const device_ptr<const bool> &stencil,
                      const device_ptr<CudaScatteringDistributionFunction> &f,
                      const size_t n) const
 {
@@ -54,7 +54,7 @@ void CudaMaterial
   ::evaluateSensor(CudaShadingInterface &context,
                    const device_ptr<const CudaDifferentialGeometry> &dg,
                    const size_t dgStride,
-                   const device_ptr<const int> &stencil,
+                   const device_ptr<const bool> &stencil,
                    const device_ptr<CudaScatteringDistributionFunction> &f,
                    const size_t n) const
 {

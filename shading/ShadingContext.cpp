@@ -304,7 +304,7 @@ ScatteringDistributionFunction *ShadingContext
 void ShadingContext
   ::evaluateScattering(const MaterialHandle *m,
                        const DifferentialGeometry *dg,
-                       const int *stencil,
+                       const bool *stencil,
                        ScatteringDistributionFunction **f,
                        const size_t n)
 {
@@ -327,7 +327,7 @@ ScatteringDistributionFunction *ShadingContext
 void ShadingContext
   ::evaluateSensor(const MaterialHandle *m,
                    const DifferentialGeometry *dg,
-                   const int *stencil,
+                   const bool *stencil,
                    ScatteringDistributionFunction **f,
                    const size_t n)
 {
@@ -350,7 +350,7 @@ ScatteringDistributionFunction *ShadingContext
 void ShadingContext
   ::evaluateEmission(const MaterialHandle *m,
                      const DifferentialGeometry *dg,
-                     const int *stencil,
+                     const bool *stencil,
                      ScatteringDistributionFunction **f,
                      const size_t n)
 {
@@ -368,7 +368,7 @@ void ShadingContext
                                     const Vector *wo,
                                     const DifferentialGeometry *dg,
                                     const Vector *wi,
-                                    const int *stencil,
+                                    const bool *stencil,
                                     Spectrum *results,
                                     const size_t n)
 {
@@ -385,7 +385,7 @@ void ShadingContext
   ::evaluateUnidirectionalScattering(ScatteringDistributionFunction **f,
                                      const Vector *wo,
                                      const DifferentialGeometry *dg,
-                                     const int *stencil,
+                                     const bool *stencil,
                                      Spectrum *results,
                                      const size_t n)
 {

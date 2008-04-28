@@ -48,7 +48,7 @@ class CudaDebugRenderer
 
     virtual void shade(stdcuda::device_ptr<const float4> directionsAndMaxT,
                        stdcuda::device_ptr<const CudaIntersection> intersectionsDevice,
-                       stdcuda::device_ptr<const int> stencilDevice,
+                       stdcuda::device_ptr<const bool> stencilDevice,
                        stdcuda::device_ptr<float3> results,
                        const size_t n) const;
 
@@ -59,7 +59,7 @@ class CudaDebugRenderer
     virtual void intersect(stdcuda::device_ptr<const float4> originsAndMinT,
                            stdcuda::device_ptr<const float4> directionsAndMaxT,
                            stdcuda::device_ptr<CudaIntersection> intersections,
-                           stdcuda::device_ptr<int> stencil,
+                           stdcuda::device_ptr<bool> stencil,
                            const size_t n);
 
 }; // end CudaDebugRenderer

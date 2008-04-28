@@ -9,16 +9,32 @@
 using namespace stdcuda;
 
 void CudaScene
-  ::intersect(device_ptr<const float4> originsAndMinT,
-              device_ptr<const float4> directionsAndMaxT,
-              device_ptr<CudaIntersection> intersections,
-              device_ptr<int> stencil,
+  ::intersect(const device_ptr<const float4> &originsAndMinT,
+              const device_ptr<const float4> &directionsAndMaxT,
+              const device_ptr<CudaIntersection> &intersections,
+              const device_ptr<bool> &stencil,
               const size_t n) const
 {
   mRaysCast += n;
   const CudaPrimitive *prim = dynamic_cast<const CudaPrimitive*>(getPrimitive().get());
   prim->intersect(originsAndMinT, directionsAndMaxT, intersections, stencil, n);
 } // end CudaScene::intersect()
+
+void CudaScene
+  ::shadow(const device_ptr<const float4> &originsAndMinT,
+           const device_ptr<const float4> &directionsAndMaxT,
+           const device_ptr<const bool> &stencil,
+           const device_ptr<bool> &results,
+           const size_t n) const
+{
+  const CudaPrimitive *prim = dynamic_cast<const CudaPrimitive*>(getPrimitive().get());
+  prim->intersect(originsAndMinT, directionsAndMaxT, stencil, results, n);
+
+  // XXX reductions here
+  // mRaysCast += reduce(stencil)
+  // mShadowRaysCast += reduce(stencil)
+  // mBlockedShadowRays += reduce(result)
+} // end CudaScene::shadow()
 
 void CudaScene
   ::setPrimitive(boost::shared_ptr<Primitive> g)

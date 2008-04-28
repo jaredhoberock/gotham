@@ -16,7 +16,7 @@ void __global__ ks(const CudaScatteringDistributionFunction *f,
                    const float3 *wo,
                    const CudaDifferentialGeometry *dg,
                    const int dgStride,
-                   const int *stencil,
+                   const bool *stencil,
                    float3 *results)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -35,7 +35,7 @@ void __global__ ks(const CudaScatteringDistributionFunction *f,
 static void __global__ k(const CudaScatteringDistributionFunction *f,
                          const float3 *wo,
                          const CudaDifferentialGeometry *dg,
-                         const int *stencil,
+                         const bool *stencil,
                          float3 *results)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -49,7 +49,7 @@ static void __global__ k(const CudaScatteringDistributionFunction *f,
 void evaluateUnidirectionalScattering(const CudaScatteringDistributionFunction *f,
                                       const float3 *wo,
                                       const CudaDifferentialGeometry *dg,
-                                      const int *stencil,
+                                      const bool *stencil,
                                       float3 *results,
                                       const size_t n)
 {
@@ -70,7 +70,7 @@ void evaluateUnidirectionalScatteringStride(const CudaScatteringDistributionFunc
                                             const float3 *wo,
                                             const CudaDifferentialGeometry *dg,
                                             const size_t dgStride,
-                                            const int *stencil,
+                                            const bool *stencil,
                                             float3 *results,
                                             const size_t n)
 {

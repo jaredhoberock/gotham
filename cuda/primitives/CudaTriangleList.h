@@ -52,5 +52,8 @@ class CudaTriangleList
     stdcuda::vector_dev<PrimitiveHandle> mPrimitiveHandlesDevice;
 
     TriangleTable mSurfaceAreaPdf;
+
+    // The total surface area over all triangles
+    float mTotalSurfaceArea;
 }; // end CudaTriangleList
 

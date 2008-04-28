@@ -264,12 +264,19 @@ void Mesh
 {
   const Triangle &t = *mTriangleTable(u1);
 
+  // XXX it seems like we ought to do this
+  //     otherwise, we don't take into account the
+  //     pdf of choosing t
+  //const Triangle &t = *mTriangleTable(u1, pdf);
+
   const Point &v0 = mPoints[t[0]];
   const Point &v1 = mPoints[t[1]];
   const Point &v2 = mPoints[t[2]];
 
   Point p;
   ParametricCoordinates b;
+
+  // XXX why don't we get the pdf here??
   UnitSquareToTriangle::evaluate(u2,u3, v0, v1, v2, p, b);
 
   // XXX implement shading normals

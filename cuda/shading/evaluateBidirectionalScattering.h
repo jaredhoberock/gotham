@@ -15,7 +15,7 @@ extern "C" void evaluateBidirectionalScattering(const CudaScatteringDistribution
                                                 const float3 *wo,
                                                 const CudaDifferentialGeometry *dg,
                                                 const float3 *wi,
-                                                const int *stencil,
+                                                const bool *stencil,
                                                 float3 *results,
                                                 const size_t n);
 
@@ -24,7 +24,7 @@ extern "C" void evaluateBidirectionalScatteringStride(const CudaScatteringDistri
                                                       const CudaDifferentialGeometry *dg,
                                                       const size_t dgStride,
                                                       const float3 *wi,
-                                                      const int *stencil,
+                                                      const bool *stencil,
                                                       float3 *results,
                                                       const size_t n);
 

@@ -10,6 +10,7 @@
 #include "DebugRenderer.h"
 #include "SIMDDebugRenderer.h"
 #include "../cuda/renderers/CudaDebugRenderer.h"
+#include "../cuda/renderers/CudaKajiyaPathTracer.h"
 #include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
@@ -77,10 +78,19 @@ Renderer *RendererApi
   // create the renderer
   if(rendererName == "montecarlo")
   {
-    // create a PathSampler
-    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
+    if(numThreads <= 1)
+    {
+      // create a PathSampler
+      shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
 
-    result = new PathDebugRenderer(z, sampler);
+      result = new PathDebugRenderer(z, sampler);
+    } // end if
+    else
+    {
+      CudaKajiyaPathTracer *r = new CudaKajiyaPathTracer();
+      r->setWorkBatchSize(numThreads);
+      result = r;
+    } // end else
   } // end if
   else if(rendererName == "energyredistribution")
   {

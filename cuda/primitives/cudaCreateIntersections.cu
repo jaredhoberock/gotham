@@ -23,7 +23,7 @@ struct Parameters
   const float2 *uv2;
   const float  *inverseSurfaceArea;
   const PrimitiveHandle *primitiveHandles;
-  const int    *stencil;
+  const bool   *stencil;
   CudaIntersection *results;
 };
 
@@ -77,8 +77,8 @@ __global__ void k(const Parameters p)
 //                  const float2 *p1,          // parametrics for vertex 1
 //                  const float2 *p2,          // parametrics for vertex 2
 //                  const float  *ia,          // inverse surface area per primitive
-//                  const PrimitiveHandle *h, // primitive handles
-//                  const int    *s,           // stencil
+//                  const PrimitiveHandle *h,  // primitive handles
+//                  const bool    *s,          // stencil
 //                  CudaIntersection *in)
 //{
 //  int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -163,7 +163,7 @@ void cudaCreateIntersections(const float4 *rayOriginsAndMinT,
                              const float2 *thirdVertexParms,
                              const float  *invSurfaceArea,
                              const PrimitiveHandle *primHandles,
-                             const int *stencil,
+                             const bool *stencil,
                              CudaIntersection *intersections,
                              const size_t n)
 {
