@@ -34,7 +34,7 @@ Spectrum SphericalEmission
            bool &delta) const
 {
   delta = false;
-  Mappings::unitSquareToSphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), w, pdf);
+  Mappings<Vector>::unitSquareToSphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), w, pdf);
   return evaluate(w, dg);
 } // end SphericalEmission::sample()
 

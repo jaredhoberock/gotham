@@ -41,6 +41,18 @@ struct CSDF
                                          float3 &wo,
                                          float &pdf,
                                          bool &delta) const;
+
+  inline __host__ __device__ void sample(const float3 &wo,
+                                         const CudaDifferentialGeometry &dg,
+                                         const float u0,
+                                         const float u1,
+                                         const float u2,
+                                         float3 &s,
+                                         float3 &wi,
+                                         float &pdf,
+                                         bool &delta,
+                                         unsigned int &component) const;
+                                         
 }; // end CudaScatteringDistributionFunction
 
 typedef CSDF CudaScatteringDistributionFunction;

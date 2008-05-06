@@ -5,6 +5,7 @@
 
 #include "LambertianBase.h"
 #include "../areSameHemisphere.h"
+#include "../../geometry/Mappings.h"
 
 #ifndef INV_PI
 #define INV_PI 0.318309886f
@@ -17,11 +18,9 @@ template<typename V3, typename S3, typename DG>
 {
   mAlbedoOverPi = albedo;
 
-  // XXX god this is so shitty but we have to do it to be
-  //     compatible with CUDA vectors
-  ((float*)&mAlbedoOverPi)[0] *= INV_PI;
-  ((float*)&mAlbedoOverPi)[1] *= INV_PI;
-  ((float*)&mAlbedoOverPi)[2] *= INV_PI;
+  mAlbedoOverPi.x *= INV_PI;
+  mAlbedoOverPi.y *= INV_PI;
+  mAlbedoOverPi.z *= INV_PI;
 } // end LambertianBase::LambertianBase()
 
 template<typename V3, typename S3, typename DG>
@@ -30,12 +29,10 @@ template<typename V3, typename S3, typename DG>
                const DG &dg,
                const V3 &wi) const
 {
-  // XXX god this is so shitty but we have to do it to be
-  //     compatible with CUDA vectors
   S3 result;
-  ((float*)&result)[0] = 0;
-  ((float*)&result)[1] = 0;
-  ((float*)&result)[2] = 0;
+  result.x = 0;
+  result.y = 0;
+  result.z = 0;
 
   if(areSameHemisphere(wi, dg.getNormal(), wo))
   {
@@ -51,4 +48,22 @@ template<typename V3, typename S3, typename DG>
 {
   return mAlbedo;
 } // end LambertianBase::getAlbedo()
+
+template<typename V3, typename S3, typename DG>
+  S3 LambertianBase<V3,S3,DG>
+    ::sample(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const float u0,
+             const float u1,
+             const float u2,
+             Vector &wi,
+             float &pdf,
+             bool &delta,
+             unsigned int &component) const
+{
+  delta = false;
+  component = 0;
+  Mappings<V3>::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), wi, pdf);
+  return evaluate(wo, dg, wi);
+} // end LambertianBase::sample()
 

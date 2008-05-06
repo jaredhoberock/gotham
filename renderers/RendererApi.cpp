@@ -11,6 +11,7 @@
 #include "SIMDDebugRenderer.h"
 #include "../cuda/renderers/CudaDebugRenderer.h"
 #include "../cuda/renderers/CudaKajiyaPathTracer.h"
+#include "../cuda/numeric/CudaRandomSequence.h"
 #include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
@@ -89,6 +90,7 @@ Renderer *RendererApi
     {
       CudaKajiyaPathTracer *r = new CudaKajiyaPathTracer();
       r->setWorkBatchSize(numThreads);
+      r->setRandomSequence(shared_ptr<CudaRandomSequence>(new CudaRandomSequence()));
       result = r;
     } // end else
   } // end if

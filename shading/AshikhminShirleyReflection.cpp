@@ -32,10 +32,10 @@ Spectrum AshikhminShirleyReflection
 
   // sample a microfacet normal
   Vector wh;
-  Mappings::unitSquareToAnisotropicPhongLobe(u0, u1,
-                                             mNu, mNv,
-                                             dg.getTangent(), dg.getBinormal(), dg.getNormal(),
-                                             wh, pdf);
+  Mappings<Vector>::unitSquareToAnisotropicPhongLobe(u0, u1,
+                                                     mNu, mNv,
+                                                     dg.getTangent(), dg.getBinormal(), dg.getNormal(),
+                                                     wh, pdf);
 
   // we are able to sample the Ashikhmin-Shirley distribution exactly
   float D = pdf;
@@ -85,10 +85,10 @@ Spectrum AshikhminShirleyReflection
   float cosThetaH = wh.absDot(wi);
 
   // evaluate the Ashikhmin-Shirley distribution
-  float D = Mappings::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
-                                                      dg.getTangent(),
-                                                      dg.getBinormal(),
-                                                      dg.getNormal());
+  float D = Mappings<Vector>::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
+                                                              dg.getTangent(),
+                                                              dg.getBinormal(),
+                                                              dg.getNormal());
 
   // Walter et al, 2007, equation 14
   float J = 0.25f / wh.absDot(wi);
@@ -125,10 +125,10 @@ Spectrum AshikhminShirleyReflection
   float cosThetaH = wh.absDot(wi);
 
   // evaluate the Ashikhmin-Shirley distribution
-  float D = Mappings::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
-                                                      dg.getTangent(),
-                                                      dg.getBinormal(),
-                                                      dg.getNormal());
+  float D = Mappings<Vector>::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
+                                                              dg.getTangent(),
+                                                              dg.getBinormal(),
+                                                              dg.getNormal());
 
   // compute the geometry term
   float nDotWo = dg.getNormal().absDot(wo);
@@ -160,7 +160,7 @@ float AshikhminShirleyReflection
   float J = 0.25f / wh.absDot(wi);
 
   // evaluate the AshikhminShirley distribution and multiply by the Jacobian
-  return J * Mappings::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
-                                                       dg.getTangent(), dg.getBinormal(), dg.getNormal());
+  return J * Mappings<Vector>::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
+                                                               dg.getTangent(), dg.getBinormal(), dg.getNormal());
 } // end AshikhminShirleyReflection::evaluatePdf()
 

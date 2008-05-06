@@ -161,6 +161,48 @@ class CudaShadingContext
      */
     virtual void setMaterials(const boost::shared_ptr<MaterialList> &materials);
 
+    /*! This method samples the bidirectional scattering of a batch of
+     *  scattering jobs in a SIMD fashion on a CUDA device.
+     *  \param f A list of ScatteringDistributionFunction objects.
+     *  \param wo A list of outgoing directions.
+     *  \param woStride The stride size of the wo list.
+     *  \param dg A list of CudaDifferentialGeometry objects.
+     *  \param dgStride The stride size of the dg list.
+     *  \param u A list of points in [0,1]^3
+     *  \param uStride The stride size of the u list.
+     *  \param stencil This stencil controls which jobs get processed.
+     *  \param s A list of outgoing energy is returned here.
+     *  \param sStride The stride size of the s list.
+     *  \param wi A list of incoming directions is returned here.
+     *  \param wiStride The stride size of the wi list.
+     *  \param pdf The pdf of each wi is returned to this list.
+     *  \param pdfStride The stride size of the pdf list.
+     *  \param delta Whether or not each wi was sampled from a delta distribution is returned to this list.
+     *  \param deltaStride The stride size of the delta list.
+     *  \param component Which component index each wi was sampled from is returned to this list.
+     *  \param componentStride The stride size of the component list.
+     *  \param n The number of jobs.
+     */
+    virtual void sampleBidirectionalScattering(const stdcuda::device_ptr<const CudaScatteringDistributionFunction> &f,
+                                               const stdcuda::device_ptr<const float3> &wo,
+                                               const size_t woStride,
+                                               const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
+                                               const size_t dgStride,
+                                               const stdcuda::device_ptr<const float3> &u,
+                                               const size_t uStride,
+                                               const stdcuda::device_ptr<bool> &stencil,
+                                               const stdcuda::device_ptr<float3> &s,
+                                               const size_t sStride,
+                                               const stdcuda::device_ptr<float3> &wi,
+                                               const size_t wiStride,
+                                               const stdcuda::device_ptr<float> &pdf,
+                                               const size_t pdfStride,
+                                               const stdcuda::device_ptr<bool> &delta,
+                                               const size_t deltaStride,
+                                               const stdcuda::device_ptr<unsigned int> &component,
+                                               const size_t componentStride,
+                                               const size_t n);
+
     /*! This method samples the unidirectional scattering of a batch of
      *  scattering jobs in a SIMD fashion on a CUDA device.
      *  \param f A list of ScatteringDistributionFunction objects.

@@ -31,7 +31,7 @@ class ScatteringDistributionFunction
     /*! \typedef ComponentIndex
      *  \brief Shorthand.
      */
-    typedef size_t ComponentIndex;
+    typedef unsigned int ComponentIndex;
 
     /*! Null destructor does nothing.
      */

@@ -32,7 +32,7 @@ float ScatteringDistributionFunction
                 const DifferentialGeometry &dg,
                 const Vector3 &wi) const
 {
-  return Mappings::evaluateCosineHemispherePdf(wi, dg.getNormal());
+  return Mappings<Vector>::evaluateCosineHemispherePdf(wi, dg.getNormal());
 } // end ScatteringDistributionFunction::evaluatePdf()
 
 float ScatteringDistributionFunction
@@ -72,7 +72,7 @@ Spectrum ScatteringDistributionFunction
 {
   delta = false;
   component = 0;
-  Mappings::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), wi, pdf);
+  Mappings<Vector>::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), wi, pdf);
   return evaluate(wo, dg, wi);
 } // end ScatteringDistributionFunction::sample()
 
@@ -86,7 +86,7 @@ Spectrum ScatteringDistributionFunction
            bool &delta) const
 {
   delta = false;
-  Mappings::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), w, pdf);
+  Mappings<Vector>::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), w, pdf);
   return evaluate(w, dg);
 } // end ScatteringDistributionFunction::sample()
 
@@ -96,14 +96,14 @@ void ScatteringDistributionFunction
            float &u0,
            float &u1) const
 {
-  Mappings::cosineHemisphereToUnitSquare(w, dg.getTangent(), dg.getBinormal(), dg.getNormal(), u0, u1);
+  Mappings<Vector>::cosineHemisphereToUnitSquare(w, dg.getTangent(), dg.getBinormal(), dg.getNormal(), u0, u1);
 } // end ScatteringDistributionFunction::invert()
 
 float ScatteringDistributionFunction
   ::evaluatePdf(const Vector &w,
                 const DifferentialGeometry &dg) const
 {
-  return Mappings::evaluateCosineHemispherePdf(w, dg.getNormal());
+  return Mappings<Vector>::evaluateCosineHemispherePdf(w, dg.getNormal());
 } // end ScatteringDistributionFunctionr::evaluatePdf()
 
 bool ScatteringDistributionFunction

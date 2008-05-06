@@ -10,6 +10,7 @@
 #include "CudaRenderer.h"
 #include <stdcuda/device_types.h>
 #include <vector_types.h>
+#include "../numeric/CudaRandomSequence.h"
 
 class CudaKajiyaPathTracer
   : public CudaRenderer
@@ -31,16 +32,20 @@ class CudaKajiyaPathTracer
     inline CudaKajiyaPathTracer(boost::shared_ptr<const Scene> s,
                                 boost::shared_ptr<Record> r);
 
+    /*! This method sets this CudaKajiyaPathTracer's CudaRandomSequence.
+     *  \param r Sets mRandomSequence.
+     */
+    virtual void setRandomSequence(const boost::shared_ptr<CudaRandomSequence> &r);
+
   protected:
     virtual void kernel(ProgressCallback &progress);
 
     virtual void generateHyperPoints(const stdcuda::device_ptr<float4> &u,
                                      const size_t n);
-    virtual void stratify(const size_t w, const size_t h,
-                          std::vector<float4> &u);
-    virtual void stratify(const size_t w, const size_t h,
-                          const stdcuda::device_ptr<float4> &u,
-                          const size_t n);
+
+    /*! A CudaKajiyaPathTracer uses a CudaRandomSequence to generate random numbers.
+     */
+    boost::shared_ptr<CudaRandomSequence> mRandomSequence;
 }; // end CudaKajiyaPathTracer
 
 #include "CudaKajiyaPathTracer.inl"

@@ -9,11 +9,15 @@
 #ifndef MAPPINGS_H
 #define MAPPINGS_H
 
-#include "Vector.h"
-
-class Mappings
+template<typename V3>
+  class Mappings
 {
   public:
+    /*! \typedef Vector
+     *  \brief Shorthand.
+     */
+    typedef V3 Vector;
+
     /*! This method maps a point in the unit square to a point on the unit
      *  sphere situated around the z-axis.
      *  \param u0 A real number in [0,1).
@@ -31,10 +35,10 @@ class Mappings
      */
     inline static void unitSquareToSphere(const float u0,
                                           const float u1,
-                                          const Vector3 &xAxis,
-                                          const Vector3 &yAxis,
-                                          const Vector3 &zAxis,
-                                          Vector3 &w,
+                                          const Vector &xAxis,
+                                          const Vector &yAxis,
+                                          const Vector &zAxis,
+                                          Vector &w,
                                           float &pdf);
 
     /*! This method maps a point in the unit square
@@ -55,10 +59,10 @@ class Mappings
      */
     inline static void unitSquareToHemisphere(const float u0,
                                               const float u1,
-                                              const Vector3 &xAxis,
-                                              const Vector3 &yAxis,
-                                              const Vector3 &zAxis,
-                                              Vector3 &w,
+                                              const Vector &xAxis,
+                                              const Vector &yAxis,
+                                              const Vector &zAxis,
+                                              Vector &w,
                                               float &pdf);
 
     /*! This method maps a point in the unit square to a point
@@ -200,6 +204,24 @@ class Mappings
                                                     const Vector &zAxis,
                                                     float &u0,
                                                     float &u1);
+
+  protected:
+    /*! This method aligns a vector in the canonical space into
+     *  a given frenet frame.
+     *  \param xAxis A unit vector parallel to the x-axis of
+     *               defining the frame of the hemisphere of interest.
+     *  \param yAxis A unit vector parallel to the y-axis of
+     *               defining the frame of the hemisphere of interest.
+     *  \param zAxis A unit vector parallel to the z-axis of
+     *               defining the frame of the hemisphere of interest.
+     *  \param w The Vector to align.
+     *  \param wPrime The new Vector is returned here.
+     */
+    inline static void alignVector(const Vector &xAxis,
+                                   const Vector &yAxis,
+                                   const Vector &zAxis,
+                                   const Vector &w,
+                                   Vector &wPrime);
 }; // end Mappings
 
 #include "Mappings.inl"

@@ -7,6 +7,7 @@
 #include "kajiyaPathTracerUtil.h"
 #include <stdcuda/vector_math.h>
 #include <stdcuda/stride_cast.h>
+#include <stdcuda/stride_copy.h>
 
 using namespace stdcuda;
 
@@ -160,8 +161,6 @@ void createShadowRays(const device_ptr<const CudaIntersection> &intersections,
     p.intersections += gridSize*BLOCK_SIZE;
     p.dg += gridSize*BLOCK_SIZE;
 
-    //k3<<<1,n%BLOCK_SIZE>>>(intersections + gridSize*BLOCK_SIZE,
-    //                       dg + gridSize*BLOCK_SIZE,
     k3<<<1,n%BLOCK_SIZE>>>(p,
                            epsilon,
                            stencil + gridSize*BLOCK_SIZE,
@@ -453,7 +452,62 @@ void flipVectors(const device_ptr<float3> &w,
   if(gridSize)
     k12<<<gridSize,BLOCK_SIZE>>>(w,stencil);
   if(n%BLOCK_SIZE)
-    k12<<<1,n&BLOCK_SIZE>>>(w + gridSize*BLOCK_SIZE,
+    k12<<<1,n%BLOCK_SIZE>>>(w + gridSize*BLOCK_SIZE,
                             stencil + gridSize*BLOCK_SIZE);
 } // end flipVectors()
+
+__global__ void k13(const unsigned int w, const unsigned int h,
+                    float4 *u,
+                    const float2 invPixelSize,
+                    const unsigned int offset)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x + offset;
+
+  float4 temp = u[i];
+
+  temp.x = static_cast<float>(i % w) / w + temp.x * invPixelSize.x;
+  temp.y = static_cast<float>(i / w) / h + temp.y * invPixelSize.y;
+
+  u[i] = temp;
+} // end k13()
+
+void stratify(const unsigned int w, const unsigned int h,
+              const device_ptr<float4> &u,
+              const size_t n)
+{
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / BLOCK_SIZE;
+
+  float2 invPixelSize = make_float2(1.0f / w, 1.0f / h);
+
+  if(gridSize)
+    k13<<<gridSize,BLOCK_SIZE>>>(w, h, u, invPixelSize, 0);
+  if(n%BLOCK_SIZE)
+    k13<<<1,n%BLOCK_SIZE>>>(w, h, u, invPixelSize, gridSize*BLOCK_SIZE);
+} // end stratify()
+
+//__global__ void k14(const CudaIntersection *intersections,
+//                    CudaDifferentialGeometry *dg)
+//{
+//  int i = blockIdx.x * blockDim.x + threadIdx.x;
+//  dg[i] = intersections[i].getDifferentialGeometry();
+//} // end k14()
+//
+void copyDifferentialGeometry(const device_ptr<const CudaIntersection> &intersections,
+                              const device_ptr<CudaDifferentialGeometry> &dg,
+                              const size_t n)
+{
+  //unsigned int BLOCK_SIZE = 192;
+  //unsigned int gridSize = n / BLOCK_SIZE;
+
+  //if(gridSize)
+  //  k14<<<gridSize,BLOCK_SIZE>>>(intersections,dg);
+  //if(n%BLOCK_SIZE)
+  //  k14<<<1,n%BLOCK_SIZE>>>(intersections + gridSize*BLOCK_SIZE,
+  //                          dg + gridSize*BLOCK_SIZE);
+
+  const void *temp = &intersections[0];
+  device_ptr<const CudaDifferentialGeometry> firstDg(reinterpret_cast<const CudaDifferentialGeometry*>(temp));
+  stdcuda::stride_copy(firstDg, sizeof(CudaIntersection), dg, sizeof(CudaDifferentialGeometry), n);
+} // end copyDifferentialGeometry()
 

@@ -125,5 +125,39 @@ void CudaScatteringDistributionFunction
   } // end switch
 } // end CudaDifferentialGeometry::sample()
 
+void CudaScatteringDistributionFunction
+  ::sample(const float3 &wo,
+           const CudaDifferentialGeometry &dg,
+           const float u0,
+           const float u1,
+           const float u2,
+           float3 &s,
+           float3 &wi,
+           float &pdf,
+           bool &delta,
+           unsigned int &component) const
+{
+  // do a naive switch for now
+  switch(mType)
+  {
+    case LAMBERTIAN:
+    {
+      const CudaLambertian &l = (const CudaLambertian&)mFunction;
+
+      s = l.sample(wo,dg,u0,u1,u2,wi,pdf,delta,component);
+      break;
+    } // end PERSPECTIVE_SENSOR
+
+    default:
+    {
+      s = make_float3(0,0,0);
+      wi = make_float3(0,0,0);
+      pdf = 0;
+      delta = false;
+      break;
+    } // end default
+  } // end switch
+} // end CudaDifferentialGeometry::sample()
+
 #endif // __CUDACC__
 

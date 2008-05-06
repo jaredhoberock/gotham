@@ -298,6 +298,13 @@ elif os.name == 'nt':
     makefile += 'includes = ' + `includes` + '\n'
     makefile += 'env.Append(CPPPATH = includes)\n'
 
+    # uncomment these two lines for emudebug mode
+    #makefile += "env.Append(SHNVCCFLAGS = ['-deviceemu'])\n"
+    #makefile += "env['CPPFLAGS'] = '-g'\n"
+
+    # uncomment this line for emurelease mode
+    #makefile += "env.Append(SHNVCCFLAGS = ['-deviceemu'])\n"
+
     makefile += 'sources = ' + `sources`
 
     makefile += '''

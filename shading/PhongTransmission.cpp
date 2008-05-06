@@ -39,9 +39,9 @@ Spectrum PhongTransmission
 
   // sample a microfacet normal
   Vector m;
-  Mappings::unitSquareToPhongLobe(u0, u1, dg.getNormal(), mExponent,
-                                  dg.getTangent(), dg.getBinormal(), dg.getNormal(),
-                                  m, pdf);
+  Mappings<Vector>::unitSquareToPhongLobe(u0, u1, dg.getNormal(), mExponent,
+                                          dg.getTangent(), dg.getBinormal(), dg.getNormal(),
+                                          m, pdf);
 
   // we are able to sample the Phong distribution exactly
   float D = pdf;

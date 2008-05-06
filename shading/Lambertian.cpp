@@ -33,7 +33,7 @@ Spectrum Lambertian
   pdf = 0;
   if(areSameHemisphere(wi, dg.getNormal(), wo))
   {
-    pdf = Mappings::evaluateCosineHemispherePdf(wi, dg.getNormal());
+    pdf = Mappings<Vector>::evaluateCosineHemispherePdf(wi, dg.getNormal());
     result = mAlbedoOverPi;
   } // end if
 

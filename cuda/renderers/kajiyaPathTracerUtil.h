@@ -89,3 +89,11 @@ extern "C" void flipVectors(const stdcuda::device_ptr<float3> &w,
                             const stdcuda::device_ptr<const bool> &stencil,
                             const size_t n);
 
+extern "C" void stratify(const unsigned int w, const unsigned int h,
+                         const stdcuda::device_ptr<float4> &u,
+                         const size_t n);
+
+extern "C" void copyDifferentialGeometry(const stdcuda::device_ptr<const CudaIntersection> &intersections,
+                                         const stdcuda::device_ptr<CudaDifferentialGeometry> &dg,
+                                         const size_t n);
+

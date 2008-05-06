@@ -23,6 +23,8 @@ env.Append(LIBS = ['geometry'])
 env.Append(LIBS = ['cudaprimitives'])
 env.Append(LIBS = ['cudashading'])
 env.Append(LIBS = ['cudarenderers'])
+env.Append(LIBS = ['cudanumeric'])
+env.Append(LIBS = ['stdcuda'])
 
 # openexr libraries
 env.Append(LIBS = ['Iex'])
@@ -68,7 +70,9 @@ env.Append(LIBPATH = ['../geometry',
 # CUDA Gotham library paths
 env.Append(LIBPATH = ['../cuda/primitives',
                       '../cuda/shading',
-                      '../cuda/renderers'])
+                      '../cuda/renderers',
+                      '../cuda/numeric',
+                      '../../stdcuda'])
 
 # create a shared library
 gothamLib = env.SharedLibrary('gotham', ['exportApi.cpp', 'Gotham.cpp'])
