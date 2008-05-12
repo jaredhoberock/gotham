@@ -28,7 +28,7 @@ def mul(A, x):
   b3 = A[12] * x[0] + A[13] * x[1] + A[14] * x[2] + A[15] * x[3]
   return (b0, b1, b2, b3)
 
-class Gotham2(Gotham):
+class PyGotham(Gotham):
   # standard shaderpaths
   shaderpaths = ['.']
   try:
@@ -136,15 +136,15 @@ class Gotham2(Gotham):
       print "render((w,h), spp): Warning: using arguments with this function is deprecated."
       print "Please use render() instead."
     if len(args) == 1:
-      Gotham2.attribute(self, "record:width", str(args[0][0]))
-      Gotham2.attribute(self, "record:height", str(args[0][1]))
+      PyGotham.attribute(self, "record:width", str(args[0][0]))
+      PyGotham.attribute(self, "record:height", str(args[0][1]))
     if len(args) > 2:
       print "Error: too many parameters to render()."
       return
     elif len(args) == 2:
-      Gotham2.attribute(self, "record:width", str(args[0][0]))
-      Gotham2.attribute(self, "record:height", str(args[0][1]))
-      Gotham2.attribute(self, "renderer:spp", str(args[1]))
+      PyGotham.attribute(self, "record:width", str(args[0][0]))
+      PyGotham.attribute(self, "record:height", str(args[0][1]))
+      PyGotham.attribute(self, "renderer:spp", str(args[1]))
     Gotham.render(self)
 
   def lookAt(self, eye, center, up):
@@ -168,7 +168,7 @@ class Gotham2(Gotham):
 
   def pointlight(self, position, power, radius = 0.0005):
     Gotham.pushAttributes(self)
-    Gotham2.material(self, 'light', 'power', power)
+    PyGotham.material(self, 'light', 'power', power)
     Gotham.sphere(self, position[0], position[1], position[2], radius)
     Gotham.popAttributes(self)
 
@@ -209,28 +209,28 @@ class Gotham2(Gotham):
     ll = (c[0] + near * look[0] - aspect * right[0] - up[0],
           c[1] + near * look[1] - aspect * right[1] - up[1],
           c[2] + near * look[2] - aspect * right[2] - up[2])
-    Gotham2.material(self,
-                     'perspective',
-                     'aspect',aspect,
-                     'fovy',fovyRadians,
-                     'lowerLeft', ll)
+    PyGotham.material(self,
+                      'perspective',
+                      'aspect',aspect,
+                      'fovy',fovyRadians,
+                      'lowerLeft', ll)
     # name the camera
     Gotham.attribute(self, "name", "camera")
-    Gotham2.mesh(self, points, uv, triangles)
+    PyGotham.mesh(self, points, uv, triangles)
     Gotham.popAttributes(self)
     Gotham.popMatrix(self)
     # hint to the viewer after we've popped the attributes
     # XXX we really need a way to pass types besides strings
-    Gotham2.attribute(self, "viewer:fovy",  str(fovy))
-    Gotham2.attribute(self, "viewer:eyex",  str(c[0]))
-    Gotham2.attribute(self, "viewer:eyey",  str(c[1]))
-    Gotham2.attribute(self, "viewer:eyez",  str(c[2]))
-    Gotham2.attribute(self, "viewer:upx",   str(up[0]))
-    Gotham2.attribute(self, "viewer:upy",   str(up[1]))
-    Gotham2.attribute(self, "viewer:upz",   str(up[2]))
-    Gotham2.attribute(self, "viewer:lookx", str(look[0]))
-    Gotham2.attribute(self, "viewer:looky", str(look[1]))
-    Gotham2.attribute(self, "viewer:lookz", str(look[2]))
+    PyGotham.attribute(self, "viewer:fovy",  str(fovy))
+    PyGotham.attribute(self, "viewer:eyex",  str(c[0]))
+    PyGotham.attribute(self, "viewer:eyey",  str(c[1]))
+    PyGotham.attribute(self, "viewer:eyez",  str(c[2]))
+    PyGotham.attribute(self, "viewer:upx",   str(up[0]))
+    PyGotham.attribute(self, "viewer:upy",   str(up[1]))
+    PyGotham.attribute(self, "viewer:upz",   str(up[2]))
+    PyGotham.attribute(self, "viewer:lookx", str(look[0]))
+    PyGotham.attribute(self, "viewer:looky", str(look[1]))
+    PyGotham.attribute(self, "viewer:lookz", str(look[2]))
 
   def parse(self, lines):
     # XXX we can think about passing each line
@@ -268,45 +268,45 @@ class Gotham2(Gotham):
                       1, 2,  3])
 
     # front wall
-    Gotham2.pushMatrix(self)
-    Gotham2.translate(self, 0, 0, 0.5)
-    Gotham2.rotate(self, 90, 1, 0, 0)
-    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    Gotham2.popMatrix(self)
+    PyGotham.pushMatrix(self)
+    PyGotham.translate(self, 0, 0, 0.5)
+    PyGotham.rotate(self, 90, 1, 0, 0)
+    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    PyGotham.popMatrix(self)
 
     # left wall
-    Gotham2.pushMatrix(self)
-    Gotham2.translate(self, -0.5,0,0)
-    Gotham2.rotate(self, 90, 0, 0, 1)
-    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    Gotham2.popMatrix(self)
+    PyGotham.pushMatrix(self)
+    PyGotham.translate(self, -0.5,0,0)
+    PyGotham.rotate(self, 90, 0, 0, 1)
+    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    PyGotham.popMatrix(self)
 
     # right wall
-    Gotham2.pushMatrix(self)
-    Gotham2.translate(self, 0.5,0,0)
-    Gotham2.rotate(self, -90, 0, 0, 1)
-    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    Gotham2.popMatrix(self)
+    PyGotham.pushMatrix(self)
+    PyGotham.translate(self, 0.5,0,0)
+    PyGotham.rotate(self, -90, 0, 0, 1)
+    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    PyGotham.popMatrix(self)
 
     # back wall
-    Gotham2.pushMatrix(self)
-    Gotham2.translate(self, 0, 0, -0.5)
-    Gotham2.rotate(self, -90, 1, 0, 0)
-    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    Gotham2.popMatrix(self)
+    PyGotham.pushMatrix(self)
+    PyGotham.translate(self, 0, 0, -0.5)
+    PyGotham.rotate(self, -90, 1, 0, 0)
+    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    PyGotham.popMatrix(self)
 
     # ceiling
-    Gotham2.pushMatrix(self)
-    Gotham2.translate(self, 0, 0.5,0)
-    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    Gotham2.popMatrix(self)
+    PyGotham.pushMatrix(self)
+    PyGotham.translate(self, 0, 0.5,0)
+    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    PyGotham.popMatrix(self)
 
     # floor
-    Gotham2.pushMatrix(self)
-    Gotham2.translate(self, 0, -0.5,0)
-    Gotham2.rotate(self, 180, 1, 0, 0)
-    Gotham2.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    Gotham2.popMatrix(self)
+    PyGotham.pushMatrix(self)
+    PyGotham.translate(self, 0, -0.5,0)
+    PyGotham.rotate(self, 180, 1, 0, 0)
+    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
+    PyGotham.popMatrix(self)
 
 def __copyright():
   print 'Gotham 0.1'
@@ -319,7 +319,7 @@ __copyright()
 # create the 'canonical' Gotham instance
 # this is not technically a singleton but
 # the idea is to make it work like one
-__gGotham = Gotham2()
+__gGotham = PyGotham()
 
 def __wrapMethod(name, wrapperName):
   firstLine = 'def ' + wrapperName + '(*args, **kwargs):\n'

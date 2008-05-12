@@ -103,7 +103,7 @@ Material('mirror', 'Kr', (1.0, 1.0, 1.0))
 # make a ball using the 'sphere' command
 # this command takes 4 arguments:
 # the x, y, and z coordinates of the sphere's center and the length of its radius
-Sphere(-0.4, -0.66, -0.15, 0.33)
+#Sphere(-0.4, -0.66, -0.15, 0.33)
 
 # glass ball
 # the glass shader needs to know three things:
@@ -111,7 +111,7 @@ Sphere(-0.4, -0.66, -0.15, 0.33)
 # how transmissive it is (as a color)
 # and an index of refraction (actual glass's index is around 1.5)
 Material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
-Sphere(0.4,-0.66,0.25,0.33)
+#Sphere(0.4,-0.66,0.25,0.33)
 
 # now we need to tell gotham how it should perform the render
 # we do this by setting gothams's state with the attribute() command
@@ -123,12 +123,14 @@ Attribute("path:sampler", "kajiya")
 
 # we can specify how long (in vertices) light paths are allowed to grow.
 # for the cornell box, 7 is a good compromise between correctness and speed
-Attribute("path:maxlength", 7)
+#Attribute("path:maxlength", 7)
+Attribute("path:maxlength", 15)
 
 # now we specify which rendering algorithm to use
 # let's use traditional 'montecarlo'
 # this one takes no additional parameters
 Attribute("renderer:algorithm", "montecarlo")
+Attribute('path:sampler', 'kelemen')
 
 # let's render to a 512x512 image
 (w,h) = (512,512)

@@ -44,7 +44,7 @@ class Gotham
 
     /*! This method sets the initial graphics state.
      */
-    void init(void);
+    virtual void init(void);
 
     /*! This method pushes a copy of the current Matrix
      *  to the top of the matrix stack.
@@ -99,13 +99,13 @@ class Gotham
 
     /*! This method starts a render.
      */
-    void render(void);
+    virtual void render(void);
 
     /*! This method sets the given Material
      *  as the current Material.
      *  \param m The Material.
      */
-    void material(Material *m);
+    virtual void material(Material *m);
 
     /*! This method creates a new triangle Mesh by
      *  transforming the given geometry against the current
@@ -113,8 +113,8 @@ class Gotham
      *  \param vertices A list of triangle vertices.
      *  \param triangles A list of vertex index triples.
      */
-    void mesh(std::vector<float> &vertices,
-              std::vector<unsigned int> &triangles);
+    virtual void mesh(std::vector<float> &vertices,
+                      std::vector<unsigned int> &triangles);
 
     /*! This method creates a new triangle Mesh by
      *  transforming the given geometry against the current
@@ -123,9 +123,9 @@ class Gotham
      *  \param parametrics A list of parametric triangle vertex positions.
      *  \param triangles A list of vertex index triples.
      */
-    void mesh(std::vector<float> &vertices,
-              std::vector<float> &parametrics,
-              std::vector<unsigned int> &triangles);
+    virtual void mesh(std::vector<float> &vertices,
+                      std::vector<float> &parametrics,
+                      std::vector<unsigned int> &triangles);
 
     /*! This method creates a new Sphere.
      *  \param cx The x-coordinate of the center of the Sphere.
@@ -133,25 +133,25 @@ class Gotham
      *  \param cz The z-coordinate of the center of the Sphere.
      *  \param radius The radius of the Sphere.
      */
-    void sphere(const float cx,
-                const float cy,
-                const float cz,
-                const float radius);
+    virtual void sphere(const float cx,
+                        const float cy,
+                        const float cz,
+                        const float radius);
 
     /*! This method creates a new PhotonMap.
      *  \param positions A list of Photon positions.
      *  \param wi A list of Photon incoming directions.
      *  \param power A list of Photon powers.
      */
-    void photons(const std::vector<float> &positions,
-                 const std::vector<float> &wi,
-                 const std::vector<float> &power);
+    virtual void photons(const std::vector<float> &positions,
+                         const std::vector<float> &wi,
+                         const std::vector<float> &power);
 
     /*! This method sets the given named attribute.
      *  \param name The name of the attribute to set.
      *  \param val The value to set to.
      */
-    void attribute(const std::string &name, const std::string &val);
+    virtual void attribute(const std::string &name, const std::string &val);
 
     /*! This method pushes a copy of the current attributes to the top of
      *  the attributes stack.
@@ -168,7 +168,7 @@ class Gotham
      */
     bool parseLine(const std::string &line);
 
-  private:
+  protected:
     typedef Transform Matrix;
 
     /*! This method loads the given Matrix into the Matrix

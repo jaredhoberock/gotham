@@ -1,0 +1,92 @@
+import os
+
+Import('env')
+
+# add dependencies
+# with msvc, boost figures out which libraries to link
+if os.name == 'posix':
+  env.Append(LIBS = ['boost_python'])
+  env.Append(LIBS = ['boost_thread'])
+
+env.Append(LIBS = ['gotham'])
+
+# cuda Gotham libraries
+env.Append(LIBS = ['cudaprimitives'])
+env.Append(LIBS = ['cudashading'])
+env.Append(LIBS = ['cudarenderers'])
+env.Append(LIBS = ['cudanumeric'])
+env.Append(LIBS = ['stdcuda'])
+
+# openexr libraries
+env.Append(LIBS = ['Iex'])
+env.Append(LIBS = ['IlmImf'])
+env.Append(LIBS = ['Imath'])
+env.Append(LIBS = ['Half'])
+env.Append(LIBS = ['z'])
+
+# cuda libraries
+env.Append(LIBS = ['cudart'])
+env.Append(LIBPATH = ['/usr/local/cuda/lib'])
+
+# qt libraries
+env.Append(LIBS = ['QtCore'])
+env.Append(LIBS = ['QtXml'])
+env.Append(LIBS = ['QtGui'])
+env.Append(LIBS = ['QtOpenGL'])
+
+# gl libraries
+env.Append(LIBS = ['GL'])
+env.Append(LIBS = ['GLU'])
+env.Append(LIBS = ['GLEW'])
+env.Append(LIBS = ['QGLViewer'])
+
+# Gotham library path
+env.Append(LIBPATH = ['../../lib'])
+
+# CUDA Gotham library paths
+env.Append(LIBPATH = ['../primitives',
+                      '../shading',
+                      '../renderers',
+                      '../numeric',
+                      '../../../stdcuda'])
+
+# create a shared library
+cudaGothamLib = env.SharedLibrary('cudagotham', ['CudaGotham.cpp'])
+
+## install the distribution
+#try:
+#  dir = os.environ["GOTHAMHOME"] + '/lib'
+#  Default(env.Install(dir, source = gothamLib))
+#  Default(env.Install(dir, source = 'api.py'))
+#  Default(env.Install(dir, source = 'objtogoth.py'))
+#  Default(env.Install(dir, source = 'wavefront.py'))
+#  Default(env.Install(dir, source = 'pygtogoth/pygtogoth.py'))
+#  Default(env.Install(dir, source = 'pygtogoth/pygpatch.py'))
+#  Default(env.Install(dir, source = 'pygtogoth/pygshaders.py'))
+#  dir = os.environ["GOTHAMHOME"] + '/bin'
+#  Default(env.Install(dir, source = 'pbslc'))
+#  Default(env.Install(dir, source = 'gotham'))
+#except:
+#  print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
+#
+## if we are writing test code, build it
+#if os.path.isfile("test.cpp"):
+#  env.Append(LIBS = ['python2.5'])
+#  env.Program('test', 'test.cpp')
+#  dir = os.environ["GOTHAMHOME"] + '/bin'
+#  Default(env.Install(dir, source = 'test'))
+#
+## build imgstat
+#if os.path.isfile("imgstat.cpp"):
+#  env.Append(LIBS = ['python2.5'])
+#  env.Program('imgstat', 'imgstat.cpp')
+#  dir = os.environ["GOTHAMHOME"] + '/bin'
+#  Default(env.Install(dir, source = 'imgstat'))
+#
+## build imgclean
+#if os.path.isfile("imgclean.cpp"):
+#  env.Append(LIBS = ['python2.5'])
+#  env.Program('imgclean', 'imgclean.cpp')
+#  dir = os.environ["GOTHAMHOME"] + '/bin'
+#  Default(env.Install(dir, source = 'imgclean'))
+#
