@@ -45,3 +45,13 @@ inline __host__ __device__ void perspectiveSensor(const float3 &Ks, const float 
   return CudaShadingInterface::perspectiveSensor(Ks,aspect,lowerLeft,f);
 } // end perspectiveSensor()
 
+inline __host__ __device__ CudaScatteringDistributionFunction refraction(const float3 &Kt, const float etai, const float etat)
+{
+  return CudaShadingInterface::refraction(Kt,etai,etat);
+} // end refraction()
+
+inline __host__ __device__ void refraction(const float3 &Kt, const float etai, const float etat, CudaScatteringDistributionFunction &f)
+{
+  return CudaShadingInterface::refraction(Kt,etai,etat,f);
+} // end refraction()
+

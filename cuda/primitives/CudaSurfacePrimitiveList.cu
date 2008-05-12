@@ -115,3 +115,33 @@ void CudaSurfacePrimitiveList
                                materials + gridSize*BLOCK_SIZE);
 } // end CudaSurfacePrimitiveList::getMaterialHandles()
 
+static __global__ void getMaterialHandleInPlaceKernel(unsigned int *indices,
+                                                      const bool *stencil,
+                                                      const MaterialHandle *primToMaterial)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if(stencil[i])
+  {
+    indices[i] = primToMaterial[indices[i]];
+  } // end if
+} // end kernel()
+
+void CudaSurfacePrimitiveList
+  ::getMaterialHandles(const device_ptr<unsigned int> &indices,
+                       const device_ptr<const bool> &stencil,
+                       const size_t n) const
+{
+  unsigned int BLOCK_SIZE = 192;
+  unsigned int gridSize = n / 192;
+
+  if(gridSize)
+    getMaterialHandleInPlaceKernel<<<gridSize,BLOCK_SIZE>>>(indices,
+                                                            stencil,
+                                                            &mPrimitiveHandleToMaterialHandle[0]);
+  if(n%BLOCK_SIZE)
+    getMaterialHandleInPlaceKernel<<<1,n%BLOCK_SIZE>>>(indices + gridSize*BLOCK_SIZE,
+                                                       stencil + gridSize*BLOCK_SIZE,
+                                                       &mPrimitiveHandleToMaterialHandle[0]);
+} // end CudaSurfacePrimitiveList::getMaterialHandles()
+

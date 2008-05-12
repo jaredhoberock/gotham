@@ -45,8 +45,7 @@ __global__ void selectMaterial(const MaterialHandle *handles,
 
 void ScatteredAccessContext
   ::evaluateScattering(const device_ptr<const MaterialHandle> &m,
-                       const device_ptr<const CudaDifferentialGeometry> &dg,
-                       const size_t dgStride,
+                       const CudaDifferentialGeometryArray &dg,
                        const device_ptr<const bool> &stencil,
                        const device_ptr<CudaScatteringDistributionFunction> &f,
                        const size_t n)
@@ -84,15 +83,14 @@ void ScatteredAccessContext
                                            &materialStencil[gridSize*BLOCK_SIZE]);
 
       // run the shader
-      material->evaluateScattering(*this, dg, dgStride, &materialStencil[0], f, n);
+      material->evaluateScattering(*this, dg, &materialStencil[0], f, n);
     } // end if
   } // end for i
 } // end ScatteredAccessContext::evaluateScattering()
 
 void ScatteredAccessContext
   ::evaluateEmission(const device_ptr<const MaterialHandle> &m,
-                     const device_ptr<const CudaDifferentialGeometry> &dg,
-                     const size_t dgStride,
+                     const CudaDifferentialGeometryArray &dg,
                      const device_ptr<const bool> &stencil,
                      const device_ptr<CudaScatteringDistributionFunction> &f,
                      const size_t n)
@@ -129,15 +127,14 @@ void ScatteredAccessContext
                                            &materialStencil[gridSize*BLOCK_SIZE]);
 
       // run the shader
-      material->evaluateEmission(*this, dg, dgStride, &materialStencil[0], f, n);
+      material->evaluateEmission(*this, dg, &materialStencil[0], f, n);
     } // end if
   } // end for i
 } // end ScatteredAccessContext::evaluateEmission()
 
 void ScatteredAccessContext
   ::evaluateSensor(const device_ptr<const MaterialHandle> &m,
-                   const device_ptr<const CudaDifferentialGeometry> &dg,
-                   const size_t dgStride,
+                   const CudaDifferentialGeometryArray &dg,
                    const device_ptr<CudaScatteringDistributionFunction> &f,
                    const size_t n)
 {
@@ -169,7 +166,7 @@ void ScatteredAccessContext
 
       // run the shader
       // normal stride
-      material->evaluateSensor(*this, dg, dgStride, &materialStencil[0], f, n);
+      material->evaluateSensor(*this, dg, &materialStencil[0], f, n);
     } // end if
   } // end for
 } // end ScatteredAccessContext::evaluateSensor()

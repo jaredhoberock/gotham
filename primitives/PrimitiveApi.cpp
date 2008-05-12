@@ -8,7 +8,7 @@
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../primitives/PrimitiveBSP.h"
 #include "TriangleBVH.h"
-#include "../cuda/primitives/CUDATriangleBVH.h"
+#include "../cuda/primitives/CudaTriangleBVH.h"
 #include "../cuda/primitives/CudaScene.h"
 #include "Scene.h"
 #include "UnshadowedScene.h"
@@ -26,7 +26,7 @@ PrimitiveList *PrimitiveApi
 
   if(numThreads > 1)
   {
-    CUDATriangleBVH *bvh = new RasterizablePrimitiveList<CUDATriangleBVH>();
+    CudaTriangleBVH *bvh = new RasterizablePrimitiveList<CudaTriangleBVH>();
     bvh->setWorkBatchSize(numThreads);
     result = bvh;
   } // end if
@@ -52,7 +52,7 @@ SurfacePrimitiveList *PrimitiveApi
   if(numThreads > 1)
   {
     // XXX no need for this to be a bvh
-    CUDATriangleBVH *bvh = new RasterizablePrimitiveList<CUDATriangleBVH>();
+    CudaTriangleBVH *bvh = new RasterizablePrimitiveList<CudaTriangleBVH>();
     bvh->setWorkBatchSize(numThreads);
     result = bvh;
   } // end if

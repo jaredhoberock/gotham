@@ -7,12 +7,14 @@
 #include "../../geometry/Ray.h"
 #include "../../records/RenderFilm.h"
 #include "../primitives/CudaIntersection.h"
+#include "../geometry/CudaDifferentialGeometryVector.h"
 #include <vector_functions.h>
 #include <stdcuda/cuda_algorithm.h>
 #include "../shading/CudaShadingContext.h"
 #include "../shading/CudaScatteringDistributionFunction.h"
 #include "../primitives/CudaSurfacePrimitiveList.h"
 #include "cudaDebugRendererUtil.h"
+#include <stdcuda/fill.h>
 
 using namespace stdcuda;
 
@@ -49,8 +51,9 @@ void CudaDebugRenderer
 void CudaDebugRenderer
   ::sampleEyeRays(const device_ptr<const float4> &u0,
                   const device_ptr<const float4> &u1,
-                  const device_ptr<float4> &originsAndMinT,
-                  const device_ptr<float4> &directionsAndMaxT,
+                  const device_ptr<float3> &origins,
+                  const device_ptr<float3> &directions,
+                  const device_ptr<float2> &intervals,
                   const device_ptr<float> &pdfs,
                   const size_t n) const
 {
@@ -58,15 +61,15 @@ void CudaDebugRenderer
   const CudaSurfacePrimitiveList &sensors = dynamic_cast<const CudaSurfacePrimitiveList&>(*mScene->getSensors());
 
   vector_dev<PrimitiveHandle> prims(n);
-  vector_dev<CudaDifferentialGeometry> dg(n);
+  CudaDifferentialGeometryVector dg(n);
 
   // sample eye points
-  sensors.sampleSurfaceArea(u0, &prims[0], &dg[0], pdfs, n);
+  sensors.sampleSurfaceArea(u0, &prims[0], dg, pdfs, n);
 
   // get a list of MaterialHandles
   const CudaSurfacePrimitiveList &primitives = dynamic_cast<const CudaSurfacePrimitiveList&>(*mScene->getPrimitives());
   vector_dev<MaterialHandle> materials(n);
-  primitives.getMaterialHandles(&prims[0],
+  primitives.getMaterialHandles(device_ptr<const PrimitiveHandle>(&prims[0]),
                                 &materials[0],
                                 n);
 
@@ -77,14 +80,9 @@ void CudaDebugRenderer
   // evaluate sensor shader
   CudaShadingContext *context = dynamic_cast<CudaShadingContext*>(mShadingContext.get());
   context->evaluateSensor(&materials[0],
-                          &dg[0],
-                          sizeof(CudaDifferentialGeometry),
+                          dg,
                           &sensorFunctions[0],
                           n);
-
-  // reinterpret directionsAndMaxT into a float3 *
-  float4 *temp = directionsAndMaxT;
-  device_ptr<float3> wo(reinterpret_cast<float3*>(temp));
 
   // reinterpret u1 into a float3 *
   const float4 *temp2 = u1;
@@ -94,64 +92,50 @@ void CudaDebugRenderer
   vector_dev<bool> delta(n);
   vector_dev<float3> s(n);
   context->sampleUnidirectionalScattering(&sensorFunctions[0],
-                                          &dg[0],
-                                          sizeof(CudaDifferentialGeometry),
+                                          dg,
                                           u1AsAFloat3,
                                           sizeof(float4),
                                           &s[0],
+                                          &directions[0],
                                           sizeof(float3),
-                                          wo,
-                                          sizeof(float4),
                                           &pdfs[0],
-                                          sizeof(float),
                                           &delta[0],
-                                          sizeof(bool),
                                           n);
 
   // copy from differential geometry into originsAndMinT
+  stdcuda::copy(dg.mPoints, dg.mPoints + n, origins);
+
   // set min t to epsilon
   // set max t to infinity
-  sampleEyeRaysEpilogue(&dg[0], &originsAndMinT[0], &directionsAndMaxT[0], n);
+  stdcuda::fill(intervals, intervals + n, make_float2(0.0005f, std::numeric_limits<float>::infinity()));
 } // end CudaDebugRenderer::sampleEyeRay()
 
 void CudaDebugRenderer
-  ::shade(device_ptr<const float4> directionsAndMaxT,
-          device_ptr<const CudaIntersection> intersectionsDevice,
-          device_ptr<const bool> stencilDevice,
-          device_ptr<float3> results,
+  ::shade(const device_ptr<const float3> &directions,
+          const CudaDifferentialGeometryArray &dg,
+          const device_ptr<const PrimitiveHandle> &hitPrims,
+          const device_ptr<const bool> &stencil,
+          const device_ptr<float3> &results,
           const size_t n) const
 {
   CudaShadingContext *context = dynamic_cast<CudaShadingContext*>(mShadingContext.get());
 
-  // get a pointer to the first CudaDifferentialGeometry
-  // in the first CudaIntersection in the list
-  const void *temp = intersectionsDevice;
-  device_ptr<const CudaDifferentialGeometry> firstDg(reinterpret_cast<const CudaDifferentialGeometry*>(temp));
-
-  // get a pointer to the first PrimitiveHandle
-  // in the first CudaIntersection in the list
-  // the PrimitiveHandle immediately follows the DifferentialGeometry, so
-  // index the "2nd" DifferentialGeometry to get this pointer
-  temp = &firstDg[1];
-  device_ptr<const PrimitiveHandle> firstPrimHandle(reinterpret_cast<const PrimitiveHandle*>(temp));
-  
   // get a list of MaterialHandles
   const CudaSurfacePrimitiveList &primitives = dynamic_cast<const CudaSurfacePrimitiveList&>(*mScene->getPrimitives());
-  vector_dev<MaterialHandle> materialsDevice(n);
-  primitives.getMaterialHandles(firstPrimHandle,
-                                sizeof(CudaIntersection),
-                                &stencilDevice[0],
-                                &materialsDevice[0],
+  vector_dev<MaterialHandle> materials(n);
+  primitives.getMaterialHandles(hitPrims,
+                                sizeof(PrimitiveHandle),
+                                &stencil[0],
+                                &materials[0],
                                 n);
 
   // allocate space for scattering functions
   vector_dev<CudaScatteringDistributionFunction> cf(n);
 
   // evaluate scattering shader
-  context->evaluateScattering(&materialsDevice[0],
-                              firstDg,
-                              sizeof(CudaIntersection),
-                              &stencilDevice[0],
+  context->evaluateScattering(&materials[0],
+                              dg,
+                              &stencil[0],
                               &cf[0],
                               n);
 
@@ -159,44 +143,39 @@ void CudaDebugRenderer
   vector_dev<CudaScatteringDistributionFunction> ce(n);
 
   // evaluate emission shader
-  context->evaluateEmission(&materialsDevice[0],
-                            firstDg,
-                            sizeof(CudaIntersection),
-                            &stencilDevice[0],
+  context->evaluateEmission(&materials[0],
+                            dg,
+                            &stencil[0],
                             &ce[0],
                             n);
 
   // XXX kill these temps
-  vector_dev<float3> woDevice(n);
-  rayDirectionsToWo(&directionsAndMaxT[0],
-                    &woDevice[0],
-                    n);
+  vector_dev<float3> wo(n);
+  flipVectors(&directions[0], &wo[0], n);
 
   // evaluate scattering bsdf
-  vector_dev<float3> scatteringDevice(n);
+  vector_dev<float3> scattering(n);
   context->evaluateBidirectionalScattering(&cf[0],
-                                           &woDevice[0],
-                                           firstDg,
-                                           sizeof(CudaIntersection),
-                                           &woDevice[0],
-                                           &stencilDevice[0],
-                                           &scatteringDevice[0],
+                                           &wo[0],
+                                           dg,
+                                           &wo[0],
+                                           &stencil[0],
+                                           &scattering[0],
                                            n);
 
   // evaluate emission bsdf
-  vector_dev<float3> emissionDevice(n);
+  vector_dev<float3> emission(n);
   context->evaluateUnidirectionalScattering(&ce[0],
-                                            &woDevice[0],
-                                            firstDg,
-                                            sizeof(CudaIntersection),
-                                            &stencilDevice[0],
-                                            &emissionDevice[0],
+                                            &wo[0],
+                                            dg,
+                                            &stencil[0],
+                                            &emission[0],
                                             n);
 
   // sum into results
-  sumScatteringAndEmission(&scatteringDevice[0],
-                           &emissionDevice[0],
-                           &stencilDevice[0],
+  sumScatteringAndEmission(&scattering[0],
+                           &emission[0],
+                           &stencil[0],
                            &results[0],
                            n);
 } // end CudaDebugRenderer::shade()
@@ -228,17 +207,16 @@ void CudaDebugRenderer
   size_t numBatches = totalWork / mWorkBatchSize;
 
   // allocate per-thread data
-  stdcuda::vector_dev<float4> originsAndMinT(totalWork);
-  stdcuda::vector_dev<float4> directionsAndMaxT(totalWork);
+  stdcuda::vector_dev<float3> origins(totalWork);
+  stdcuda::vector_dev<float3> directions(totalWork);
+  stdcuda::vector_dev<float2> intervals(totalWork);
   stdcuda::vector_dev<float> pdfsDevice(totalWork);
   stdcuda::vector_dev<float4> u0(totalWork);
   stdcuda::vector_dev<float4> u1(totalWork);
   std::vector<float> pdfs(totalWork);
   stdcuda::vector_dev<CudaIntersection> intersectionsDevice(totalWork);
-
-  // XXX eliminate this
-  std::vector<Ray> rays(totalWork);
-
+  CudaDifferentialGeometryVector dg(totalWork);
+  stdcuda::vector_dev<PrimitiveHandle> hitPrims(totalWork);
 
   // init stencil to 1
   stdcuda::vector_dev<bool> stencilDevice(totalWork);
@@ -261,8 +239,9 @@ void CudaDebugRenderer
   {
     sampleEyeRays(&u0[i * mWorkBatchSize],
                   &u1[i * mWorkBatchSize],
-                  &originsAndMinT[i * mWorkBatchSize],
-                  &directionsAndMaxT[i * mWorkBatchSize],
+                  &origins[i * mWorkBatchSize],
+                  &directions[i * mWorkBatchSize],
+                  &intervals[i * mWorkBatchSize],
                   &pdfsDevice[i * mWorkBatchSize],
                   mWorkBatchSize);
 
@@ -273,8 +252,9 @@ void CudaDebugRenderer
   } // end for i
   sampleEyeRays(&u0[numBatches * mWorkBatchSize],
                 &u1[numBatches * mWorkBatchSize],
-                &originsAndMinT[numBatches * mWorkBatchSize],
-                &directionsAndMaxT[numBatches * mWorkBatchSize],
+                &origins[numBatches * mWorkBatchSize],
+                &directions[numBatches * mWorkBatchSize],
+                &intervals[numBatches * mWorkBatchSize],
                 &pdfsDevice[numBatches * mWorkBatchSize],
                 totalWork % mWorkBatchSize);
 
@@ -283,14 +263,15 @@ void CudaDebugRenderer
   progress += totalWork % mWorkBatchSize;
 
   // intersect en masse
-  intersect(&originsAndMinT[0], &directionsAndMaxT[0], &intersectionsDevice[0], &stencilDevice[0], totalWork);
+  intersect(&origins[0], &directions[0], &intervals[0], dg, &hitPrims[0], &stencilDevice[0], totalWork);
   progress += totalWork;
 
   // shade
   for(size_t i = 0; i != numBatches; ++i)
   {
-    shade(&directionsAndMaxT[i * mWorkBatchSize],
-          &intersectionsDevice[i * mWorkBatchSize],
+    shade(&directions[i * mWorkBatchSize],
+          dg + i * mWorkBatchSize,
+          &hitPrims[i * mWorkBatchSize],
           &stencilDevice[i * mWorkBatchSize],
           &results[i * mWorkBatchSize],
           mWorkBatchSize);
@@ -302,8 +283,9 @@ void CudaDebugRenderer
   } // end for i
 
   // shade the last partial batch
-  shade(&directionsAndMaxT[numBatches * mWorkBatchSize],
-        &intersectionsDevice[numBatches * mWorkBatchSize],
+  shade(&directions[numBatches * mWorkBatchSize],
+        dg + numBatches * mWorkBatchSize,
+        &hitPrims[numBatches * mWorkBatchSize],
         &stencilDevice[numBatches * mWorkBatchSize],
         &results[numBatches * mWorkBatchSize],
         totalWork % mWorkBatchSize);
@@ -330,10 +312,12 @@ void CudaDebugRenderer
 } // end CudaDebugRenderer::kernel()
 
 void CudaDebugRenderer
-  ::intersect(device_ptr<const float4> originsAndMinT,
-              device_ptr<const float4> directionsAndMaxT,
-              device_ptr<CudaIntersection> intersections,
-              device_ptr<bool> stencil,
+  ::intersect(const device_ptr<const float3> &origins,
+              const device_ptr<const float3> &directions,
+              const device_ptr<const float2> &intervals,
+              CudaDifferentialGeometryArray &dg,
+              const device_ptr<PrimitiveHandle> &hitPrims,
+              const device_ptr<bool> &stencil,
               const size_t n)
 {
   const CudaScene *scene = static_cast<const CudaScene*>(mScene.get());
@@ -341,22 +325,26 @@ void CudaDebugRenderer
   // compute the total number of batches we need to complete the work
   size_t numBatches = n / mWorkBatchSize;
 
-  device_ptr<const float4> o = originsAndMinT;
-  device_ptr<const float4> d = directionsAndMaxT;
-  device_ptr<CudaIntersection> inter = intersections;
+  device_ptr<const float3> o = origins;
+  device_ptr<const float3> d = directions;
+  device_ptr<const float2> i = intervals;
+  CudaDifferentialGeometryArray dgPtr = dg;
+  device_ptr<PrimitiveHandle> hitPrimsPtr = hitPrims;
   device_ptr<bool> s = stencil;
-  device_ptr<const float4> end = o + numBatches * mWorkBatchSize;
+  device_ptr<const float3> end = o + numBatches * mWorkBatchSize;
   for(;
       o != end;
       o += mWorkBatchSize,
       d += mWorkBatchSize,
-      inter += mWorkBatchSize,
+      i += mWorkBatchSize,
+      dgPtr += mWorkBatchSize,
+      hitPrimsPtr += mWorkBatchSize,
       s += mWorkBatchSize)
   {
-    scene->intersect(o, d, inter, s, mWorkBatchSize);
+    scene->intersect(o, d, i, dgPtr, hitPrimsPtr, s, mWorkBatchSize);
   } // end for i
 
   // do the last partial batch
-  scene->intersect(o, d, inter, s, n % mWorkBatchSize);
+  scene->intersect(o, d, i, dgPtr, hitPrimsPtr, s, n % mWorkBatchSize);
 } // end CudaDebugRenderer::intersect()
 

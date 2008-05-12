@@ -18,11 +18,9 @@ template<typename V3, typename S3, typename DG>
     ::HemisphericalEmissionBase(const S3 &radiosity)
       :mRadiance(radiosity)
 {
-  // XXX god this is so shitty but we have to do it to be
-  //     compatible with CUDA vectors
-  ((float*)&mRadiance)[0] *= INV_PI;
-  ((float*)&mRadiance)[1] *= INV_PI;
-  ((float*)&mRadiance)[2] *= INV_PI;
+  mRadiance.x *= INV_PI;
+  mRadiance.y *= INV_PI;
+  mRadiance.z *= INV_PI;
 } // end HemisphericalEmissionBase::HemisphericalEmissionBase()
 
 template<typename V3, typename S3, typename DG>
@@ -45,16 +43,22 @@ template<typename V3, typename S3, typename DG>
   S3 HemisphericalEmissionBase<V3,S3,DG>
     ::evaluate(const V3 &wo, const DG &dg) const
 {
+  return evaluate(wo, dg.getNormal());
+} // end HemisphericalEmissionBase::evaluate()
+
+template<typename V3, typename S3, typename DG>
+  S3 HemisphericalEmissionBase<V3,S3,DG>
+    ::evaluate(const V3 &wo,
+               const V3 &normal) const
+{
   S3 result;
 
-  // XXX god this is so shitty but we have to do it to be
-  //     compatible with CUDA vectors
-  ((float*)&result)[0] = 0;
-  ((float*)&result)[1] = 0;
-  ((float*)&result)[2] = 0;
+  result.x = 0;
+  result.y = 0;
+  result.z = 0;
 
   // are we pointing in the same direction?
-  if(dot(wo,dg.getNormal()) > 0)
+  if(dot(wo,normal) > 0)
   {
     result = mRadiance;
   } // end if

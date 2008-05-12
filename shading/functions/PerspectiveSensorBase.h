@@ -44,6 +44,21 @@ template<typename V3, typename S3, typename DG>
      */
     inline Spectrum evaluate(const Vector &ws,
                              const DifferentialGeometry &dg) const;
+
+    /*! This method evaluates this PerspectiveSensor's sensor response
+     *  to radiance in a given sensing direction.
+     *  \param ws A vector pointing towards the incoming direction.
+     *  \param point The position of the point of interest.
+     *  \param tangent The tangent vector at the point of interest.
+     *  \param binormal The binormal vector at the point of interest.
+     *  \param normal The normal vector at the point of interest.
+     *  \return The sensor response to incoming radiance from ws.
+     */
+    inline Spectrum evaluate(const Vector &ws,
+                             const Point &point,
+                             const Vector &tangent,
+                             const Vector &binormal,
+                             const Vector &normal) const;
     
     /*! This method which samples this PerspectiveSensor's sensor window
      *  given a DifferentialGeometry, and two numbers.
@@ -59,6 +74,33 @@ template<typename V3, typename S3, typename DG>
      *          is returned here.
      */
     inline Spectrum sample(const DifferentialGeometry &dg,
+                           const float u0,
+                           const float u1,
+                           const float u2,
+                           Vector &ws,
+                           float &pdf,
+                           bool &delta) const;
+
+    /*! This method which samples this PerspectiveSensor's sensor window
+     *  given a DifferentialGeometry, and two numbers.
+     *  \param point The position on the sensor.
+     *  \param tangent The tangent direction at point.
+     *  \param binormal The binormal direction at point.
+     *  \param normal The normal direction at point.
+     *  \param u0 A real number in [0,1).
+     *  \param u1 A second real number in [0,1).
+     *  \param u2 A third real number in [0,1).
+     *  \param ws The direction of sensing is returned here.
+     *  \param pdf The value of the solid angle pdf at (u0,u1) is
+     *             returned here.
+     *  \param delta This is set to false.
+     *  \return The sensor response to incoming radiance from ws
+     *          is returned here.
+     */
+    inline Spectrum sample(const Point &point,
+                           const Vector &tangent,
+                           const Vector &binormal,
+                           const Vector &normal,
                            const float u0,
                            const float u1,
                            const float u2,
@@ -88,6 +130,21 @@ template<typename V3, typename S3, typename DG>
      */
     inline float evaluatePdf(const Vector &ws,
                              const DifferentialGeometry &dg) const;
+
+    /*! This method evaluates the solid angle pdf of the
+     *  sensing direction of interest.
+     *  \param ws The sensing direction of interest.
+     *  \param point The position of the point of interest.
+     *  \param tangent The tangent at the Point of interest.
+     *  \param binormal The binormal at the Point of interest.
+     *  \param normal The normal at the Point of interest.
+     *  \return The solid angle pdf of ws.
+     */
+    inline float evaluatePdf(const Vector &ws,
+                             const Point &point,
+                             const Vector &tangent,
+                             const Vector &binormal,
+                             const Vector &normal) const;
 
   protected:
     /*! This method samples the surface area of the window.

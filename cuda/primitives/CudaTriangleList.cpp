@@ -14,12 +14,23 @@ void CudaTriangleList
 
   mTotalSurfaceArea = 0;
 
+  // create temporary host-side arrays of each
+  // triangle's vertices
+  std::vector<float3> firstVertex(mFirstVertex.size());
+  stdcuda::copy(mFirstVertex.begin(), mFirstVertex.end(), firstVertex.begin());
+
+  std::vector<float3> secondVertex(mSecondVertex.size());
+  stdcuda::copy(mSecondVertex.begin(), mSecondVertex.end(), secondVertex.begin());
+
+  std::vector<float3> thirdVertex(mThirdVertex.size());
+  stdcuda::copy(mThirdVertex.begin(), mThirdVertex.end(), thirdVertex.begin());
+
   // collect triangle areas
   for(size_t i = 0; i != mFirstVertex.size(); ++i)
   {
-    float3 temp0 = mFirstVertex[i];
-    float3 temp1 = mSecondVertex[i];
-    float3 temp2 = mThirdVertex[i];
+    float3 temp0 = firstVertex[i];
+    float3 temp1 = secondVertex[i];
+    float3 temp2 = thirdVertex[i];
 
     Vector v0(temp0.x, temp0.y, temp0.z);
     Vector v1(temp1.x, temp1.y, temp1.z);

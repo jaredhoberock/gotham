@@ -6,21 +6,23 @@ import inspect
 exec open('/home/jared/dev/src/gotham/bin/pbslc')
 
 class CudaShaderCompiler(ShaderCompiler):
-  # define some global variables defined in all shaders
+  # define some global variables defined in all shaders which use
+  # the new CudaDifferentialGeometryArray interface
   __globalCudaVariables__ = '''
-int i = blockIdx.x * blockDim.x + threadIdx.x;
-const char *ptr = reinterpret_cast<const char *>(dg) + i*dgStride;
-const CudaDifferentialGeometry &diffG = *reinterpret_cast<const CudaDifferentialGeometry*>(ptr);
-const float3 &P  = diffG.getPoint();
-const float3 &N  = diffG.getNormal();
-const float3 &T  = diffG.getTangent();
-const float3 &B  = diffG.getBinormal();
-const float2 &UV = diffG.getParametricCoordinates();
-const float3 &dpdu = diffG.getDPDU();
-const float3 &dpdv = diffG.getDPDV();
-      float area = diffG.getSurfaceArea();
-      float invArea = diffG.getInverseSurfaceArea();
+const int i = blockIdx.x * blockDim.x + threadIdx.x;
+// XXX these produce warnings when they are unused, but
+//     the other variables don't for some reason
+const float3 &P = dg.mPoints[i];
+const float3 &N = dg.mNormals[i];
+const float3 &T = dg.mTangents[i];
+const float3 &B = dg.mBinormals[i];
+const float2 &UV = dg.mParametricCoordinates[i];
+const float3 &dpdu = dg.mDPDUs[i];
+const float3 &dpdv = dg.mDPDVs[i];
+const float area = dg.mSurfaceAreas[i];
+const float invArea = dg.mInverseSurfaceAreas[i];
 '''
+
   # define the global variables defined in scattering shaders
   __globalScatteringCudaVariables__ = __globalCudaVariables__ + 'CudaScatteringDistributionFunction &F = f[i];\n'
 
@@ -32,7 +34,7 @@ const float3 &dpdv = diffG.getDPDV();
 
   def createCudaIncludeCode(self):
     return '''
-#include "../geometry/CudaDifferentialGeometry.h"
+#include "../geometry/CudaDifferentialGeometryArray.h"
 #include "../shading/CudaScatteringDistributionFunction.h"
 #include "CudaShadingInterface.h"
 #include "stdcudamaterial.h"
@@ -51,10 +53,9 @@ const float3 &dpdv = diffG.getDPDV();
 
   def createThunkHeader(self, name, parametersList):
     result = '''
-// make sure this name gets mangled correctly
+// make sure these function names gets mangled correctly
 extern "C" void %sThunk(CudaShadingInterface &context,
-                        const CudaDifferentialGeometry *dg,
-                        const size_t dgStride,
+                        const CudaDifferentialGeometryArray &dg,
                         const bool *stencil,
                         CudaScatteringDistributionFunction *f,
                         const size_t n
@@ -86,13 +87,12 @@ extern "C" void %sThunk(CudaShadingInterface &context,
     # add our own special sauce
     shaderString += '''
 virtual void evaluate%s(CudaShadingInterface &context,
-                        const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                        const size_t dgStride,
+                        const CudaDifferentialGeometryArray &dg,
                         const stdcuda::device_ptr<const bool> &stencil,
                         const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                         const size_t n) const
 {
-  %sThunk(context, dg, dgStride, stencil, f, n
+  %sThunk(context, dg, stencil, f, n
 '''
     # substitute in name
     shaderString = shaderString % (name, name)
@@ -111,17 +111,16 @@ virtual void evaluate%s(CudaShadingInterface &context,
 '''
     return shaderString
 
-  def createShaderCudaCode(self, className, shaderName, shaderBody, shaderParametersList, shaderGlobalVariables):
+  def createShaderCudaCode(self, className, shaderName, kernelName, shaderBody, shaderParametersList, shaderGlobalVariables):
     kernelDefinition = '''
-__global__ void %sK(const CudaDifferentialGeometry *dg,
-                    const int dgStride,
-                    const bool *stencil,
-                    CudaScatteringDistributionFunction *f
-                    // shader parameters follow
-                    %s)
+__global__ void %s(const CudaDifferentialGeometryArray dg,
+                   const bool *stencil,
+                   CudaScatteringDistributionFunction *f
+                   // shader parameters follow
+                   %s)
 {
   // global variables follow
-  %s 
+  %s
   if(stencil[i])
   {
     // shader body follows
@@ -130,7 +129,7 @@ __global__ void %sK(const CudaDifferentialGeometry *dg,
 }
 '''
     # substitute into kernelDefinition
-    kernelDefinition = kernelDefinition % (shaderName,
+    kernelDefinition = kernelDefinition % (kernelName,
                                            self.createShaderParametersDeclarations(shaderParametersList),
                                            shaderGlobalVariables,
                                            shaderBody)
@@ -143,12 +142,10 @@ __global__ void %sK(const CudaDifferentialGeometry *dg,
   unsigned int gridSize = n / BLOCK_SIZE;
 
   if(gridSize)
-    %sK<<<gridSize,BLOCK_SIZE>>>(dg, dgStride, stencil, f %s);
+    %s<<<gridSize,BLOCK_SIZE>>>(dg, stencil, f %s);
   if(n%%BLOCK_SIZE)
   {
-    const char *temp = reinterpret_cast<const char*>(dg) + dgStride*gridSize*BLOCK_SIZE;
-    %sK<<<1,n%%BLOCK_SIZE>>>(reinterpret_cast<const CudaDifferentialGeometry*>(temp),
-                            dgStride,
+    %s<<<1,n%%BLOCK_SIZE>>>(dg + gridSize * BLOCK_SIZE,
                             stencil + gridSize*BLOCK_SIZE,
                             f + gridSize*BLOCK_SIZE %s);
   }
@@ -160,9 +157,9 @@ __global__ void %sK(const CudaDifferentialGeometry *dg,
       shaderParameterPassing += ', %s' % param[1]
     # substitute into thunkDefinition
     thunkDefinition = thunkDefinition % (self.createThunkHeader(shaderName, shaderParametersList),
-                                         shaderName,
+                                         kernelName,
                                          shaderParameterPassing,
-                                         shaderName,
+                                         kernelName,
                                          shaderParameterPassing)
 
     return kernelDefinition + thunkDefinition
@@ -180,10 +177,11 @@ __global__ void %sK(const CudaDifferentialGeometry *dg,
     if scatteringBody != '':
       # rebuild a shader string
       scatteringString = self.createShaderCudaCode(className,
-                                                   'Scattering',
-                                                   scatteringBody,
-                                                   scatteringParametersList,
-                                                   self.__globalScatteringCudaVariables__)
+                                                    'Scattering',
+                                                    'Sc',
+                                                    scatteringBody,
+                                                    scatteringParametersList,
+                                                    self.__globalScatteringCudaVariables__)
 
     # try to parse 'emission'
     emissionString = ''
@@ -191,10 +189,11 @@ __global__ void %sK(const CudaDifferentialGeometry *dg,
     (emissionParametersList, emissionBody) = self.parseFunction('emission', shaderString)
     if emissionBody != '':
       emissionString = self.createShaderCudaCode(className,
-                                                 'Emission',
-                                                 emissionBody,
-                                                 emissionParametersList,
-                                                 self.__globalEmissionCudaVariables__)
+                                                  'Emission',
+                                                  'Em',
+                                                  emissionBody,
+                                                  emissionParametersList,
+                                                  self.__globalEmissionCudaVariables__)
 
     # try to parse 'sensor'
     sensorString = ''
@@ -202,10 +201,11 @@ __global__ void %sK(const CudaDifferentialGeometry *dg,
     (sensorParametersList, sensorBody) = self.parseFunction('sensor', shaderString)
     if sensorBody != '':
       sensorString = self.createShaderCudaCode(className,
-                                               'Sensor',
-                                               sensorBody,
-                                               sensorParametersList,
-                                               self.__globalSensingCudaVariables__)
+                                                'Sensor',
+                                                'Se',
+                                                sensorBody,
+                                                sensorParametersList,
+                                                self.__globalSensingCudaVariables__)
 
     # standard includes
     compileMe = ''
@@ -296,8 +296,7 @@ elif os.name == 'nt':
                 '/home/jared/dev/src/gotham/geometry',
                 '/usr/local/cuda/include']
     makefile += 'includes = ' + `includes` + '\n'
-    makefile += 'env.Append(CPPPATH = includes)\n'
-
+    makefile += 'env.Append(CPPPATH = includes)\n' 
     # uncomment these two lines for emudebug mode
     #makefile += "env.Append(SHNVCCFLAGS = ['-deviceemu'])\n"
     #makefile += "env['CPPFLAGS'] = '-g'\n"

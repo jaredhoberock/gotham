@@ -20,11 +20,18 @@ class CudaDefaultMaterial
 
     virtual const char *getName(void) const;
 
+    /*! This method evaluates this CudaMaterial's scattering shader on a
+     *  list of CudaDifferentialGeometrys in SIMD fashion.
+     *  \param context A context for shader evaluation.
+     *  \param dg A list of shading points.
+     *  \param stencil A stencil to control which jobs get processed.
+     *  \param f The result of each shading job is returned to this list.
+     *  \param n The size of the lists.
+     */
     using Parent::evaluateScattering;
     virtual void evaluateScattering(CudaShadingInterface &context,
-                                    const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                    const size_t dgStride,
-                                    const stdcuda::device_ptr<const int> &stencil,
+                                    const CudaDifferentialGeometryArray &dg,
+                                    const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                     const size_t n) const;
 }; // end CudaDefaultMaterial

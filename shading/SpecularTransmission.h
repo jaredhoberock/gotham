@@ -9,16 +9,22 @@
 
 #include <spectrum/Spectrum.h>
 #include "DeltaDistributionFunction.h"
-#include "Fresnel.h"
+#include "functions/SpecularTransmissionBase.h"
 
 class SpecularTransmission
-  : public DeltaDistributionFunction
+  : public DeltaDistributionFunction,
+    public SpecularTransmissionBase<Vector,Spectrum,DifferentialGeometry>
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef DeltaDistributionFunction Parent;
+    typedef DeltaDistributionFunction Parent0;
+
+    /*! \typedef Parent1
+     *  \brief Shorthand.
+     */
+    typedef SpecularTransmissionBase<Vector,Spectrum,DifferentialGeometry> Parent1;
 
     /*! Constructor accepts a transmission and indices of refraction.
      *  \param t The transmittance of this SpecularTransmission.
@@ -80,15 +86,6 @@ class SpecularTransmission
                               const bool delta,
                               const ComponentIndex component,
                               float &pdf) const;
-
-  protected:
-    /*! The transmittance.
-     */
-    Spectrum mTransmittance;
-
-    /*! The Fresnel dielectric.
-     */
-    FresnelDielectric mFresnel;
 }; // end SpecularTransmission
 
 #endif // SPECULAR_TRANSMISSION_H

@@ -10,6 +10,7 @@
 #include "../../primitives/PrimitiveHandle.h"
 #include "../../shading/MaterialHandle.h"
 #include "../geometry/CudaDifferentialGeometry.h"
+#include "../geometry/CudaDifferentialGeometryArray.h"
 
 class CudaSurfacePrimitiveList
 {
@@ -62,6 +63,20 @@ class CudaSurfacePrimitiveList
                                     const stdcuda::device_ptr<MaterialHandle> &materials,
                                     const size_t n) const;
 
+    /*! This method fills requests for MaterialHandles
+     *  given a set of PrimitiveHandles. This method returns the
+     *  MaterialHandles in place.
+     *  \param indices The list of PrimitiveHandles of interest,
+     *                 presumably belonging to this CudaSurfacePrimitiveList.
+     *                 Each element of this list will be replaced with the
+     *                 corresponding MaterialHandle.
+     *  \param stencil A stencil to control which requests get processed.
+     *  \param n The length of each list.
+     */
+    virtual void getMaterialHandles(const stdcuda::device_ptr<unsigned int> &indices,
+                                    const stdcuda::device_ptr<const bool> &stencil,
+                                    const size_t n) const;
+
     /*! This method samples the surface area of this CudaSurfacePrimitiveList
      *  in a SIMD fashion.
      *  \param u A list of points in [0,1)^4
@@ -73,6 +88,19 @@ class CudaSurfacePrimitiveList
     virtual void sampleSurfaceArea(const stdcuda::device_ptr<const float4> &u,
                                    const stdcuda::device_ptr<PrimitiveHandle> &prims,
                                    const stdcuda::device_ptr<CudaDifferentialGeometry> &dg,
+                                   const stdcuda::device_ptr<float> &pdf,
+                                   const size_t n) const = 0;
+
+    virtual void sampleSurfaceArea(const stdcuda::device_ptr<const float4> &u,
+                                   const stdcuda::device_ptr<PrimitiveHandle> &prims,
+                                   CudaDifferentialGeometryArray &dg,
+                                   const stdcuda::device_ptr<float> &pdf,
+                                   const size_t n) const = 0;
+
+    virtual void sampleSurfaceArea(const stdcuda::device_ptr<const float4> &u,
+                                   const stdcuda::device_ptr<const bool> &stencil,
+                                   const stdcuda::device_ptr<PrimitiveHandle> &prims,
+                                   CudaDifferentialGeometryArray &dg,
                                    const stdcuda::device_ptr<float> &pdf,
                                    const size_t n) const = 0;
 

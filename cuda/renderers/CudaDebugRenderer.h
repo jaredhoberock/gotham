@@ -37,8 +37,9 @@ class CudaDebugRenderer
 
     virtual void sampleEyeRays(const stdcuda::device_ptr<const float4> &u0,
                                const stdcuda::device_ptr<const float4> &u1,
-                               const stdcuda::device_ptr<float4> &originsAndMinT,
-                               const stdcuda::device_ptr<float4> &directionsAndMaxT,
+                               const stdcuda::device_ptr<float3> &origins,
+                               const stdcuda::device_ptr<float3> &directions,
+                               const stdcuda::device_ptr<float2> &intervals,
                                const stdcuda::device_ptr<float> &pdfs,
                                const size_t n) const;
 
@@ -46,22 +47,24 @@ class CudaDebugRenderer
                                      stdcuda::vector_dev<float4> &u1,
                                      const size_t n) const;
 
-    virtual void shade(stdcuda::device_ptr<const float4> directionsAndMaxT,
-                       stdcuda::device_ptr<const CudaIntersection> intersectionsDevice,
-                       stdcuda::device_ptr<const bool> stencilDevice,
-                       stdcuda::device_ptr<float3> results,
+    virtual void shade(const stdcuda::device_ptr<const float3> &directions,
+                       const CudaDifferentialGeometryArray &dg,
+                       const stdcuda::device_ptr<const PrimitiveHandle> &hitPrims,
+                       const stdcuda::device_ptr<const bool> &stencil,
+                       const stdcuda::device_ptr<float3> &results,
                        const size_t n) const;
 
     virtual void deposit(const size_t batchIdx,
                          const size_t threadIdx,
                          const Spectrum *results);
 
-    virtual void intersect(stdcuda::device_ptr<const float4> originsAndMinT,
-                           stdcuda::device_ptr<const float4> directionsAndMaxT,
-                           stdcuda::device_ptr<CudaIntersection> intersections,
-                           stdcuda::device_ptr<bool> stencil,
+    virtual void intersect(const stdcuda::device_ptr<const float3> &origins,
+                           const stdcuda::device_ptr<const float3> &directions,
+                           const stdcuda::device_ptr<const float2> &intervals,
+                           CudaDifferentialGeometryArray &dg,
+                           const stdcuda::device_ptr<PrimitiveHandle> &hitPrims,
+                           const stdcuda::device_ptr<bool> &stencil,
                            const size_t n);
-
 }; // end CudaDebugRenderer
 
 #include "CudaDebugRenderer.inl"

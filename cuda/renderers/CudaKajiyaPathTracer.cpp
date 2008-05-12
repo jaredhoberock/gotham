@@ -10,9 +10,11 @@
 #include "../../numeric/RandomSequence.h"
 #include "../primitives/CudaSurfacePrimitiveList.h"
 #include "../primitives/CudaIntersection.h"
+#include "../geometry/CudaDifferentialGeometryVector.h"
 #include <stdcuda/cuda_algorithm.h>
 #include "../../records/RenderFilm.h"
 #include <hilbertsequence/HilbertSequence.h>
+#include <vector_functions.h>
 
 using namespace stdcuda;
 
@@ -70,21 +72,18 @@ void CudaKajiyaPathTracer
   // the result of each sample
   vector_dev<float3> results(workingSetSize);
   // XXX delete this
-  std::vector<float3> hostResults(workingSetSize);
+  std::vector<float3> hostResults(workingSetSize, make_float3(0,0,0));
 
   // path throughput
   vector_dev<float3> throughput(workingSetSize);
-  // storage for rays
-  vector_dev<float4> originsAndMinT(workingSetSize);
-  vector_dev<float4> directionsAndMaxT(workingSetSize);
 
-  // storage for intersections
-  vector_dev<CudaIntersection> intersections(workingSetSize);
+  // storage for rays
+  vector_dev<float3> directions(workingSetSize);
+  const float rayEpsilon = 0.00005f;
 
   // per intersection storage
-  vector_dev<PrimitiveHandle> primitives(workingSetSize);
-  vector_dev<MaterialHandle> materials(workingSetSize);
-  vector_dev<CudaDifferentialGeometry> dg(workingSetSize);
+  CudaDifferentialGeometryVector eyeDg(workingSetSize);
+  vector_dev<unsigned int> primitivesOrMaterials(workingSetSize);
   vector_dev<CudaScatteringDistributionFunction> functions(workingSetSize);
   vector_dev<float3> scattering(workingSetSize);
   vector_dev<float3> wo(workingSetSize);
@@ -93,18 +92,20 @@ void CudaKajiyaPathTracer
   vector_dev<float> pdfs(workingSetSize);
 
   // per light sample storage
-  vector_dev<CudaDifferentialGeometry> lightDg(workingSetSize);
+  CudaDifferentialGeometryVector lightDg(workingSetSize);
   vector_dev<CudaScatteringDistributionFunction> lightFunctions(workingSetSize);
   vector_dev<bool> shadowStencil(workingSetSize);
   vector_dev<float3> wi(workingSetSize);
   vector_dev<float3> emission(workingSetSize);
   vector_dev<float> geometricTerm(workingSetSize);
+  //std::cerr << "after mallocs: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
   progress.restart(workingSetSize);
 
   //size_t spp = 1;
   //size_t spp = 16;
-  size_t spp = 100;
+  //size_t spp = 100;
+  size_t spp = 1000;
 
   for(size_t pixelSample = 0; pixelSample < spp; ++pixelSample)
   {
@@ -112,204 +113,154 @@ void CudaKajiyaPathTracer
     
     // initialize
     stdcuda::fill(throughput.begin(), throughput.end(), make_float3(1,1,1));
+    //std::cerr << "after fill: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+
     stdcuda::fill(results.begin(), results.end(), make_float3(0,0,0));
+    //std::cerr << "after fill: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
     stdcuda::fill(stencil.begin(), stencil.end(), true);
+    //std::cerr << "after fill: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
     stdcuda::fill(shadowStencil.begin(), shadowStencil.end(), true);
+    //std::cerr << "after fill: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
     
     // generate random numbers
     generateHyperPoints(&u[0], u.size());
+    //std::cerr << "after generateHyperPoints(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
     // sample the surface of the sensor
-    sensors.sampleSurfaceArea(&u[0], &primitives[0], &dg[0], &pdfs[0], workingSetSize);
+    sensors.sampleSurfaceArea(&u[0], &primitivesOrMaterials[0], eyeDg, &pdfs[0], workingSetSize);
+    //std::cerr << "after sampleSurfaceArea(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
     // divide throughput by pdf
     divideByPdf(&pdfs[0], &throughput[0], workingSetSize);
+    //std::cerr << "after divideByPdf(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
-    // find each hit primitive's material
-    primitiveList.getMaterialHandles(&primitives[0], &materials[0], workingSetSize);
+    // map the primitive to its material
+    primitiveList.getMaterialHandles(&primitivesOrMaterials[0], &stencil[0], workingSetSize);
+    //std::cerr << "after getMaterialHandles(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
     // evaluate the sensor's shader
-    context.evaluateSensor(&materials[0],
-                           &dg[0],
-                           sizeof(CudaDifferentialGeometry),
+    context.evaluateSensor(&primitivesOrMaterials[0],
+                           eyeDg,
                            &functions[0],
                            workingSetSize);
+    //std::cerr << "after evaluateSensor(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
-    //   for path length
-    for(size_t pathLength = 1; pathLength <= 7; ++pathLength)
+    // for path length
+    //for(size_t pathLength = 3; pathLength <= 3; ++pathLength)
+    //for(size_t pathLength = 3; pathLength <= 5; ++pathLength)
+    for(size_t pathLength = 3; pathLength <= 7; ++pathLength)
     {
       // generate more numbers
       generateHyperPoints(&u[0], u.size());
+      //std::cerr << "after generateHyperPoints(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
-      if(pathLength == 1)
+      if(pathLength == 3)
       {
         stratify(film->getWidth(), film->getHeight(), &u[0], workingSetSize);
-      }
+        //std::cerr << "after strafity(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+      } // end if
 
       // sample distribution function
-      if(pathLength == 1)
+      if(pathLength == 3)
       {
-        // reinterpret directionsAndMaxT into a float3 *
-        float4 *temp = &directionsAndMaxT[0];
-        device_ptr<float3> wi(reinterpret_cast<float3*>(temp));
-
         // reinterpret u into a float3 *
         const float4 *temp2 = &u[0];
         device_ptr<const float3> uAsAFloat3(reinterpret_cast<const float3*>(temp2));
         context.sampleUnidirectionalScattering(&functions[0],
-                                               &dg[0],
-                                               sizeof(CudaDifferentialGeometry),
+                                               eyeDg,
                                                uAsAFloat3,
                                                sizeof(float4),
                                                &scattering[0],
+                                               &directions[0],
                                                sizeof(float3),
-                                               wi,
-                                               sizeof(float4),
                                                &pdfs[0],
-                                               sizeof(float),
                                                &delta[0],
-                                               sizeof(bool),
                                                workingSetSize);
+        //std::cerr << "after sampleUnidirectionalScattering(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
         // save the first two elements of u to use later
         extractFloat2(&u[0], &pixelLocations[0], workingSetSize);
+        //std::cerr << "after extractFloat2(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
       } // end if
       else
       {
-        // reinterpret directionsAndMaxT into a float3 *
-        float4 *temp = &directionsAndMaxT[0];
-        device_ptr<float3> wi(reinterpret_cast<float3*>(temp));
-
         // reinterpret u into a float3 *
         const float4 *temp2 = &u[0];
         device_ptr<const float3> uAsAFloat3(reinterpret_cast<const float3*>(temp2));
 
-        // get a pointer to the first CudaDifferentialGeometry
-        // in the first CudaIntersection in the list
-        const void *temp3 = &intersections[0];
-        device_ptr<const CudaDifferentialGeometry> firstDg(reinterpret_cast<const CudaDifferentialGeometry*>(temp3));
-
         // sample
-        //std::cerr << "before sample(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         context.sampleBidirectionalScattering(&functions[0],
                                               &wo[0],
                                               sizeof(float3),
-                                              firstDg,
-                                              sizeof(CudaIntersection),
+                                              eyeDg,
                                               uAsAFloat3,
                                               sizeof(float4),
                                               &stencil[0],
                                               &scattering[0],
+                                              &directions[0],
                                               sizeof(float3),
-                                              wi,
-                                              sizeof(float4),
                                               &pdfs[0],
-                                              sizeof(float),
                                               &delta[0],
-                                              sizeof(bool),
                                               &component[0],
-                                              sizeof(unsigned int),
                                               workingSetSize);
-        //std::cerr << "after sample(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-
-        // copy DifferentialGeometry from the intersections
-        // into dg
-        // XXX this really really really sucks
-        copyDifferentialGeometry(&intersections[0],&dg[0],workingSetSize);
       } // end else
-
-      // create rays
-      finalizeRays(&dg[0],
-                   0.0005f,
-                   std::numeric_limits<float>::infinity(),
-                   &stencil[0],
-                   &originsAndMinT[0],
-                   &directionsAndMaxT[0],
-                   workingSetSize);
-
-      // find intersection, update stencil
-      // XXX we need an in stencil and an out stencil
-      scene.intersect(&originsAndMinT[0],
-                      &directionsAndMaxT[0],
-                      &intersections[0],
-                      &stencil[0],
-                      workingSetSize);
-
-      // flip ray directions to wo
-      flipRayDirections(&directionsAndMaxT[0],
-                        &stencil[0],
-                        &wo[0],
-                        workingSetSize);
 
       // convert solid angle pdf into projected solid angle pdf
       // this is equivalent to multiplying throughput by the cosine term
       // XXX and might also be slower because it involves a divide
-      toProjectedSolidAnglePdf(&wo[0],
-                               &dg[0],
+      toProjectedSolidAnglePdf(&directions[0],
+                               eyeDg.mNormals,
                                &stencil[0],
                                &pdfs[0],
                                workingSetSize);
+      //std::cerr << "after toProjectedSolidAnglePdf(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+
+      // find intersection, update stencil
+      // XXX we need an in stencil and an out stencil
+      scene.intersect(eyeDg.mPoints,
+                      &directions[0],
+                      make_float2(rayEpsilon, std::numeric_limits<float>::infinity()),
+                      eyeDg,
+                      &primitivesOrMaterials[0],
+                      &stencil[0],
+                      workingSetSize);
+      //std::cerr << "after intersect(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+
+      // flip ray directions to wo
+      flipVectors(&directions[0], &stencil[0], &wo[0], workingSetSize);
+      //std::cerr << "after flipVectors(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
       // update: throughput *= scattering/pdf
+      // XXX we could ensure that throughput is > 0 at this point and modify the stencil
       updateThroughput(&scattering[0],
                        &pdfs[0],
                        &stencil[0],
                        &throughput[0],
                        workingSetSize);
-
-      // get a pointer to the first CudaDifferentialGeometry
-      // in the first CudaIntersection in the list
-      const void *temp = &intersections[0];
-      device_ptr<const CudaDifferentialGeometry> firstDg(reinterpret_cast<const CudaDifferentialGeometry*>(temp));
-
-      // get a pointer to the fist PrimitiveHandle
-      // in the first CudaIntersection in the list
-      temp = &firstDg[1];
-      device_ptr<const PrimitiveHandle> firstPrimHandle(reinterpret_cast<const PrimitiveHandle*>(temp));
+      //std::cerr << "after updateThroughput(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
       // get the material of the intersected primitive
-      primitiveList.getMaterialHandles(firstPrimHandle,
-                                       sizeof(CudaIntersection),
-                                       &stencil[0],
-                                       &materials[0],
-                                       workingSetSize);
+      primitiveList.getMaterialHandles(&primitivesOrMaterials[0], &stencil[0], workingSetSize);
+      //std::cerr << "after getMaterialHandles(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
       // evaluate the surface shader
-      context.evaluateScattering(&materials[0],
-                                 firstDg,
-                                 sizeof(CudaIntersection),
-                                 &stencil[0],
-                                 &functions[0],
-                                 workingSetSize);
+      context.evaluateScattering(&primitivesOrMaterials[0], eyeDg, &stencil[0], &functions[0], workingSetSize);
+      //std::cerr << "after evaluateScattering(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
       // always accumulate emission for eye rays
-      if(pathLength == 1)
+      if(pathLength == 3)
         stdcuda::copy(stencil.begin(), stencil.end(), delta.begin());
 
       // evaluate emission at the hit point
-      //std::cerr << "before evaluateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-      context.evaluateEmission(&materials[0],
-                               firstDg,
-                               sizeof(CudaIntersection),
-                               &delta[0],
-                               &lightFunctions[0],
-                               workingSetSize);
-      //std::cerr << "after evaluateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+      context.evaluateEmission(&primitivesOrMaterials[0], eyeDg, &delta[0], &lightFunctions[0], workingSetSize);
+      //std::cerr << "after evaluateEmission(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
-      //std::cerr << "before evaluateUnidirectionalScattering(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-      context.evaluateUnidirectionalScattering(&lightFunctions[0],
-                                               &wo[0],
-                                               firstDg,
-                                               sizeof(CudaIntersection),
-                                               &delta[0],
-                                               &emission[0],
-                                               workingSetSize);
-      //std::cerr << "after evaluateUnidirectionalScattering(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+      context.evaluateUnidirectionalScattering(&lightFunctions[0], &wo[0], eyeDg, &delta[0], &emission[0], workingSetSize);
+      //std::cerr << "after evaluateUnidirectionalScattering(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
       // result += delta * throughput * emission
-      //std::cerr << "before accumulateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
       accumulateEmission(&throughput[0], &emission[0], &delta[0], &results[0], workingSetSize);
-      //std::cerr << "after accumulateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+      //std::cerr << "after accumulateEmission(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
       size_t numLightSamples = 1;
       //if(pathLength <= 2)
@@ -318,77 +269,62 @@ void CudaKajiyaPathTracer
       for(size_t i = 0; i != numLightSamples; ++i)
       {
         // generate random numbers
-        //std::cerr << "before generateHyperPoints(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         generateHyperPoints(&u[0], u.size());
-        //std::cerr << "after generateHyperPoints(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        //std::cerr << "after generateHyperPoints(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // sample light
-        //std::cerr << "before sampleSurfaceArea(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        emitters.sampleSurfaceArea(&u[0], &primitives[0], &lightDg[0], &pdfs[0], workingSetSize);
-        //std::cerr << "after sampleSurfaceArea(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        emitters.sampleSurfaceArea(&u[0], &stencil[0], &primitivesOrMaterials[0], lightDg, &pdfs[0], workingSetSize);
+        //std::cerr << "after sampleSurfaceArea(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // get the material of the light
-        //std::cerr << "before getMaterialHandles(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        primitiveList.getMaterialHandles(&primitives[0], &materials[0], workingSetSize);
-        //std::cerr << "after getMaterialHandles(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        primitiveList.getMaterialHandles(&primitivesOrMaterials[0], &stencil[0], workingSetSize);
+        //std::cerr << "after getMaterialHandles(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // create shadow rays pointing from intersection to sampled light point
-        //std::cerr << "before createShadowRays(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        createShadowRays(&intersections[0], &lightDg[0], 0.0005f, &stencil[0], &originsAndMinT[0], &directionsAndMaxT[0], workingSetSize);
-        //std::cerr << "after createShadowRays(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        createShadowRays(eyeDg.mPoints, lightDg.mPoints, 0.0005f, &stencil[0], &directions[0], workingSetSize);
+        //std::cerr << "after createShadowRays(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // trace shadow rays
-        //std::cerr << "before shadow(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        scene.shadow(&originsAndMinT[0], &directionsAndMaxT[0], &stencil[0], &shadowStencil[0], workingSetSize);
-        //std::cerr << "after shadow(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        scene.shadow(eyeDg.mPoints, &directions[0], make_float2(rayEpsilon, 1.0f - rayEpsilon), &stencil[0], &shadowStencil[0], workingSetSize);
+        //std::cerr << "after shadow(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // evaluate emission shader
-        //std::cerr << "before evaluateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        context.evaluateEmission(&materials[0], &lightDg[0], sizeof(CudaDifferentialGeometry), &shadowStencil[0], &lightFunctions[0], workingSetSize);
-        //std::cerr << "after evaluateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        context.evaluateEmission(&primitivesOrMaterials[0], lightDg, &shadowStencil[0], &lightFunctions[0], workingSetSize);
+        //std::cerr << "after evaluateEmission(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // turn shadow ray directions into wi
-        //std::cerr << "before rayDirectionsToFloat3(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        rayDirectionsToFloat3(&directionsAndMaxT[0], &shadowStencil[0], &wi[0], workingSetSize);
-        //std::cerr << "after rayDirectionsToFloat3(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        // XXX this is probably not necessary
+        stdcuda::copy(directions.begin(), directions.end(), wi.begin());
+        //std::cerr << "after copy(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // evaluate scattering function at intersection
-        //std::cerr << "before evaluateBidirectionalScattering(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         context.evaluateBidirectionalScattering(&functions[0],
                                                 &wo[0],
-                                                firstDg,
-                                                sizeof(CudaIntersection),
+                                                eyeDg,
                                                 &wi[0],
                                                 &shadowStencil[0],
                                                 &scattering[0],
                                                 workingSetSize);
-        //std::cerr << "after evaluateBidirectionalScattering(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        //std::cerr << "after evaluateBidirectionalScattering(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
         // flip shadow ray directions
-        //std::cerr << "before flipVectors(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         flipVectors(&wi[0], &shadowStencil[0], workingSetSize);
-        //std::cerr << "after flipVectors(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        //std::cerr << "after flipVectors(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
         // evaluate emission function at light
-        //std::cerr << "before evaluateUnidirectionalScattering(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         context.evaluateUnidirectionalScattering(&lightFunctions[0],
                                                  &wi[0],
-                                                 &lightDg[0],
+                                                 lightDg,
                                                  &shadowStencil[0],
                                                  &emission[0],
                                                  workingSetSize);
-        //std::cerr << "after evaluateUnidirectionalScattering(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        //std::cerr << "after evaluateUnidirectionalScattering(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         
         // evaluate geometric term
-        //std::cerr << "before evaluateGeometricTerm(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-        evaluateGeometricTerm(firstDg,
-                              sizeof(CudaIntersection),
-                              &lightDg[0], &shadowStencil[0], &geometricTerm[0],
-                              workingSetSize);
-        //std::cerr << "after evaluateGeometricTerm(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        evaluateGeometricTerm(eyeDg.mPoints, eyeDg.mNormals, lightDg.mPoints, lightDg.mNormals, &shadowStencil[0], &geometricTerm[0], workingSetSize);
+        //std::cerr << "after evaluateGeometricTerm(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
 
         // result += throughput * scattering * emission * geometricTerm / pdf
-        //std::cerr << "before accumulateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
         accumulateLightSample(1.0f / numLightSamples,
                               &throughput[0],
                               &scattering[0],
@@ -398,12 +334,13 @@ void CudaKajiyaPathTracer
                               &shadowStencil[0],
                               &results[0],
                               workingSetSize);
-        //std::cerr << "after accumulateEmission(): cuda error: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+        //std::cerr << "after accumulateLightSample(): " << cudaGetErrorString(cudaGetLastError()) << std::endl;
       } // end for i
     } // end for pathLength
     
     // scatter results
-    // XXX implement a gpu path for this
+    // XXX implementing a gpu path for this is probably not worth it
+    //     this takes essentially 0 time
     stdcuda::copy(results.begin(), results.end(), hostResults.begin());
     stdcuda::copy(pixelLocations.begin(), pixelLocations.end(), pixelLocationsHost.begin());
     for(size_t i = 0; i != workingSetSize; ++i)

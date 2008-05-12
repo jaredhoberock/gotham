@@ -10,6 +10,7 @@
 #include "../../include/Material.h"
 #include <stdcuda/device_types.h>
 #include "../geometry/CudaDifferentialGeometry.h"
+#include "../geometry/CudaDifferentialGeometryArray.h"
 #include "../shading/CudaScatteringDistributionFunction.h"
 class CudaShadingInterface;
 
@@ -32,14 +33,7 @@ class CudaMaterial
      */
     using Parent::evaluateScattering;
     virtual void evaluateScattering(CudaShadingInterface &context,
-                                    const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                    const stdcuda::device_ptr<const bool> &stencil,
-                                    const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
-                                    const size_t n) const;
-
-    virtual void evaluateScattering(CudaShadingInterface &context,
-                                    const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                    const size_t dgStride,
+                                    const CudaDifferentialGeometryArray &dg,
                                     const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                     const size_t n) const;
@@ -55,8 +49,7 @@ class CudaMaterial
      */
     using Parent::evaluateEmission;
     virtual void evaluateEmission(CudaShadingInterface &context,
-                                  const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                  const size_t dgStride,
+                                  const CudaDifferentialGeometryArray &dg,
                                   const stdcuda::device_ptr<const bool> &stencil,
                                   const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                   const size_t n) const;
@@ -71,8 +64,7 @@ class CudaMaterial
      */
     using Parent::evaluateSensor;
     virtual void evaluateSensor(CudaShadingInterface &context,
-                                const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                const size_t dgStride,
+                                const CudaDifferentialGeometryArray &dg,
                                 const stdcuda::device_ptr<const bool> &stencil,
                                 const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                 const size_t n) const;

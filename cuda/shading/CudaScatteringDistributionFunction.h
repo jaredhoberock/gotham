@@ -14,6 +14,7 @@ enum ScatteringType
   LAMBERTIAN,
   HEMISPHERICAL_EMISSION,
   PERSPECTIVE_SENSOR,
+  SPECULAR_TRANSMISSION,
   NULL_SCATTERING
 }; // end ScatteringType
 
@@ -31,6 +32,19 @@ struct CSDF
                                              const float3 &wi) const;
 
   inline __host__ __device__ float3 evaluate(const float3 &wo,
+                                             const float3 &point,
+                                             const float3 &tangent,
+                                             const float3 &binormal,
+                                             const float3 &normal,
+                                             const float3 &wi) const;
+
+  inline __host__ __device__ float3 evaluate(const float3 &wo,
+                                             const float3 &point,
+                                             const float3 &tangent,
+                                             const float3 &binormal,
+                                             const float3 &normal) const;
+
+  inline __host__ __device__ float3 evaluate(const float3 &wo,
                                              const CudaDifferentialGeometry &dg) const;
 
   inline __host__ __device__ void sample(const CudaDifferentialGeometry &dg,
@@ -42,8 +56,34 @@ struct CSDF
                                          float &pdf,
                                          bool &delta) const;
 
+  inline __host__ __device__ void sample(const float3 &point,
+                                         const float3 &tangent,
+                                         const float3 &binormal,
+                                         const float3 &normal,
+                                         const float u0,
+                                         const float u1,
+                                         const float u2,
+                                         float3 &s,
+                                         float3 &wo,
+                                         float &pdf,
+                                         bool &delta) const;
+
   inline __host__ __device__ void sample(const float3 &wo,
                                          const CudaDifferentialGeometry &dg,
+                                         const float u0,
+                                         const float u1,
+                                         const float u2,
+                                         float3 &s,
+                                         float3 &wi,
+                                         float &pdf,
+                                         bool &delta,
+                                         unsigned int &component) const;
+                                         
+  inline __host__ __device__ void sample(const float3 &wo,
+                                         const float3 &point,
+                                         const float3 &tangent,
+                                         const float3 &binormal,
+                                         const float3 &normal,
                                          const float u0,
                                          const float u1,
                                          const float u2,

@@ -29,8 +29,7 @@ class ScatteredAccessContext
      */
     using Parent::evaluateScattering;
     virtual void evaluateScattering(const stdcuda::device_ptr<const MaterialHandle> &m,
-                                    const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                    const size_t dgStride,
+                                    const CudaDifferentialGeometryArray &dg,
                                     const stdcuda::device_ptr<const bool> &stencil,
                                     const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                     const size_t n);
@@ -46,8 +45,7 @@ class ScatteredAccessContext
      */
     using Parent::evaluateEmission;
     virtual void evaluateEmission(const stdcuda::device_ptr<const MaterialHandle> &m,
-                                  const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                  const size_t dgStride,
+                                  const CudaDifferentialGeometryArray &dg,
                                   const stdcuda::device_ptr<const bool> &stencil,
                                   const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                   const size_t n);
@@ -62,8 +60,7 @@ class ScatteredAccessContext
      */
     using Parent::evaluateSensor;
     virtual void evaluateSensor(const stdcuda::device_ptr<const MaterialHandle> &m,
-                                const stdcuda::device_ptr<const CudaDifferentialGeometry> &dg,
-                                const size_t dgStride,
+                                const CudaDifferentialGeometryArray &dg,
                                 const stdcuda::device_ptr<CudaScatteringDistributionFunction> &f,
                                 const size_t n);
 }; // end ScatteredAccessContext

@@ -37,7 +37,10 @@ template<typename V3, typename S3, typename DG>
 
 template<typename V3, typename S3, typename DG>
   S3 PerspectiveSensorBase<V3,S3,DG>
-    ::sample(const DifferentialGeometry &dg,
+    ::sample(const Point &point,
+             const Point &tangent,
+             const Point &binormal,
+             const Point &normal,
              const float u0,
              const float u1,
              const float u2,
@@ -48,12 +51,12 @@ template<typename V3, typename S3, typename DG>
   delta = false;
   Point q;
   sampleWindow(u0,u1,
-               dg.getBinormal(),
-               dg.getTangent(),
-               dg.getNormal(),
+               binormal,
+               tangent,
+               normal,
                q,
                pdf);
-  ws = q - dg.getPoint();
+  ws = q - point;
   float d2 = dot(ws,ws);
   ws /= sqrtf(d2);
 
@@ -61,11 +64,29 @@ template<typename V3, typename S3, typename DG>
   pdf *= d2;
 
   // this removes the vignetting effect, but is it correct?
-  pdf *= dot(dg.getNormal(),ws);
+  pdf *= dot(normal,ws);
 
   //// divide the response by the dot product to remove the vignette effect
   //return mResponse / dot(dg.getNormal(),ws);
   return mResponse;
+} // end PerspectiveSensorBase::sample()
+
+template<typename V3, typename S3, typename DG>
+  S3 PerspectiveSensorBase<V3,S3,DG>
+    ::sample(const DifferentialGeometry &dg,
+             const float u0,
+             const float u1,
+             const float u2,
+             Vector &ws,
+             float &pdf,
+             bool &delta) const
+{
+  return sample(dg.getPoint(),
+                dg.getTangent(),
+                dg.getBinormal(),
+                dg.getNormal(),
+                u0, u1, u2,
+                ws, pdf, delta);
 } // end PerspectiveSensorBase::sample()
 
 template<typename V3, typename S3, typename DG>
@@ -115,26 +136,27 @@ template<typename V3, typename S3, typename DG>
 template<typename V3, typename S3, typename DG>
   float PerspectiveSensorBase<V3,S3,DG>
     ::evaluatePdf(const Vector &ws,
-                  const DifferentialGeometry &dg) const
+                  const Point &point,
+                  const Vector &tangent,
+                  const Vector &binormal,
+                  const Vector &normal) const
 {
   // intersect a ray through dg in direction ws with the sensor window
   // remember that the normal points in the -look direction
-  //float t = -dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
-  //          -dg.getNormal().dot(ws);
-  float t = -dot(dg.getNormal(), mWindowOrigin - dg.getPoint()) /
-            -dot(dg.getNormal(), ws);
+  float t = -dot(normal, mWindowOrigin - point) /
+            -dot(normal, ws);
 
   // if t is negative, then ws came from 'behind the camera',
   // and there is zero pdf of generating such directions
   if(t < 0) return 0;
 
   // compute q the intersection with the ray and the window
-  Point q = dg.getPoint() + t * ws;
+  Point q = point + t * ws;
   Point coords = q - mWindowOrigin;
   coords *= 0.5f;
 
-  float u = dot(coords,dg.getBinormal()) / mAspectRatio;
-  float v = dot(coords,dg.getTangent());
+  float u = dot(coords,normal) / mAspectRatio;
+  float v = dot(coords,tangent);
 
   // if the ray does not pass through the window,
   // then there is zero probability of having generated it
@@ -142,14 +164,22 @@ template<typename V3, typename S3, typename DG>
   if(v < 0.0f || v >= 1.0f) return 0.0f;
 
   // compute solid angle pdf
-  Vector wi = q - dg.getPoint();
+  Vector wi = q - point;
   float pdf = dot(wi,wi);
   pdf *= mInverseWindowSurfaceArea;
 
   // this removes the vignetting effect, but is it correct?
-  pdf *= fabs(dot(dg.getNormal(),ws));
+  pdf *= fabs(dot(normal,ws));
 
   return pdf;
+} // end PerspectiveSensorBase::evaluatePdf()
+
+template<typename V3, typename S3, typename DG>
+  float PerspectiveSensorBase<V3,S3,DG>
+    ::evaluatePdf(const Vector &ws,
+                  const DifferentialGeometry &dg) const
+{
+  return evaluatePdf(ws, dg.getPoint(), dg.getTangent(), dg.getBinormal(), dg.getNormal());
 } // end PerspectiveSensorBase::evaluatePdf()
 
 template<typename V3, typename S3, typename DG>
@@ -157,17 +187,27 @@ template<typename V3, typename S3, typename DG>
     ::evaluate(const Vector &ws,
                const DifferentialGeometry &dg) const
 {
+  return evaluate(ws, dg.getPoint(), dg.getTangent(), dg.getBinormal(), dg.getNormal());
+} // end PerspectiveSensorBase::evaluate()
+
+template<typename V3, typename S3, typename DG>
+  S3 PerspectiveSensorBase<V3,S3,DG>
+    ::evaluate(const Vector &ws,
+               const Point &point,
+               const Vector &tangent,
+               const Vector &binormal,
+               const Vector &normal) const
+{
   // evaluate the pdf at ws, and if it is not zero, return mResponse
   // divide by dot product to remove the vignetting effect
   //return evaluatePdf(ws, dg) > 0 ? (mResponse / dg.getNormal().absDot(ws)) : Spectrum::black();
   
-  // XXX this is shitty but we have to do it to be compatible with CUDA vectors
   Spectrum result;
-  ((float*)&result)[0] = 0;
-  ((float*)&result)[1] = 0;
-  ((float*)&result)[2] = 0;
+  result.x = 0;
+  result.y = 0;
+  result.z = 0;
 
-  if(evaluatePdf(ws,dg) > 0)
+  if(evaluatePdf(ws,point,tangent,binormal,normal) > 0)
   {
     result = mResponse;
   } // end if

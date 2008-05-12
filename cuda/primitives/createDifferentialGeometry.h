@@ -39,5 +39,24 @@ inline __host__ __device__
                                   const float *inverseSurfaceArea,
                                   CudaDifferentialGeometry &dg);
 
+inline __host__ __device__
+  void createDifferentialGeometry(const float2 &b,
+                                  const unsigned int triIndex,
+                                  const float3 *v0,
+                                  const float3 *v1,
+                                  const float3 *v2,
+                                  const float3 *n,
+                                  const float2 *parms0,
+                                  const float2 *parms1,
+                                  const float2 *parms2,
+                                  float3 &normal,
+                                  float3 &tangent,
+                                  float3 &binormal,
+                                  float2 &uv,
+                                  float3 &dpdu,
+                                  float3 &dpdv,
+                                  float3 &dndu,
+                                  float3 &dndv);
+
 #include "createDifferentialGeometry.inl"
 

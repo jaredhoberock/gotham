@@ -159,7 +159,9 @@ const Vector3 &dpdv = dg.getDPDV();
         nextC = ''
         if i+1 != len(line):
           nextC = line[i+1]
-        if c == '#' or (c == '/' and nextC == '/'):
+        # leave '#' for preprocessor directives
+        # only count '//' as comments
+        if c == '/' and nextC == '/':
           break
         lastC = c
         stripped += c
@@ -415,7 +417,7 @@ if os.name == 'nt':
     #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
     
     # kill the tempfiles
-    #shutil.rmtree(dir, True)
+    shutil.rmtree(dir, True)
   
 def usage():
   pass

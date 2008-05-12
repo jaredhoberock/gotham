@@ -15,6 +15,12 @@ float3 CudaNullScattering
 } // end CudaDifferentialGeometry::evaluate()
 
 float3 CudaNullScattering
+  ::evaluate(void) const
+{
+  return make_float3(0,0,0);
+} // end CudaDifferentialGeometry::evaluate()
+
+float3 CudaNullScattering
   ::evaluate(const float3 &wo,
              const CudaDifferentialGeometry &dg) const
 {

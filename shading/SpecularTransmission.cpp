@@ -10,9 +10,7 @@ SpecularTransmission
   ::SpecularTransmission(const Spectrum &t,
                          const float etai,
                          const float etat)
-    :Parent(),
-     mTransmittance(t),
-     mFresnel(etai,etat)
+    :Parent0(),Parent1(t,etai,etat)
 {
   ;
 } // end SpecularTransmission::SpecularTransmission()
@@ -28,41 +26,7 @@ Spectrum SpecularTransmission
            bool &delta,
            ComponentIndex &component) const
 {
-  delta = true;
-  component = 0;
-
-  Spectrum result(0,0,0);
-  pdf = 1.0f;
-
-  // figure out which eta is incident/transmitted
-  float cosi = wo.dot(dg.getNormal());
-  bool entering = cosi > 0;
-  float ei = mFresnel.mEtai, et = mFresnel.mEtat;
-  if(!entering) std::swap(ei,et);
-
-  // compute refracted ray direction
-  float sini2 = 1.0f - cosi*cosi;
-  float eta = ei / et;
-  float sint2 = eta * eta * sini2;
-
-  // check for total internal refraction
-  if(sint2 <= 1.0f)
-  {
-    float cost = -sqrtf(std::max(0.0f, 1.0f - sint2));
-    if(entering) cost = -cost;
-
-    wi = (eta*cosi - cost)*dg.getNormal() - eta * wo;
-
-    // compute fresnel term
-    Spectrum f = mFresnel.evaluate(cosi, cost);
-    f = Spectrum::white() - f;
-    f.saturate();
-    result = (et*et)/(ei*ei) * f * mTransmittance;
-
-    result /= dg.getNormal().absDot(wi);
-  } // end if
-
-  return result;
+  return Parent1::sample(wo,dg.getNormal(),wi,pdf,delta,component);
 } // end SpecularTransmission::sample()
 
 Spectrum SpecularTransmission
@@ -70,7 +34,7 @@ Spectrum SpecularTransmission
              const DifferentialGeometry &dg,
              const Vector &wi) const
 {
-  return Spectrum::black();
+  return Parent1::evaluate();
 } // end SpecularTransmission::evaluate()
 
 Spectrum SpecularTransmission
@@ -90,7 +54,7 @@ Spectrum SpecularTransmission
     // figure out which eta is incident/transmitted
     float cosi = wo.dot(dg.getNormal());
     bool entering = cosi > 0;
-    float ei = mFresnel.mEtai, et = mFresnel.mEtat;
+    float ei = mEtai, et = mEtat;
     if(!entering) std::swap(ei,et);
 
     // compute refracted ray direction
@@ -103,8 +67,8 @@ Spectrum SpecularTransmission
     if(entering) cost = -cost;
 
     // compute fresnel term
-    Spectrum f = mFresnel.evaluate(cosi, cost);
-    f = Spectrum::white() - f;
+    float fresnel = evaluateFresnelDielectric(ei, et, cosi, cost);
+    Spectrum f = Spectrum::white() - Spectrum(fresnel,fresnel,fresnel);
     f.saturate();
     result = (et*et)/(ei*ei) * f * mTransmittance;
 

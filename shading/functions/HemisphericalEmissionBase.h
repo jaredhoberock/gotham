@@ -30,6 +30,14 @@ template<typename V3, typename S3, typename DG>
     inline Spectrum evaluate(const Vector &w,
                              const DifferentialGeometry &dg) const;
 
+    /*! This method computes hemispherical emission.
+     *  \param w  The outgoing direction of emission.
+     *  \param normal The normal direction at the point of interest.
+     *  \return mRadiance if w points in the direction of dg's normal direction.
+     */
+    inline Spectrum evaluate(const Vector &w,
+                             const Vector &normal) const;
+
     /*! This method returns a const reference to mRadiance.
      *  \return mRadiance
      */

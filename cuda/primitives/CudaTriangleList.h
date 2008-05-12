@@ -36,6 +36,19 @@ class CudaTriangleList
                                    const stdcuda::device_ptr<float> &pdf,
                                    const size_t n) const;
 
+    virtual void sampleSurfaceArea(const stdcuda::device_ptr<const float4> &u,
+                                   const stdcuda::device_ptr<PrimitiveHandle> &prims,
+                                   CudaDifferentialGeometryArray &dg,
+                                   const stdcuda::device_ptr<float> &pdf,
+                                   const size_t n) const;
+
+    virtual void sampleSurfaceArea(const stdcuda::device_ptr<const float4> &u,
+                                   const stdcuda::device_ptr<const bool> &stencil,
+                                   const stdcuda::device_ptr<PrimitiveHandle> &prims,
+                                   CudaDifferentialGeometryArray &dg,
+                                   const stdcuda::device_ptr<float> &pdf,
+                                   const size_t n) const;
+
     typedef CudaAliasTable<unsigned int, float> TriangleTable;
 
   protected:

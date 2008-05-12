@@ -11,6 +11,7 @@
 
 #include "../shading/CudaNullScattering.h"
 #include "../shading/CudaLambertian.h"
+#include "../shading/CudaSpecularTransmission.h"
 #include "../shading/CudaHemisphericalEmission.h"
 #include "../shading/CudaPerspectiveSensor.h"
 
@@ -70,5 +71,19 @@ class CudaShadingInterface
       CudaShadingInterface::perspectiveSensor(Ks,aspect,origin,result);
       return result;
     } // end perspectiveSensor()
+
+    static inline __host__ __device__ void refraction(const float3 &Kt, const float etai, const float etat, CudaScatteringDistributionFunction &f)
+    {
+      CudaSpecularTransmission *cst = reinterpret_cast<CudaSpecularTransmission*>(&f.mFunction);
+      *cst = CudaSpecularTransmission(Kt,etai,etat);
+      f.mType = SPECULAR_TRANSMISSION;
+    } // end refraction()
+
+    static inline __host__ __device__ CudaScatteringDistributionFunction refraction(const float3 &Kt, const float etai, const float etat)
+    {
+      CudaScatteringDistributionFunction result;
+      CudaShadingInterface::refraction(Kt,etai,etat,result);
+      return result;
+    } // end refraction()
 }; // end CudaShadingInterface
 

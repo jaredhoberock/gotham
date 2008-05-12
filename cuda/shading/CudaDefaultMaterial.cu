@@ -21,9 +21,8 @@ const char *CudaDefaultMaterial
 
 void CudaDefaultMaterial
   ::evaluateScattering(CudaShadingInterface &context,
-                       const device_ptr<const CudaDifferentialGeometry> &dg,
-                       const size_t dgStride,
-                       const device_ptr<const int> &stencil,
+                       const CudaDifferentialGeometryArray &dg,
+                       const device_ptr<const bool> &stencil,
                        const device_ptr<CudaScatteringDistributionFunction> &f,
                        const size_t n) const
 {
