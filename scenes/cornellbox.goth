@@ -103,7 +103,7 @@ Material('mirror', 'Kr', (1.0, 1.0, 1.0))
 # make a ball using the 'sphere' command
 # this command takes 4 arguments:
 # the x, y, and z coordinates of the sphere's center and the length of its radius
-#Sphere(-0.4, -0.66, -0.15, 0.33)
+Sphere(-0.4, -0.66, -0.15, 0.33)
 
 # glass ball
 # the glass shader needs to know three things:
@@ -111,7 +111,7 @@ Material('mirror', 'Kr', (1.0, 1.0, 1.0))
 # how transmissive it is (as a color)
 # and an index of refraction (actual glass's index is around 1.5)
 Material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
-#Sphere(0.4,-0.66,0.25,0.33)
+Sphere(0.4,-0.66,0.25,0.33)
 
 # now we need to tell gotham how it should perform the render
 # we do this by setting gothams's state with the attribute() command
