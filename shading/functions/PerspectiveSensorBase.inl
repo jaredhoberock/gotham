@@ -141,7 +141,7 @@ template<typename V3, typename S3, typename DG>
                   const Vector &binormal,
                   const Vector &normal) const
 {
-  // intersect a ray through dg in direction ws with the sensor window
+  // intersect a ray through point in direction ws with the sensor window
   // remember that the normal points in the -look direction
   float t = -dot(normal, mWindowOrigin - point) /
             -dot(normal, ws);
@@ -155,7 +155,7 @@ template<typename V3, typename S3, typename DG>
   Point coords = q - mWindowOrigin;
   coords *= 0.5f;
 
-  float u = dot(coords,normal) / mAspectRatio;
+  float u = dot(coords,binormal) / mAspectRatio;
   float v = dot(coords,tangent);
 
   // if the ray does not pass through the window,

@@ -21,8 +21,8 @@ template<typename V3, typename N3>
                                 const N3 &n,
                                 const V3 &wi);
 
-inline float areSameHemisphere(const float coso,
-                               const float cosi);
+inline bool areSameHemisphere(const float coso,
+                              const float cosi);
 
 #include "areSameHemisphere.inl"
 

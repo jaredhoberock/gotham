@@ -13,8 +13,8 @@ template<typename V3, typename N3>
   return areSameHemisphere(dot(wo,n), dot(wi,n));
 } // end areSameHemisphere()
 
-float areSameHemisphere(const float coso,
-                        const float cosi)
+bool areSameHemisphere(const float coso,
+                       const float cosi)
 {
   return (coso > 0) == (cosi > 0); 
 } // end areSameHemisphere()
