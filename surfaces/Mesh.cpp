@@ -63,8 +63,8 @@ bool Mesh
     const Triangle &tri = *intersector.mHitFace;
 
     // fill out DifferentialGeometry details
-    Vector3 e1 = mPoints[tri[1]] - mPoints[tri[0]];
-    Vector3 e2 = mPoints[tri[2]] - mPoints[tri[0]];
+    Vector e1 = mPoints[tri[1]] - mPoints[tri[0]];
+    Vector e2 = mPoints[tri[2]] - mPoints[tri[0]];
     getDifferentialGeometry(tri, r(t), e1.cross(e2).normalize(),
                             intersector.mBarycentricCoordinates[0],
                             intersector.mBarycentricCoordinates[1],

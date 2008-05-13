@@ -57,8 +57,8 @@ Point Transform
   return transformPoint(Parent::second, p);
 } // end Transform::inverseTransform()
 
-Vector3 Transform
-  ::inverseTransform(const Vector3 &v) const
+Vector Transform
+  ::inverseTransform(const Vector &v) const
 {
   return transformVector(Parent::second, v);
 } // end Transform::inverseTransform()
@@ -126,8 +126,8 @@ BoundingBox Transform
   return result;
 } // end Transform::operator()()
 
-Vector3 Transform
-  ::operator()(const Vector3 &v) const
+Vector Transform
+  ::operator()(const Vector &v) const
 {
   return transformVector(Parent::first, v);
 } // end Transform::operator()()
@@ -139,15 +139,15 @@ Normal Transform
   return transformNormal(Parent::second, n);
 } // end Transform::operator()()
 
-Vector3 Transform
+Vector Transform
   ::transformVector(const gpcpu::float4x4 &m,
-                    const Vector3 &v)
+                    const Vector &v)
 {
   float x = m(0,0)*v[0] + m(0,1)*v[1] + m(0,2)*v[2];
   float y = m(1,0)*v[0] + m(1,1)*v[1] + m(1,2)*v[2];
   float z = m(2,0)*v[0] + m(2,1)*v[1] + m(2,2)*v[2];
 
-  return Vector3(x,y,z);
+  return Vector(x,y,z);
 } // end Transform::transformVector()
 
 Normal Transform
@@ -212,12 +212,12 @@ Transform Transform
   return Transform(A);
 } // end Transform::rotate()
 
-Vector3 Transform
+Vector Transform
   ::rotateVector(const float degrees,
                  const float rx,
                  const float ry,
                  const float rz,
-                 const Vector3 &v)
+                 const Vector &v)
 {
   gpcpu::float3x3 A;
   float length = sqrt((rx*rx) + (ry*ry) + (rz*rz));

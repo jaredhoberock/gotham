@@ -73,7 +73,7 @@ class Transform
      *  \param v The vector to transform.
      *  \return v transformed.
      */
-    Vector3 operator()(const Vector3 &v) const;
+    Vector operator()(const Vector &v) const;
 
     /*! This method transforms a Normal.
      *  \param n The Normal to transform.
@@ -91,7 +91,7 @@ class Transform
      *  \param v The vector to transform.
      *  \return v transformed by this Transform's inverse.
      */
-    Vector3 inverseTransform(const Vector3 &v) const;
+    Vector inverseTransform(const Vector &v) const;
 
     /*! This method transforms a BoundingBox by applying this Transform to its min/max corners.
      *  \param b The BoundingBox to transform.
@@ -142,8 +142,8 @@ class Transform
      *  \param v The vector to rotate.
      *  \return v rotated around (rx,ry,rz).
      */
-    static Vector3 rotateVector(const float degrees, const float rx, const float ry, const float rz,
-                                const Vector3 &v);
+    static Vector rotateVector(const float degrees, const float rx, const float ry, const float rz,
+                               const Vector &v);
 
     /*! This static method returns a Transform which represents a scaling by the given scale factors.
      *  \param sx Scaling in x.
@@ -179,7 +179,7 @@ class Transform
      *  \param v The vector to transform.
      *  \return v transformed by xfrm.
      */
-    static Vector3 transformVector(const gpcpu::float4x4 &m, const Vector3 &v);
+    static Vector transformVector(const gpcpu::float4x4 &m, const Vector &v);
 
     /*! This static method transforms a normal by a float4x4.
      *  \param m The float4x4 describing the inverse of the transformation.

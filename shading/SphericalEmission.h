@@ -39,7 +39,7 @@ class SphericalEmission
                             const float u0,
                             const float u1,
                             const float u2,
-                            Vector3 &w,
+                            Vector &w,
                             float &pdf,
                             bool &delta) const;
 
@@ -48,7 +48,7 @@ class SphericalEmission
      *  \param dg The DifferentialGeometry at the Point of interest.
      */
     using Parent::evaluate;
-    Spectrum evaluate(const Vector3 &w,
+    Spectrum evaluate(const Vector &w,
                       const DifferentialGeometry &dg) const;
     
   protected:

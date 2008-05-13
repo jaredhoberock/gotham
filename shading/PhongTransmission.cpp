@@ -101,9 +101,9 @@ Spectrum PhongTransmission
 } // end PhongTransmission::sample()
 
 float PhongTransmission
-  ::evaluatePdf(const Vector3 &wo,
+  ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,
-                const Vector3 &wi) const
+                const Vector &wi) const
 {
   bool entering = wo.dot(dg.getNormal()) > 0;
   float ei = mFresnel.mEtai, et = mFresnel.mEtat;

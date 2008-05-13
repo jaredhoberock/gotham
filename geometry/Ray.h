@@ -47,7 +47,7 @@ class Ray
      *  \param mint Sets mInterval[0].
      *  \param maxt Sets mInterval[1].
      */
-    inline Ray(const Point &a, const Vector3 &d, const float mint, const float maxt);
+    inline Ray(const Point &a, const Vector &d, const float mint, const float maxt);
 
     /*! Constructor accepts an anchor and direction.
      *  \param a Sets mAnchor.
@@ -55,7 +55,7 @@ class Ray
      *  \param maxt Sets mInterval[1].
      *  \note mInterval[0] is set to EPSILON.
      */
-    inline Ray(const Point &a, const Vector3 &d, const float maxt);
+    inline Ray(const Point &a, const Vector &d, const float maxt);
 
     /*! Null destructor does nothing.
      */
@@ -74,17 +74,17 @@ class Ray
     /*! This method returns a const reference to mDirection.
      *  \return mDirection
      */
-    inline const Vector3 &getDirection(void) const;
+    inline const Vector &getDirection(void) const;
 
     /*! This method returns a const reference to mInverseDirection.
      *  \return mInverseDirection
      */
-    inline const Vector3 &getInverseDirection(void) const;
+    inline const Vector &getInverseDirection(void) const;
 
     /*! This method sets this Ray's direction.
      *  \param d Sets mDirection.
      */
-    inline void setDirection(const Vector3 &d);
+    inline void setDirection(const Vector &d);
 
     /*! \brief This method evaluates the Ray equation, a + t*d.
      *  \param t The parametric value at which to evaluate the equation.
@@ -136,11 +136,11 @@ class Ray
 
     /*! A Ray has a (not necessarily normalized) direction.
      */
-    Vector3 mDirection;
+    Vector mDirection;
 
     /*! The inverse of each of the coordinates of mDirection.
      */
-    Vector3 mInverseDirection;
+    Vector mInverseDirection;
 
     /*! A Ray has a legal Interval of parameter values which
      *  lie upon it.

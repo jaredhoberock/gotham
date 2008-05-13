@@ -38,9 +38,9 @@ class Lambertian
      *          0, otherwise.
      */
     using Parent0::evaluate;
-    Spectrum evaluate(const Vector3 &wo,
+    Spectrum evaluate(const Vector &wo,
                       const DifferentialGeometry &dg,
-                      const Vector3 &wi) const;
+                      const Vector &wi) const;
 
     /*! This method computes the value of this Lambertian and its pdf.
      *  \param wo A Vector pointing towards the direction of scattering.

@@ -40,7 +40,7 @@ void DebugRenderer
 
   Ray r;
   Point o;
-  Vector3 d;
+  ::Vector d;
   Normal n;
   float pdf;
   bool delta;

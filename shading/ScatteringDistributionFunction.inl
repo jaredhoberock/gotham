@@ -28,15 +28,15 @@ bool ScatteringDistributionFunction
 } // end ScatteringDistributionFunction::areSameHemisphere()
 
 Spectrum ScatteringDistributionFunction
-  ::operator()(const Vector3 &wo,
+  ::operator()(const Vector &wo,
                const DifferentialGeometry &dg,
-               const Vector3 &wi) const
+               const Vector &wi) const
 {
   return evaluate(wo,dg,wi);
 } // end ScatteringDistributionFunction::operator()()
 
 Spectrum ScatteringDistributionFunction
-  ::operator()(const Vector3 &w,
+  ::operator()(const Vector &w,
                const DifferentialGeometry &dg) const
 {
   return evaluate(w,dg);

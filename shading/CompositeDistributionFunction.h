@@ -54,12 +54,12 @@ class CompositeDistributionFunction
      *  \return The bidirectional scattering from wi to wo is returned here.
      */
     using Parent0::sample;
-    virtual Spectrum sample(const Vector3 &wo,
+    virtual Spectrum sample(const Vector &wo,
                             const DifferentialGeometry &dg,
                             const float u0,
                             const float u1,
                             const float u2,
-                            Vector3 &wi,
+                            Vector &wi,
                             float &pdf,
                             bool &delta,
                             ComponentIndex &component) const;

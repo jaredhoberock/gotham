@@ -6,17 +6,17 @@
 #include "DeltaDistributionFunction.h"
 
 float DeltaDistributionFunction
-  ::evaluatePdf(const Vector3 &wo,
+  ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,
-                const Vector3 &wi) const
+                const Vector &wi) const
 {
   return 0;
 } // end DeltaDistributionFunction::evaluatePdf()
 
 float DeltaDistributionFunction
-  ::evaluatePdf(const Vector3 &wo,
+  ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,
-                const Vector3 &wi,
+                const Vector &wi,
                 const bool delta,
                 const ComponentIndex component) const
 {

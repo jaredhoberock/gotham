@@ -7,15 +7,15 @@
 #include "../geometry/Mappings.h"
 
 Spectrum ScatteringDistributionFunction
-  ::evaluate(const Vector3 &wo,
+  ::evaluate(const Vector &wo,
              const DifferentialGeometry &dg,
-             const Vector3 &wi) const
+             const Vector &wi) const
 {
   return Spectrum::black();
 } // end ScatteringDistributionFunction::evaluate()
 
 Spectrum ScatteringDistributionFunction
-  ::evaluate(const Vector3 &w,
+  ::evaluate(const Vector &w,
              const DifferentialGeometry &dg) const
 {
   return Spectrum::black();
@@ -28,17 +28,17 @@ void *ScatteringDistributionFunction
 } // end ScatteringDistributionFunction::operator new()
 
 float ScatteringDistributionFunction
-  ::evaluatePdf(const Vector3 &wo,
+  ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,
-                const Vector3 &wi) const
+                const Vector &wi) const
 {
   return Mappings<Vector>::evaluateCosineHemispherePdf(wi, dg.getNormal());
 } // end ScatteringDistributionFunction::evaluatePdf()
 
 float ScatteringDistributionFunction
-  ::evaluatePdf(const Vector3 &wo,
+  ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,
-                const Vector3 &wi,
+                const Vector &wi,
                 const bool delta,
                 const ComponentIndex component) const
 {
@@ -60,12 +60,12 @@ Spectrum ScatteringDistributionFunction
 } // end ScatteringDistributionFunction::evaluate()
 
 Spectrum ScatteringDistributionFunction
-  ::sample(const Vector3 &wo,
+  ::sample(const Vector &wo,
            const DifferentialGeometry &dg,
            const float u0,
            const float u1,
            const float u2,
-           Vector3 &wi,
+           Vector &wi,
            float &pdf,
            bool &delta,
            ComponentIndex &component) const
@@ -81,7 +81,7 @@ Spectrum ScatteringDistributionFunction
            const float u0,
            const float u1,
            const float u2,
-           Vector3 &w,
+           Vector &w,
            float &pdf,
            bool &delta) const
 {

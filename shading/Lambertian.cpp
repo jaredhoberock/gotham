@@ -14,9 +14,9 @@ Lambertian
 } // end Lambertian::Lambertian()
 
 Spectrum Lambertian
-  ::evaluate(const Vector3 &wo,
+  ::evaluate(const Vector &wo,
              const DifferentialGeometry &dg,
-             const Vector3 &wi) const
+             const Vector &wi) const
 {
   return Parent1::evaluate(wo,dg,wi);
 } // end Lambertian::evaluate()

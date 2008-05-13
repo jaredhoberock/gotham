@@ -47,9 +47,9 @@ class ScatteringDistributionFunction
      *  \note The default implementation of this method returns
      *        Spectrum::black().
      */
-    virtual Spectrum evaluate(const Vector3 &wo,
+    virtual Spectrum evaluate(const Vector &wo,
                               const DifferentialGeometry &dg,
-                              const Vector3 &wi) const;
+                              const Vector &wi) const;
 
     /*! operator()() method calls evaluate().
      *  \param wo A vector pointing towards the outgoing scattered direction
@@ -57,9 +57,9 @@ class ScatteringDistributionFunction
      *  \param wi A vector pointing towards the incoming direction.
      *  \return The bidirectional scattering toward direction wo from wi.
      */
-    inline Spectrum operator()(const Vector3 &wo,
+    inline Spectrum operator()(const Vector &wo,
                                const DifferentialGeometry &dg,
-                               const Vector3 &wi) const;
+                               const Vector &wi) const;
 
     /*! All child classes must implement this method which evaluates a
      *  scattering event in an outgoing direction of interest.
@@ -68,7 +68,7 @@ class ScatteringDistributionFunction
      *  \return The unidirectional scattering in direction we.
      *  \note The default implementation returns Spectrum::black().
      */
-    virtual Spectrum evaluate(const Vector3 &w,
+    virtual Spectrum evaluate(const Vector &w,
                               const DifferentialGeometry &dg) const;
 
     /*! operator()() method calls evaluate().
@@ -76,7 +76,7 @@ class ScatteringDistributionFunction
      *  \param dg The DifferentialGeometry at the Point of interest.
      *  \return The radiance emitted in direction w.
      */
-    inline Spectrum operator()(const Vector3 &w,
+    inline Spectrum operator()(const Vector &w,
                                const DifferentialGeometry &dg) const;
 
     /*! All child classes must implement this method which samples this
@@ -95,12 +95,12 @@ class ScatteringDistributionFunction
      *                   generated wi.
      *  \return The bidirectional scattering from wi to wo is returned here.
      */
-    virtual Spectrum sample(const Vector3 &wo,
+    virtual Spectrum sample(const Vector &wo,
                             const DifferentialGeometry &dg,
                             const float u0,
                             const float u1,
                             const float u2,
-                            Vector3 &wi,
+                            Vector &wi,
                             float &pdf,
                             bool &deltaDistribution,
                             ComponentIndex &component) const;
@@ -112,9 +112,9 @@ class ScatteringDistributionFunction
      *  \param wi A Vector pointing towards the direction of incidence.
      *  \return The value of the pdf at (wi,dg,wo).
      */
-    virtual float evaluatePdf(const Vector3 &wo,
+    virtual float evaluatePdf(const Vector &wo,
                               const DifferentialGeometry &dg,
-                              const Vector3 &wi) const;
+                              const Vector &wi) const;
 
     /*! This method evaluates the value of this ScatteringDistributionFunction's pdf given a
      *  wo, DifferentialGeometry, and wi.
@@ -168,7 +168,7 @@ class ScatteringDistributionFunction
      *  \param dg The DifferentialGeometry at the Point of interest.
      *  \return The solid angle pdf of w.
      */
-    virtual float evaluatePdf(const Vector3 &w,
+    virtual float evaluatePdf(const Vector &w,
                               const DifferentialGeometry &dg) const;
 
     /*! This method inverts this ScatteringDistributionFunction's mapping
@@ -202,7 +202,7 @@ class ScatteringDistributionFunction
                             const float u0,
                             const float u1,
                             const float u2,
-                            Vector3 &w,
+                            Vector &w,
                             float &pdf,
                             bool &delta) const;
 

@@ -146,9 +146,9 @@ Spectrum AshikhminShirleyReflection
 } // end AshikhminShirleyReflection::evaluate()
 
 float AshikhminShirleyReflection
-  ::evaluatePdf(const Vector3 &wo,
+  ::evaluatePdf(const Vector &wo,
                 const DifferentialGeometry &dg,
-                const Vector3 &wi) const
+                const Vector &wi) const
 {
   // wo & wi must lie in the same hemisphere
   if(!areSameHemisphere(wi,dg.getNormal(),wo)) return 0;

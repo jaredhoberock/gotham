@@ -18,7 +18,7 @@ SphericalEmission
 } // end SphericalEmission::SphericalEmission()
 
 Spectrum SphericalEmission
-  ::evaluate(const Vector3 &w,
+  ::evaluate(const Vector &w,
              const DifferentialGeometry &dg) const
 {
   return mRadiance;
@@ -29,7 +29,7 @@ Spectrum SphericalEmission
            const float u0,
            const float u1,
            const float u2,
-           Vector3 &w,
+           Vector &w,
            float &pdf,
            bool &delta) const
 {

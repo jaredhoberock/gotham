@@ -65,8 +65,8 @@ bool SmallMesh
   if(result)
   {
     // fill out DifferentialGeometry details
-    Vector3 e1 = mPoints[(*hitTri)[1]] - mPoints[(*hitTri)[0]];
-    Vector3 e2 = mPoints[(*hitTri)[2]] - mPoints[(*hitTri)[0]];
+    Vector e1 = mPoints[(*hitTri)[1]] - mPoints[(*hitTri)[0]];
+    Vector e2 = mPoints[(*hitTri)[2]] - mPoints[(*hitTri)[0]];
     getDifferentialGeometry(*hitTri, r(t), e1.cross(e2).normalize(),
                             b1,
                             b2,

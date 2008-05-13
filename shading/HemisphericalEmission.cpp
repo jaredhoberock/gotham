@@ -13,7 +13,7 @@ HemisphericalEmission
 } // end HemisphericalEmission::HemisphericalEmission()
 
 Spectrum HemisphericalEmission
-  ::evaluate(const Vector3 &w,
+  ::evaluate(const Vector &w,
              const DifferentialGeometry &dg) const
 {
   return Parent1::evaluate(w,dg);

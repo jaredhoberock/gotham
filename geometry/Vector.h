@@ -34,9 +34,6 @@ class Vector
     inline Vector(const float x, const float y, const float z);
 }; // end Vector
 
-// XXX remove this
-typedef Vector Vector3;
-
 #include "Vector.inl"
 
 #endif // VECTOR

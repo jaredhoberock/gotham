@@ -67,7 +67,7 @@ class PerspectiveSensor
                             const float u0,
                             const float u1,
                             const float u2,
-                            Vector3 &ws,
+                            Vector &ws,
                             float &pdf,
                             bool &delta) const;
 
@@ -92,7 +92,7 @@ class PerspectiveSensor
      *  \return The solid angle pdf of ws.
      */
     using Parent0::evaluatePdf;
-    virtual float evaluatePdf(const Vector3 &ws,
+    virtual float evaluatePdf(const Vector &ws,
                               const DifferentialGeometry &dg) const;
 }; // end PerspectiveSensor
 

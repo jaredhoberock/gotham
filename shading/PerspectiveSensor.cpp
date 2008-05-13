@@ -26,7 +26,7 @@ Spectrum PerspectiveSensor
            const float u0,
            const float u1,
            const float u2,
-           Vector3 &ws,
+           Vector &ws,
            float &pdf,
            bool &delta) const
 {
@@ -43,7 +43,7 @@ void PerspectiveSensor
 } // end PerspectiveSensor::invert()
 
 float PerspectiveSensor
-  ::evaluatePdf(const Vector3 &ws,
+  ::evaluatePdf(const Vector &ws,
                 const DifferentialGeometry &dg) const
 {
   return Parent1::evaluatePdf(ws,dg);

@@ -15,7 +15,7 @@ Ray
 } // end Ray::Ray()
 
 Ray
-  ::Ray(const Point &a, const Vector3 &d)
+  ::Ray(const Point &a, const Vector &d)
     :mAnchor(a),mDirection(d),mInverseDirection(1.0f / d[0], 1.0f / d[1], 1.0f / d[2])
 {
   getInterval()[0] = RAY_EPSILON;
@@ -23,7 +23,7 @@ Ray
 } // end Ray::Ray()
 
 Ray
-  ::Ray(const Point &a, const Vector3 &d, const float maxt)
+  ::Ray(const Point &a, const Vector &d, const float maxt)
     :mAnchor(a),mDirection(d),mInverseDirection(1.0f / d[0], 1.0f / d[1], 1.0f / d[2])
 {
   getInterval()[0] = RAY_EPSILON;
@@ -37,7 +37,7 @@ Ray
 } // end Ray::Ray()
 
 Ray
-  ::Ray(const Point &a, const Vector3 &d, const float mint, const float maxt)
+  ::Ray(const Point &a, const Vector &d, const float mint, const float maxt)
     :mAnchor(a),mDirection(d),mInverseDirection(1.0f / d[0], 1.0f / d[1], 1.0f / d[2])
 {
   getInterval()[0] = std::min<float>(mint,maxt);
@@ -62,20 +62,20 @@ void Ray
   mAnchor = a;
 } // end Ray::setAnchor()
 
-const Vector3 &Ray
+const Vector &Ray
   ::getDirection(void) const
 {
   return mDirection;
 } // end Ray::getDirection()
 
-const Vector3 &Ray
+const Vector &Ray
   ::getInverseDirection(void) const
 {
   return mInverseDirection;
 } // end Ray::getInverseDirection()
 
 void Ray
-  ::setDirection(const Vector3 &d)
+  ::setDirection(const Vector &d)
 {
   mDirection = d;
   mInverseDirection[0] = 1.0f / d[0];

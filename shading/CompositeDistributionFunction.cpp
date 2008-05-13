@@ -29,7 +29,7 @@ Spectrum CompositeDistributionFunction
            const float u0,
            const float u1,
            const float u2,
-           Vector3 &wi,
+           Vector &wi,
            float &pdf,
            bool &delta,
            ComponentIndex &index) const
