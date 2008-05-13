@@ -9,9 +9,6 @@
 #include "MetropolisRenderer.h"
 #include "DebugRenderer.h"
 #include "SIMDDebugRenderer.h"
-#include "../cuda/renderers/CudaDebugRenderer.h"
-#include "../cuda/renderers/CudaKajiyaPathTracer.h"
-#include "../cuda/numeric/CudaRandomSequence.h"
 #include "MultiStageMetropolisRenderer.h"
 #include "VarianceRenderer.h"
 #include "BatchMeansRenderer.h"
@@ -36,7 +33,6 @@ void RendererApi
   attr["renderer:energyredistribution:chainlength"] = "100";
   attr["renderer:batchmeans:batches"] = "2";
   attr["renderer:noiseawaremetropolis:varianceexponent"] = "0.5";
-  attr["renderer:threads"] = "1";
 } // end RendererApi::getDefaultAttributes()
 
 Renderer *RendererApi
@@ -74,25 +70,13 @@ Renderer *RendererApi
   std::string proposalFilename   = attr["record:proposals:outfile"];
   std::string targetFilename     = attr["record:target:outfile"];
 
-  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
-
   // create the renderer
   if(rendererName == "montecarlo")
   {
-    if(numThreads <= 1)
-    {
-      // create a PathSampler
-      shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
+    // create a PathSampler
+    shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
 
-      result = new PathDebugRenderer(z, sampler);
-    } // end if
-    else
-    {
-      CudaKajiyaPathTracer *r = new CudaKajiyaPathTracer();
-      r->setWorkBatchSize(numThreads);
-      r->setRandomSequence(shared_ptr<CudaRandomSequence>(new CudaRandomSequence()));
-      result = r;
-    } // end else
+    result = new PathDebugRenderer(z, sampler);
   } // end if
   else if(rendererName == "energyredistribution")
   {
@@ -169,17 +153,7 @@ Renderer *RendererApi
   } // end else if
   else if(rendererName == "debug")
   {
-    if(numThreads > 1)
-    {
-      //SIMDDebugRenderer *r= new SIMDDebugRenderer();
-      CudaDebugRenderer *r = new CudaDebugRenderer();
-      r->setWorkBatchSize(numThreads);
-      result = r;
-    } // end if
-    else
-    {
-      result = new DebugRenderer();
-    } // end else
+    result = new DebugRenderer();
   } // end else if
   else
   {

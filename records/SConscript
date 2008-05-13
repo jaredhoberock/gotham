@@ -8,7 +8,9 @@ for fullpath in glob.glob(pattern):
   basename = os.path.basename(fullpath)
   sources.append(basename)
 
-# create a library 
 Import('env')
-env.Library('records', sources)
+
+# create shared objects
+sharedObjects = env.SharedObject(sources)
+Return('sharedObjects')
 

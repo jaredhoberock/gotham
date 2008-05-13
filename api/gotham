@@ -2,6 +2,7 @@
 import sys
 import inspect
 import os
+import string
 
 def options():
   pass
@@ -11,9 +12,8 @@ def usage():
   options()
   exit(-1)
 
-# XXX i don't know if this is a hack or not, but we basically
-#     require that api and other libraries reside in a known
-#     directory relative to this script
+# we require that api and other libraries reside in a known
+# directory relative to this script
 
 # figure out the absolute path of the directory containing this script
 dir = os.path.dirname(inspect.getabsfile(usage))
@@ -21,8 +21,27 @@ dir = os.path.dirname(inspect.getabsfile(usage))
 # the directory we want to include is ../lib
 dir = os.path.join(os.path.dirname(dir), 'lib')
 
-# save the state of sys.path
-oldpath = sys.path
+# the directories searched for shared libraries must include
+# this directory which houses 'plugins'
+variableName = {'posix'  : 'LD_LIBRARY_PATH',
+                'darwin' : 'DYLD_LIBRARY_PATH',
+                'nt'     : 'PATH'}
+pathSeparator = {'posix'  : ':',
+                 'darwin' : ':',
+                 'nt'     : ';'}
+try:
+  oldPath = os.environ[variableName[os.name]]
+  # is it set correctly?
+  if string.split(oldPath,pathSeparator[os.name])[0] != dir:
+    path = dir + pathSeparator[os.name] + oldPath
+    os.environ[variableName[os.name]] = path
+    # recurse with the new environment
+    os.execvp("gotham",sys.argv)
+except:
+  # continue and hope for the best
+  print 'Warning: unknown OS. Could not set shared library path.'
+
+# Python's path must also include this directory
 sys.path += [dir]
 
 # do the import
@@ -38,7 +57,4 @@ if len(sys.argv) < 2:
 
 for arg in sys.argv[1:]:
   exec open(arg)
-
-# restore the state of sys.path
-sys.path = oldpath
 

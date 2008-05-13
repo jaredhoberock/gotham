@@ -8,6 +8,7 @@ if os.name == 'posix':
   env.Append(LIBS = ['boost_python'])
   env.Append(LIBS = ['boost_thread'])
 
+# Gotham library
 env.Append(LIBS = ['gotham'])
 
 # cuda Gotham libraries
@@ -41,7 +42,7 @@ env.Append(LIBS = ['GLEW'])
 env.Append(LIBS = ['QGLViewer'])
 
 # Gotham library path
-env.Append(LIBPATH = ['../../lib'])
+env.Append(LIBPATH = [os.environ["GOTHAMHOME"] + '/lib'])
 
 # CUDA Gotham library paths
 env.Append(LIBPATH = ['../primitives',
@@ -51,42 +52,14 @@ env.Append(LIBPATH = ['../primitives',
                       '../../../stdcuda'])
 
 # create a shared library
-cudaGothamLib = env.SharedLibrary('cudagotham', ['CudaGotham.cpp'])
+cudaGothamLib = env.SharedLibrary('cudagotham', ['CudaGotham.cpp', 'exportCudaGotham.cpp'])
 
-## install the distribution
-#try:
-#  dir = os.environ["GOTHAMHOME"] + '/lib'
-#  Default(env.Install(dir, source = gothamLib))
-#  Default(env.Install(dir, source = 'api.py'))
-#  Default(env.Install(dir, source = 'objtogoth.py'))
-#  Default(env.Install(dir, source = 'wavefront.py'))
-#  Default(env.Install(dir, source = 'pygtogoth/pygtogoth.py'))
-#  Default(env.Install(dir, source = 'pygtogoth/pygpatch.py'))
-#  Default(env.Install(dir, source = 'pygtogoth/pygshaders.py'))
-#  dir = os.environ["GOTHAMHOME"] + '/bin'
-#  Default(env.Install(dir, source = 'pbslc'))
-#  Default(env.Install(dir, source = 'gotham'))
-#except:
-#  print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
-#
-## if we are writing test code, build it
-#if os.path.isfile("test.cpp"):
-#  env.Append(LIBS = ['python2.5'])
-#  env.Program('test', 'test.cpp')
-#  dir = os.environ["GOTHAMHOME"] + '/bin'
-#  Default(env.Install(dir, source = 'test'))
-#
-## build imgstat
-#if os.path.isfile("imgstat.cpp"):
-#  env.Append(LIBS = ['python2.5'])
-#  env.Program('imgstat', 'imgstat.cpp')
-#  dir = os.environ["GOTHAMHOME"] + '/bin'
-#  Default(env.Install(dir, source = 'imgstat'))
-#
-## build imgclean
-#if os.path.isfile("imgclean.cpp"):
-#  env.Append(LIBS = ['python2.5'])
-#  env.Program('imgclean', 'imgclean.cpp')
-#  dir = os.environ["GOTHAMHOME"] + '/bin'
-#  Default(env.Install(dir, source = 'imgclean'))
-#
+# install the distribution
+try:
+  dir = os.environ["GOTHAMHOME"] + '/lib'
+  Default(env.Install(dir, source = cudaGothamLib))
+  dir = os.environ["GOTHAMHOME"] + '/bin'
+  Default(env.Install(dir, source = 'cuda_pbslc'))
+except:
+  print "Warning: $GOTHAMHOME not defined! Gotham could not be installed."
+

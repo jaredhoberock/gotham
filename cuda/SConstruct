@@ -1,6 +1,6 @@
 exec open('../build-env.py')
 
 env = GothamEnvironment()
-SConscript(['primitives/SConscript'],
+SConscript(['SConscript'],
            exports={'env':env})
 

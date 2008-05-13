@@ -1,7 +1,4 @@
-#!/usr/bin/env python
 #!/usr/bin/env gotham
-
-from api import *
 
 # set up a unit square we can use for the walls of the box
 # four vertices
@@ -94,7 +91,7 @@ Rotate(180.0, 1.0, 0, 0)
 Mesh(unitSquare[0], unitSquare[1])
 PopMatrix()
 
-# make some shiny balls
+# make some shiny spheres
 
 # mirror ball
 # the mirror shader needs to know how reflective it is
@@ -112,25 +109,6 @@ Sphere(-0.4, -0.66, -0.15, 0.33)
 # and an index of refraction (actual glass's index is around 1.5)
 Material('perfectglass', 'Kr', (1.0, 1.0, 1.0), 'Kt', (1.0, 1.0, 1.0), 'eta', 1.5)
 Sphere(0.4,-0.66,0.25,0.33)
-
-# now we need to tell gotham how it should perform the render
-# we do this by setting gothams's state with the attribute() command
-
-# first we need to specify how light paths should be created
-# we do this by setting the value of a parameter called 'path::sampler'
-# there are several of these, and many have parameters, but a straightforward one to use is called 'kajiya'
-Attribute("path:sampler", "kajiya")
-
-# we can specify how long (in vertices) light paths are allowed to grow.
-# for the cornell box, 7 is a good compromise between correctness and speed
-#Attribute("path:maxlength", 7)
-Attribute("path:maxlength", 15)
-
-# now we specify which rendering algorithm to use
-# let's use traditional 'montecarlo'
-# this one takes no additional parameters
-Attribute("renderer:algorithm", "montecarlo")
-Attribute('path:sampler', 'kelemen')
 
 # let's render to a 512x512 image
 (w,h) = (512,512)

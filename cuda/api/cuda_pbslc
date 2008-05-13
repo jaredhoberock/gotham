@@ -264,10 +264,11 @@ elif os.name == 'nt':
   includes += ['c:/dev/src', 'c:/dev/include', 'c:/Python25/include']
 libpath = os.environ["GOTHAMHOME"] + '/lib'
 if os.name == 'posix':
-  libs = [File(libpath + '/libgotham.so'), 'boost_python']
+  libs = [File(libpath + '/libgotham.so'), File(libpath + '/libcudagotham.so'), 'boost_python']
+  #libs = [File(libpath + '/libcudagotham.so'), 'boost_python']
 elif os.name == 'nt':
   # on windows, we need to link to the import library
-  libs = ['gotham']
+  libs = ['gotham', 'cudagotham']
 # XXX TODO fix these path issues
 if os.name == 'nt':
   libpath += ['c:/dev/lib', 'c:/Python25/libs']

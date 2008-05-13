@@ -2,5 +2,6 @@ Import('env')
 SConscript(['primitives/SConscript',
             'shading/SConscript',
             'renderers/SConscript',
-            'numeric/SConscript'],
+            'numeric/SConscript',
+            'api/SConscript'],
            exports = {'env':env})

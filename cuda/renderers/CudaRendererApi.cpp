@@ -4,6 +4,7 @@
  */
 
 #include "CudaRendererApi.h"
+#include <gotham/renderers/RendererApi.h>
 #include "CudaDebugRenderer.h"
 #include "CudaKajiyaPathTracer.h"
 #include "../numeric/CudaRandomSequence.h"
@@ -13,11 +14,14 @@ using namespace boost;
 void CudaRendererApi
   ::getDefaultAttributes(Gotham::AttributeMap &attr)
 {
-  attr["renderer:algorithm"] = "montecarlo";
+  // get the regular api's defaults
+  RendererApi::getDefaultAttributes(attr);
+
+  // add one of our own
   attr["renderer:threads"] = "1";
 } // end CudaRendererApi::getDefaultAttributes()
 
-CudaRenderer *CudaRendererApi
+Renderer *CudaRendererApi
   ::renderer(Gotham::AttributeMap &attr,
              const Gotham::PhotonMaps &photonMaps)
 {
@@ -25,7 +29,7 @@ CudaRenderer *CudaRendererApi
   shared_ptr<CudaRandomSequence> z(new CudaRandomSequence());
 
   // create a new CudaRenderer
-  CudaRenderer *result = 0;
+  Renderer *result = 0;
 
   // fish out the parameters
   std::string rendererName = attr["renderer:algorithm"];
@@ -59,12 +63,9 @@ CudaRenderer *CudaRendererApi
   else
   {
     std::cerr << "Warning: unknown rendering algorithm \"" << rendererName << "\"." << std::endl;
+    std::cerr << "Defaulting to Gotham subsystem." << std::endl;
 
-    // just do kajiya
-    CudaKajiyaPathTracer *r = new CudaKajiyaPathTracer();
-    r->setWorkBatchSize(numThreads);
-    r->setRandomSequence(shared_ptr<CudaRandomSequence>(new CudaRandomSequence()));
-    result = r;
+    return RendererApi::renderer(attr, photonMaps);
   } // end else
 
   // XXX Remove this when we have successfully generalized target counts

@@ -7,9 +7,6 @@
 #include "../rasterizables/RasterizableScene.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../primitives/PrimitiveBSP.h"
-#include "TriangleBVH.h"
-#include "../cuda/primitives/CudaTriangleBVH.h"
-#include "../cuda/primitives/CudaScene.h"
 #include "Scene.h"
 #include "UnshadowedScene.h"
 #include <algorithm>
@@ -22,18 +19,7 @@ PrimitiveList *PrimitiveApi
 {
   PrimitiveList *result = 0;
 
-  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
-
-  if(numThreads > 1)
-  {
-    CudaTriangleBVH *bvh = new RasterizablePrimitiveList<CudaTriangleBVH>();
-    bvh->setWorkBatchSize(numThreads);
-    result = bvh;
-  } // end if
-  else
-  {
-    result = new RasterizablePrimitiveList<PrimitiveBSP>();
-  } // end else
+  result = new RasterizablePrimitiveList<PrimitiveBSP>();
 
   // copy the prims
   std::copy(prims.begin(), prims.end(), std::back_inserter(*result));
@@ -47,19 +33,7 @@ SurfacePrimitiveList *PrimitiveApi
 {
   SurfacePrimitiveList *result = 0;
 
-  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
-
-  if(numThreads > 1)
-  {
-    // XXX no need for this to be a bvh
-    CudaTriangleBVH *bvh = new RasterizablePrimitiveList<CudaTriangleBVH>();
-    bvh->setWorkBatchSize(numThreads);
-    result = bvh;
-  } // end if
-  else
-  {
-    result = new RasterizablePrimitiveList<SurfacePrimitiveList>();
-  } // end else
+  result = new RasterizablePrimitiveList<SurfacePrimitiveList>();
 
   // copy the prims
   std::copy(surfaces.begin(), surfaces.end(), std::back_inserter(*result));
@@ -72,22 +46,13 @@ Scene *PrimitiveApi
 {
   Scene *result = 0;
 
-  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
-
-  if(numThreads > 1)
+  if(attr["scene:castshadows"] == std::string("false"))
   {
-    result = new RasterizableScene<CudaScene>();
+    result = new RasterizableScene<UnshadowedScene>();
   } // end if
   else
   {
-    if(attr["scene:castshadows"] == std::string("false"))
-    {
-      result = new RasterizableScene<UnshadowedScene>();
-    } // end if
-    else
-    {
-      result = new RasterizableScene<Scene>();
-    } // end else
+    result = new RasterizableScene<Scene>();
   } // end else
 
   return result;

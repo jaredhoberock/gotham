@@ -21,7 +21,7 @@ void PathApi
   ::getDefaultAttributes(Gotham::AttributeMap &attr)
 {
   attr["path:sampler"] = "kajiya";
-  attr["path:maxlength"] = "4";
+  attr["path:maxlength"] = "7";
   attr["path:russianroulette:function"] = "always";
   attr["path:russianroulette:continueprobability"] = "1.0";
   attr["path:russianroulette:minimumsubpathlength"] = "3";

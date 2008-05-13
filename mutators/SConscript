@@ -8,7 +8,9 @@ for fullpath in glob.glob(pattern):
   basename = os.path.basename(fullpath)
   sources.append(basename)
 
-# create a library 
+# compile shared objects
 Import('env')
-env.Library('mutators', sources)
+
+sharedObjects = env.SharedObject(sources)
+Return('sharedObjects')
 

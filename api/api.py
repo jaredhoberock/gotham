@@ -28,7 +28,8 @@ def mul(A, x):
   b3 = A[12] * x[0] + A[13] * x[1] + A[14] * x[2] + A[15] * x[3]
   return (b0, b1, b2, b3)
 
-class PyGotham(Gotham):
+# define a class named 'PyGotham'
+class PyGotham:
   # standard shaderpaths
   shaderpaths = ['.']
   try:
@@ -36,20 +37,87 @@ class PyGotham(Gotham):
   except:
     print 'Warning: $GOTHAMHOME undefined! Some shaders may not be found.'
 
+  def __init__(self):
+    # by default, the subsystem is plain old Gotham
+    self.__subsystem = self.__createSubsystem("Gotham")
+    self.attribute("renderer:subsystem", "Gotham")
+
+    # include the directory containing this script
+    # in Python's search path
+    dir = os.path.dirname(inspect.getabsfile(mul))
+    sys.path += [dir]
+
+  def __createSubsystem(self, name, copyFrom = None):
+    result = None
+    # try to import every file in this directory
+    # look for the first one with a type of Gotham which matches name
+    dir = os.path.dirname(inspect.getabsfile(mul))
+
+    # try importing each file as a module
+    for file in os.listdir(dir):
+      fileBasename = os.path.splitext(file)[0]
+      try:
+        module = __import__(fileBasename)
+        if copyFrom == None:
+          # call the null constructor
+          # g = module.name()
+          exec "result = module." + name + "()"
+        else:
+          # call the copy constructor
+          # g = module.name(copyFrom)
+          exec "result = module." + name + "(copyFrom)"
+        del module
+      except:
+        pass
+      # stop at the first thing we were able to create
+      if result != None:
+        break;
+    return result
+
+  def pushMatrix(self):
+    return self.__subsystem.pushMatrix()
+
+  def popMatrix(self):
+    return self.__subsystem.popMatrix()
+
+  def translate(self, tx, ty, tz):
+    return self.__subsystem.translate(tx,ty,tz)
+
+  def rotate(self, degrees, rx, ry, rz):
+    return self.__subsystem.rotate(degrees, rx, ry, rz)
+
+  def scale(self, sx, sy, sz):
+    return self.__subsystem.scale(sx, sy, sz)
+
+  def getMatrix(self, m):
+    return self.__subsystem.getMatrix(m)
+
+  def sphere(self, cx, cy, cz, radius):
+    return self.__subsystem.sphere(cx, cy, cz, radius)
+
+  def pushAttributes(self):
+    return self.__subsystem.pushAttributes()
+
+  def popAttributes(self):
+    return self.__subsystem.popAttributes()
+
   def attribute(self, name, value):
-    # convert "::" to ":"
-    fixed = name.replace("::",":")
-    if fixed != name:
-      print 'attribute(%s,' % name, value, '): Warning double colon "::" attribute syntax is deprecated, please use single colon ":" instead.'
-    # wrap up the value as a string and pass
-    # it along to the parent
-    Gotham.attribute(self, fixed, str(value).lower())
+    if value == "False":
+      return self.__subsystem.attribute(name, str("false"))
+    elif value == "True":
+      return self.__subsystem.attribute(name, str("true"))
+    else:
+      return self.__subsystem.attribute(name, str(value))
+
+  def getAttribute(self, name):
+    return self.__subsystem.getAttribute(name)
 
   def material(self, name, *parms):
     # XXX this is getting ugly
     # add shaderpaths to os.path temporarily
     oldpath = sys.path
     sys.path += self.shaderpaths
+
     #try:
     # import the material
     module = __import__(name)
@@ -81,11 +149,13 @@ class PyGotham(Gotham):
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
 
     del module
-    Gotham.material(self, m)
+    # send the material to the subsystem
+    self.__subsystem.material(m)
     result = True
     #except:
     #  print "Unable to find material '%s'." % name
     #  result = False
+    # restore paths
     sys.path = oldpath
     return result
 
@@ -117,19 +187,19 @@ class PyGotham(Gotham):
     if len(args) == 3:
       parmsvec = vector_float()
       parmsvec[:] = args[1]
-      Gotham.mesh(self, pointsvec, parmsvec, facesvec)
+      return self.__subsystem.mesh(pointsvec, parmsvec, facesvec)
     else:
-      Gotham.mesh(self, pointsvec, facesvec)
+      return self.__subsystem.mesh(pointsvec, facesvec)
 
   def multMatrix(self, m):
     matrix = vector_float()
     matrix[:] = m
-    Gotham.multMatrix(self, matrix)
+    return self.__subsystem.multMatrix(matrix)
 
   def loadMatrix(self, m):
     matrix = vector_float()
     matrix[:] = m
-    Gotham.loadMatrix(self, matrix)
+    return self.__subsystem.loadMatrix(matrix)
 
   def render(self, *args):
     if len(args) > 0:
@@ -145,7 +215,18 @@ class PyGotham(Gotham):
       PyGotham.attribute(self, "record:width", str(args[0][0]))
       PyGotham.attribute(self, "record:height", str(args[0][1]))
       PyGotham.attribute(self, "renderer:spp", str(args[1]))
-    Gotham.render(self)
+
+    # finalize the subsystem
+    subsys = self.getAttribute("renderer:subsystem")
+    if subsys != "":
+      # do we need to change subsystems?
+      if type(self.__subsystem).__name__ != subsys:
+        try:
+          # create a copy using the new subsystem type
+          self.__subsystem = self.__createSubsystem(subsys, self.__subsystem)
+        except:
+          print 'Warning: Could not create subsystem named', subsys
+    return self.__subsystem.render()
 
   def lookAt(self, eye, center, up):
     # see gluLookAt man page: we construct the
@@ -163,14 +244,14 @@ class PyGotham(Gotham):
             s[1],  u[1], -f[1], 0.0,
             s[2],  u[2], -f[2], 0.0,
              0.0,   0.0,   0.0, 1.0] 
-    Gotham.translate(self, eye[0], eye[1], eye[2])
-    Gotham.multMatrix(self, M)
+    self.translate(eye[0], eye[1], eye[2])
+    self.multMatrix(M)
 
   def pointlight(self, position, power, radius = 0.0005):
-    Gotham.pushAttributes(self)
-    PyGotham.material(self, 'light', 'power', power)
-    Gotham.sphere(self, position[0], position[1], position[2], radius)
-    Gotham.popAttributes(self)
+    self.pushAttributes()
+    self.material('light', 'power', power)
+    self.sphere(position[0], position[1], position[2], radius)
+    self.popAttributes()
 
   def camera(self, aspect, fovy, apertureRadius):
     # create a small rectangle for the aperture
@@ -182,13 +263,13 @@ class PyGotham(Gotham):
     points = [-0.5, -0.5, 0,  -0.5, 0.5, 0,  0.5, 0.5, 0,  0.5, -0.5, 0]
     uv = [0,0,  1,0,  1,1,  0,1]
     triangles = [0, 1, 3,  1, 2, 3]
-    Gotham.pushMatrix(self)
-    Gotham.scale(self, apertureRadius/2, apertureRadius/2, apertureRadius/2)
+    self.pushMatrix()
+    self.scale(apertureRadius/2, apertureRadius/2, apertureRadius/2)
     # compute the center of the aperture in world coordinates by multiplying
     # (0,0,0) by the current matrix
     # assign the perspective material
     m = vector_float()
-    Gotham.getMatrix(self, m)
+    self.getMatrix(m)
     c = mul(m, (0,0,0,1))
     up = mul(m, (0,1,0,0))
     up = (up[0],up[1],up[2])
@@ -199,7 +280,7 @@ class PyGotham(Gotham):
     look = mul(m, (0,0,-1,0))
     look = (look[0],look[1],look[2])
     look = normalize(look)
-    Gotham.pushAttributes(self)
+    self.pushAttributes()
     # convert to radians
     fovyRadians = fovy * (math.pi/180.0)
     # compute the location of the lower-left corner of the viewport,
@@ -209,28 +290,27 @@ class PyGotham(Gotham):
     ll = (c[0] + near * look[0] - aspect * right[0] - up[0],
           c[1] + near * look[1] - aspect * right[1] - up[1],
           c[2] + near * look[2] - aspect * right[2] - up[2])
-    PyGotham.material(self,
-                      'perspective',
-                      'aspect',aspect,
-                      'fovy',fovyRadians,
-                      'lowerLeft', ll)
+    self.material('perspective',
+                  'aspect',aspect,
+                  'fovy',fovyRadians,
+                  'lowerLeft', ll)
     # name the camera
-    Gotham.attribute(self, "name", "camera")
-    PyGotham.mesh(self, points, uv, triangles)
-    Gotham.popAttributes(self)
-    Gotham.popMatrix(self)
+    self.attribute("name", "camera")
+    self.mesh(points, uv, triangles)
+    self.popAttributes()
+    self.popMatrix()
     # hint to the viewer after we've popped the attributes
     # XXX we really need a way to pass types besides strings
-    PyGotham.attribute(self, "viewer:fovy",  str(fovy))
-    PyGotham.attribute(self, "viewer:eyex",  str(c[0]))
-    PyGotham.attribute(self, "viewer:eyey",  str(c[1]))
-    PyGotham.attribute(self, "viewer:eyez",  str(c[2]))
-    PyGotham.attribute(self, "viewer:upx",   str(up[0]))
-    PyGotham.attribute(self, "viewer:upy",   str(up[1]))
-    PyGotham.attribute(self, "viewer:upz",   str(up[2]))
-    PyGotham.attribute(self, "viewer:lookx", str(look[0]))
-    PyGotham.attribute(self, "viewer:looky", str(look[1]))
-    PyGotham.attribute(self, "viewer:lookz", str(look[2]))
+    self.attribute("viewer:fovy",  str(fovy))
+    self.attribute("viewer:eyex",  str(c[0]))
+    self.attribute("viewer:eyey",  str(c[1]))
+    self.attribute("viewer:eyez",  str(c[2]))
+    self.attribute("viewer:upx",   str(up[0]))
+    self.attribute("viewer:upy",   str(up[1]))
+    self.attribute("viewer:upz",   str(up[2]))
+    self.attribute("viewer:lookx", str(look[0]))
+    self.attribute("viewer:looky", str(look[1]))
+    self.attribute("viewer:lookz", str(look[2]))
 
   def parse(self, lines):
     # XXX we can think about passing each line
@@ -251,7 +331,7 @@ class PyGotham(Gotham):
       if not Gotham.parseLine(self, line):
         # each line depends on 'g' being defined as some Gotham object
         g = self
-        exec line
+        exec line in globals()
       lineNumber += 1
     print '\nDone.'
 
@@ -268,45 +348,45 @@ class PyGotham(Gotham):
                       1, 2,  3])
 
     # front wall
-    PyGotham.pushMatrix(self)
-    PyGotham.translate(self, 0, 0, 0.5)
-    PyGotham.rotate(self, 90, 1, 0, 0)
-    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    PyGotham.popMatrix(self)
+    self.pushMatrix()
+    self.translate(0, 0, 0.5)
+    self.rotate(90, 1, 0, 0)
+    self.mesh(unitSquare[0], unitSquare[1], unitSquare[2])
+    self.popMatrix()
 
     # left wall
-    PyGotham.pushMatrix(self)
-    PyGotham.translate(self, -0.5,0,0)
-    PyGotham.rotate(self, 90, 0, 0, 1)
-    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    PyGotham.popMatrix(self)
+    self.pushMatrix()
+    self.translate(-0.5,0,0)
+    self.rotate(90, 0, 0, 1)
+    self.mesh(unitSquare[0], unitSquare[1], unitSquare[2])
+    self.popMatrix()
 
     # right wall
-    PyGotham.pushMatrix(self)
-    PyGotham.translate(self, 0.5,0,0)
-    PyGotham.rotate(self, -90, 0, 0, 1)
-    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    PyGotham.popMatrix(self)
+    self.pushMatrix()
+    self.translate(0.5,0,0)
+    self.rotate(-90, 0, 0, 1)
+    self.mesh(unitSquare[0], unitSquare[1], unitSquare[2])
+    self.popMatrix()
 
     # back wall
-    PyGotham.pushMatrix(self)
-    PyGotham.translate(self, 0, 0, -0.5)
-    PyGotham.rotate(self, -90, 1, 0, 0)
-    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    PyGotham.popMatrix(self)
+    self.pushMatrix()
+    self.translate(0, 0, -0.5)
+    self.rotate(-90, 1, 0, 0)
+    self.mesh(unitSquare[0], unitSquare[1], unitSquare[2])
+    self.popMatrix()
 
     # ceiling
-    PyGotham.pushMatrix(self)
-    PyGotham.translate(self, 0, 0.5,0)
-    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    PyGotham.popMatrix(self)
+    self.pushMatrix()
+    self.translate(0, 0.5,0)
+    self.mesh(unitSquare[0], unitSquare[1], unitSquare[2])
+    self.popMatrix()
 
     # floor
-    PyGotham.pushMatrix(self)
-    PyGotham.translate(self, 0, -0.5,0)
-    PyGotham.rotate(self, 180, 1, 0, 0)
-    PyGotham.mesh(self, unitSquare[0], unitSquare[1], unitSquare[2])
-    PyGotham.popMatrix(self)
+    self.pushMatrix()
+    self.translate(0, -0.5,0)
+    self.rotate(180, 1, 0, 0)
+    self.mesh(unitSquare[0], unitSquare[1], unitSquare[2])
+    self.popMatrix()
 
 def __copyright():
   print 'Gotham 0.1'
@@ -323,7 +403,7 @@ __gGotham = PyGotham()
 
 def __wrapMethod(name, wrapperName):
   firstLine = 'def ' + wrapperName + '(*args, **kwargs):\n'
-  secondLine = '  __gGotham.' + name + '(*args, **kwargs)\n'
+  secondLine = '  return __gGotham.' + name + '(*args, **kwargs)\n'
   return firstLine + secondLine
 
 # now wrap up the api in gGotham

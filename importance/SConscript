@@ -10,5 +10,7 @@ for fullpath in glob.glob(pattern):
 
 # create a library 
 Import('env')
-env.Library('importance', sources)
+
+sharedObjects = env.SharedObject(sources)
+Return('sharedObjects')
 

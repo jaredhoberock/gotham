@@ -12,6 +12,20 @@ class CudaGotham
   : public Gotham
 {
   public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef Gotham Parent;
+
+    /*! Null constructor calls Parent().
+     */
+    CudaGotham(void);
+
+    /*! Copy constructor copies from a Parent type.
+     *  \param g The Parent to copy from.
+     */
+    CudaGotham(const Parent &g);
+
     /*! This method starts a render.
      */
     virtual void render(void);

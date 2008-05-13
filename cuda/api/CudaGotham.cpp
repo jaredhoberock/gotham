@@ -19,6 +19,20 @@ using namespace boost;
 #include <Qt/qapplication.h>
 #pragma warning(pop)
 
+CudaGotham
+  ::CudaGotham(void)
+    :Parent()
+{
+  ;
+} // end CudaGotham::CudaGotham()
+
+CudaGotham
+  ::CudaGotham(const Parent &g)
+    :Parent(g)
+{
+  ;
+} // end CudaGotham::CudaGotham()
+
 void CudaGotham
   ::render(void)
 {

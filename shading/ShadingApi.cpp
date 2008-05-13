@@ -4,7 +4,6 @@
  */
 
 #include "ShadingApi.h"
-#include "../cuda/shading/ScatteredAccessContext.h"
 
 using namespace boost;
 
@@ -14,15 +13,7 @@ ShadingContext *ShadingApi
 {
   ShadingContext *result = 0;
 
-  size_t numThreads = lexical_cast<size_t>(attr["renderer:threads"]);
-  if(numThreads > 1)
-  {
-    result = new ScatteredAccessContext();
-  } // end if
-  else
-  {
-    result = new ShadingContext();
-  } // end else
+  result = new ShadingContext();
 
   // give the materials to the ShadingContext
   result->setMaterials(materials);

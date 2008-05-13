@@ -484,6 +484,18 @@ void Gotham
   mAttributeStack.back()[name] = val;
 } // end Gotham::attribute()
 
+std::string Gotham
+  ::getAttribute(const std::string &name) const
+{
+  AttributeMap::const_iterator i = mAttributeStack.back().find(name);
+  if(i != mAttributeStack.back().end())
+  {
+    return i->second;
+  } // end if
+
+  return "";
+} // end Gotham::getAttribute()
+
 void Gotham
   ::pushAttributes(void)
 {
@@ -548,7 +560,7 @@ bool Gotham
   bool result = parse(line.c_str(),
     // begin grammar
     (
-      (str_p("g.photons") | str_p("Photons")) >> '(' >> pointsRule >> ',' >> vectorsRule >> ',' >> powersRule >> ')' >> end_p
+      str_p("Photons") >> '(' >> pointsRule >> ',' >> vectorsRule >> ',' >> powersRule >> ')' >> end_p
     )
     ,
     // end grammar

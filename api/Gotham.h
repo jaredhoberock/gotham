@@ -153,6 +153,12 @@ class Gotham
      */
     virtual void attribute(const std::string &name, const std::string &val);
 
+    /*! This method returns the given named attribute.
+     *  \param name The name of the attribute of interest.
+     *  \return If the attribute so named exists, its value is returned here; "", otherwise.
+     */
+    virtual std::string getAttribute(const std::string &name) const;
+
     /*! This method pushes a copy of the current attributes to the top of
      *  the attributes stack.
      */

@@ -1,7 +1,5 @@
-#!/usr/bin/env python
 #!/usr/bin/env gotham
 
-from api import *
 import objtogoth
 
 unitSquare = ([-0.5, 0,  0.5,
@@ -65,51 +63,30 @@ Rotate(180.0, 1.0, 0, 0)
 Mesh(unitSquare[0], unitSquare[1])
 PopMatrix()
 
-#(verts, parms, indices) = objtogoth.objtogoth("../../../data/geometry/obj/ajax.obj")
-#PushAttributes()
-#PushMatrix()
-#Material('matte', 'Kd', (1,1,1))
-#Rotate(45, 0, 1, 0)
-#Scale(0.05, 0.05, 0.05)
-#Translate(5, -23, 12)
-#Mesh(verts, parms, indices)
-#PopMatrix()
-#PopAttributes()
-
-#(verts, parms, indices) = objtogoth.objtogoth("../../../data/geometry/obj/bunny.obj")
-#PushAttributes()
-#PushMatrix()
-##Material('matte', 'Kd', (1,1,1))
-#Material('speculartransmission')
-#Translate(0,-1.2,0)
-#Scale(5,5,5)
-#Mesh(verts, parms, indices)
-#PopMatrix()
-#PopAttributes()
+(verts, parms, indices) = objtogoth.objtogoth("../../../data/geometry/obj/bunny.obj")
+PushAttributes()
+PushMatrix()
+Material('speculartransmission')
+Translate(0,-1.2,0)
+Scale(5,5,5)
+Mesh(verts, parms, indices)
+PopMatrix()
+PopAttributes()
 
 # let's render to a 512x512 image
 (w,h) = (512,512)
 Attribute("record:width",  w)
 Attribute("record:height", h)
-
-#Attribute("renderer:algorithm", "debug")
-#Attribute("renderer:threads", "16")
-#Attribute("renderer:threads", "192")
-
-#Attribute("renderer:threads", "193")
-#Attribute("renderer:threads", "100000")
-#Attribute("renderer:threads", "500000")
 Attribute("renderer:threads", w*h)
-#Attribute("path:maxlength", 7)
-#Attribute("renderer:spp", 10)
-#Attribute("viewer", False)
 
 PushMatrix()
 LookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
 Camera(float(w) / h, 60.0, 0.01)
 PopMatrix()
 
+# use the cuda subsystem
+Attribute("renderer:subsystem", 'CudaGotham')
+
 # finally, tell gotham to render
 Render()
-
 
