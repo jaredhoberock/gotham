@@ -33,7 +33,7 @@ class PyGotham:
   # standard shaderpaths
   shaderpaths = ['.']
   try:
-    shaderpaths += [os.environ['GOTHAMHOME'] + '/shaders']
+    shaderpaths += [os.path.join(os.environ['GOTHAMHOME'], 'shaders')]
   except:
     print 'Warning: $GOTHAMHOME undefined! Some shaders may not be found.'
 
