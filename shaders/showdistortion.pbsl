@@ -1,15 +1,20 @@
 scattering(void)
 {
-  // create Jacobian
-  gpcpu::float3x2 J;
-  J(0,0) = dpdu[0]; J(0,1) = dpdv[0];
-  J(1,0) = dpdu[1]; J(1,1) = dpdv[1];
-  J(2,0) = dpdu[2]; J(2,1) = dpdv[2];
+  // we require the two diagonal elements of
+  // the metric tensor
 
-  // create metric tensor
-  gpcpu::float2x2 G = J.transpose() * J;
+  // Jacobian:
+  // assume dpdu, dpdv column vectors
+  // J = [dpdu, dpdv]
 
-  float dA = sqrtf(0.5f * G(0,0) + G(1,1));
+  // metric tensor:
+  // G = J^T * J
+
+  // get the 2 diagonal elements of the metric tensor
+  float d0 = dot(dpdu,dpdu);
+  float d1 = dot(dpdv,dpdv);
+
+  float dA = sqrtf(0.5f * d0 + d1);
   float d = 1.0f / dA;
 
   Spectrum s(d,d,d);
