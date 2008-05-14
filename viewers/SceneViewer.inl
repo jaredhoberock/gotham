@@ -67,11 +67,11 @@ void SceneViewer
   Vector lookAt = eye + look;
   Vector up(camera()->upVector());
 
-  std::cerr << "g.pushMatrix()" << std::endl;
-  std::cerr << "g.lookAt([" << eye[0] << "," << eye[1] << "," << eye[2] << "]," << std::endl;
-  std::cerr << "         [" << lookAt[0] << "," << lookAt[1] << "," << lookAt[2] << "]," << std::endl;
-  std::cerr << "         [" << up[0] << "," << up[1] << "," << up[2] << "])" << std::endl;
-  std::cerr << "g.camera(" << camera()->aspectRatio() << "," << camera()->fieldOfView() << "," << camera()->zNear() << ")" << std::endl;
-  std::cerr << "g.popMatrix()" << std::endl;
+  std::cerr << "PushMatrix()" << std::endl;
+  std::cerr << "LookAt([" << eye[0] << "," << eye[1] << "," << eye[2] << "]," << std::endl;
+  std::cerr << "       [" << lookAt[0] << "," << lookAt[1] << "," << lookAt[2] << "]," << std::endl;
+  std::cerr << "       [" << up[0] << "," << up[1] << "," << up[2] << "])" << std::endl;
+  std::cerr << "Camera(" << camera()->aspectRatio() << "," << camera()->fieldOfView() << "," << camera()->zNear() << ")" << std::endl;
+  std::cerr << "PopMatrix()" << std::endl;
 } // end SceneViewer::printCameraCode()
 

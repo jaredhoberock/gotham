@@ -20,14 +20,18 @@
 #include "../primitives/Scene.h"
 #include <boost/shared_ptr.hpp>
 
+#include <glutviewer/GlutViewer.h>
+
 class SceneViewer
-  : public CommonViewer<QGLViewer,QKeyEvent>
+  //: public CommonViewer<QGLViewer,QKeyEvent>
+  : public CommonViewer<GlutViewer,KeyEvent>
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef CommonViewer<QGLViewer,QKeyEvent> Parent;
+    //typedef CommonViewer<QGLViewer,QKeyEvent> Parent;
+    typedef CommonViewer<GlutViewer,KeyEvent> Parent;
 
     /*! This method sets mScene.
      *  \param s Sets mScene.
