@@ -21,6 +21,9 @@ env.Append(LIBS = ['QtXml'])
 env.Append(LIBS = ['QtGui'])
 env.Append(LIBS = ['QtOpenGL'])
 
+# glut libraries
+env.Append(LIBS = ['glut'])
+
 # gl libraries
 env.Append(LIBS = ['GL'])
 env.Append(LIBS = ['GLU'])

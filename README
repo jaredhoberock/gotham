@@ -34,20 +34,6 @@ sudo apt-get install libglew1.4-dev
 # install openexr for floating point images
 sudo apt-get install libopenexr-dev
 
-# install qt4 for the render preview gui environment
-sudo apt-get install libqt4-dev
-
-# install libqglviewer for the render preview viewer
-# XXX TODO provide a quick path for avoiding this through GLUT
-wget http://artis.imag.fr/Members/Gilles.Debunne/QGLViewer/src/libQGLViewer-2.2.6-3.tar.gz 
-tar -xzf libQGLViewer-2.2.6-3.tar.gz
-cd libQGLViewer-2.2.6-3/QGLViewer
-qmake QGLVIEWER_STATIC=no
-make
-sudo make install
-cd ../../
-rm -rf libQGLViewer-2.2.6-3
-
 # build gotham
 cd $GOTHAMHOME
 scons

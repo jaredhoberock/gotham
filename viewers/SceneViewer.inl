@@ -19,16 +19,9 @@ void SceneViewer
   // fit the view to the scene
   BoundingBox b;
   mScene->getBoundingBox(b);
-  setSceneBoundingBox(qglviewer::Vec(b[0]),
-                      qglviewer::Vec(b[1]));
+  setSceneBoundingBox(Parent::Vec(b[0]),
+                      Parent::Vec(b[1]));
 } // end SceneViewer::setScene()
-
-void SceneViewer
-  ::init(void)
-{
-  glewInit();
-  Parent::init();
-} // end SceneViewer::init()
 
 void SceneViewer
   ::draw(void)

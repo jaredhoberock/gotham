@@ -36,6 +36,7 @@ class RenderViewer
     virtual void resizeGL(int w, int h);
     virtual void setRenderer(boost::shared_ptr<Renderer> r);
     virtual void setGamma(const float g);
+    virtual float getGamma(void) const;
 
   protected:
     virtual void drawScenePreview(void);

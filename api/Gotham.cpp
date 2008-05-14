@@ -15,7 +15,6 @@
 #include "../surfaces/Sphere.h"
 #include "../primitives/SurfacePrimitive.h"
 #include "../primitives/PrimitiveApi.h"
-#include "../viewers/RenderViewer.h"
 #include "../renderers/RendererApi.h"
 #include "../records/RecordApi.h"
 #include "../shading/ShadingApi.h"
@@ -31,10 +30,18 @@
 #include "../importance/ImportanceApi.h"
 #include "../renderers/RendererApi.h"
 
+#define USE_QGLVIEWER 0
+
+// choose which viewer base class to use before this
+// #include
+#include "../viewers/RenderViewer.h"
+
+#if USE_QGLVIEWER
 #pragma warning(push)
 #pragma warning(disable : 4311 4312)
 #include <Qt/qapplication.h>
 #pragma warning(pop)
+#endif // USE_QGLVIEWER
 
 using namespace boost;
 using namespace boost::spirit;
@@ -234,8 +241,10 @@ void Gotham
 
   if(!headless)
   {
+#if USE_QGLVIEWER
     int zero = 0;
     QApplication application(zero,0);
+#endif // USE_QGLVIEWER
 
     RenderViewer v;
 
@@ -246,8 +255,6 @@ void Gotham
     v.setScene(s);
 
     v.setRenderer(mRenderer);
-
-    v.setSnapshotFileName(mRenderer->getRenderParameters().c_str());
 
     v.setGamma(lexical_cast<float>(attr["viewer:gamma"]));
 
@@ -272,18 +279,23 @@ void Gotham
       float fovyRadians = fovy * PI / 180.0f;
       v.camera()->setFieldOfView(fovyRadians);
       v.camera()->setAspectRatio(width/height);
-      v.camera()->setPosition(qglviewer::Vec(eyex,eyey,eyez));
-      v.camera()->setUpVector(qglviewer::Vec(upx,upy,upz));
-      v.camera()->setViewDirection(qglviewer::Vec(lookx,looky,lookz));
+      v.camera()->setPosition(RenderViewer::Vec(eyex,eyey,eyez));
+      v.camera()->setUpVector(RenderViewer::Vec(upx,upy,upz));
+      v.camera()->setViewDirection(RenderViewer::Vec(lookx,looky,lookz));
+
+      // open the window
+      v.show();
+
+#if USE_QGLVIEWER
+      application.exec();
+#endif // USE_QGLVIEWER
     } // end try
     catch(...)
     {
-      ;
+      std::cerr << "Warning: Unable to create a window. Defaulting to headless render." << std::endl;
+      Renderer::ProgressCallback callback;
+      mRenderer->render(callback);
     } // end catch
-
-    v.show();
-
-    application.exec();
   } // end if
   else
   {

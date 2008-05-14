@@ -36,17 +36,16 @@ def getEmulationNVCCFLAGS():
 
 def getIncludes():
   result = []
+  # figure out the absolute path of this file
+  thisFile = inspect.getabsfile(getIncludes)
+  # include the dependencies directory
+  includeMe = os.path.join(os.path.dirname(thisFile), 'dependencies')
   if os.name == 'nt':
-    result = ['c:/dev/src/', 'c:/dev/include', 'c:/Python25/include',
+    result = [includeMe, 'c:/Python25/include',
               'c:/dev/include/Qt', 'c:/dev/include/QtCore',
               'c:/dev/include/QtGui', 'c:/dev/include/QtXml', 'c:/dev/include/QtOpenGL',
               'c:/dev/include/OpenEXR']
   elif os.name == 'posix':
-    # figure out the absolute path of this file
-    thisFile = inspect.getabsfile(getIncludes)
-    # include the directory above the one containing this file
-    #includeMe =  os.path.dirname(os.path.dirname(thisFile))
-    includeMe = os.path.join(os.path.dirname(thisFile), 'dependencies')
     result = [includeMe, '/usr/include/python2.5',
               '/usr/include/qt4',
               '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',

@@ -309,9 +309,9 @@ ShadingInterface *gContext;
 import os
 includes = [os.environ['GOTHAMHOME'] + '/include']
 if os.name == 'posix':
-  includes += ['/home/jared/dev/src', '/usr/include/python2.5']
+  includes += ['/usr/include/python2.5']
 elif os.name == 'nt':
-  includes += ['c:/dev/src', 'c:/dev/include', 'c:/Python25/include']
+  includes += ['c:/Python25/include']
 libpath = os.environ["GOTHAMHOME"] + '/lib'
 if os.name == 'posix':
   libs = [File(libpath + '/libgotham.so'), 'boost_python']

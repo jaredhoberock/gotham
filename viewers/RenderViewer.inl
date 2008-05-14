@@ -16,10 +16,35 @@ using namespace boost;
 
 RenderViewer
   ::RenderViewer(void)
-    :Parent()
+    :Parent(),mDrawPreview(true),
+     mExposure(0.0f),mGamma(1.0f),
+     mDoTonemap(false),mMiddleGrey(0.5f)
 {
   ;
 } // end RenderViewer::RenderViewer()
+
+void RenderViewer
+  ::init(void)
+{
+  // first init the parent
+  Parent::init();
+
+  // no state file please
+  setStateFileName(Parent::String(""));
+
+  // init other stuff
+  mTexture.create();
+
+  // resize
+  resize(512,512);
+
+  shared_ptr<const RenderFilm> film = dynamic_pointer_cast<const RenderFilm,const Record>(mRenderer->getRecord());
+  if(film.get() != 0)
+  {
+    resize(film->getWidth(), film->getHeight());
+  } // end if
+} // end RenderViewer::init()
+
 
 void RenderViewer
   ::drawFilm(const shared_ptr<const RenderFilm> &f) 
@@ -150,37 +175,6 @@ void RenderViewer
 {
   Parent::draw();
 } // end RenderViewer::drawScenePreview()
-
-void RenderViewer
-  ::init(void)
-{
-  glewInit();
-
-  // first init the parent
-  Parent::init();
-
-  // no state file please
-  setStateFileName(QString::null);
-
-  // init other stuff
-  mTexture.create();
-
-  mDrawPreview = true;
-  mExposure = 0.0f;
-  mGamma = 1.0f;
-
-  mDoTonemap = false;
-  mMiddleGrey = 0.5f;
-
-  // resize
-  resize(512,512);
-
-  shared_ptr<const RenderFilm> film = dynamic_pointer_cast<const RenderFilm,const Record>(mRenderer->getRecord());
-  if(film.get() != 0)
-  {
-    resize(film->getWidth(), film->getHeight());
-  } // end if
-} // end RenderViewer::init()
 
 void RenderViewer
   ::keyPressEvent(KeyEvent *e)
@@ -406,4 +400,10 @@ void RenderViewer
 {
   mGamma = g;
 } // end RenderViewer::setGamma()
+
+float RenderViewer
+  ::getGamma(void) const
+{
+  return mGamma;
+} // end RenderViewer::getGamma()
 

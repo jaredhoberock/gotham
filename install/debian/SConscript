@@ -15,7 +15,7 @@ DEBVERSION = "0.01"
 DEBMAINT = "Jared Hoberock [jaredhoberock@gmail.com]"
 # XXX we should use uname or something to get the architecture
 DEBARCH = "amd64"
-DEBDEPENDS = "scons, g++, libboost-dev, libboost-date-time-dev, libboost-thread-dev, libboost-python-dev, libglew1.4-dev, libopenexr-dev, libqt4-dev"
+DEBDEPENDS = "scons, g++, libboost-dev, libboost-date-time-dev, libboost-thread-dev, libboost-python-dev, libglew-dev, libopenexr-dev, libglut-dev"
 DEBDESC = "An unbiased photorealistic renderer"
 
 install_base = 'usr/local/gotham/'
@@ -96,3 +96,4 @@ env.Command(DEBCONTROLFILE, None, make_control)
 # And we can generate the .deb file by calling dpkg-deb
 env.Command(debpkg, DEBCONTROLFILE,
             "dpkg-deb -b %s %s" % ("%s" % DEBNAME, "$TARGET"))
+
