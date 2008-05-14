@@ -10,9 +10,9 @@
 
 class BoundingBox;
 class Ray;
-#include "../geometry/DifferentialGeometry.h"
+#include "../include/DifferentialGeometry.h"
+#include "../include/Spectrum.h"
 #include "../geometry/Transform.h"
-#include <spectrum/Spectrum.h>
 #include <boost/functional/hash.hpp>
 #include "Intersection.h"
 #include "PrimitiveHandle.h"

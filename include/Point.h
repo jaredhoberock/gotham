@@ -6,7 +6,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <gpcpu/Vector.h>
+#include "gpcpu/Vector.h"
 
 /*! \class Point
  *  \brief A Point is a 3-vector.

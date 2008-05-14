@@ -7,7 +7,6 @@
 #ifndef PHONG_REFLECTION_H
 #define PHONG_REFLECTION_H
 
-#include <spectrum/Spectrum.h>
 #include "ScatteringDistributionFunction.h"
 
 class Fresnel;

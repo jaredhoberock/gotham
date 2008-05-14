@@ -7,10 +7,9 @@
 
 #include "exportShading.h"
 
-#include <spectrum/Spectrum.h>
-#include "../geometry/Point.h"
-#include "../geometry/Vector.h"
-#include <gpcpu/floatmxn.h>
+#include "Spectrum.h"
+#include "Point.h"
+#include "Vector.h"
 
 #include "stdmaterial.h"
 #include "noises.h"

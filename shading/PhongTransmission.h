@@ -7,7 +7,6 @@
 #ifndef PHONG_TRANSMISSION_H
 #define PHONG_TRANSMISSION_H
 
-#include <spectrum/Spectrum.h>
 #include "ScatteringDistributionFunction.h"
 #include "Fresnel.h"
 

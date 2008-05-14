@@ -45,7 +45,8 @@ def getIncludes():
     # figure out the absolute path of this file
     thisFile = inspect.getabsfile(getIncludes)
     # include the directory above the one containing this file
-    includeMe =  os.path.dirname(os.path.dirname(thisFile))
+    #includeMe =  os.path.dirname(os.path.dirname(thisFile))
+    includeMe = os.path.join(os.path.dirname(thisFile), 'dependencies')
     result = [includeMe, '/usr/include/python2.5',
               '/usr/include/qt4',
               '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',

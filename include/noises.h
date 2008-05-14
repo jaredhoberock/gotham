@@ -8,7 +8,7 @@
 
 #include "stdshader.h"
 #include "ShadingInterface.h"
-#include "../geometry/Point.h"
+#include "Point.h"
 
 // A hook into the ShadingInterface
 // XXX This is probably not reentrant

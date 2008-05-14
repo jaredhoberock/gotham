@@ -1,0 +1,3 @@
+This directory contains code which Gotham depends on, but which is not part of Gotham proper.
+All of this code is inlined.
+

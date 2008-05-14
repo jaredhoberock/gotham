@@ -10,7 +10,7 @@
 
 // XXX don't require another #include here for DifferentialGeometry
 //class DifferentialGeometry;
-#include "../geometry/DifferentialGeometry.h"
+#include "DifferentialGeometry.h"
 class ShadingInterface;
 class ScatteringDistributionFunction;
 

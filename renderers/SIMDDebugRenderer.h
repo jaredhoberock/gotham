@@ -10,7 +10,7 @@
 #include "SIMDRenderer.h"
 #include "../primitives/Primitive.h"
 #include "../primitives/Primitive.h"
-#include <spectrum/Spectrum.h>
+#include "../include/Spectrum.h"
 
 class ScatteringDistributionFunction;
 

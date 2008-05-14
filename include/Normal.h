@@ -6,7 +6,7 @@
 #ifndef NORMAL_H
 #define NORMAL_H
 
-#include <gpcpu/Vector.h>
+#include "gpcpu/Vector.h"
 #include "Vector.h"
 
 /*! \class Normal

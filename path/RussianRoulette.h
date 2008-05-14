@@ -13,7 +13,7 @@
 class Spectrum;
 class Vector;
 
-#include "../geometry/DifferentialGeometry.h"
+#include "../include/DifferentialGeometry.h"
 
 class RussianRoulette
 {

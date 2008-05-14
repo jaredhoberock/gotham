@@ -1,0 +1,11 @@
+exec open('../../build.py')
+
+# set up the environment
+env = getCommonEnvironment()
+
+# name the source files
+sourceFiles = ['main.cpp']
+
+# build
+env.Program(target = 'commonviewer', source = sourceFiles)
+

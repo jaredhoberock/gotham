@@ -9,7 +9,7 @@
 
 #include "../geometry/CudaDifferentialGeometry.h"
 #include "CudaScatteringDistributionFunction.h"
-#include <spectrum/Spectrum.h>
+#include "../../include/Spectrum.h"
 
 extern "C" void evaluateUnidirectionalScattering(const CudaScatteringDistributionFunction *f,
                                                  const float3 *wo,

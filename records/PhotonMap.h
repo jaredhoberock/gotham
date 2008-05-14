@@ -7,9 +7,9 @@
 #define PHOTON_MAP_H
 
 #include <vector>
-#include "../geometry/Point.h"
-#include "../geometry/Vector.h"
-#include <spectrum/Spectrum.h>
+#include "../include/Point.h"
+#include "../include/Vector.h"
+#include "../include/Spectrum.h"
 
 struct Photon
 {

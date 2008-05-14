@@ -7,7 +7,6 @@
 #ifndef SPECULAR_TRANSMISSION_H
 #define SPECULAR_TRANSMISSION_H
 
-#include <spectrum/Spectrum.h>
 #include "DeltaDistributionFunction.h"
 #include "functions/SpecularTransmissionBase.h"
 

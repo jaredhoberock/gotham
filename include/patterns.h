@@ -1,6 +1,6 @@
 /*! \file patterns.h
  *  \author Jared Hoberock
- *  \brief Adapted from Gelato/shadres/patterns.h.
+ *  \brief Adapted from Gelato/shaders/patterns.h.
  */
 
 #ifndef PATTERNS_H

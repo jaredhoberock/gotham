@@ -5,9 +5,8 @@
 
 #include "SceneViewer.h"
 #include "../rasterizables/Rasterizable.h"
-#include <pricksie/geometry/BoundingBox.h>
+#include "../geometry/BoundingBox.h"
 #include "../primitives/SurfacePrimitiveList.h"
-#include "../geometry/DifferentialGeometry.h"
 #include "../shading/PerspectiveSensor.h"
 #include <fstream>
 #include <qfiledialog.h>

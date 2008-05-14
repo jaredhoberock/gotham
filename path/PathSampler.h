@@ -8,7 +8,7 @@
 #define PATH_SAMPLER_H
 
 #include <vector>
-#include <spectrum/Spectrum.h>
+#include "../include/Spectrum.h"
 #include <boost/array.hpp>
 #include "Path.h"
 #include "../numeric/RandomSequence.h"

@@ -10,7 +10,7 @@
 #include <gl++/texture/Texture.h>
 #include <gl++/framebuffer/Framebuffer.h>
 #include "Film.h"
-#include <spectrum/Spectrum.h>
+#include "../include/Spectrum.h"
 #include <vector>
 #include <boost/thread/mutex.hpp>
 

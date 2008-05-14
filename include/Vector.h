@@ -6,7 +6,7 @@
 #ifndef VECTOR
 #define VECTOR
 
-#include <gpcpu/Vector.h>
+#include "gpcpu/Vector.h"
 
 class Vector
   : public gpcpu::float3

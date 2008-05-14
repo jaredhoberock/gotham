@@ -8,7 +8,7 @@
 
 #include "CudaRenderer.h"
 #include "../primitives/CudaIntersection.h"
-#include <spectrum/Spectrum.h>
+#include "../../include/Spectrum.h"
 #include <stdcuda/stdcuda.h>
 #include <vector>
 

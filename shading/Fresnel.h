@@ -5,7 +5,7 @@
  */
 
 #pragma once
-#include <spectrum/Spectrum.h>
+#include "../include/Spectrum.h"
 
 class FunctionAllocator;
 

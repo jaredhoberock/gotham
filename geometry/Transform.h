@@ -6,10 +6,10 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include <gpcpu/floatmxn.h>
-#include "Vector.h"
-#include "Normal.h"
-#include "Point.h"
+#include "../include/gpcpu/floatmxn.h"
+#include "../include/Vector.h"
+#include "../include/Normal.h"
+#include "../include/Point.h"
 
 class Ray;
 class BoundingBox;

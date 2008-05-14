@@ -4,7 +4,6 @@
  */
 
 #include "Mesh.h"
-#include "../geometry/Normal.h"
 #include <2dmapping/UnitSquareToTriangle.h>
 #include <waldbikkerintersection/waldBikkerIntersection.h>
 

@@ -6,7 +6,7 @@
 #ifndef PARAMETRIC_COORDINATES_H
 #define PARAMETRIC_COORDINATES_H
 
-#include <gpcpu/Vector.h>
+#include "gpcpu/Vector.h"
 
 /*! \typedef ParametricCoordinates
  *  \brief Shorthand for now.

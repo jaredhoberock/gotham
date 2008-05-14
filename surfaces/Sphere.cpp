@@ -4,11 +4,11 @@
  */
 
 #include "Sphere.h"
+#include "../include/Vector.h"
+#include "../include/DifferentialGeometry.h"
 #include <quadratic/Quadratic.h>
 #include "../geometry/BoundingBox.h"
-#include "../geometry/Vector.h"
 #include "../geometry/Ray.h"
-#include "../geometry/DifferentialGeometry.h"
 #include <2dmapping/UnitSquareToSphere.h>
 #include <assert.h>
 

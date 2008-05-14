@@ -6,7 +6,7 @@
 #ifndef BOUNDING_BOX_H
 #define BOUNDING_BOX_H
 
-#include "Point.h"
+#include "../include/Point.h"
 class Ray;
 class Normal;
 #include "AxisAlignedHypercube.h"

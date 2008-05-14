@@ -4,8 +4,8 @@
  */
 
 #include "SIMDDebugRenderer.h"
-#include "../geometry/Point.h"
-#include "../geometry/Vector.h"
+#include "../include/Point.h"
+#include "../include/Vector.h"
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../records/RenderFilm.h"

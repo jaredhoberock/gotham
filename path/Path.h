@@ -7,13 +7,13 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include "../geometry/Point.h"
-#include "../geometry/Normal.h"
-#include "../geometry/Vector.h"
-#include "../geometry/DifferentialGeometry.h"
+#include "../include/Point.h"
+#include "../include/Normal.h"
+#include "../include/Vector.h"
+#include "../include/DifferentialGeometry.h"
+#include "../include/Spectrum.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../shading/ShadingContext.h"
-#include <spectrum/Spectrum.h>
 #include <boost/array.hpp>
 
 class FunctionAllocator;

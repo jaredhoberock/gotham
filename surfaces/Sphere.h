@@ -8,7 +8,7 @@
 #define SPHERE_H
 
 #include "Surface.h"
-#include "../geometry/Point.h"
+#include "../include/Point.h"
 
 class Sphere
   : public Surface
