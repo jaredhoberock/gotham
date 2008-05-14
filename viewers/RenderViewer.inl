@@ -4,7 +4,6 @@
  */
 
 #include "RenderViewer.h"
-#include <qstring.h>
 #include "../renderers/MetropolisRenderer.h"
 #include "../renderers/EnergyRedistributionRenderer.h"
 #include "../records/GpuFilm.h"
@@ -181,7 +180,7 @@ void RenderViewer
 {
   switch(e->key())
   {
-    case Qt::Key_R:
+    case 'R':
     {
       startRender();
       mDrawPreview = false;
@@ -189,7 +188,7 @@ void RenderViewer
       break;
     } // end case Qt::Key_R
 
-    case Qt::Key_P:
+    case 'P':
     {
       mDrawPreview = !mDrawPreview;
       updateGL();
@@ -361,12 +360,6 @@ class RenderThunk
   Renderer *mRenderer;
   Renderer::ProgressCallback *mProgress;
 };
-
-void RenderViewer
-  ::postSelection(const QPoint &p)
-{
-  ;
-} // end RenderViewer::postSelection()
 
 void RenderViewer
   ::setRenderer(shared_ptr<Renderer> r)

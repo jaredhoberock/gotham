@@ -9,7 +9,6 @@
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../shading/PerspectiveSensor.h"
 #include <fstream>
-#include <qfiledialog.h>
 
 void SceneViewer
   ::setScene(boost::shared_ptr<Scene> s)

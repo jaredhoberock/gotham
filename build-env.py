@@ -42,14 +42,9 @@ def getIncludes():
   includeMe = os.path.join(os.path.dirname(thisFile), 'dependencies')
   if os.name == 'nt':
     result = [includeMe, 'c:/Python25/include',
-              'c:/dev/include/Qt', 'c:/dev/include/QtCore',
-              'c:/dev/include/QtGui', 'c:/dev/include/QtXml', 'c:/dev/include/QtOpenGL',
               'c:/dev/include/OpenEXR']
   elif os.name == 'posix':
     result = [includeMe, '/usr/include/python2.5',
-              '/usr/include/qt4',
-              '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',
-              '/usr/include/qt4/QtGui', '/usr/include/qt4/QtXml', '/usr/include/qt4/QtOpenGL',
               '/usr/include/OpenEXR',
               '/usr/local/cuda/include']
   return result

@@ -41,7 +41,6 @@ class RenderViewer
   protected:
     virtual void drawScenePreview(void);
     virtual void startRender(void);
-    virtual void postSelection(const QPoint &p);
 
     /*! Render resources
      */

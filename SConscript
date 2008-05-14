@@ -15,12 +15,6 @@ env.Append(LIBS = ['Imath'])
 env.Append(LIBS = ['Half'])
 env.Append(LIBS = ['z'])
 
-# qt libraries
-env.Append(LIBS = ['QtCore'])
-env.Append(LIBS = ['QtXml'])
-env.Append(LIBS = ['QtGui'])
-env.Append(LIBS = ['QtOpenGL'])
-
 # glut libraries
 env.Append(LIBS = ['glut'])
 
