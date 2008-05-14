@@ -18,7 +18,6 @@
 #include "../importance/ImportanceApi.h"
 #include "../importance/LuminanceImportance.h"
 #include "HaltCriterion.h"
-#include "ExperimentalMetropolisRenderer.h"
 
 using namespace boost;
 
