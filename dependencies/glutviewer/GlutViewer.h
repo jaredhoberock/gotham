@@ -54,6 +54,7 @@ class GlutViewer
     /* static call back function for glut */    
     inline static void displayFunc(void);	
     inline static void idleFunc(void);
+    inline static void timerFunc(int value);
     inline static void keyFunc(unsigned char key, int x, int y);
     inline static void mouseFunc(int button, int state, int x, int y);
     inline static void motionFunc(int x, int y);

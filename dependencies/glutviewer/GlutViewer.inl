@@ -38,6 +38,7 @@ GlutViewer
 
   // animation
   mIsAnimating = false;
+  mAnimationPeriod = 0;
 
   viewer = this;
 
@@ -132,6 +133,24 @@ void GlutViewer
 {
   ;
 } // end GlutViewer::animate()
+
+void GlutViewer
+  ::timerFunc(int value)
+{
+  GlutViewer *pViewer = GlutViewer::getInstance();
+
+  if(pViewer->mIsAnimating)
+  {
+    pViewer->animate();
+    pViewer->render();
+
+    // if we're still animating, ask for another frame
+    if(pViewer->mIsAnimating)
+    {
+      glutTimerFunc(pViewer->mAnimationPeriod, timerFunc, value);
+    } // end if
+  } // end if
+} // end GlutViewer::timerFunc()
 
 void GlutViewer
   ::idleFunc(void)
@@ -377,14 +396,15 @@ void GlutViewer
   ::startAnimation(void)
 {
   mIsAnimating = true;
-  glutIdleFunc(idleFunc);
+  //glutIdleFunc(idleFunc);
+  glutTimerFunc(mAnimationPeriod, timerFunc, 0);
 } // end GlutViewer::startAnimation()
 
 void GlutViewer
   ::stopAnimation(void)
 {
   mIsAnimating = false;
-  glutIdleFunc(0);
+  //glutIdleFunc(0);
 } // end GlutViewer::stopAnimation()
 
 void GlutViewer
