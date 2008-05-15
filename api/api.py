@@ -102,9 +102,9 @@ class PyGotham:
     return self.__subsystem.popAttributes()
 
   def attribute(self, name, value):
-    if value == "False":
+    if value == False:
       return self.__subsystem.attribute(name, str("false"))
-    elif value == "True":
+    elif value == True:
       return self.__subsystem.attribute(name, str("true"))
     else:
       return self.__subsystem.attribute(name, str(value))
