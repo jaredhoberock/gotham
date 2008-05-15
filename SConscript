@@ -22,7 +22,6 @@ env.Append(LIBS = ['glut'])
 env.Append(LIBS = ['GL'])
 env.Append(LIBS = ['GLU'])
 env.Append(LIBS = ['GLEW'])
-env.Append(LIBS = ['QGLViewer'])
 
 # aggregate shared objects from each child directory
 subdirectories = ['geometry',
