@@ -7,30 +7,32 @@
 #ifndef PHONG_REFLECTION_H
 #define PHONG_REFLECTION_H
 
+#include <gpcpu/Vector.h>
 #include "ScatteringDistributionFunction.h"
-
-class Fresnel;
+#include "functions/PhongReflectionBase.h"
 
 class PhongReflection
-  : public ScatteringDistributionFunction
+  : public ScatteringDistributionFunction,
+    public PhongReflectionBase<Vector,Spectrum>
 {
   public:
     /*! \typedef Parent
      *  \brief Shorthand.
      */
-    typedef ScatteringDistributionFunction Parent;
+    //typedef ScatteringDistributionFunction Parent;
+    typedef ScatteringDistributionFunction Parent0;
+
+    typedef PhongReflectionBase<Vector,Spectrum> Parent1;
 
     /*! Constructor accepts a reflectance, index of refraction,
      *  and a Phong exponent to create a glossy Fresnel conductor.
-     *  \param t The transmittance of this PhongReflection.
+     *  \param r The reflectivity of this PhongReflection.
      *  \param eta Sets the index of refraction of the Fresnel conductor.
      *  \param exponent The Phong exponent of this PhongReflection.
-     *  \param alloc A FunctionAllocator object for allocating the Fresnel object.
      */
-    PhongReflection(const Spectrum &t,
+    PhongReflection(const Spectrum &r,
                     const float eta,
-                    const float exponent,
-                    FunctionAllocator &alloc);
+                    const float exponent);
 
     /*! Constructor accepts a reflectance, indices of refraction,
      *  and a Phong exponent to create a glossy Fresnel dielectric.
@@ -43,8 +45,7 @@ class PhongReflection
     PhongReflection(const Spectrum &t,
                     const float etai,
                     const float etat,
-                    const float exponent,
-                    FunctionAllocator &alloc);
+                    const float exponent);
 
     /*! This method evaluates this PhongReflection function.
      *  \param wi A vector pointing towards the direction of incoming radiance.
@@ -52,7 +53,7 @@ class PhongReflection
      *  \param wo A vector pointing towards the viewing direction.
      *  \return The scattering in direction wo.
      */
-    using Parent::evaluate;
+    using Parent0::evaluate;
     virtual Spectrum evaluate(const Vector &wo,
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;
@@ -70,7 +71,7 @@ class PhongReflection
      *  \param component This is set to 0.
      *  \return The bidirectional scattering from wi to wo is returned here.
      */
-    using Parent::sample;
+    using Parent0::sample;
     virtual Spectrum sample(const Vector &wo,
                             const DifferentialGeometry &dg,
                             const float u0,
@@ -107,30 +108,10 @@ class PhongReflection
      *  \param wi A Vector pointing towards the direction of incidence.
      *  \return The value of the pdf at (wi,dg,wo).
      */
-    using Parent::evaluatePdf;
+    using Parent0::evaluatePdf;
     virtual float evaluatePdf(const Vector &wo,
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;
-
-    /*! This method clones this PhongReflection.
-     *  \param allocator The FunctionAllocator to allocate from.
-     *  \return a pointer to a newly-allocated clone of this PhongReflection; 0,
-     *          if no memory could be allocated.
-     */
-    virtual ScatteringDistributionFunction *clone(FunctionAllocator &allocator) const;
-
-  protected:
-    /*! The reflectance.
-     */
-    Spectrum mReflectance;
-
-    /*! The Phong exponent.
-     */
-    float mExponent;
-
-    /*! The Fresnel object.
-     */
-    Fresnel *mFresnel;
 }; // end PhongReflection
 
 #endif // PHONG_REFLECTION_H

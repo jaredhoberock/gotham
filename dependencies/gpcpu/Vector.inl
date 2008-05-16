@@ -405,6 +405,19 @@ template<typename Scalar, size_t N>
   return result;
 } // end dot()
 
+template<typename Scalar, size_t N>
+  Vector<Scalar,N> reflect(const Vector<Scalar,N> &v0,
+                           const Vector<Scalar,N> &v1)
+{
+  return v0.reflect(v1);
+} // end reflect()
+
+template<typename Scalar, size_t N>
+  Vector<Scalar,N> normalize(const Vector<Scalar,N> &v)
+{
+  return v.normalize();
+} // end normalize()
+
 #ifndef __CUDACC__
 template<typename Scalar, size_t N>
   std::ostream &operator<<(std::ostream &os,

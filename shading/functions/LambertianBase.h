@@ -70,7 +70,7 @@ template<typename V3, typename S3, typename DG>
                            unsigned int &component) const;
 
     /*! This method samples this LambertianBase given a Wo,
-     *  DifferentialGeometry, and three numbers in the unit interval.
+     *  differential geometry vectors, and three numbers in the unit interval.
      *  \param wo The direction of scattering.
      *  \param tangent The tangent direction.
      *  \param binormal The binormal direction.

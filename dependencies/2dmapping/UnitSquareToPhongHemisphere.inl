@@ -19,19 +19,19 @@
 #endif // INV_TWOPI
 
 template<typename Real, typename Real3>
-  void UnitSquareToPhongHemisphere
+  void UnitSquareToPhongHemisphere<Real,Real3>
     ::evaluate(const Real &u,
                const Real &v,
                const Real &k,
                Real3 &p,
                Real *pdf)
 {
-  Real cosAlpha = pow(1.0f - u,Real(1.0) / (k + Real(1.0)));
+  Real cosAlpha = pow(Real(1) - u,Real(1) / (k + Real(1)));
 
-  float sinAlpha = sqrt(std::max<Real>(0, Real(1.0) - cosAlpha*cosAlpha));
-  p[0] = sinAlpha * cos(Real(2.0) * PI * v);
-  p[1] = sinAlpha * sin(Real(2.0) * PI * v);
-  p[2] = cosAlpha;
+  float sinAlpha = sqrtf(fmaxf(Real(0), Real(1) - cosAlpha*cosAlpha));
+  p.x = sinAlpha * cosf(Real(2) * PI * v);
+  p.y = sinAlpha * sinf(Real(2) * PI * v);
+  p.z = cosAlpha;
 
   if(pdf != 0)
   {
@@ -40,15 +40,15 @@ template<typename Real, typename Real3>
 } // end UnitSquareToPhongHemisphere::evaluate()
 
 template<typename Real, typename Real3>
-  Real UnitSquareToPhongHemisphere
+  Real UnitSquareToPhongHemisphere<Real,Real3>
     ::evaluatePdf(const Real3 &p, const Real &k)
 {
   // from Walter et al, 2007, equation 30
-  return (k + Real(2.0)) * pow(p[2], k) * INV_TWOPI;
+  return (k + Real(2)) * powf(p.z, k) * INV_TWOPI;
 } // end UnitSquareToPhongHemisphere::evaluatePdf()
 
-template<typename Real3, typename Real>
-  void UnitSquareToPhongHemisphere
+template<typename Real, typename Real3>
+  void UnitSquareToPhongHemisphere<Real,Real3>
     ::inverse(const Real3 &p,
               const Real &k,
               Real &u,

@@ -7,7 +7,8 @@
 #ifndef UNIT_SQUARE_TO_PHONG_HEMISPHERE_H
 #define UNIT_SQUARE_TO_PHONG_HEMISPHERE_H
 
-class UnitSquareToPhongHemisphere
+template<typename Real, typename Real3>
+  class UnitSquareToPhongHemisphere
 {
   public:
     /*! This method maps points in the unit square
@@ -22,12 +23,11 @@ class UnitSquareToPhongHemisphere
      *  \param pdf The value of the distribution function over the hemisphere
      *             is returned here if this is not 0.
      */
-    template<typename Real, typename Real3>
-      static void evaluate(const Real &u,
-                           const Real &v,
-                           const Real &k,
-                           Real3 &p,
-                           Real *pdf = 0);
+    inline static void evaluate(const Real &u,
+                                const Real &v,
+                                const Real &k,
+                                Real3 &p,
+                                Real *pdf = 0);
 
     /*! This method evaluates the probability density
      *  function of this mapping at the given point
@@ -37,9 +37,8 @@ class UnitSquareToPhongHemisphere
      *  \param k The exponent of the distribution.
      *  \return The value of the pdf at p.
      */
-    template<typename Real, typename Real3>
-      static Real evaluatePdf(const Real3 &p,
-                              const Real &k);
+    inline static Real evaluatePdf(const Real3 &p,
+                                   const Real &k);
 
     /*! This method provides the inverse mapping from
      *  a point on the Phong-weighted hemisphere to a
@@ -51,11 +50,10 @@ class UnitSquareToPhongHemisphere
      *  \param v The second coordinate of the corresponding
      *           point on the unit square is returned here.
      */
-    template<typename Real3, typename Real>
-      static void inverse(const Real3 &p,
-                          const Real &k,
-                          Real &u,
-                          Real &v);
+    inline static void inverse(const Real3 &p,
+                               const Real &k,
+                               Real &u,
+                               Real &v);
 }; // end UnitSquareToPhongHemisphere
 
 #include "UnitSquareToPhongHemisphere.inl"

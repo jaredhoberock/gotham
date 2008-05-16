@@ -56,7 +56,7 @@ ScatteringDistributionFunction *ShadingContext
            const float eta,
            const float exponent)
 {
-  return new(mAllocator) PhongReflection(Kr, eta, exponent, mAllocator);
+  return new(mAllocator) PhongReflection(Kr, eta, exponent);
 } // end ShadingContext::glossy()
 
 ScatteringDistributionFunction *ShadingContext
@@ -167,7 +167,7 @@ ScatteringDistributionFunction *ShadingContext
   {
     if(shininess < 1000.0f)
     {
-      specular = new(mAllocator) PhongReflection(Ks, Fresnel::approximateEta(Ks)[0], shininess, mAllocator);
+      specular = new(mAllocator) PhongReflection(Ks, Fresnel::approximateEta(Ks)[0], shininess);
     } // end if
     else
     {
@@ -212,11 +212,11 @@ ScatteringDistributionFunction *ShadingContext
   {
     if(shininess < 1000.0f)
     {
-      glossy = new(mAllocator) PhongReflection(Ks, Fresnel::approximateEta(Ks)[0], shininess, mAllocator);
+      glossy = new(mAllocator) PhongReflection(Ks, eta, shininess);
     } // end if
     else
     {
-      glossy = new(mAllocator) SpecularReflection(Ks, Fresnel::approximateEta(Ks)[0], mAllocator);
+      glossy = new(mAllocator) SpecularReflection(Ks, eta, mAllocator);
     } // end else
   } // end if
 

@@ -138,7 +138,7 @@ template<typename V3>
 {
   // XXX fix this
   // generate a random vector on the +z hemisphere
-  UnitSquareToPhongHemisphere::evaluate<float, Vector>(u0,u1,exponent,w,&pdf);
+  UnitSquareToPhongHemisphere<float,Vector>::evaluate(u0,u1,exponent,w,&pdf);
 
   // get the angle between r and (0,0,1)
   // r dot (0,0,1) = r[0]*0 + r[1]*0 + r[2]*1
@@ -191,7 +191,9 @@ template<typename V3>
   else if(r.z < 0)
   {
     // no rotation necessary, just flip because r == -z
-    w = -w;
+    w.x = -w.x;
+    w.y = -w.y;
+    w.z = -w.z;
   } // end else if
 } // end Mappings::unitSquareToPhongLobe()
 
