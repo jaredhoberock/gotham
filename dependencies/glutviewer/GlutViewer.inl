@@ -425,6 +425,7 @@ void GlutViewer
 {
   mWindowTitle = title;
   glutSetWindowTitle(title.c_str());
+  glutSetIconTitle(title.c_str());
 } // end GlutViewer::setWindowTitle()
 
 void GlutViewer
