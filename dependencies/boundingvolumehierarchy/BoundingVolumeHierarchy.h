@@ -181,6 +181,14 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
     template<typename Bounder>
       struct PrimitiveSorter
     {
+      inline PrimitiveSorter(const size_t axis,
+                             const std::vector<PrimitiveType> &primitives,
+                             Bounder &bound)
+        :mAxis(axis),mPrimitives(primitives),mBound(bound)
+      {
+        ;
+      } // end PrimitiveSorter()
+
       inline bool operator()(const size_t lhs, const size_t rhs) const
       {
         return mBound(mAxis, true, mPrimitives[lhs]) < mBound(mAxis, true, mPrimitives[rhs]);

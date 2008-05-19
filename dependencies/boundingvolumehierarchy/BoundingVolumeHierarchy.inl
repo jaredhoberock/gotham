@@ -315,8 +315,8 @@ template<typename PrimitiveType,
   size_t axis = findPrincipalAxis(m, M);
 
   // create an ordering
-  PrimitiveSorter<Bounder> sorter = {axis, primitives, bound};
-
+  PrimitiveSorter<Bounder> sorter(axis,primitives,bound);
+  
   // sort the median
   std::vector<size_t>::iterator split
     = begin + (end - begin) / 2;

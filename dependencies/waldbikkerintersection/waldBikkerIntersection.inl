@@ -67,18 +67,25 @@ template<typename PointType, typename RealType>
   float numer = (n[0] - o[dominantAxis] - n[1] *   o[uAxis] - n[2] *   o[vAxis]);
   t = numer / denom;
 
-  if(t < minT || t > maxT) return false;
+  // if the triangle is malformed (e.g., zero area)
+  // then, at this point, t is nan
+  // write this comparison so that t must be non-nan
+  // to continue
+  if(t >= minT && t <= maxT)
+  {
+    // calculate hit point
+    float pu = o[uAxis] + t * dir[uAxis] - v0[uAxis];
+    float pv = o[vAxis] + t * dir[vAxis] - v0[vAxis];
+    b1 = pv * bnu + pu * bnv;
+    if(b1 < 0) return false;
+    b2 = pu * cnu + pv * cnv;
+    if(b2 < 0) return false;
 
-  // calculate hit point
-  float pu = o[uAxis] + t * dir[uAxis] - v0[uAxis];
-  float pv = o[vAxis] + t * dir[vAxis] - v0[vAxis];
-  b1 = pv * bnu + pu * bnv;
-  if(b1 < 0) return false;
-  b2 = pu * cnu + pv * cnv;
-  if(b2 < 0) return false;
+    if(b1 + b2 > 1.0f) return false;
 
-  if(b1 + b2 > 1.0f) return false;
+    return true;
+  } // end if
 
-  return true;
+  return false;
 } // end waldBikkerIntersection()
 
