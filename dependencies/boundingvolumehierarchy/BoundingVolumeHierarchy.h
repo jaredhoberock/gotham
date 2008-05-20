@@ -188,7 +188,6 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
 
       inline bool operator()(const size_t lhs, const size_t rhs) const
       {
-        //return mBound(mAxis, true, mPrimitives[lhs]) < mBound(mAxis, true, mPrimitives[rhs]);
         return mBound(mAxis, true, lhs) < mBound(mAxis, true, rhs);
       } // end operator<()
 
@@ -239,9 +238,6 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
     std::vector<gpcpu::float4> mMaxBoundMissIndex;
 
     NodeIndex mRootIndex;
-
-    uint64_t mFindBoundsTime;
-    uint64_t mNthElementTime;
 }; // end BoundingVolumeHierarchy
 
 #include "BoundingVolumeHierarchy.inl"

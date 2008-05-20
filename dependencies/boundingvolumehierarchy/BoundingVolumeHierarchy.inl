@@ -9,19 +9,6 @@
 #include <limits>
 #include <algorithm>
 
-#include <stdint.h>
-extern "C" {
-   __inline__ uint64_t rdtsc() {
-   uint32_t lo, hi;
-   __asm__ __volatile__ (      // serialize
-     "xorl %%eax,%%eax \n        cpuid"
-     ::: "%rax", "%rbx", "%rcx", "%rdx");
-   /* We cannot use "=A", since this would use %rax on x86_64 */
-   __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-   return (uint64_t)hi << 32 | lo;
-   }
-}
-
 template<typename PrimitiveType,
          typename PointType,
          typename RealType>
@@ -264,17 +251,12 @@ template<typename PrimitiveType,
   // create a CachedBounder
   CachedBounder<Bounder> cachedBound(bound,primitives);
 
-  mFindBoundsTime = mNthElementTime = 0;
-  uint64_t start = rdtsc();
-
   // recurse
   mRootIndex = build(NULL_NODE,
                      primIndices.begin(),
                      primIndices.end(),
                      primitives,
-                     //bound);
                      cachedBound);
-  uint64_t buildTime = rdtsc() - start;
 
   // for each node, compute the index of the
   // next node in a hit/miss ray traversal
@@ -293,10 +275,6 @@ template<typename PrimitiveType,
     setHitIndex(i, hit);
     setMissIndex(i, miss);
   } // end for i
-
-  std::cerr << "BoundingVolumeHierarchy::build(): build       time: " << buildTime << std::endl;
-  std::cerr << "BoundingVolumeHierarchy::build(): bound       time: " << mFindBoundsTime << std::endl;
-  std::cerr << "BoundingVolumeHierarchy::build(): nth_element time: " << mNthElementTime << std::endl;
 } // end BoundingVolumeHierarchy::build()
 
 template<typename PrimitiveType,
@@ -331,9 +309,7 @@ template<typename PrimitiveType,
   
   // find the bounds of the Primitives
   Point m, M;
-  uint64_t start = rdtsc();
   findBounds(begin, end, primitives, bound, m, M);
-  mFindBoundsTime += rdtsc() - start;
 
   // create a new node
   NodeIndex index = addNode(parent);
@@ -348,9 +324,7 @@ template<typename PrimitiveType,
   std::vector<size_t>::iterator split
     = begin + (end - begin) / 2;
 
-  start = rdtsc();
   std::nth_element(begin, split, end, sorter);
-  mNthElementTime += rdtsc() - start;
 
   NodeIndex leftChild = build(index, begin, split,
                               primitives, bound);
