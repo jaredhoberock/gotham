@@ -137,12 +137,65 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
     inline void setParentIndex(const NodeIndex node,
                                const NodeIndex parent);
 
+    /*! The idea of this class is to wrap Bounder
+     *  and accelerate build() by caching the results
+     *  of Bounder.
+     *
+     *  This gives about a 10x build speedup on the bunny
+     *  in Cornell box scene.
+     */
+    template<typename Bounder>
+      class CachedBounder
+    {
+      public:
+        inline CachedBounder(Bounder &bound,
+                             const std::vector<Primitive> &primitives);
+
+        inline float operator()(const size_t axis,
+                                const bool min,
+                                const size_t primIndex)
+        {
+          if(min)
+          {
+            return mPrimMinBounds[axis][primIndex];
+          }
+
+          return mPrimMaxBounds[axis][primIndex];
+        } // end operator()()
+
+      protected:
+        std::vector<RealType> mPrimMinBounds[3];
+        std::vector<RealType> mPrimMaxBounds[3];
+    }; // end CachedBounder
+
     template<typename Bounder>
       static void findBounds(const std::vector<size_t>::iterator begin,
                              const std::vector<size_t>::iterator end,
                              const std::vector<Primitive> &primitives,
-                             Bounder &bound,
+                             CachedBounder<Bounder> &bound,
                              Point &m, Point &M);
+
+    template<typename Bounder>
+      struct PrimitiveSorter
+    {
+      inline PrimitiveSorter(const size_t axis,
+                             const std::vector<PrimitiveType> &primitives,
+                             Bounder &bound)
+        :mAxis(axis),mPrimitives(primitives),mBound(bound)
+      {
+        ;
+      } // end PrimitiveSorter()
+
+      inline bool operator()(const size_t lhs, const size_t rhs) const
+      {
+        //return mBound(mAxis, true, mPrimitives[lhs]) < mBound(mAxis, true, mPrimitives[rhs]);
+        return mBound(mAxis, true, lhs) < mBound(mAxis, true, rhs);
+      } // end operator<()
+
+      size_t mAxis;
+      const std::vector<PrimitiveType> &mPrimitives;
+      Bounder &mBound;
+    }; // end PrimitiveSorter
 
     template<typename Bounder>
       NodeIndex build(const NodeIndex parent,
@@ -178,27 +231,6 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
      */
     NodeIndex computeRightBrotherIndex(const NodeIndex i) const;
 
-    template<typename Bounder>
-      struct PrimitiveSorter
-    {
-      inline PrimitiveSorter(const size_t axis,
-                             const std::vector<PrimitiveType> &primitives,
-                             Bounder &bound)
-        :mAxis(axis),mPrimitives(primitives),mBound(bound)
-      {
-        ;
-      } // end PrimitiveSorter()
-
-      inline bool operator()(const size_t lhs, const size_t rhs) const
-      {
-        return mBound(mAxis, true, mPrimitives[lhs]) < mBound(mAxis, true, mPrimitives[rhs]);
-      } // end operator<()
-
-      size_t mAxis;
-      const std::vector<PrimitiveType> &mPrimitives;
-      Bounder &mBound;
-    }; // end PrimitiveSorter
-
     std::vector<NodeIndex> mParentIndices;
     std::vector<gpcpu::size2> mChildIndices;
 
@@ -207,6 +239,9 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
     std::vector<gpcpu::float4> mMaxBoundMissIndex;
 
     NodeIndex mRootIndex;
+
+    uint64_t mFindBoundsTime;
+    uint64_t mNthElementTime;
 }; // end BoundingVolumeHierarchy
 
 #include "BoundingVolumeHierarchy.inl"

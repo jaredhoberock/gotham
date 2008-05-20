@@ -132,12 +132,6 @@ template<typename TriangleType, typename PointType, typename RealType>
     } // end if
     else
     {
-      if(currentNode == 5649)
-      {
-        int foo = 0;
-        ++foo;
-      }
-
       firstVertexDominantAxis = mFirstVertexDominantAxis[currentNode];
       hit = waldBikkerIntersection<PointType,RealType>
         (o,d,tMin,tMax,

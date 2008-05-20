@@ -19,6 +19,7 @@ template<typename Type, typename Real = float>
              typename ProbabilityIterator>
       void build(ElementIterator begin, ElementIterator end,
                  ProbabilityIterator beginP, ProbabilityIterator endP);
+    
 
     Type &operator()(const Real &u);
     const Type &operator()(const Real &u) const;

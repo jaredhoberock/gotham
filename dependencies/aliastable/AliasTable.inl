@@ -43,30 +43,52 @@ template<typename ElementIterator,
 
   mean = sum / n;
 
-  // sort table in ascending order
-  std::sort(mTable.begin(), mTable.end());
-
-  Real diff = 0;
+  // mark all entries taller than the average
+  std::vector<size_t> rich;
   for(size_t i = 0;
       i != mTable.size();
       ++i)
   {
-    diff = mean - mTable[i].mDivide;
+    if(mTable[i].mDivide > mean)
+    {
+      rich.push_back(i);
+    } // end if
+  } // end for i
+
+  // steal from the rich
+  for(size_t i = 0;
+      i != mTable.size();
+      ++i)
+  {
+    Real diff = mean - mTable[i].mDivide;
     if(diff > 0)
     {
-      for(size_t j = i+1;
-          j != mTable.size();
-          ++j)
+      if(rich.size() > 0)
       {
-        if(mTable[j].mDivide >= diff)
+        // steal from the first rich guy
+        size_t victim = rich.back();
+
+        // set the alias to point to the victim
+        mTable[i].mAlias = mTable[victim].mValue;
+
+        // note the alias's pdf
+        mTable[i].mAliasPdf = mTable[victim].mValuePdf;
+
+        // steal
+        mTable[victim].mDivide -= diff;
+
+        // is he still rich?
+        if(mTable[victim].mDivide <= mean)
         {
-          // steal from the rich
-          mTable[i].mAlias = mTable[j].mValue;
-          mTable[i].mAliasPdf = mTable[i].mAliasPdf;
-          mTable[j].mDivide -= diff;
-          break;
+          rich.pop_back();
         } // end if
-      } // end for j
+      } // end if
+      else
+      {
+        // this case may occur due to floating point error
+        // when diff ~ 0
+        // fear not, it will still work
+      } // end else
     } // end if
   } // end for i
 

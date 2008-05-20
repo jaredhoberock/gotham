@@ -559,6 +559,77 @@ void Gotham
 } // end Gotham::photons()
 
 bool Gotham
+  ::parseMesh(const std::string &line)
+{
+  std::vector<float> points;
+  std::vector<float> uvs;
+  std::vector<unsigned int> faces;
+
+  rule<phrase_scanner_t> pointsRule  = (ch_p('(') | ch_p('[')) >> real_p[push_back_a(points)]  >> *(',' >> real_p[push_back_a(points)])  >> (ch_p(')') | ch_p(']'));
+  rule<phrase_scanner_t> uvsRule = (ch_p('(') | ch_p('[')) >> real_p[push_back_a(uvs)] >> *(',' >> real_p[push_back_a(uvs)]) >> (ch_p(')') | ch_p(']'));
+  rule<phrase_scanner_t> facesRule = (ch_p('(') | ch_p('[')) >> uint_p[push_back_a(faces)] >> *(',' >> uint_p[push_back_a(faces)]) >> (ch_p(')') | ch_p(']'));
+
+  bool result = parse(line.c_str(),
+    // begin grammar
+    (
+      // points, uvs, and faces
+      str_p("Mesh") >> '(' >> pointsRule >> ',' >> uvsRule >> ',' >> facesRule >> ')' >> end_p
+      |
+      // points and faces
+      str_p("Mesh") >> '(' >> pointsRule >> ',' >> facesRule >> ')' >> end_p
+    )
+    ,
+    // end grammar
+    
+    space_p).full;
+
+  if(result)
+  {
+    // validate points
+    if((points.size() % 3) != 0)
+    {
+      // XXX report error
+      throw;
+    } // end if
+
+    if(uvs.size() && ((uvs.size() % 2) != 0))
+    {
+      // XXX report error
+      throw;
+    } // end if
+
+    // validate faces
+    if((faces.size() % 3) != 0)
+    {
+      // XXX report error
+      throw;
+    } // end if
+
+    for(size_t i = 0; i != faces.size(); ++i)
+    {
+      if(faces[i] >= points.size() / 3)
+      {
+        // face i refers to non-vertex!
+        // XXX report error
+        throw;
+      } // end if
+    } // end for i
+
+    // instantiate the mesh
+    if(points.size() && uvs.size() && faces.size())
+    {
+      mesh(points, uvs, faces);
+    } // end if
+    else if(points.size() && faces.size())
+    {
+      mesh(points, faces);
+    } // end else
+  } // end if
+
+  return result;
+} // end Gotham::parseMesh()
+
+bool Gotham
   ::parsePhotons(const std::string &line)
 {
   std::vector<float> points;
@@ -596,6 +667,10 @@ bool Gotham
   {
     result = true;
   } // end if
+  else if(parseMesh(line))
+  {
+    result = true;
+  } // end else if
 
   return result;
 } // end Gotham::parseLine()

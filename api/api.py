@@ -328,7 +328,7 @@ class PyGotham:
         print 'Progress: ' +  str(100 * float(lineNumber)/numLines) + '%\r',
         sys.stdout.flush()
       # first see if we can parse it quickly in c++
-      if not Gotham.parseLine(self, line):
+      if not self.__subsystem.parseLine(line):
         # each line depends on 'g' being defined as some Gotham object
         g = self
         exec line in globals()

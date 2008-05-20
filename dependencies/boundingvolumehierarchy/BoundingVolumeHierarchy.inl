@@ -9,6 +9,19 @@
 #include <limits>
 #include <algorithm>
 
+#include <stdint.h>
+extern "C" {
+   __inline__ uint64_t rdtsc() {
+   uint32_t lo, hi;
+   __asm__ __volatile__ (      // serialize
+     "xorl %%eax,%%eax \n        cpuid"
+     ::: "%rax", "%rbx", "%rcx", "%rdx");
+   /* We cannot use "=A", since this would use %rax on x86_64 */
+   __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+   return (uint64_t)hi << 32 | lo;
+   }
+}
+
 template<typename PrimitiveType,
          typename PointType,
          typename RealType>
@@ -176,7 +189,7 @@ template<typename PrimitiveType,
       ::findBounds(const std::vector<size_t>::iterator begin,
                    const std::vector<size_t>::iterator end,
                    const std::vector<Primitive> &primitives,
-                   Bounder &bound,
+                   CachedBounder<Bounder> &bound,
                    Point &m, Point &M)
 {
   Real inf = std::numeric_limits<Real>::infinity();
@@ -194,14 +207,14 @@ template<typename PrimitiveType,
         i < 3;
         ++i)
     {
-      x = bound(i, true, primitives[*t]);
+      x = bound(i, true, *t);
 
       if(x < m[i])
       {
         m[i] = x;
       } // end if
 
-      x = bound(i, false, primitives[*t]);
+      x = bound(i, false, *t);
 
       if(x > M[i])
       {
@@ -248,12 +261,20 @@ template<typename PrimitiveType,
     addNode(NULL_NODE);
   } // end for i
 
+  // create a CachedBounder
+  CachedBounder<Bounder> cachedBound(bound,primitives);
+
+  mFindBoundsTime = mNthElementTime = 0;
+  uint64_t start = rdtsc();
+
   // recurse
   mRootIndex = build(NULL_NODE,
                      primIndices.begin(),
                      primIndices.end(),
                      primitives,
-                     bound);
+                     //bound);
+                     cachedBound);
+  uint64_t buildTime = rdtsc() - start;
 
   // for each node, compute the index of the
   // next node in a hit/miss ray traversal
@@ -272,6 +293,10 @@ template<typename PrimitiveType,
     setHitIndex(i, hit);
     setMissIndex(i, miss);
   } // end for i
+
+  std::cerr << "BoundingVolumeHierarchy::build(): build       time: " << buildTime << std::endl;
+  std::cerr << "BoundingVolumeHierarchy::build(): bound       time: " << mFindBoundsTime << std::endl;
+  std::cerr << "BoundingVolumeHierarchy::build(): nth_element time: " << mNthElementTime << std::endl;
 } // end BoundingVolumeHierarchy::build()
 
 template<typename PrimitiveType,
@@ -306,7 +331,9 @@ template<typename PrimitiveType,
   
   // find the bounds of the Primitives
   Point m, M;
+  uint64_t start = rdtsc();
   findBounds(begin, end, primitives, bound, m, M);
+  mFindBoundsTime += rdtsc() - start;
 
   // create a new node
   NodeIndex index = addNode(parent);
@@ -321,7 +348,9 @@ template<typename PrimitiveType,
   std::vector<size_t>::iterator split
     = begin + (end - begin) / 2;
 
+  start = rdtsc();
   std::nth_element(begin, split, end, sorter);
+  mNthElementTime += rdtsc() - start;
 
   NodeIndex leftChild = build(index, begin, split,
                               primitives, bound);
@@ -533,4 +562,35 @@ template<typename PrimitiveType,
 {
   return mMinBoundHitIndex.size();
 } // end BoundingVolumeHierarchy::getNumNodes()
+
+template<typename PrimitiveType,
+         typename PointType,
+         typename RealType>
+  template<typename Bounder>
+    BoundingVolumeHierarchy<PrimitiveType,PointType,RealType>::CachedBounder<Bounder>
+      ::CachedBounder(Bounder &bound,
+                      const std::vector<Primitive> &primitives)
+{
+  mPrimMinBounds[0].resize(primitives.size());
+  mPrimMinBounds[1].resize(primitives.size());
+  mPrimMinBounds[2].resize(primitives.size());
+
+  mPrimMaxBounds[0].resize(primitives.size());
+  mPrimMaxBounds[1].resize(primitives.size());
+  mPrimMaxBounds[2].resize(primitives.size());
+
+  size_t i = 0;
+  for(typename std::vector<PrimitiveType>::const_iterator prim = primitives.begin();
+      prim != primitives.end();
+      ++prim, ++i)
+  {
+    mPrimMinBounds[0][i] = bound(0, true, *prim);
+    mPrimMinBounds[1][i] = bound(1, true, *prim);
+    mPrimMinBounds[2][i] = bound(2, true, *prim);
+
+    mPrimMaxBounds[0][i] = bound(0, false, *prim);
+    mPrimMaxBounds[1][i] = bound(1, false, *prim);
+    mPrimMaxBounds[2][i] = bound(2, false, *prim);
+  } // end for prim
+} // end CachedBounder::CachedBounder()
 

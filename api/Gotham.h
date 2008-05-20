@@ -200,7 +200,13 @@ class Gotham
      */
     void surfacePrimitive(SurfacePrimitive *prim);
 
-    /*! This method parses a line of Gotham Python code for a photons() call.
+    /*! This method parses a line of Gotham Python code for a Mesh() call.
+     *  \param line The line to parse.
+     *  \return true if line could be successfully parsed; false, otherwise.
+     */
+    bool parseMesh(const std::string &line);
+
+    /*! This method parses a line of Gotham Python code for a Photons() call.
      *  \param line The line to parse.
      *  \return true if line could be successfully parsed; false, otherwise.
      */
