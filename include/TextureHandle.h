@@ -12,6 +12,9 @@ typedef unsigned int TextureHandle;
 
 struct TextureParameter
 {
+  inline TextureParameter(void)
+    :mHandle(0),mAlias(""){}
+
   inline TextureParameter(const std::string &alias)
     :mHandle(0),mAlias(alias){}
 

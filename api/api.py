@@ -44,6 +44,9 @@ class PyGotham:
   except:
     print 'Warning: $GOTHAMHOME undefined! Some textures may not be found.'
 
+  # map texture aliases to texture handles
+  __textureMap = {}
+
   def __init__(self):
     # by default, the subsystem is plain old Gotham
     self.__subsystem = self.__createSubsystem("Gotham")
@@ -131,6 +134,22 @@ class PyGotham:
     # create a new material
     m = module.createMaterial()
 
+    # bind any dangling texture references
+    # XXX this will instantiate a texture even
+    #     if the default is overridden below
+    #     it would be nice to avoid this case
+    for member in dir(m): 
+      handle = 0
+      alias = ''
+      try:
+        exec 'alias = m.%s.mAlias' % member
+        exec 'handle = m.%s.mHandle' % member
+      except:
+        continue;
+      if alias != '':
+        # create the texture
+        exec 'm.%s.mHandle = self.texture(alias)' % member
+
     parmDict = {}
     if len(parms) > 1:
       for i in range(0, len(parms), 2):
@@ -156,6 +175,7 @@ class PyGotham:
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
 
     del module
+
     # send the material to the subsystem
     self.__subsystem.material(m)
     result = True
@@ -176,7 +196,13 @@ class PyGotham:
       for dir in self.texturepaths:
         fullpath = os.path.join(dir, name)
         if os.path.exists(fullpath):
-          return self.__subsystem.texture(fullpath)
+          # does this texture exist?
+          try:
+            return self.__textureMap[fullpath]
+          except:
+            result = self.__subsystem.texture(fullpath)
+            self.__textureMap[fullpath] = result
+            return result
       raise ValueError, "Texture '%s' not found."
     if len(args) == 3:
       # convert to a vector

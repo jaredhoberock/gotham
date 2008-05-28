@@ -1,0 +1,6 @@
+scattering(Texture texture = "texture.exr")
+{
+  Spectrum Kd = tex2D(texture, UV[0], UV[1]);
+  F = diffuse(Kd);
+}
+

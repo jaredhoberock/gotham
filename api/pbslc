@@ -153,11 +153,8 @@ const Vector &dpdv = dg.getDPDV();
       for param in parameterList[0:-1]:
         result += param[1] + '(' + param[2] + '),\n'
       result += parameterList[-1][1] + '(' + parameterList[-1][2] + ')\n'
-    result += '{\n'
-    # fill the list of TextureParameters
-    for param in parameterList:
-      result += "  mTextureParameters.push_back(&%s);" % param[1]
-    result += "}\n"
+    # empty body
+    result += '{;}\n'
     return result
   
   def stripComments(self, shaderLines):
@@ -295,8 +292,9 @@ ShadingInterface *gContext;
 
     # create thunks to methods for setting TextureParameters
     for param in scatteringParametersList + emissionParametersList + sensorParametersList:
-      compileMe += 'void (%s::*set_%s_handle)(const TextureHandle &) = &%s::set_%s;' % (className, param[1], className, param[1])
-      compileMe += 'void (%s::*set_%s_alias)(const std::string &) = &%s::set_%s;' % (className, param[1], className, param[1])
+      if param[0] == 'Texture':
+        compileMe += 'void (%s::*set_%s_handle)(const TextureHandle &) = &%s::set_%s;\n' % (className, param[1], className, param[1])
+        compileMe += 'void (%s::*set_%s_alias)(const std::string &) = &%s::set_%s;\n' % (className, param[1], className, param[1])
     
     compileMe += '''
   #include <boost/python.hpp>
@@ -306,6 +304,11 @@ ShadingInterface *gContext;
   BOOST_PYTHON_MODULE(%s)
   {
     def("createMaterial", createMaterial, return_value_policy<manage_new_object>());
+    class_<TextureParameter>("TextureParameter")
+      .def_readwrite("mHandle", &TextureParameter::mHandle)
+      .def_readwrite("mAlias", &TextureParameter::mAlias)
+      ;
+
     class_<%s, bases<Material> >("%s")
     ''' % (baseName,className,className)
     for param in scatteringParametersList:
@@ -326,6 +329,10 @@ ShadingInterface *gContext;
         compileMe += '    .def("set_%s", set_%s_alias)\n' % (param[1], param[1])
       else:
         compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+
+    for param in scatteringParametersList + emissionParametersList + sensorParametersList:
+      compileMe += '    .def_readwrite("%s", &%s::%s)\n' % (param[1], className, param[1])
+
     compileMe += '    ;\n'
 
     # close the module
