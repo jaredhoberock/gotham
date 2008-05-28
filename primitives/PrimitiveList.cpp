@@ -1,6 +1,6 @@
-/*! \file PrimitiveList.inl
+/*! \file PrimitiveList.cpp
  *  \author Jared Hoberock
- *  \brief Inline file for PrimitiveList.h.
+ *  \brief Implementation of PrimitiveList class.
  */
 
 #include "PrimitiveList.h"

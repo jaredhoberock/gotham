@@ -26,7 +26,7 @@ int ifloor(double t)
 {
   // XXX BUG this doesn't seem to be working
   //return iround(t - _doublemagicroundeps);
-  return static_cast<int>(t);
+  return static_cast<int>(floorf(t));
 } // end ifloor()
 
 template<typename OUT, typename IN>

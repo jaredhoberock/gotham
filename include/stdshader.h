@@ -46,5 +46,19 @@ template<typename T>
   return x*x*(static_cast<T>(3) - static_cast<T>(2)*x);
 } // end smoothstep()
 
+// The idea here is that we need a context to evaluate
+// some shading functions
+// So we will require that the shader set this at the beginning of its
+// function before calling any of these functions.
+// XXX This is probably not reentrant
+extern ShadingInterface *gContext;
+
+inline Spectrum tex2D(const TextureHandle texture,
+                      const float u,
+                      const float v)
+{
+  return gContext->tex2D(texture, u, v);
+} // end tex2D()
+
 #endif // STDSHADER_H
 

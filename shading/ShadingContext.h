@@ -15,6 +15,7 @@ class DLLAPI ShadingContext;
 
 #include "FunctionAllocator.h"
 #include "MaterialList.h"
+#include "TextureList.h"
 #include <boost/shared_ptr.hpp>
 
 class ShadingContext
@@ -88,6 +89,10 @@ class ShadingContext
 
     float noise(const float x, const float y, const float z);
 
+    Spectrum tex2D(const TextureHandle texture,
+                   const float u,
+                   const float v) const;
+
     /*! This method frees all allocated shading resources.
      */
     virtual void freeAll(void);
@@ -111,7 +116,6 @@ class ShadingContext
      */
     virtual ScatteringDistributionFunction *evaluateScattering(const MaterialHandle &m,
                                                                const DifferentialGeometry &dg);
-
     /*! This method evaluates the scattering of a list of shading points in a SIMD fashion.
      *  \param m A list of Materials to evaluate.
      *  \param dg A list of shading points of interest.
@@ -215,11 +219,31 @@ class ShadingContext
      */
     const Material *getMaterial(const MaterialHandle &h) const;
 
+    /*! This method copies the Textures in the given list into mTextures.
+     *  \param textures The TextureList to copy.
+     */
+    virtual void setTextures(const boost::shared_ptr<TextureList> &textures);
+
+    /*! This method returns a const pointer to the Texture of interest.
+     *  \param h The TextureHandle of the Texture of interest.
+     *  \return mTextures[h].get()
+     */
+    const Texture *getTexture(const TextureHandle &h) const;
+
+    /*! This method is called after rendering.
+     *  \note Default implementation does nothing.
+     */
+    virtual void postprocess(void);
+
   protected:
     FunctionAllocator mAllocator;
 
     /*! A ShadingContext keeps a list of Materials.
      */
     boost::shared_ptr<MaterialList> mMaterials;
+
+    /*! A ShadingContext keeps a list of Textures.
+     */
+    boost::shared_ptr<TextureList> mTextures;
 }; // end ShadingContext
 

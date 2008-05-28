@@ -69,7 +69,7 @@ template<typename ParentFilmType>
 
     /*! Pixel storage.
      */
-    Texture mTexture;
+    glpp::Texture mTexture;
 
     /*! A framebuffer object.
      */

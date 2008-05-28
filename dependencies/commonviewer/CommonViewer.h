@@ -43,13 +43,13 @@ template<typename Parent,
     /*! This method displays the given texture as a full screen quad.
      *  \param t The Texture of interest.
      */
-    inline void drawTexture(const Texture &t) const;
+    inline void drawTexture(const glpp::Texture &t) const;
 
     /*! This method displays the given texture as a full screen quad.
      *  \param t The Texture of interest.
      *  \param p The Program to use to draw the Texture.
      */
-    inline void drawTexture(const Texture &t, const Program &p) const;
+    inline void drawTexture(const glpp::Texture &t, const Program &p) const;
 
     inline virtual void init(void);
     inline virtual void keyPressEvent(KeyEvent *e);

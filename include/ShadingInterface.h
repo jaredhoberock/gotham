@@ -8,6 +8,7 @@
 #pragma once
 
 #include "exportShading.h"
+#include "TextureHandle.h"
 
 #ifdef WIN32
 class DLLAPI ShadingInterface;
@@ -80,5 +81,9 @@ class ShadingInterface
     virtual ScatteringDistributionFunction *hemisphericalEmission(const Spectrum &Ke) = 0;
 
     virtual float noise(const float x, const float y, const float z) = 0;
+
+    virtual Spectrum tex2D(const TextureHandle texture,
+                           const float u,
+                           const float v) const = 0;
 }; // end ShadingInterface
 

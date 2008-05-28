@@ -8,6 +8,7 @@
 #pragma once
 
 #include "MaterialList.h"
+#include "TextureList.h"
 #include "ShadingContext.h"
 #include <boost/shared_ptr.hpp>
 #include "../api/Gotham.h"
@@ -21,9 +22,11 @@ class ShadingApi
      *  \param attr An AttributeMap describing a set of
      *              rendering attributes.
      *  \param materials A MaterialList to copy from.
+     *  \param textures A TextureList to copy from.
      *  \return A new ShadingContext.
      */
     static ShadingContext *context(Gotham::AttributeMap &attr,
-                                   const boost::shared_ptr<MaterialList> &materials);
+                                   const boost::shared_ptr<MaterialList> &materials,
+                                   const boost::shared_ptr<TextureList> &textures);
 }; // end ShadingApi
 

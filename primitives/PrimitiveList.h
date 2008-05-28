@@ -23,20 +23,20 @@ class PrimitiveList
 
     /*! Null destructor does nothing.
      */
-    inline virtual ~PrimitiveList(void);
+    virtual ~PrimitiveList(void);
 
-    inline virtual void push_back(const boost::shared_ptr<Primitive> &p);
-    inline virtual void clear(void);
-    inline virtual void getBoundingBox(BoundingBox &b) const;
-    inline virtual bool intersect(Ray &r, Intersection &inter) const;
-    inline virtual bool intersect(const Ray &r) const;
+    virtual void push_back(const boost::shared_ptr<Primitive> &p);
+    virtual void clear(void);
+    virtual void getBoundingBox(BoundingBox &b) const;
+    
+    using Parent0::intersect;
+    virtual bool intersect(Ray &r, Intersection &inter) const;
+    virtual bool intersect(const Ray &r) const;
 
   private:
     typedef std::vector<boost::shared_ptr<Primitive> > Parent1;
     BoundingBox mBoundingBox;
 }; // end PrimitiveList
-
-#include "PrimitiveList.inl"
 
 #endif // PRIMITIVE_LIST_H
 

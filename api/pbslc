@@ -46,6 +46,9 @@ const Vector &dpdv = dg.getDPDV();
       identifier = ""
       # set default values to 0 for now
       default = "0.0f"
+      # Textures must default to a non-float
+      if(type == "Texture"):
+        default = "0"
       try:
         # split barexpr into "identifier [= default]"
         (identifier, default) = tuple(expression.split("="))
@@ -59,6 +62,7 @@ const Vector &dpdv = dg.getDPDV();
       identifier = identifier.rstrip()
       default = default.lstrip()
       default = default.rstrip()
+
       # set the result
       result = (type, identifier, default)
     except:
@@ -132,6 +136,10 @@ const Vector &dpdv = dg.getDPDV();
       result += 'void set_%s(const float x, const float y, const float z){%s = %s(x,y,z);}\n' % (parameterName, parameterName, parameterType)
     elif parameterType == "float":
       result += 'void set_%s(const %s &v){%s = v;}\n' % (parameterName, parameterType, parameterName)
+    elif parameterType == "Texture":
+      # set a TextureParameter with a handle or filename
+      result += 'void set_%s(const TextureHandle &h){%s = h;}\n' % (parameterName, parameterName)
+      result += 'void set_%s(const std::string &textureAlias){%s = textureAlias;}\n' %(parameterName, parameterName)
     else:
       print "Error: Unknown type %s for parameter %s." % (parameterType, parameterName)
       exit()
@@ -145,8 +153,11 @@ const Vector &dpdv = dg.getDPDV();
       for param in parameterList[0:-1]:
         result += param[1] + '(' + param[2] + '),\n'
       result += parameterList[-1][1] + '(' + parameterList[-1][2] + ')\n'
-    # give it an empty body
-    result += '{;}\n'
+    result += '{\n'
+    # fill the list of TextureParameters
+    for param in parameterList:
+      result += "  mTextureParameters.push_back(&%s);" % param[1]
+    result += "}\n"
     return result
   
   def stripComments(self, shaderLines):
@@ -186,6 +197,10 @@ virtual bool is%s(void) const {return true;}
   def createCppIncludeCode(self, scatteringParametersList, emissionParametersList, sensorParametersList):
     return '''
 #include "Material.h"
+// XXX this should really go elsewhere
+// hide TextureHandle/TextureParameter from the user
+#include "TextureHandle.h"
+typedef TextureParameter Texture;
 #include "stdshader.h"
 '''
 
@@ -277,6 +292,11 @@ ShadingInterface *gContext;
     compileMe += '{\n'
     compileMe += '  return new %s();\n' % className
     compileMe += '}\n'
+
+    # create thunks to methods for setting TextureParameters
+    for param in scatteringParametersList + emissionParametersList + sensorParametersList:
+      compileMe += 'void (%s::*set_%s_handle)(const TextureHandle &) = &%s::set_%s;' % (className, param[1], className, param[1])
+      compileMe += 'void (%s::*set_%s_alias)(const std::string &) = &%s::set_%s;' % (className, param[1], className, param[1])
     
     compileMe += '''
   #include <boost/python.hpp>
@@ -289,13 +309,25 @@ ShadingInterface *gContext;
     class_<%s, bases<Material> >("%s")
     ''' % (baseName,className,className)
     for param in scatteringParametersList:
-      compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+      if param[0] == 'Texture':
+        compileMe += '    .def("set_%s", set_%s_handle)\n' % (param[1], param[1])
+        compileMe += '    .def("set_%s", set_%s_alias)\n' % (param[1], param[1])
+      else:
+        compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
     for param in emissionParametersList:
-      compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+      if param[0] == 'Texture':
+        compileMe += '    .def("set_%s", set_%s_handle)\n' % (param[1], param[1])
+        compileMe += '    .def("set_%s", set_%s_alias)\n' % (param[1], param[1])
+      else:
+        compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
     for param in sensorParametersList:
-      compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
+      if param[0] == 'Texture':
+        compileMe += '    .def("set_%s", set_%s_handle)\n' % (param[1], param[1])
+        compileMe += '    .def("set_%s", set_%s_alias)\n' % (param[1], param[1])
+      else:
+        compileMe += '    .def("set_%s", &%s::set_%s)\n' % (param[1], className, param[1])
     compileMe += '    ;\n'
-    
+
     # close the module
     compileMe += '}\n'
 
@@ -417,7 +449,7 @@ if os.name == 'nt':
     #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
     
     # kill the tempfiles
-    shutil.rmtree(dir, True)
+    #shutil.rmtree(dir, True)
   
 def usage():
   pass

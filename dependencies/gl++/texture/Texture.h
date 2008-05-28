@@ -9,6 +9,9 @@
 #include <GL/glew.h>
 #include <gl++/globject/GLObject.h>
 
+namespace glpp
+{
+
 /*! \fn genTextureThunk
  *  \todo Find a way around this.
  */
@@ -347,6 +350,8 @@ class Texture : public GLObject<genTextureThunk,
      */
     GLint mBorderSize;
 }; // end class Texture
+
+}; // end glpp
 
 #include "Texture.inl"
 

@@ -30,6 +30,16 @@ void ShadingContext
   *mMaterials = *materials;
 } // end ShadingContext::setMaterials()
 
+void ShadingContext
+  ::setTextures(const boost::shared_ptr<TextureList> &textures)
+{
+  // keep our own list
+  mTextures.reset(new TextureList());
+
+  // copy the Textures
+  *mTextures = *textures;
+} // end ShadingContext::setTextures()
+
 ShadingContext
   ::~ShadingContext(void)
 {
@@ -276,6 +286,14 @@ float ShadingContext
   return ::noise(x, y, z);
 } // end ShadingContext::noise()
 
+Spectrum ShadingContext
+  ::tex2D(const TextureHandle texture,
+          const float u,
+          const float v) const
+{
+  return getTexture(texture)->element(u,v);
+} // end ShadingContext::tex2D()
+
 void ShadingContext
   ::freeAll(void)
 {
@@ -403,4 +421,16 @@ const Material *ShadingContext
 {
   return (*mMaterials)[h].get();
 } // end ShadingContext::getMaterial()
+
+const Texture *ShadingContext
+  ::getTexture(const TextureHandle &h) const
+{
+  return (*mTextures)[h].get();
+} // end ShadingContext::getTexture()
+
+void ShadingContext
+  ::postprocess(void)
+{
+  ;
+} // end ShadingContext::postprocess()
 

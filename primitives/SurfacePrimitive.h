@@ -59,6 +59,7 @@ class SurfacePrimitive
      *  \param inter If an Intersection exists, information regarding the first intersection along r is returned here.
      *  \return true if an Intersection exists; false, otherwise.
      */
+    using Parent::intersect;
     virtual bool intersect(Ray &r, Intersection &inter) const;
 
     /*! This method computes whether or not an intersection between the given

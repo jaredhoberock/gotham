@@ -356,6 +356,22 @@ template<typename Scalar, size_t N>
 template<typename Scalar, size_t N>
   inline Vector<Scalar,N> saturate(const Vector<Scalar,N> &v);
 
+/*! \fn reflect
+ *  \brief Reflect a Vector around another.
+ *  \param ref The reference Vector.
+ *  \param v The Vector to reflect.
+ */
+template<typename Scalar, size_t N>
+  inline Vector<Scalar,N> reflect(const Vector<Scalar,N> &ref,
+                                  const Vector<Scalar,N> &v);
+
+/*! \fn normalize
+ *  \brief normalize for Vetors.
+ *  \return v.normalize().
+ */
+template<typename Scalar, size_t N>
+  inline Vector<Scalar,N> normalize(const Vector<Scalar,N> &v);
+
 // don't define these for CUDA
 #ifndef __CUDACC__
 

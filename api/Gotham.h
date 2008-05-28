@@ -13,6 +13,8 @@
 #include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../shading/MaterialList.h"
+#include "../include/TextureHandle.h"
+#include "../shading/TextureList.h"
 #include "../renderers/Renderer.h"
 #include "../records/PhotonMap.h"
 #include <boost/shared_ptr.hpp>
@@ -106,6 +108,25 @@ class Gotham
      *  \param m The Material.
      */
     virtual void material(Material *m);
+
+    /*! This method creates a new 2D rgb Texture
+     *  from an image file on disk.
+     *  \param filename The filename of the Texture of interest.
+     *  \return The TextureHandle referring to the newly
+     *          created Texture.
+     */
+    virtual TextureHandle texture(const std::string &filename);
+
+    /*! This method creates a new 2D rgb Texture.
+     *  \param w The width of the Texture.
+     *  \param h The height of the Texture.
+     *  \param pixels The pixels of the Texture.
+     *  \return The TextureHandle referring to the newly
+     *          created Texture.
+     */
+    virtual TextureHandle texture(const size_t w,
+                                  const size_t h,
+                                  std::vector<float> &pixels);
 
     /*! This method creates a new triangle Mesh by
      *  transforming the given geometry against the current
@@ -223,6 +244,10 @@ class Gotham
     /*! The list of Materials created for this Scene.
      */
     boost::shared_ptr<MaterialList> mMaterials;
+
+    /*! The list of Textures created for this Scene.
+     */
+    boost::shared_ptr<TextureList> mTextures;
 
     /*! A list of Primitives.
      */

@@ -5,6 +5,9 @@
 
 #include "Texture.h"
 
+namespace glpp
+{
+
 Texture::Texture(void):Parent()
 {
   setTarget(GL_TEXTURE_RECTANGLE_ARB);
@@ -341,4 +344,6 @@ template<>
 {
   return GL_UNSIGNED_INT;
 } // end Texture::ExternalFormat::operator GLenum ()
+
+}; // end glpp
 

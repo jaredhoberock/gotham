@@ -75,6 +75,7 @@ void Renderer
   double elapsed = mTimer.elapsed();
 
   postRenderReport(elapsed);
+  mShadingContext->postprocess();
 
   mRecord->postprocess();
 } // end Renderer::postprocess()

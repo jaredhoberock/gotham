@@ -45,7 +45,7 @@ template<typename Parent, typename KeyEvent, typename StringType, typename Vecto
 
 template<typename Parent, typename KeyEvent, typename StringType, typename VectorType>
   void CommonViewer<Parent,KeyEvent,StringType,VectorType>
-    ::drawTexture(const Texture &t,
+    ::drawTexture(const glpp::Texture &t,
                   const Program &p) const
 {
   glPushAttrib(GL_DEPTH_BUFFER_BIT |
@@ -90,7 +90,7 @@ template<typename Parent, typename KeyEvent, typename StringType, typename Vecto
 
 template<typename Parent, typename KeyEvent, typename StringType, typename VectorType>
   void CommonViewer<Parent,KeyEvent,StringType,VectorType>
-    ::drawTexture(const Texture &t) const
+    ::drawTexture(const glpp::Texture &t) const
 {
 #if 0
   const Program &p = (t.getTarget() == GL_TEXTURE_2D_ARRAY_EXT) ? mTexture2DArrayProgram : mTexture2DRectProgram;

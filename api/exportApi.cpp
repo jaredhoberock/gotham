@@ -36,6 +36,15 @@ void (Gotham::*mesh3)(std::vector<float>&,
                       std::vector<unsigned int> &)
   = &Gotham::mesh;
 
+// deal with overloaded Gotham::texture
+TextureHandle (Gotham::*texture1)(const std::string &)
+  = &Gotham::texture;
+
+TextureHandle (Gotham::*texture3)(const size_t,
+                                  const size_t,
+                                  std::vector<float> &)
+  = &Gotham::texture;
+
 void exportGotham(void)
 {
   class_<Gotham>("Gotham")
@@ -53,6 +62,8 @@ void exportGotham(void)
     .def("sphere", &Gotham::sphere)
     .def("render", &Gotham::render)
     .def("material", Gotham_material)
+    .def("texture", texture1)
+    .def("texture", texture3)
     .def("attribute", &Gotham::attribute)
     .def("getAttribute", &Gotham::getAttribute)
     .def("pushAttributes", &Gotham::pushAttributes)

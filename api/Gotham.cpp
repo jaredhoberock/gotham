@@ -76,6 +76,12 @@ void Gotham
   // create the default material
   mMaterials->push_back(shared_ptr<Material>(new DefaultMaterial()));
 
+  // clear textures
+  mTextures.reset(new TextureList());
+
+  // create the default texture
+  mTextures->push_back(shared_ptr<Texture>(new Texture()));
+
   // push default attributes
   AttributeMap attr;
   mAttributeStack.resize(1);
@@ -229,7 +235,7 @@ void Gotham
 
   // create a ShadingContext
   shared_ptr<ShadingContext> context;
-  context.reset(ShadingApi::context(mAttributeStack.back(), mMaterials));
+  context.reset(ShadingApi::context(mAttributeStack.back(), mMaterials, mTextures));
 
   // give everything to the renderer
   mRenderer->setScene(s);
@@ -316,6 +322,40 @@ void Gotham
   // note the current material
   mAttributeStack.back()["material"] = lexical_cast<std::string>(mMaterials->size() - 1);
 } // end Gotham::material)
+
+TextureHandle Gotham
+  ::texture(const std::string &filename)
+{
+  // create a new texture
+  shared_ptr<Texture> newTex(new Texture(filename.c_str()));
+  mTextures->push_back(newTex);
+
+  return mTextures->size() - 1;
+} // end Gotham::texture()
+
+TextureHandle Gotham
+  ::texture(const size_t w,
+            const size_t h,
+            std::vector<float> &pixels)
+{
+  // create a new texture
+  shared_ptr<Texture> newTex(new Texture(w,h));
+
+  mTextures->push_back(newTex);
+
+  // fill the texture
+  for(size_t y = 0; y != h; ++y)
+  {
+    for(size_t x = 0; x != w; ++x)
+    {
+      newTex->element(x,y).x = pixels[y*w*3 + 3*x + 0];
+      newTex->element(x,y).y = pixels[y*w*3 + 3*x + 1];
+      newTex->element(x,y).z = pixels[y*w*3 + 3*x + 2];
+    } // end for x
+  } // end for y
+
+  return mTextures->size() - 1;
+} // end Gotham::texture()
 
 void Gotham
   ::sphere(const float cx,

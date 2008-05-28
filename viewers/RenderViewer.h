@@ -49,7 +49,7 @@ class RenderViewer
 
     /*! A Texture to upload the image to.
      */
-    Texture mTexture;
+    glpp::Texture mTexture;
 
     /*! Whether or not to draw the preview of the Scene.
      */

@@ -14,19 +14,14 @@
 // XXX This is probably not reentrant
 extern ShadingInterface *gContext;
 
-inline float snoise(const Point &x)
-{
-  return gContext->noise(x[0], x[1], x[2]);
-} // end snoise()
-
-inline float snoise(float x, float y, float z)
+inline float snoise(float x, float y = 0, float z = 0)
 {
   return gContext->noise(x,y,z);
 } // end snoise()
 
-inline float snoise(const float x)
+inline float snoise(const Point &x)
 {
-  return gContext->noise(x,0,0);
+  return snoise(x.x, x.y, x.z);
 } // end snoise()
 
 inline Vector vsnoise(const Point &x)

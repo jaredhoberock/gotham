@@ -39,12 +39,14 @@ def getIncludes():
   # figure out the absolute path of this file
   thisFile = inspect.getabsfile(getIncludes)
   # include the dependencies directory
-  includeMe = os.path.join(os.path.dirname(thisFile), 'dependencies')
+  includeMe0 = os.path.join(os.path.dirname(thisFile), 'dependencies')
+  # include the gotham include directory
+  includeMe1 = os.path.join(os.path.dirname(thisFile), 'include')
   if os.name == 'nt':
-    result = [includeMe, 'c:/Python25/include',
+    result = [includeMe0, includeMe1, 'c:/Python25/include',
               'c:/dev/include/OpenEXR']
   elif os.name == 'posix':
-    result = [includeMe, '/usr/include/python2.5',
+    result = [includeMe0, includeMe1, '/usr/include/python2.5',
               '/usr/include/OpenEXR',
               '/usr/local/cuda/include']
   return result

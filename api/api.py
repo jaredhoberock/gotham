@@ -37,6 +37,13 @@ class PyGotham:
   except:
     print 'Warning: $GOTHAMHOME undefined! Some shaders may not be found.'
 
+  # standard texturepaths
+  texturepaths = ['.']
+  try:
+    texturepaths += [os.path.join(os.environ['GOTHAMHOME'], 'shaders')]
+  except:
+    print 'Warning: $GOTHAMHOME undefined! Some textures may not be found.'
+
   def __init__(self):
     # by default, the subsystem is plain old Gotham
     self.__subsystem = self.__createSubsystem("Gotham")
@@ -158,6 +165,25 @@ class PyGotham:
     # restore paths
     sys.path = oldpath
     return result
+
+  def texture(self, *args):
+    # validate arguments
+    if len(args) != 1 and len(args) != 3:
+      raise ValueError, "texture() expects one (filename) or three (width,height,pixels) arguments."
+    if len(args) == 1:
+      name = args[0]
+      # find the file
+      for dir in self.texturepaths:
+        fullpath = os.path.join(dir, name)
+        if os.path.exists(fullpath):
+          return self.__subsystem.texture(fullpath)
+      raise ValueError, "Texture '%s' not found."
+    if len(args) == 3:
+      # convert to a vector
+      pixels = args[0]
+      pixels = vector_float()
+      pixels[:] = args[2]
+      return self.__subsystem.texture(args[0],args[1],pixels)
 
   def mesh(self, *args):
     # validate arguments

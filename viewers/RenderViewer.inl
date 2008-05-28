@@ -49,7 +49,7 @@ void RenderViewer
   ::drawFilm(const shared_ptr<const RenderFilm> &f) 
 {
   // figure out which texture to use
-  const Texture *texture = &mTexture;
+  const glpp::Texture *texture = &mTexture;
   const GpuFilm<RenderFilm> *gpuFilm = dynamic_cast<const GpuFilm<RenderFilm> *>(f.get());
   if(gpuFilm != 0)
   {
