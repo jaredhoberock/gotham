@@ -60,6 +60,12 @@ class PathDebugRenderer
     virtual void postprocess(void);
 
     boost::shared_ptr<PathSampler> mSampler;
+
+    // The number of x strata per pixel.
+    size_t mXStrata;
+    
+    // The number of y strata per pixel.
+    size_t mYStrata;
 }; // end PathDebugRenderer
 
 #endif // PATH_DEBUG_RENDERER_H
