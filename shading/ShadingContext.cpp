@@ -291,7 +291,7 @@ Spectrum ShadingContext
           const float u,
           const float v) const
 {
-  return getTexture(texture)->element(u,v);
+  return getTexture(texture)->tex2D(u,v);
 } // end ShadingContext::tex2D()
 
 void ShadingContext

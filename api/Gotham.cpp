@@ -18,6 +18,7 @@
 #include "../renderers/RendererApi.h"
 #include "../records/RecordApi.h"
 #include "../shading/ShadingApi.h"
+#include "../shading/DeferredLoadTexture.h"
 #include "../rasterizables/RasterizablePrimitiveList.h"
 #include "../rasterizables/RasterizableSurfacePrimitive.h"
 #include "../rasterizables/RasterizableMesh.h"
@@ -327,7 +328,7 @@ TextureHandle Gotham
   ::texture(const std::string &filename)
 {
   // create a new texture
-  shared_ptr<Texture> newTex(new Texture(filename.c_str()));
+  shared_ptr<Texture> newTex(new DeferredLoadTexture(filename.c_str()));
   mTextures->push_back(newTex);
 
   return mTextures->size() - 1;
@@ -339,20 +340,8 @@ TextureHandle Gotham
             std::vector<float> &pixels)
 {
   // create a new texture
-  shared_ptr<Texture> newTex(new Texture(w,h));
-
+  shared_ptr<Texture> newTex(new Texture(w,h, reinterpret_cast<const Spectrum*>(&pixels[0])));
   mTextures->push_back(newTex);
-
-  // fill the texture
-  for(size_t y = 0; y != h; ++y)
-  {
-    for(size_t x = 0; x != w; ++x)
-    {
-      newTex->element(x,y).x = pixels[y*w*3 + 3*x + 0];
-      newTex->element(x,y).y = pixels[y*w*3 + 3*x + 1];
-      newTex->element(x,y).z = pixels[y*w*3 + 3*x + 2];
-    } // end for x
-  } // end for y
 
   return mTextures->size() - 1;
 } // end Gotham::texture()

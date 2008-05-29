@@ -40,7 +40,7 @@ class PyGotham:
   # standard texturepaths
   texturepaths = ['.']
   try:
-    texturepaths += [os.path.join(os.environ['GOTHAMHOME'], 'shaders')]
+    texturepaths += [os.path.join(os.environ['GOTHAMHOME'], 'textures')]
   except:
     print 'Warning: $GOTHAMHOME undefined! Some textures may not be found.'
 
@@ -134,22 +134,6 @@ class PyGotham:
     # create a new material
     m = module.createMaterial()
 
-    # bind any dangling texture references
-    # XXX this will instantiate a texture even
-    #     if the default is overridden below
-    #     it would be nice to avoid this case
-    for member in dir(m): 
-      handle = 0
-      alias = ''
-      try:
-        exec 'alias = m.%s.mAlias' % member
-        exec 'handle = m.%s.mHandle' % member
-      except:
-        continue;
-      if alias != '':
-        # create the texture
-        exec 'm.%s.mHandle = self.texture(alias)' % member
-
     parmDict = {}
     if len(parms) > 1:
       for i in range(0, len(parms), 2):
@@ -170,9 +154,22 @@ class PyGotham:
               # try a scalar instead
               setMethod(val)
             except:
-              print 'Warning: %s has unknown type; material parameter left undefined.'
+              print 'Warning: %s has unknown type; material parameter left undefined.' % p
         except:
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
+
+    # bind any dangling texture references
+    for member in dir(m): 
+      handle = 0
+      alias = ''
+      try:
+        exec 'alias = m.%s.mAlias' % member
+        exec 'handle = m.%s.mHandle' % member
+      except:
+        continue;
+      if handle == 0 and alias != '':
+        # create the texture
+        exec 'm.%s.mHandle = self.texture(alias)' % member
 
     del module
 
@@ -194,16 +191,25 @@ class PyGotham:
       name = args[0]
       # find the file
       for dir in self.texturepaths:
-        fullpath = os.path.join(dir, name)
+        #fullpath = os.path.join(dir, name)
+        fullpath = dir + '/' + name
         if os.path.exists(fullpath):
           # does this texture exist?
           try:
             return self.__textureMap[fullpath]
           except:
-            result = self.__subsystem.texture(fullpath)
-            self.__textureMap[fullpath] = result
-            return result
-      raise ValueError, "Texture '%s' not found."
+            try:
+              result = self.__subsystem.texture(fullpath)
+              self.__textureMap[fullpath] = result
+              return result
+            except:
+              print "Warning: unable to load image file '%s'." % fullpath
+              return 0
+        else:
+          print fullpath, 'does not exist'
+      print "Warning: '%s' not found." % name
+      # return a reference to the default texture
+      return 0
     if len(args) == 3:
       # convert to a vector
       pixels = args[0]

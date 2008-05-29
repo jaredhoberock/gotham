@@ -8,6 +8,10 @@ if os.name == 'posix':
   env.Append(LIBS = ['boost_python'])
   env.Append(LIBS = ['boost_thread'])
 
+# image format libraries
+env.Append(LIBS = ['jpeg'])
+env.Append(LIBS = ['png'])
+
 # openexr libraries
 env.Append(LIBS = ['Iex'])
 env.Append(LIBS = ['IlmImf'])
