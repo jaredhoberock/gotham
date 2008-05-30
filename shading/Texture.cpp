@@ -230,14 +230,20 @@ const Spectrum &Texture
   ::texRect(const size_t x,
             const size_t y) const
 {
-  return Parent::raster(x,y);
+  // clamp to dim - 1
+  return Parent::raster(std::min<size_t>(x, mDimensions[0]-1),
+                        std::min<size_t>(y, mDimensions[1]-1));
 } // end Texture::texRect()
 
 const Spectrum &Texture
   ::tex2D(const float u,
           const float v) const
 {
-  return texRect(static_cast<size_t>(u * getDimensions()[0]),
-                 static_cast<size_t>(v * getDimensions()[1]));
+  int x = static_cast<int>(u * getDimensions()[0]);
+  int y = static_cast<int>(v * getDimensions()[1]);
+
+  // clamp to 0
+  return texRect(std::max<int>(0,x),
+                 std::max<int>(0,y));
 } // end Texture::tex2D()
 
