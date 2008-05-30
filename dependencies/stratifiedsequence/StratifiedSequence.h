@@ -47,6 +47,11 @@ class StratifiedSequence
     inline virtual bool operator()(float &x, float &y,
                                    float xJitter, float yJitter);
 
+    /*! This method returns the current raster position.
+     *  \return mCurrentRaster.
+     */
+    inline const size_t *getCurrentRaster(void) const;
+
   protected:
     inline virtual bool advance(void);
 

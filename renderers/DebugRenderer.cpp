@@ -18,15 +18,9 @@ using namespace boost;
 using namespace gpcpu;
 
 DebugRenderer
-  ::DebugRenderer(void)
-{
-  ;
-} // end DebugRenderer::DebugRenderer()
-
-DebugRenderer
-  ::DebugRenderer(shared_ptr<const Scene> s,
-                  shared_ptr<Record> r)
-    :Parent(s,r)
+  ::DebugRenderer(const size_t xStrata,
+                  const size_t yStrata)
+    :Parent(),mXStrata(xStrata),mYStrata(yStrata)
 {
   ;
 } // end DebugRenderer::DebugRenderer()
@@ -37,12 +31,10 @@ void DebugRenderer
   // XXX TODO: kill this
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
 
-  size_t xStrata = 4;
-  size_t yStrata = 4;
   HilbertSequence seq(0.0f, 1.0f,
                       0.0f, 1.0f,
-                      xStrata * film->getWidth(),
-                      yStrata * film->getHeight());
+                      mXStrata * film->getWidth(),
+                      mYStrata * film->getHeight());
 
   Ray r;
   Point o;
@@ -58,9 +50,9 @@ void DebugRenderer
   float temp;
   mScene->getSensors()->sampleSurfaceArea(0.0f, &sensor, temp);
 
-  float weight = 1.0f / (xStrata * yStrata);
+  float weight = 1.0f / (mXStrata * mYStrata);
 
-  progress.restart(film->getWidth() * film->getHeight() * xStrata * yStrata);
+  progress.restart(film->getWidth() * film->getHeight() * mXStrata * mYStrata);
 
   while(seq(uv[0], uv[1]))
   {
@@ -90,7 +82,9 @@ void DebugRenderer
       L += e->evaluate(-d, inter.getDifferentialGeometry());
     } // end if
 
-    film->deposit(uv[0],uv[1], weight * L);
+    film->deposit(seq.getCurrentRaster()[0] / mXStrata,
+                  seq.getCurrentRaster()[1] / mYStrata,
+                  weight * L);
 
     // purge all malloc'd memory for this sample
     mShadingContext->freeAll();

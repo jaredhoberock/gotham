@@ -102,3 +102,9 @@ bool StratifiedSequence
   return result;
 } // end StratifiedSequence::operator()()
 
+const size_t *StratifiedSequence
+  ::getCurrentRaster(void) const
+{
+  return mCurrentRaster;
+} // end StratifiedSequence::getCurrentRaster()
+
