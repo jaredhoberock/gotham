@@ -6,6 +6,9 @@
 #include "HaltCriterion.h"
 #include "MonteCarloRenderer.h"
 #include "../primitives/Scene.h"
+#include <boost/lexical_cast.hpp>
+#include "string_to_tuple.h"
+using namespace boost;
 
 void HaltCriterion
   ::init(const MonteCarloRenderer *r,
@@ -57,6 +60,26 @@ bool TargetSampleCount
   return currentSamples >= getTarget();
 } // end TargetSampleCount::operator()()
 
+void TargetPixelSampleCount
+  ::setStrata(const size_t xStrata,
+              const size_t yStrata)
+{
+  mXStrata = xStrata;
+  mYStrata = yStrata;
+} // end TargetPixelSampleCount::setStrata()
+
+size_t TargetPixelSampleCount
+  ::getXStrata(void) const
+{
+  return mXStrata;
+} // end TargetPixelSampleCount::getXStrata()
+
+size_t TargetPixelSampleCount
+  ::getYStrata(void) const
+{
+  return mYStrata;
+} // end TargetPixelSampleCount::getYStrata()
+
 TargetRayCount
   ::TargetRayCount(const Target t)
     :Parent()
@@ -87,8 +110,6 @@ void HaltCriterion
 HaltCriterion *HaltCriterion
   ::createCriterion(Gotham::AttributeMap &attr)
 {
-  using namespace boost;
-
   std::string targetFunctionName = attr["renderer:target:function"];
 
   // count the number of pixels
@@ -108,17 +129,28 @@ HaltCriterion *HaltCriterion
 
   // check if we specified spp
   // this automatically overrides the function name
+  tuple<size_t,size_t> spp(2,2);
   a = attr.find("renderer:spp");
   if(a != attr.end())
   {
     any val = a->second;
-    unsigned int spp = atoi(any_cast<std::string>(val).c_str());
+    try
+    {
+      // try to convert a tuple
+      spp = lexical_cast<tuple<size_t, size_t> >(a->second);
+    } // end try
+    catch(...)
+    {
+      // try to convert a single integer
+      size_t xStrata = lexical_cast<size_t>(a->second);
+      spp = tuple<size_t,size_t>(xStrata,xStrata);
+    } // end catch
 
     // setting samples per pixel automatically overrides the target function
     targetFunctionName = "samples";
 
-    // remember we actually use the square of this value
-    target = spp * spp * numPixels;
+    // target based on number of strata per pixel
+    target = spp.get<0>() * spp.get<0>() * numPixels;
   } // end if
 
   HaltCriterion *result = 0;
@@ -126,8 +158,9 @@ HaltCriterion *HaltCriterion
   // create a HaltCriterion
   if(targetFunctionName == "samples")
   {
-    TargetCriterion *r = new TargetSampleCount();
+    TargetPixelSampleCount *r = new TargetPixelSampleCount();
     r->setTarget(target);
+    r->setStrata(spp.get<0>(), spp.get<1>());
     result = r;
   } // end if
   else if(targetFunctionName == "rays")

@@ -113,6 +113,37 @@ class TargetSampleCount
     virtual bool operator()(void);
 }; // end TargetSampleCount
 
+class TargetPixelSampleCount
+  : public TargetSampleCount
+{
+  public:
+    /*! \typedef Parent
+     *  \brief Shorthand.
+     */
+    typedef TargetSampleCount Parent;
+
+    /*! This method sets the number of strata
+     *  in each dimension per pixel to target.
+     *  \param xStrata Sets mXStrata.
+     *  \param yStrata Sets mYStrata.
+     */
+    void setStrata(const size_t xStrata,
+                   const size_t yStrata);
+
+    /*! This method returns mXStrata.
+     *  \return mXStrata
+     */
+    size_t getXStrata(void) const;
+
+    /*! This method returns mYStrata.
+     *  \return mYStrata
+     */
+    size_t getYStrata(void) const;
+
+  protected:
+    size_t mXStrata, mYStrata;
+}; // end TargetPixelSampleCount
+
 class TargetRayCount
   : public TargetCriterion
 {

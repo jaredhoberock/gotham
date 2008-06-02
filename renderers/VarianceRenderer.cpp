@@ -241,14 +241,17 @@ void VarianceRenderer
   variance->resize(film->getWidth(), film->getHeight());
   variance->fill(Spectrum::black());
 
+  size_t xStrata = dynamic_cast<const TargetPixelSampleCount*>(mHalt.get())->getXStrata();
+  size_t yStrata = dynamic_cast<const TargetPixelSampleCount*>(mHalt.get())->getYStrata();
+
   unsigned int totalPixels = film->getWidth() * film->getHeight();
-  unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
+  unsigned int totalSamples = (xStrata * yStrata) * totalPixels;
 
   const Scene *s = mScene.get();
 
   HilbertSequence sequence(0, 1.0f, 0, 1.0f,
-                           film->getWidth() * mSamplesPerPixel,
-                           film->getHeight() * mSamplesPerPixel);
+                           film->getWidth() * xStrata,
+                           film->getHeight() * yStrata);
 
   std::vector<PathSampler::Result> results;
   PathSampler::HyperPoint x;

@@ -154,7 +154,7 @@ class PyGotham:
               # try a scalar instead
               setMethod(val)
             except:
-              print 'Warning: %s has unknown type; material parameter left undefined.' % p
+              print 'Warning: value %s for parameter %s has unknown type; material parameter left undefined.' % (val,p)
         except:
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
 

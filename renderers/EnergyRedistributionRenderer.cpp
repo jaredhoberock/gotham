@@ -12,6 +12,7 @@
 #include "../mutators/KelemenMutator.h"
 #include <hilbertsequence/HilbertSequence.h>
 #include <bittricks/bittricks.h>
+#include "HaltCriterion.h"
 
 #include <gpcpu/Vector.h>
 #include <boost/progress.hpp>
@@ -39,7 +40,10 @@ void EnergyRedistributionRenderer
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
 
   unsigned int totalPixels = film->getWidth() * film->getHeight();
-  unsigned int totalSamples = (mSamplesPerPixel * mSamplesPerPixel) * totalPixels;
+  const TargetPixelSampleCount *halt = dynamic_cast<const TargetPixelSampleCount*>(mHalt.get());
+  size_t xStrata = halt->getXStrata();
+  size_t yStrata = halt->getYStrata();
+  size_t totalSamples = (xStrata * yStrata) * totalPixels;
 
   PathSampler::HyperPoint x, y, z;
   Path xPath, yPath, zPath;
@@ -72,8 +76,8 @@ void EnergyRedistributionRenderer
 
   // weight each monte carlo sample by the number of samples per pixel
   HilbertSequence walk(0, 1.0f, 0, 1.0f,
-                       film->getWidth() * mSamplesPerPixel,
-                       film->getHeight() * mSamplesPerPixel);
+                       film->getWidth() * xStrata,
+                       film->getHeight() * yStrata);
 
   // XXX yuck
   KelemenMutator &smallStepper = dynamic_cast<KelemenMutator&>(*mMutator);

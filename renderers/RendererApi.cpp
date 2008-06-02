@@ -18,6 +18,7 @@
 #include "../importance/ImportanceApi.h"
 #include "../importance/LuminanceImportance.h"
 #include "HaltCriterion.h"
+#include "string_to_tuple.h"
 
 using namespace boost;
 
@@ -152,7 +153,30 @@ Renderer *RendererApi
   } // end else if
   else if(rendererName == "debug")
   {
-    result = new DebugRenderer();
+    tuple<size_t, size_t> spp(1,1);
+
+    Gotham::AttributeMap::const_iterator a = attr.find("renderer:spp");
+    if(a != attr.end())
+    {
+      try
+      {
+        spp = lexical_cast<tuple<size_t,size_t> >(a->second);
+      } // end try
+      catch(...)
+      {
+        try
+        {
+          size_t xStrata = lexical_cast<size_t>(a->second);
+          spp = tuple<size_t,size_t>(xStrata,xStrata);
+        } // end try
+        catch(bad_lexical_cast &e)
+        {
+          std::cerr << "RendererApi::renderer(): Warning: Couldn't interpret " << a->second << " as samples per pixel (xStrata,yStrata)." << std::endl;
+        } // end catch
+      } // end catch
+    } // end if
+
+    result = new DebugRenderer(spp.get<0>(),spp.get<1>());
   } // end else if
   else
   {
@@ -162,17 +186,6 @@ Renderer *RendererApi
     shared_ptr<PathSampler> sampler(PathApi::sampler(attr, photonMaps));
     result = new PathDebugRenderer(z, sampler);
   } // end else
-
-  // XXX Remove this when we have successfully generalized target counts
-  // get spp
-  size_t spp = 4;
-  a = attr.find("renderer:spp");
-  if(a != attr.end())
-  {
-    spp = lexical_cast<size_t>(a->second);
-  } // end if
-
-  result->setSamplesPerPixel(spp);
 
   // create a HaltCriterion for MonteCarloRenderers
   if(dynamic_cast<MonteCarloRenderer*>(result))

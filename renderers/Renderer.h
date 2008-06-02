@@ -103,14 +103,6 @@ class Renderer
      */
     inline boost::shared_ptr<const Record> getRecord(void) const;
 
-    /*! This method sets mSamplesPerPixel.
-     *  \param spp Sets mSamplesPerPixel.
-     *  XXX remove this
-     *  RATIONALE: we would like a rendering process not necessarily
-     *             have to render pixels (like generating a photon map, for example)
-     */
-    inline void setSamplesPerPixel(const unsigned int spp);
-
     /*! This virtual method returns a string describing the parameters
      *  of the render.
      *  \return A string describing the render.
@@ -150,11 +142,6 @@ class Renderer
     /*! A Renderer keeps a pointer to a ShadingContext for evaluating shaders.
      */
     boost::shared_ptr<ShadingContext> mShadingContext;
-
-    /*! The number of samples to take per pixel.
-     *  XXX remove this.
-     */
-    unsigned int mSamplesPerPixel;
 
     /*! A timer.
      */

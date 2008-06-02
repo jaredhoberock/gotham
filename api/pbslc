@@ -304,10 +304,6 @@ ShadingInterface *gContext;
   BOOST_PYTHON_MODULE(%s)
   {
     def("createMaterial", createMaterial, return_value_policy<manage_new_object>());
-    class_<TextureParameter>("TextureParameter")
-      .def_readwrite("mHandle", &TextureParameter::mHandle)
-      .def_readwrite("mAlias", &TextureParameter::mAlias)
-      ;
 
     class_<%s, bases<Material> >("%s")
     ''' % (baseName,className,className)

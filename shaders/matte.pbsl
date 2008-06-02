@@ -1,5 +1,6 @@
-scattering(Spectrum Kd = Spectrum::white())
+scattering(Spectrum Kd = Spectrum::white(),
+           Texture map_Kd)
 {
-  F = diffuse(Kd);
+  F = diffuse(Kd * tex2D(map_Kd, UV[0], UV[1]));
 } // end scattering()
 

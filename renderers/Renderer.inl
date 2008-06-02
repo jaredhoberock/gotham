@@ -7,7 +7,7 @@
 
 Renderer
   ::Renderer(void)
-    :mScene(),mRecord(),mSamplesPerPixel(1)
+    :mScene(),mRecord()
 {
   ;
 } // end Renderer::Renderer()
@@ -67,10 +67,4 @@ ShadingContext &Renderer
 {
   return *mShadingContext;
 } // end Renderer::setShadingContext()
-
-void Renderer
-  ::setSamplesPerPixel(const unsigned int spp)
-{
-  mSamplesPerPixel = spp;
-} // end Renderer::setSamplesPerPixel()
 

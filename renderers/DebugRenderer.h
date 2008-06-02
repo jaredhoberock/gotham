@@ -18,16 +18,11 @@ class DebugRenderer
      */
     typedef Renderer Parent;
 
-    /*! Null constructor does nothing.
+    /*! Constructor accepts number of pixel strata in each dimension.
+     *  \param xStrata Sets mXStrata;
+     *  \param yStrata Sets mXStrata;
      */
-    DebugRenderer(void);
-
-    /*! Constructor accepts a pointer to a Scene, Camera, and Film.
-     *  \param s Sets mScene.
-     *  \param r Sets mRecord.
-     */
-    DebugRenderer(boost::shared_ptr<const Scene> s,
-                  boost::shared_ptr<Record> r);
+    DebugRenderer(const size_t xStrata, const size_t yStrata);
 
   protected:
     /*! This method renders mScene to mFilm.
@@ -35,7 +30,15 @@ class DebugRenderer
      *         called throughout the rendering process.
      */
     virtual void kernel(ProgressCallback &progress);
-}; // end Renderer
+
+    /*! The number of samples to take per pixel in the x dimension.
+     */
+    size_t mXStrata;
+
+    /*! The number of samples to take per pixel in the y dimension.
+     */
+    size_t mYStrata;
+}; // end DebugRenderer
 
 #endif // DEBUG_RENDERER_H
 

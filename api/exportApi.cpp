@@ -5,6 +5,7 @@
 
 #include "exportApi.h"
 #include "Gotham.h"
+#include "../include/TextureHandle.h"
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
@@ -73,6 +74,14 @@ void exportGotham(void)
     ;
 } // end exportGotham()
 
+void exportTextureParameter(void)
+{
+  class_<TextureParameter>("TextureParameter")
+    .def_readwrite("mHandle", &TextureParameter::mHandle)
+    .def_readwrite("mAlias", &TextureParameter::mAlias)
+    ;
+} // end exportTextureParameter()
+
 void exportMaterial(void)
 {
   class_<Material, std::auto_ptr<Material> >("Material")
@@ -96,6 +105,7 @@ void exportVectorUint(void)
 void exportApi(void)
 {
   exportGotham();
+  exportTextureParameter();
   exportMaterial();
   exportVectorFloat();
   exportVectorUint();

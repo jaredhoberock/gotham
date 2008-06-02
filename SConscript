@@ -71,3 +71,7 @@ env.Program('imgclean', 'api/imgclean.cpp')
 dir = os.environ["GOTHAMHOME"] + '/bin'
 Default(env.Install(dir, source = 'imgclean'))
 
+# build test if it exists
+if os.path.exists('test.cpp'):
+  env.Program('test', 'test.cpp')
+

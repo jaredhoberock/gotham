@@ -58,10 +58,11 @@ void PathDebugRenderer
   RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
   
   shared_ptr<RandomSequence2D> sequence;
-  if(film)
+  if(film && dynamic_cast<const TargetPixelSampleCount*>(mHalt.get()))
   {
-    size_t samplesWidth = film->getWidth() * mSamplesPerPixel;
-    size_t samplesHeight = film->getHeight() * mSamplesPerPixel;
+    const TargetPixelSampleCount *halt = dynamic_cast<const TargetPixelSampleCount*>(mHalt.get());
+    size_t samplesWidth = film->getWidth() * halt->getXStrata();
+    size_t samplesHeight = film->getHeight() * halt->getYStrata();
     sequence.reset(new HilbertSequence(0, 1.0f, 0, 1.0f,
                                        samplesWidth, samplesHeight));
   } // end if
