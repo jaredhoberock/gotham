@@ -93,7 +93,7 @@ def objtogothWithMaterials(filename):
       print 'looking up material', material
       raise ValueError, materials
 
-    exponent = 10000
+    exponent = 0
     if wavefrontParms.has_key('Ns'):
       exponent = wavefrontParms['Ns']
 
