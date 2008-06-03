@@ -121,7 +121,9 @@ template<typename V3>
     ::evaluateCosineHemispherePdf(const Vector &w,
                                   const Vector &zAxis)
 {
-  return std::max(0.0f, dot(w,zAxis) * INV_PI);
+  float result = dot(w,zAxis) * INV_PI;
+  result = result < 0 ? 0.0f : result;
+  return result;
 } // end Mappings::evaluateCosineHemispherePdf()
 
 template<typename V3>
