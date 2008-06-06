@@ -10,8 +10,9 @@
 Mesh
   ::Mesh(const std::vector<Point> &vertices,
          const std::vector<Triangle> &triangles)
-     :Parent0(vertices,triangles),Parent1()
+     :Parent0(vertices,triangles),Parent1(),mInterpolateNormals(false)
 {
+  createTriangleNormals();
   buildWaldBikkerData();
   buildTree();
   buildTriangleTable();
@@ -23,7 +24,22 @@ Mesh
   ::Mesh(const std::vector<Point> &vertices,
          const std::vector<ParametricCoordinates> &parametrics,
          const std::vector<Triangle> &triangles)
-    :Parent0(vertices,parametrics,triangles),Parent1()
+    :Parent0(vertices,parametrics,triangles),Parent1(),mInterpolateNormals(false)
+{
+  createTriangleNormals();
+  buildWaldBikkerData();
+  buildTree();
+  buildTriangleTable();
+  mSurfaceArea = computeSurfaceArea();
+  mOneOverSurfaceArea = 1.0f / mSurfaceArea;
+} // end Mesh::Mesh()
+
+Mesh
+  ::Mesh(const std::vector<Point> &vertices,
+         const std::vector<ParametricCoordinates> &parametrics,
+         const std::vector<Normal> &normals,
+         const std::vector<Triangle> &triangles)
+    :Parent0(vertices,parametrics,normals,triangles),Parent1(),mInterpolateNormals(true)
 {
   buildWaldBikkerData();
   buildTree();
@@ -31,6 +47,23 @@ Mesh
   mSurfaceArea = computeSurfaceArea();
   mOneOverSurfaceArea = 1.0f / mSurfaceArea;
 } // end Mesh::Mesh()
+
+void Mesh
+  ::createTriangleNormals(void)
+{
+  mNormals.resize(mTriangles.size());
+
+  for(size_t i = 0; i != mTriangles.size(); ++i)
+  {
+    Triangle tri = mTriangles[i];
+
+    const Point &v0 = mPoints[tri[0]];
+    const Point &v1 = mPoints[tri[1]];
+    const Point &v2 = mPoints[tri[2]];
+
+    mNormals[i] = (v1 - v0).cross(v2 - v0).normalize();
+  } // end for i
+} // end Mesh::createTriangleNormals()
 
 Mesh
   ::~Mesh(void)
@@ -62,9 +95,7 @@ bool Mesh
     const Triangle &tri = *intersector.mHitFace;
 
     // fill out DifferentialGeometry details
-    Vector e1 = mPoints[tri[1]] - mPoints[tri[0]];
-    Vector e2 = mPoints[tri[2]] - mPoints[tri[0]];
-    getDifferentialGeometry(tri, r(t), e1.cross(e2).normalize(),
+    getDifferentialGeometry(tri, r(t),
                             intersector.mBarycentricCoordinates[0],
                             intersector.mBarycentricCoordinates[1],
                             dg);
@@ -134,7 +165,6 @@ void Mesh
 void Mesh
   ::getDifferentialGeometry(const Triangle &tri,
                             const Point &p,
-                            const Normal &ng,
                             const float b1,
                             const float b2,
                             DifferentialGeometry &dg) const
@@ -144,30 +174,30 @@ void Mesh
   const Point &p2 = mPoints[tri[1]];
   const Point &p3 = mPoints[tri[2]];
 
-  Vector e1 = p2 - p1;
-  Vector e2 = p3 - p1;
-
   // compute the last barycentric coordinate
   float b0 = 1.0f - b1 - b2;
 
+  // XXX why do we do this here and not getDifferentialGeometry()?
   // interpolate normal?
-  //if(f[0].mNormalIndex == -1 ||
-  //   f[1].mNormalIndex == -1 ||
-  //   f[2].mNormalIndex == -1)
-  //{
-  //} // end if
-  //else
-  //{
-  //  // get each vertex's Normals
-  //  const Mesh::NormalList &norms = m.getNormals();
-  //  const Normal &n1 = norms[f[0].mNormalIndex];
-  //  const Normal &n2 = norms[f[1].mNormalIndex];
-  //  const Normal &n3 = norms[f[2].mNormalIndex];
-  //  n = b0 * n1 + b1 * n2 + b2 * n3;
-  //} // end else
+  Normal ng;
+  if(mInterpolateNormals)
+  {
+    // get each vertex's Normals
+    const Mesh::NormalList &norms = getNormals();
+    const Normal &n1 = norms[tri[0]];
+    const Normal &n2 = norms[tri[1]];
+    const Normal &n3 = norms[tri[2]];
+    ng = b0 * n1 + b1 * n2 + b2 * n3;
 
-  // normalize it
-  //dg.getNormal() = dg.getNormal().normalize();
+    // no need to normalize this if they are
+    // unit-length to begin with
+    //ng = ng.normalize();
+  } // end else
+  else
+  {
+    // XXX just look up from mNormals
+    ng = (p2 - p1).cross(p3 - p1).normalize();
+  } // end else
 
   ParametricCoordinates uv0;
   ParametricCoordinates uv1;
@@ -278,12 +308,9 @@ void Mesh
   // XXX why don't we get the pdf here??
   UnitSquareToTriangle::evaluate(u2,u3, v0, v1, v2, p, b);
 
-  // XXX implement shading normals
-  Normal ng = (v1 - v0).cross(v2 - v0).normalize();
-
   // we need to send barycentrics here, not u2 and u3
   // as they are NOT the same thing
-  getDifferentialGeometry(t, p, ng, b[0], b[1], dg);
+  getDifferentialGeometry(t, p, b[0], b[1], dg);
 
   // evaluate the pdf
   pdf = evaluateSurfaceAreaPdf(dg);

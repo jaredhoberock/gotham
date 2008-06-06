@@ -22,6 +22,16 @@ SmallMesh
   ;
 } // end SmallMesh::SmallMesh()
 
+SmallMesh
+  ::SmallMesh(const std::vector<Point> &vertices,
+              const std::vector<ParametricCoordinates> &parametrics,
+              const std::vector<Normal> &normals,
+              const std::vector<Triangle> &triangles)
+    :Parent(vertices,parametrics,normals,triangles)
+{
+  ;
+} // end SmallMesh::SmallMesh()
+
 bool SmallMesh
   ::intersect(const Ray &r) const
 {
@@ -65,9 +75,7 @@ bool SmallMesh
   if(result)
   {
     // fill out DifferentialGeometry details
-    Vector e1 = mPoints[(*hitTri)[1]] - mPoints[(*hitTri)[0]];
-    Vector e2 = mPoints[(*hitTri)[2]] - mPoints[(*hitTri)[0]];
-    getDifferentialGeometry(*hitTri, r(t), e1.cross(e2).normalize(),
+    getDifferentialGeometry(*hitTri, r(t),
                             b1,
                             b2,
                             dg);

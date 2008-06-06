@@ -54,6 +54,17 @@ template<typename P3D, typename P2D, typename N3D = P3D>
                         const std::vector<P2D> &parametrics,
                         const std::vector<Triangle> &triangles);
 
+    /*! Constructor accepts a list of points, parametrics, normals, and Triangles.
+     *  \param points The position of each vertex.
+     *  \param parametrics The parametric position of each vertex.
+     *  \param normals The normal vector of each vertex.
+     *  \param triangles A list of Triangles.
+     */
+    inline TriangleMesh(const std::vector<P3D> &points,
+                        const std::vector<P2D> &parametrics,
+                        const std::vector<N3D> &normals,
+                        const std::vector<Triangle> &triangles);
+
     typedef std::vector<Triangle> TriangleList;
     typedef std::vector<P3D> PointList;
     typedef std::vector<P2D> ParametricList;

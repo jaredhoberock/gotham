@@ -31,7 +31,8 @@
 #include "../importance/ImportanceApi.h"
 #include "../renderers/RendererApi.h"
 
-#define USE_QGLVIEWER 0
+//#define USE_QGLVIEWER 0
+#define USE_QGLVIEWER 1
 
 // choose which viewer base class to use before this
 // #include
@@ -488,6 +489,82 @@ void Gotham
   else
   {
     mesh = new RasterizableMesh<SmallMesh>(points, parms, triangles);
+  } // end else
+
+  shared_ptr<Surface> surface(mesh);
+
+  AttributeMap &attr = mAttributeStack.back();
+  surfacePrimitive(new RasterizableSurfacePrimitive(surface, lexical_cast<MaterialHandle>(attr["material"])));
+} // end Gotham::mesh()
+
+void Gotham
+  ::mesh(std::vector<float> &vertices,
+         std::vector<float> &parametrics,
+         std::vector<float> &normals,
+         std::vector<unsigned int> &faces)
+{
+  // do we need to reverse the winding of vertices?
+  bool reverse = mAttributeStack.back()["orientation"] == "inside";
+
+  std::vector<Point> points;
+  std::vector<ParametricCoordinates> parms;
+  std::vector<Normal> norms;
+  std::vector<Mesh::Triangle> triangles;
+  for(unsigned int i = 0;
+      i != vertices.size();
+      i += 3)
+  {
+    points.push_back(Point(vertices[i], vertices[i+1], vertices[i+2]));
+
+    // transform by the matrix on the top of the stack
+    points.back() = mMatrixStack.back()(points.back());
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != parametrics.size();
+      i += 2)
+  {
+    parms.push_back(ParametricCoordinates(parametrics[i], parametrics[i+1]));
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != normals.size();
+      i += 3)
+  {
+    norms.push_back(Normal(normals[i], normals[i+1], normals[i+2]));
+
+    // transform by the matrix on the top of the stack
+    norms.back() = mMatrixStack.back()(norms.back());
+
+    //// XXX do we need to flip these?
+    //if(reverse)
+    //{
+    //  norms.back() = -norms.back();
+    //} // end if
+  } // end for i
+
+  for(unsigned int i = 0;
+      i != faces.size();
+      i += 3)
+  {
+    if(reverse)
+    {
+      triangles.push_back(Mesh::Triangle(faces[i], faces[i+2], faces[i+1]));
+    } // end if
+    else
+    {
+      triangles.push_back(Mesh::Triangle(faces[i], faces[i+1], faces[i+2]));
+    } // end if
+  } // end for i
+
+  Mesh *mesh = 0;
+  if(faces.size() > 15)
+  {
+    mesh = new RasterizableMesh<Mesh>(points, parms, norms, triangles);
+  } // end if
+  else
+  {
+    mesh = new RasterizableMesh<SmallMesh>(points, parms, norms, triangles);
   } // end else
 
   shared_ptr<Surface> surface(mesh);

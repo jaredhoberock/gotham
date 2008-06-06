@@ -36,29 +36,58 @@ def splitTrianglesWithParametrics(points, uvs, triangles):
     index += 3
   return (newPoints, newUvs, newTriangles)
 
+def splitTrianglesWithParametricsAndNormals(points, uvs, normals, triangles):
+  newPoints = []
+  newUvs = []
+  newNormals = []
+  newTriangles = []
+  index = 0
+  for (v0,v1,v2) in triangles:
+    newPoints.append(points[v0[0]])
+    newPoints.append(points[v1[0]])
+    newPoints.append(points[v2[0]])
+    newUvs.append(uvs[v0[1]])
+    newUvs.append(uvs[v1[1]])
+    newUvs.append(uvs[v2[1]])
+    newNormals.append(normals[v0[2]])
+    newNormals.append(normals[v1[2]])
+    newNormals.append(normals[v2[2]])
+    newV0 = (index,     index,     -1)
+    newV1 = (index + 1, index + 1, -1)
+    newV2 = (index + 2, index + 2, -1)
+    newTriangles.append([newV0, newV1, newV2])
+    index += 3
+  return (newPoints, newUvs, newNormals, newTriangles)
+
 def objtogoth(filename):
   (points, uvs, normals, polygons) = wavefront.readMesh(filename)
   triangles = wavefront.triangulate(polygons)
-  if uvs != []:
+  if uvs != [] and normals == []:
     (points, uvs, triangles) = splitTrianglesWithParametrics(points, uvs, triangles)
+  elif uvs != [] and normals != []:
+    (points, uvs, normals, triangles) = splitTrianglesWithParametricsAndNormals(points, uvs, normals, triangles)
   else:
     (points, triangles) = splitTriangles(points, triangles)
 
   vertices = []
   indices = []
   parms = []
+  norms = []
   # flatten the points list
   for p in points:
     vertices.extend(p)
   # flatten the uv list
   for uv in uvs:
     parms.extend(uv)
+  # flatten the normals list
+  for n in normals:
+    norms.extend(n)
   # flatten the triangle list
   for tri in triangles:
     indices.append(tri[0][0])
     indices.append(tri[1][0])
     indices.append(tri[2][0])
-  return (vertices, parms, indices)
+  return (vertices, parms, indices, norms)
 
 def objtogothWithMaterials(filename):
   results = []
@@ -66,20 +95,26 @@ def objtogothWithMaterials(filename):
   (materials, primitives) = wavefront.partitionByMaterials(points, uvs, normals, materials, primitives)
   for (material, points, uvs, normals, polygons) in primitives:
     triangles = wavefront.triangulate(polygons)
-    if uvs != []:
+    if uvs != [] and normals == []:
       (points, uvs, triangles) = splitTrianglesWithParametrics(points, uvs, triangles)
+    elif uvs != [] and normals != []:
+      (points, uvs, normals, triangles) = splitTrianglesWithParametricsAndNormals(points, uvs, normals, triangles)
     else:
       (points, triangles) = splitTriangles(points, triangles)
 
     vertices = []
     indices = []
     parms = []
+    norms = []
     # flatten the points list
     for p in points:
       vertices.extend(p)
     # flatten the uv list
     for uv in uvs:
       parms.extend(uv)
+    # flatten the normals list
+    for n in normals:
+      norms.extend(n)
     # flatten the triangle list
     for tri in triangles:
       indices.append(tri[0][0])
@@ -191,7 +226,7 @@ def objtogothWithMaterials(filename):
       gothamParms['map_Kd'] = map_Kd
 
     # add to the list
-    results.append(((gothamName, gothamParms), vertices, parms, indices))
+    results.append(((gothamName, gothamParms, material), vertices, parms, indices, norms))
   return results
 
 # did we call this as a program?

@@ -94,13 +94,8 @@ void TriangleBVH
   const Mesh::PointList &points = mesh->getPoints();
   const Mesh::Triangle &tri = mesh->getTriangles()[localTriIndex];
 
-  // XXX precompute geometric normals
-  Vector e1 = points[tri[1]] - points[tri[0]];
-  Vector e2 = points[tri[2]] - points[tri[0]];
-
   // create the DifferentialGeometry
   mesh->getDifferentialGeometry(tri, p,
-                                e1.cross(e2).normalize(),
                                 b1,
                                 b2,
                                 inter.getDifferentialGeometry());

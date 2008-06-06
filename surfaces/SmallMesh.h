@@ -35,6 +35,17 @@ class SmallMesh
               const std::vector<ParametricCoordinates> &parametrics,
               const std::vector<Triangle> &triangles);
 
+    /*! Constructor takes a list of positions, parametric positions, and a list of Triangles.
+     *  \param vertices A list of vertex positions.
+     *  \param parametrics A list of parametric vertex positions.
+     *  \param normals A list of vertex normal vectors.
+     *  \param triangles A list of triangles.
+     */
+    SmallMesh(const std::vector<Point> &vertices,
+              const std::vector<ParametricCoordinates> &parametrics,
+              const std::vector<Normal> &normals,
+              const std::vector<Triangle> &triangles);
+
     /*! This method computes the intersection between the given Ray and this SmallMesh.
      *  If an intersection exists, the 'time' of intersection is returned.
      *  \param r The Ray to intersect.

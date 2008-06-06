@@ -64,6 +64,17 @@ class Mesh
          const std::vector<ParametricCoordinates> &parametrics,
          const std::vector<Triangle> &triangles);
 
+    /*! Constructor takes a list of positions, parametric positions, normals, and a list of Triangles.
+     *  \param vertices A list of vertex positions.
+     *  \param parametrics A list of parametric vertex positions.
+     *  \param normals A list of vertex normals.
+     *  \param triangles A list of triangles.
+     */
+    Mesh(const std::vector<Point> &vertices,
+         const std::vector<ParametricCoordinates> &parametrics,
+         const std::vector<Normal> &normals,
+         const std::vector<Triangle> &triangles);
+
     /*! Null destructor does nothing.
      */
     virtual ~Mesh(void);
@@ -190,7 +201,6 @@ class Mesh
      *  barycentric coordinates in a Triangle of this Mesh.
      *  \param tri The Triangle of interest.
      *  \param p The 3D Point on tri.
-     *  \param ng The geometric Normal at p.
      *  \param b1 The first barycentric coordinate.
      *  \param b2 The second barycentric coordinate.
      *  \dg The DifferentialGeometry at (b1,b2) inside tri is
@@ -198,7 +208,6 @@ class Mesh
      */
     void getDifferentialGeometry(const Triangle &tri,
                                  const Point &p,
-                                 const Normal &ng,
                                  const float b1,
                                  const float b2,
                                  DifferentialGeometry &dg) const;
@@ -305,6 +314,16 @@ class Mesh
     std::vector<WaldBikkerData> mWaldBikkerTriangleData;
 
     void buildWaldBikkerData(void);
+
+    /*! Whether or not to interpolate normals.
+     *  If so, then mNormals is interpreted as a per-vertex list of Normals.
+     *  Otherwise, it is per-triangle.
+     */
+    bool mInterpolateNormals;
+
+    /*! This method creates per-face normals for each triangle.
+     */
+    void createTriangleNormals(void);
 }; // end Mesh
 
 #include "Mesh.inl"

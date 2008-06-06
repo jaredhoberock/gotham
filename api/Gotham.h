@@ -148,6 +148,19 @@ class Gotham
                       std::vector<float> &parametrics,
                       std::vector<unsigned int> &triangles);
 
+    /*! This method creates a new triangle Mesh by
+     *  transforming the given geometry against the current
+     *  Matrix.
+     *  \param vertices A list of triangle vertex positions.
+     *  \param parametrics A list of parametric triangle vertex positions.
+     *  \param normals A list of vertex normals.
+     *  \param triangles A list of vertex index triples.
+     */
+    virtual void mesh(std::vector<float> &vertices,
+                      std::vector<float> &parametrics,
+                      std::vector<float> &normals,
+                      std::vector<unsigned int> &triangles);
+
     /*! This method creates a new Sphere.
      *  \param cx The x-coordinate of the center of the Sphere.
      *  \param cy The y-coordinate of the center of the Sphere.

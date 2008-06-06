@@ -219,15 +219,17 @@ class PyGotham:
 
   def mesh(self, *args):
     # validate arguments
-    if (len(args) != 2 and len(args) != 3):
-      raise ValueError, "mesh() expects either two (points,indices) or three (points,parms,indices) arguments."
+    if (len(args) != 2 and len(args) != 3) and len(args) != 4:
+      raise ValueError, "mesh() expects either two (points,indices), three (points,parms,indices), or four (points,parms,indices,normals) arguments."
     # convert to vectors
     points = args[0]
     pointsvec = vector_float()
     pointsvec[:] = points
     if len(args) == 2:
       faces = args[1]
-    else:
+    elif len(args) == 3:
+      faces = args[2]
+    elif len(args) == 4:
       faces = args[2]
     # validate faces
     if len(faces) == 0:
@@ -242,12 +244,19 @@ class PyGotham:
       i += 1
     facesvec = vector_uint()
     facesvec[:] = faces
-    if len(args) == 3:
+    if len(args) == 2:
+      return self.__subsystem.mesh(pointsvec, facesvec)
+
+    if len(args) > 2:
       parmsvec = vector_float()
       parmsvec[:] = args[1]
-      return self.__subsystem.mesh(pointsvec, parmsvec, facesvec)
-    else:
-      return self.__subsystem.mesh(pointsvec, facesvec)
+
+      if len(args) == 3:
+        return self.__subsystem.mesh(pointsvec, parmsvec, facesvec)
+      else:
+        normsvec = vector_float()
+        normsvec[:] = args[3]
+        return self.__subsystem.mesh(pointsvec, parmsvec, normsvec, facesvec)
 
   def multMatrix(self, m):
     matrix = vector_float()

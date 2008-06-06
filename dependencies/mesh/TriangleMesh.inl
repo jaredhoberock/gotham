@@ -33,6 +33,19 @@ template<typename P3D, typename P2D, typename N3D>
 } // end TriangleMesh::TriangleMesh()
 
 template<typename P3D, typename P2D, typename N3D>
+  TriangleMesh<P3D, P2D, N3D>
+    ::TriangleMesh(const std::vector<P3D> &points,
+                   const std::vector<P2D> &parametrics,
+                   const std::vector<N3D> &normals,
+                   const std::vector<Triangle> &triangles)
+{
+  mPoints = points;
+  mParametrics = parametrics;
+  mNormals = normals;
+  mTriangles = triangles;
+} // end TriangleMesh::TriangleMesh()
+
+template<typename P3D, typename P2D, typename N3D>
   const typename TriangleMesh<P3D, P2D, N3D>::TriangleList
     &TriangleMesh<P3D, P2D, N3D>
       ::getTriangles(void) const
