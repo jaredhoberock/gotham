@@ -55,7 +55,8 @@ void SceneViewer
   ::printCameraCode(void) const
 {
   Point eye(camera()->position());
-  Vector look(camera()->viewDirection());
+  float eyeNorm = eye.norm();
+  Vector look(eyeNorm * camera()->viewDirection());
   Vector lookAt = eye + look;
   Vector up(camera()->upVector());
 

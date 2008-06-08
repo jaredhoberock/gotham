@@ -16,6 +16,6 @@ Spectrum HemisphericalEmission
   ::evaluate(const Vector &w,
              const DifferentialGeometry &dg) const
 {
-  return Parent1::evaluate(w,dg);
+  return Parent1::evaluate(w,dg.getNormal());
 } // end HemisphericalEmission::evaluate()
 

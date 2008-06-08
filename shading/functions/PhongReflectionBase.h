@@ -72,6 +72,66 @@ template<typename V3, typename S3>
                            bool &delta,
                            unsigned int &component) const;
 
+    /*! This method samples this PhongReflectionBase given a Wo,
+     *  differential geometry vectors, and three numbers in the unit interval.
+     *  \param wo The direction of scattering.
+     *  \param point Ignored.
+     *  \param tangent The tangent direction.
+     *  \param binormal The binormal direction.
+     *  \param normal The normal direction.
+     *  \param u0 A real number in [0,1).
+     *  \param u1 A second real number in [0,1).
+     *  \param u2 A third real number in [0,1).
+     *  \param wi The direction of scattering is returned here.
+     *  \param pdf The value of the pdf at (u0,u1,u2) is returned here.
+     *  \param delta This is set to false; PhongReflectionBase is not a delta function.
+     *  \param component This is set to 0; PhongReflectionBase has only 1 component.
+     */
+    inline Spectrum sample(const Vector &wo,
+                           const Vector &point,
+                           const Vector &tangent,
+                           const Vector &binormal,
+                           const Vector &normal,
+                           const float u0,
+                           const float u1,
+                           const float u2,
+                           Vector &wi,
+                           float &pdf,
+                           bool &delta,
+                           unsigned int &component) const;
+
+    /*! This method evaluates the pdf of choosing direction wi
+     *  given direction wo and differential geometry vectors at the sampling point.
+     *  \param wo The direction of scattering.
+     *  \param tangent The tangent direction.
+     *  \param binormal The binormal direction.
+     *  \param normal The normal direction.
+     *  \param wi The direction whose pdf is of interest.
+     *  \return The pdf of wi given wo, tangent, binormal, normal, and wi.
+     */
+    inline float evaluatePdf(const Vector &wo,
+                             const Vector &tangent,
+                             const Vector &binormal,
+                             const Vector &normal,
+                             const Vector &wi) const;
+
+    /*! This method evaluates the pdf of choosing direction wi
+     *  given direction wo and differential geometry vectors at the sampling point.
+     *  \param wo The direction of scattering.
+     *  \param point Ignored.
+     *  \param tangent The tangent direction.
+     *  \param binormal The binormal direction.
+     *  \param normal The normal direction.
+     *  \param wi The direction whose pdf is of interest.
+     *  \return The pdf of wi given wo, tangent, binormal, normal, and wi.
+     */
+    inline float evaluatePdf(const Vector &wo,
+                             const Vector &point,
+                             const Vector &tangent,
+                             const Vector &binormal,
+                             const Vector &normal,
+                             const Vector &wi) const;
+
   protected:
     Spectrum mReflectance;
     float mEtat, mEtai;

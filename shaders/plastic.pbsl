@@ -1,0 +1,9 @@
+scattering(Spectrum Kd = Spectrum::white(),
+           Spectrum Ks = Spectrum(1,1,1),
+           float exponent = 0,
+           float eta = 1.5f)
+{
+  F = composite(diffuse(Kd),
+                glossy(Ks, eta, exponent));
+} // end scattering()
+

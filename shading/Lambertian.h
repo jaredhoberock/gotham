@@ -12,7 +12,7 @@
 
 class Lambertian
   : public ScatteringDistributionFunction,
-    public LambertianBase<Vector, Spectrum, DifferentialGeometry>
+    public LambertianBase<Vector, Spectrum>
 {
   public:
     /*! \typedef Parent0
@@ -23,7 +23,7 @@ class Lambertian
     /*! \typedef Parent1
      *  \brief Shorthand.
      */
-    typedef LambertianBase<Vector, Spectrum, DifferentialGeometry> Parent1;
+    typedef LambertianBase<Vector, Spectrum> Parent1;
 
     /*! Constructor accepts an albedo.
      *  \param albedo Sets mAlbedo.

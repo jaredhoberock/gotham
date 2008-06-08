@@ -1,33 +1,35 @@
-/*! \file SpecularTransmissionBase.h
+/*! \file SpecularReflectionBase.h
  *  \author Jared Hoberock
- *  \brief Defines the interface to a scattering
- *         function which performs refractive
- *         transmission.
+ *  \brief Defines the interface to a scattering function
+ *         implementing specular reflection.
  */
 
 #pragma once
 
 template<typename V3, typename S3>
-  class SpecularTransmissionBase
+  class SpecularReflectionBase
 {
   public:
     typedef V3 Vector;
     typedef S3 Spectrum;
 
-    /*! Constructor accepts a transmission and indices of refraction.
-     *  \param t The transmittance of this SpecularTransmissionBase.
-     *  \param etai The index of refraction on the outside of the interface
-     *              of this SpecularTransmission.
-     *  \param etat The index of refraction on the inside of the interface
-     *              of this SpecularTransmission.
+    /*! This constructor creates a SpecularReflectionBase conductor.
+     *  \param r Sets mReflectance.
+     *  \param eta Sets the index of refraction of the Fresnel conductor.
      */
-    inline SpecularTransmissionBase(const Spectrum &t,
-                                    const float etai,
-                                    const float etat);
+    inline SpecularReflectionBase(const Spectrum &t,
+                                  const float eta);
 
-    /*! This method evaluates this SpecularTransmissionBase function.
+    /*! This constructor creates a SpecularReflectionBase dielectric.
+     *  \param r Sets mReflectance.
+     *  \param etai Sets the index of refraction of the space surrounding the dielectric.
+     *  \param etat Sets the index of refraction of the Fresnel dielectric medium.
+     */
+    inline SpecularReflectionBase(const Spectrum &r, const float etai, const float etat);
+
+    /*! This method evaluates this SpecularReflectionBase function.
      *  \return Black; the response is non-zero only in
-     *          the refracted direction.
+     *          the specular direction.
      */
     inline Spectrum evaluate(void) const;
 
@@ -107,9 +109,10 @@ template<typename V3, typename S3>
                              const Vector &wi) const;
 
   protected:
-    Spectrum mTransmittance;
+    Spectrum mReflectance;
     float mEtai, mEtat;
-}; // end SpecularTransmissionBase
+    Spectrum mAbsorptionCoefficient;
+}; // end SpecularReflectionBase
 
-#include "SpecularTransmissionBase.inl"
+#include "SpecularReflectionBase.inl"
 

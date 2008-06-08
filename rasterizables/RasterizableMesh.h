@@ -36,11 +36,24 @@ template<typename MeshParentType>
 
     /*! Constructor takes a list of vertices and a list of
      *  triangles.
-     *  \param points A list of vertex positions
+     *  \param points A list of vertex positions.
+     *  \param parametrics A list of parametric vertex positions.
      *  \param triangles A list of triangles.
      */
     inline RasterizableMesh(const std::vector<Point> &points,
                             const std::vector<ParametricCoordinates> &parametrics,
+                            const std::vector<typename Parent0::Triangle> &triangles);
+
+    /*! Constructor takes a list of vertices and a list of
+     *  triangles.
+     *  \param points A list of vertex positions.
+     *  \param parametrics A list of parametric vertex positions.
+     *  \param normals A list of vertex normals.
+     *  \param triangles A list of triangles.
+     */
+    inline RasterizableMesh(const std::vector<Point> &points,
+                            const std::vector<ParametricCoordinates> &parametrics,
+                            const std::vector<Normal> &normals,
                             const std::vector<typename Parent0::Triangle> &triangles);
 
     /*! This method rasterizes this RasterizableMesh using

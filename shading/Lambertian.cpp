@@ -18,7 +18,7 @@ Spectrum Lambertian
              const DifferentialGeometry &dg,
              const Vector &wi) const
 {
-  return Parent1::evaluate(wo,dg,wi);
+  return Parent1::evaluate(wo,dg.getNormal(),wi);
 } // end Lambertian::evaluate()
 
 Spectrum Lambertian

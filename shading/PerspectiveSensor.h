@@ -12,7 +12,7 @@
 
 class PerspectiveSensor
   : public ScatteringDistributionFunction,
-    public PerspectiveSensorBase<Vector,Spectrum,DifferentialGeometry>
+    public PerspectiveSensorBase<Vector,Spectrum>
 {
   public:
     /*! \typedef Parent0
@@ -23,7 +23,7 @@ class PerspectiveSensor
     /*! \typedef Parent1
      *  \brief Shorthand.
      */
-    typedef PerspectiveSensorBase<Vector,Spectrum,DifferentialGeometry> Parent1;
+    typedef PerspectiveSensorBase<Vector,Spectrum> Parent1;
 
     /*! Null constructor does nothing.
      */

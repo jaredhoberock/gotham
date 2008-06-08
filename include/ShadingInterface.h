@@ -60,6 +60,9 @@ class ShadingInterface
 
     virtual ScatteringDistributionFunction *transparent(const Spectrum &Kt) = 0;
 
+    virtual ScatteringDistributionFunction *composite(ScatteringDistributionFunction *f0,
+                                                      ScatteringDistributionFunction *f1) = 0;
+
     virtual ScatteringDistributionFunction *uber(const Spectrum &Kd,
                                                  const Spectrum &Ks,
                                                  const float uShininess,

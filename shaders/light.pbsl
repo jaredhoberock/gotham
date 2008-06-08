@@ -5,6 +5,6 @@ emission(Spectrum power)
 
 //scattering(void)
 //{
-//  F = new Lambertian(Spectrum::white());
+//  F = diffuse(Spectrum(0,0,0));
 //} // end scattering()
 

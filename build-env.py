@@ -49,6 +49,9 @@ def getIncludes():
     result = [includeMe0, includeMe1, '/usr/include/python2.5',
               '/usr/include/OpenEXR',
               '/usr/local/cuda/include']
+    result += ['/usr/include/qt4',
+              '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',
+              '/usr/include/qt4/QtGui', '/usr/include/qt4/QtXml', '/usr/include/qt4/QtOpenGL']
   return result
 
 def GothamReleaseEnvironment(env):

@@ -12,7 +12,7 @@
 
 class SpecularTransmission
   : public DeltaDistributionFunction,
-    public SpecularTransmissionBase<Vector,Spectrum,DifferentialGeometry>
+    public SpecularTransmissionBase<Vector,Spectrum>
 {
   public:
     /*! \typedef Parent0
@@ -23,7 +23,7 @@ class SpecularTransmission
     /*! \typedef Parent1
      *  \brief Shorthand.
      */
-    typedef SpecularTransmissionBase<Vector,Spectrum,DifferentialGeometry> Parent1;
+    typedef SpecularTransmissionBase<Vector,Spectrum> Parent1;
 
     /*! Constructor accepts a transmission and indices of refraction.
      *  \param t The transmittance of this SpecularTransmission.

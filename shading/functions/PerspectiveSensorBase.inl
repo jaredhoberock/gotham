@@ -5,15 +5,15 @@
 
 #include "PerspectiveSensorBase.h"
 
-template<typename V3, typename S3, typename DG>
-  PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  PerspectiveSensorBase<V3,S3>
     ::PerspectiveSensorBase(void)
 {
   ;
 } // end PerspectiveSensorBase::PerspectiveSensorBase()
 
-template<typename V3, typename S3, typename DG>
-  PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  PerspectiveSensorBase<V3,S3>
     ::PerspectiveSensorBase(const Spectrum &response,
                         const float aspect,
                         const Point &origin)
@@ -25,8 +25,8 @@ template<typename V3, typename S3, typename DG>
   ;
 } // end PerspectiveSensorBase::PerspectiveSensorBase()
 
-template<typename V3, typename S3, typename DG>
-  void PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  void PerspectiveSensorBase<V3,S3>
     ::set(const float aspect,
           const Point &origin)
 {
@@ -35,8 +35,26 @@ template<typename V3, typename S3, typename DG>
   mInverseWindowSurfaceArea = (1.0f/(2.0f*2.0f*mAspectRatio));
 } // end PerspectiveSensorBase::set()
 
-template<typename V3, typename S3, typename DG>
-  S3 PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  S3 PerspectiveSensorBase<V3,S3>
+    ::sample(const Point &point,
+             const Point &tangent,
+             const Point &binormal,
+             const Point &normal,
+             const float u0,
+             const float u1,
+             const float u2,
+             Vector &ws,
+             float &pdf,
+             bool &delta,
+             unsigned int &component) const
+{
+  component = 0;
+  return sample(point,tangent,binormal,normal,u0,u1,u2,ws,pdf,delta);
+} // end PerspectiveSensorBase::sample()
+
+template<typename V3, typename S3>
+  S3 PerspectiveSensorBase<V3,S3>
     ::sample(const Point &point,
              const Point &tangent,
              const Point &binormal,
@@ -71,54 +89,8 @@ template<typename V3, typename S3, typename DG>
   return mResponse;
 } // end PerspectiveSensorBase::sample()
 
-template<typename V3, typename S3, typename DG>
-  S3 PerspectiveSensorBase<V3,S3,DG>
-    ::sample(const DifferentialGeometry &dg,
-             const float u0,
-             const float u1,
-             const float u2,
-             Vector &ws,
-             float &pdf,
-             bool &delta) const
-{
-  return sample(dg.getPoint(),
-                dg.getTangent(),
-                dg.getBinormal(),
-                dg.getNormal(),
-                u0, u1, u2,
-                ws, pdf, delta);
-} // end PerspectiveSensorBase::sample()
-
-template<typename V3, typename S3, typename DG>
-  void PerspectiveSensorBase<V3,S3,DG>
-    ::invert(const Vector &w,
-             const DifferentialGeometry &dg,
-             float &u0,
-             float &u1) const
-{
-  // a ray from the dg in direction w intersects the window at
-  // time t
-  // remember that the normal points in the -look direction
-  float t =
-    //-dg.getNormal().dot(mWindowOrigin - dg.getPoint()) /
-    //-dg.getNormal().dot(w);
-    -dot(dg.getNormal(), mWindowOrigin - dg.getPoint()) /
-    -dot(dg.getNormal(),w);
-
-  // compute q the intersection with the ray and the plane
-  Point q = dg.getPoint() + t * w;
-
-  // this is the inverse operation of sampleFilmPlane():
-  // get the film plane coordinates of q
-  q -= mWindowOrigin;
-  q *= 0.5f;
-
-  u0 = dot(q,dg.getBinormal()) / mAspectRatio;
-  u1 = dot(q,dg.getTangent());
-} // end PerspectiveSensorBase::invert()
-
-template<typename V3, typename S3, typename DG>
-  void PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  void PerspectiveSensorBase<V3,S3>
     ::sampleWindow(const float u,
                    const float v,
                    const Vector &xAxis,
@@ -133,8 +105,8 @@ template<typename V3, typename S3, typename DG>
   pdf = mInverseWindowSurfaceArea;
 } // end PerspectiveSensorBase::sampleWindow()
 
-template<typename V3, typename S3, typename DG>
-  float PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  float PerspectiveSensorBase<V3,S3>
     ::evaluatePdf(const Vector &ws,
                   const Point &point,
                   const Vector &tangent,
@@ -174,24 +146,8 @@ template<typename V3, typename S3, typename DG>
   return pdf;
 } // end PerspectiveSensorBase::evaluatePdf()
 
-template<typename V3, typename S3, typename DG>
-  float PerspectiveSensorBase<V3,S3,DG>
-    ::evaluatePdf(const Vector &ws,
-                  const DifferentialGeometry &dg) const
-{
-  return evaluatePdf(ws, dg.getPoint(), dg.getTangent(), dg.getBinormal(), dg.getNormal());
-} // end PerspectiveSensorBase::evaluatePdf()
-
-template<typename V3, typename S3, typename DG>
-  S3 PerspectiveSensorBase<V3,S3,DG>
-    ::evaluate(const Vector &ws,
-               const DifferentialGeometry &dg) const
-{
-  return evaluate(ws, dg.getPoint(), dg.getTangent(), dg.getBinormal(), dg.getNormal());
-} // end PerspectiveSensorBase::evaluate()
-
-template<typename V3, typename S3, typename DG>
-  S3 PerspectiveSensorBase<V3,S3,DG>
+template<typename V3, typename S3>
+  S3 PerspectiveSensorBase<V3,S3>
     ::evaluate(const Vector &ws,
                const Point &point,
                const Vector &tangent,
@@ -214,4 +170,33 @@ template<typename V3, typename S3, typename DG>
 
   return result;
 } // end PerspectiveSensorBase::evaluate()
+
+template<typename V3, typename S3>
+  void PerspectiveSensorBase<V3,S3>
+    ::invert(const Vector &w,
+             const Point &point,
+             const Vector &tangent,
+             const Vector &binormal,
+             const Vector &normal,
+             float &u0,
+             float &u1) const
+{
+  // a ray from the dg in direction w intersects the window at
+  // time t
+  // remember that the normal points in the -look direction
+  float t =
+    -dot(normal,mWindowOrigin - point) /
+    -dot(normal,w);
+
+  // compute q the intersection with the ray and the plane
+  Point q = point + t * w;
+
+  // this is the inverse operation of sampleFilmPlane():
+  // get the film plane coordinates of q
+  q -= mWindowOrigin;
+  q *= 0.5f;
+
+  u0 = dot(q,binormal) / mAspectRatio;
+  u1 = dot(q,tangent);
+} // end PerspectiveSensorBase::invert()
 

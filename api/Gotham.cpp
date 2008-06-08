@@ -31,8 +31,8 @@
 #include "../importance/ImportanceApi.h"
 #include "../renderers/RendererApi.h"
 
-//#define USE_QGLVIEWER 0
-#define USE_QGLVIEWER 1
+#define USE_QGLVIEWER 0
+//#define USE_QGLVIEWER 1
 
 // choose which viewer base class to use before this
 // #include

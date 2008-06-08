@@ -72,6 +72,12 @@ inline ScatteringDistributionFunction *transparent(const Spectrum &Kt)
   return gContext->transparent(Kt);
 } // end transparent()
 
+inline ScatteringDistributionFunction *composite(ScatteringDistributionFunction *f0,
+                                                 ScatteringDistributionFunction *f1)
+{
+  return gContext->composite(f0,f1);
+} // end composite()
+
 inline ScatteringDistributionFunction *uber(const Spectrum &Kd,
                                             const Spectrum &Ks,
                                             const float uShininess,

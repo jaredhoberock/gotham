@@ -13,8 +13,8 @@
 #define PI 3.14159265f
 #endif // PI
 
-template<typename V3, typename S3, typename DG>
-  HemisphericalEmissionBase<V3,S3,DG>
+template<typename V3, typename S3>
+  HemisphericalEmissionBase<V3,S3>
     ::HemisphericalEmissionBase(const S3 &radiosity)
       :mRadiance(radiosity)
 {
@@ -23,15 +23,15 @@ template<typename V3, typename S3, typename DG>
   mRadiance.z *= INV_PI;
 } // end HemisphericalEmissionBase::HemisphericalEmissionBase()
 
-template<typename V3, typename S3, typename DG>
-  const S3 &HemisphericalEmissionBase<V3,S3,DG>
+template<typename V3, typename S3>
+  const S3 &HemisphericalEmissionBase<V3,S3>
     ::getRadiance(void) const
 {
   return mRadiance;
 } // end HemisphericalEmissionBase::getRadiance()
 
-template<typename V3, typename S3, typename DG>
-  const S3 HemisphericalEmissionBase<V3,S3,DG>
+template<typename V3, typename S3>
+  const S3 HemisphericalEmissionBase<V3,S3>
     ::getRadiosity(void) const
 {
   S3 result = PI * getRadiance();
@@ -39,15 +39,8 @@ template<typename V3, typename S3, typename DG>
   return result;
 } // end HemisphericalEmissionBase::getRadiosity()
 
-template<typename V3, typename S3, typename DG>
-  S3 HemisphericalEmissionBase<V3,S3,DG>
-    ::evaluate(const V3 &wo, const DG &dg) const
-{
-  return evaluate(wo, dg.getNormal());
-} // end HemisphericalEmissionBase::evaluate()
-
-template<typename V3, typename S3, typename DG>
-  S3 HemisphericalEmissionBase<V3,S3,DG>
+template<typename V3, typename S3>
+  S3 HemisphericalEmissionBase<V3,S3>
     ::evaluate(const V3 &wo,
                const V3 &normal) const
 {
@@ -64,5 +57,16 @@ template<typename V3, typename S3, typename DG>
   } // end if
 
   return result;
+} // end HemisphericalEmissionBase::evaluate()
+
+template<typename V3, typename S3>
+  S3 HemisphericalEmissionBase<V3,S3>
+    ::evaluate(const V3 &wo,
+               const V3 &point,
+               const V3 &tangent,
+               const V3 &binormal,
+               const V3 &normal) const
+{
+  return evaluate(wo,normal);
 } // end HemisphericalEmissionBase::evaluate()
 

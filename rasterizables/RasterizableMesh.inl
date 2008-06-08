@@ -26,6 +26,17 @@ template<typename MeshParentType>
 } // end RasterizableMesh::RasterizableMesh()
 
 template<typename MeshParentType>
+  RasterizableMesh<MeshParentType>
+    ::RasterizableMesh(const std::vector<Point> &points,
+                       const std::vector<ParametricCoordinates> &parametrics,
+                       const std::vector<Normal> &normals,
+                       const std::vector<typename Parent0::Triangle> &triangles)
+      :Parent0(points,parametrics,normals,triangles),Parent1()
+{
+  ;
+} // end RasterizableMesh::RasterizableMesh()
+
+template<typename MeshParentType>
   void RasterizableMesh<MeshParentType>
     ::rasterize(void)
 {
@@ -37,24 +48,20 @@ template<typename MeshParentType>
   const Mesh::PointList &points = Parent0::getPoints();
   const Mesh::NormalList &normals = Parent0::getNormals();
   glBegin(GL_TRIANGLES);
+  size_t triIndex = 0;
   for(Mesh::TriangleList::const_iterator t = triangles.begin();
       t != triangles.end();
-      ++t)
+      ++t, ++triIndex)
   {
-    if(normals.empty())
+    if(!Parent0::mInterpolateNormals)
     {
       // create a face normal
-      Vector e1 = points[(*t)[1]] - points[(*t)[0]];
-      Vector e2 = points[(*t)[2]] - points[(*t)[0]];
-
-      Normal n = e1.cross(e2);
-      n = n.normalize();
-      glNormal3fv(n);
+      glNormal3fv(normals[triIndex]);
     } // end if
 
     for(int i = 0; i < 3; ++i)
     {
-      if(!normals.empty())
+      if(Parent0::mInterpolateNormals)
       {
         glNormal3fv(normals[(*t)[i]]);
       } // end if

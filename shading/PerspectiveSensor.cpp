@@ -30,7 +30,7 @@ Spectrum PerspectiveSensor
            float &pdf,
            bool &delta) const
 {
-  return Parent1::sample(dg,u0,u1,u2,ws,pdf,delta);
+  return Parent1::sample(dg.getPoint(),dg.getTangent(),dg.getBinormal(),dg.getNormal(),u0,u1,u2,ws,pdf,delta);
 } // end PerspectiveSensor::sample()
 
 void PerspectiveSensor
@@ -39,20 +39,20 @@ void PerspectiveSensor
            float &u0,
            float &u1) const
 {
-  return Parent1::invert(w,dg,u0,u1);
+  return Parent1::invert(w,dg.getPoint(),dg.getTangent(),dg.getBinormal(),dg.getNormal(),u0,u1);
 } // end PerspectiveSensor::invert()
 
 float PerspectiveSensor
   ::evaluatePdf(const Vector &ws,
                 const DifferentialGeometry &dg) const
 {
-  return Parent1::evaluatePdf(ws,dg);
+  return Parent1::evaluatePdf(ws,dg.getPoint(),dg.getTangent(),dg.getBinormal(),dg.getNormal());
 } // end PerspectiveSensor::evaluatePdf()
 
 Spectrum PerspectiveSensor
   ::evaluate(const Vector &ws,
              const DifferentialGeometry &dg) const
 {
-  return Parent1::evaluate(ws,dg);
+  return Parent1::evaluate(ws,dg.getPoint(),dg.getTangent(),dg.getBinormal(),dg.getNormal());
 } // end PerspectiveSensor::evaluate()
 

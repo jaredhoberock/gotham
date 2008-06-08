@@ -1,5 +1,6 @@
-scattering(Spectrum Kr = Spectrum::white())
+scattering(Spectrum Kr = Spectrum::white(),
+           float eta = 2.485f)
 {
-  F = mirror(Kr, 2.485f);
+  F = mirror(Kr, eta);
 } // end scattering
 

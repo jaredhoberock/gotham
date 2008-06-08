@@ -67,6 +67,9 @@ class ShadingContext
 
     ScatteringDistributionFunction *transparent(const Spectrum &Kt);
 
+    ScatteringDistributionFunction *composite(ScatteringDistributionFunction *f0,
+                                              ScatteringDistributionFunction *f1);
+
     ScatteringDistributionFunction *uber(const Spectrum &Kd,
                                          const Spectrum &Ks,
                                          const float uShininess,

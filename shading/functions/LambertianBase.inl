@@ -11,8 +11,8 @@
 #define INV_PI 0.318309886f
 #endif // INV_PI
 
-template<typename V3, typename S3, typename DG>
-  LambertianBase<V3,S3,DG>
+template<typename V3, typename S3>
+  LambertianBase<V3,S3>
     ::LambertianBase(const Spectrum &albedo)
       :mAlbedo(albedo)
 {
@@ -23,17 +23,8 @@ template<typename V3, typename S3, typename DG>
   mAlbedoOverPi.z *= INV_PI;
 } // end LambertianBase::LambertianBase()
 
-template<typename V3, typename S3, typename DG>
-  S3 LambertianBase<V3,S3,DG>
-    ::evaluate(const V3 &wo,
-               const DG &dg,
-               const V3 &wi) const
-{
-  return evaluate(wo, dg.getNormal(), wi);
-} // end LambertianBase::evaluate()
-
-template<typename V3, typename S3, typename DG>
-  S3 LambertianBase<V3,S3,DG>
+template<typename V3, typename S3>
+  S3 LambertianBase<V3,S3>
     ::evaluate(const V3 &wo,
                const V3 &normal,
                const V3 &wi) const
@@ -51,17 +42,20 @@ template<typename V3, typename S3, typename DG>
   return result;
 } // end LambertianBase::evaluate()
 
-template<typename V3, typename S3, typename DG>
-  const S3 &LambertianBase<V3,S3,DG>
+template<typename V3, typename S3>
+  const S3 &LambertianBase<V3,S3>
     ::getAlbedo(void) const
 {
   return mAlbedo;
 } // end LambertianBase::getAlbedo()
 
-template<typename V3, typename S3, typename DG>
-  S3 LambertianBase<V3,S3,DG>
+template<typename V3, typename S3>
+  S3 LambertianBase<V3,S3>
     ::sample(const Vector &wo,
-             const DifferentialGeometry &dg,
+             const Vector &point,
+             const Vector &tangent,
+             const Vector &binormal,
+             const Vector &normal,
              const float u0,
              const float u1,
              const float u2,
@@ -70,14 +64,11 @@ template<typename V3, typename S3, typename DG>
              bool &delta,
              unsigned int &component) const
 {
-  delta = false;
-  component = 0;
-  Mappings<V3>::unitSquareToCosineHemisphere(u0, u1, dg.getTangent(), dg.getBinormal(), dg.getNormal(), wi, pdf);
-  return evaluate(wo, dg, wi);
+  return sample(wo,tangent,binormal,normal,u0,u1,u2,wi,pdf,delta,component);
 } // end LambertianBase::sample()
 
-template<typename V3, typename S3, typename DG>
-  S3 LambertianBase<V3,S3,DG>
+template<typename V3, typename S3>
+  S3 LambertianBase<V3,S3>
     ::sample(const Vector &wo,
              const Vector &tangent,
              const Vector &binormal,
@@ -95,4 +86,27 @@ template<typename V3, typename S3, typename DG>
   Mappings<V3>::unitSquareToCosineHemisphere(u0, u1, tangent, binormal, normal, wi, pdf);
   return evaluate(wo, normal, wi);
 } // end LambertianBase::sample()
+
+template<typename V3, typename S3>
+  float LambertianBase<V3,S3>
+    ::evaluatePdf(const Vector &wo,
+                  const Vector &point,
+                  const Vector &tangent,
+                  const Vector &binormal,
+                  const Vector &normal,
+                  const Vector &wi) const
+{
+  return evaluatePdf(wo,tangent,binormal,normal,wi);
+} // end LambertianBase::evaluatePdf()
+
+template<typename V3, typename S3>
+  float LambertianBase<V3,S3>
+    ::evaluatePdf(const Vector &wo,
+                  const Vector &tangent,
+                  const Vector &binormal,
+                  const Vector &normal,
+                  const Vector &wi) const
+{
+  return Mappings<V3>::evaluateCosineHemispherePdf(wi,normal);
+} // end LambertianBase::evaluatePdf()
 

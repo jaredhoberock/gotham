@@ -357,17 +357,18 @@ template<typename Scalar, size_t N>
   inline Vector<Scalar,N> saturate(const Vector<Scalar,N> &v);
 
 /*! \fn reflect
- *  \brief Reflect a Vector around another.
- *  \param ref The reference Vector.
- *  \param v The Vector to reflect.
+ *  \brief Reflect a vector around another.
+ *  \param v0 The reference vector.
+ *  \param v1 The vector to reflect.
+ *  \return v1 reflected about v0.
  */
 template<typename Scalar, size_t N>
-  inline Vector<Scalar,N> reflect(const Vector<Scalar,N> &ref,
-                                  const Vector<Scalar,N> &v);
+  inline Vector<Scalar,N> reflect(const Vector<Scalar,N> &v0, const Vector<Scalar,N> &v1);
 
 /*! \fn normalize
- *  \brief normalize for Vetors.
- *  \return v.normalize().
+ *  \brief Returns a unit vector parallel to a given vector.
+ *  \param v The vector of interest.
+ *  \return The normalized version of v.
  */
 template<typename Scalar, size_t N>
   inline Vector<Scalar,N> normalize(const Vector<Scalar,N> &v);
@@ -427,6 +428,7 @@ template<>
 } // end namespace gpcpu
 
 #include "Vector.inl"
+#include "Vector2.h"
 #include "Vector3.h"
 
 namespace gpcpu

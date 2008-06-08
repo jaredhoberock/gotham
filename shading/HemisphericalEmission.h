@@ -13,7 +13,7 @@
 
 class HemisphericalEmission
   : public ScatteringDistributionFunction,
-    public HemisphericalEmissionBase<Vector,Spectrum,DifferentialGeometry>
+    public HemisphericalEmissionBase<Vector,Spectrum>
 {
   public:
     /*! \typedef Parent0
@@ -24,7 +24,7 @@ class HemisphericalEmission
     /*! \typedef Parent1
      *  \brief Shorthand.
      */
-    typedef HemisphericalEmissionBase<Vector,Spectrum,DifferentialGeometry> Parent1;
+    typedef HemisphericalEmissionBase<Vector,Spectrum> Parent1;
 
     /*! Constructor accepts a radiance.
      *  \param radiosity The sum of radiance emitted from this

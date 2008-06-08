@@ -116,6 +116,16 @@ ScatteringDistributionFunction *ShadingContext
 } // end ShadingContext::transparent()
 
 ScatteringDistributionFunction *ShadingContext
+  ::composite(ScatteringDistributionFunction *f0,
+              ScatteringDistributionFunction *f1)
+{
+  CompositeDistributionFunction *c = new(mAllocator) CompositeDistributionFunction();
+  *c += f0;
+  *c += f1;
+  return c;
+} // end ShadingContext::composite()
+
+ScatteringDistributionFunction *ShadingContext
   ::uber(const Spectrum &Kd,
          const Spectrum &Ks,
          const float uShininess,
