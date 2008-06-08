@@ -1,0 +1,8 @@
+scattering(Spectrum Kd = Spectrum::white(),
+           float freq = 1.0f)
+{
+  float n = 0.5f*(snoise(freq * P) + 1.0f);
+  Spectrum c(n,n,n);
+  F = diffuse(c);
+} // end scattering
+

@@ -1,0 +1,47 @@
+#!/usr/bin/env gotham
+
+from api import *
+
+Attribute("path:sampler", "kajiya")
+Attribute("path:maxlength", "10")
+
+Material('noise', 'freq', 10)
+points = [-1.0, -1.0, 0,
+           1.0, -1.0, 0,
+           1.0,  1.0, 0,
+          -1.0,  1.0, 0]
+triangles = [0, 1, 2,
+             0, 2, 3]
+Mesh(points, triangles)
+
+# put a dim light behind the camera
+Material('light', 'power', (20,20,20))
+points = [ 1.0, -1.0, 3,
+          -1.0, -1.0, 3,
+          -1.0,  1.0, 3,
+           1.0,  1.0, 3]
+Mesh(points, triangles)
+
+# put a very bright light behind the quad
+Material('light', 'power', (2000000,2000000,2000000))
+points = [-1.0, -1.0, -3,
+           1.0, -1.0, -3,
+           1.0,  1.0, -3,
+          -1.0,  1.0, -3]
+Mesh(points, triangles)
+
+(w,h) = (512,512)
+
+PushMatrix()
+# why is 1.75 the magic number?
+Translate(0,0,1.75)
+aspect = float(w) / h
+Camera(aspect, 60.0, 0.0)
+PopMatrix()
+
+Attribute("renderer:algorithm", 'debug')
+#Attribute('viewer', False)
+Attribute('renderer:subsystem', 'CudaGotham')
+Attribute('renderer:threads', w*h)
+Render((w,h), 4)
+
