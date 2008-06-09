@@ -45,24 +45,6 @@ template<typename V3, typename S3>
              bool &delta,
              unsigned int &component) const
 {
-  return sample(wo,normal,wi,pdf,delta,component);
-} // end SpecularTransmissionBase::sample()
-
-template<typename V3, typename S3>
-  S3 SpecularTransmissionBase<V3,S3>
-    ::sample(const Vector &wo,
-             const Vector &point,
-             const Vector &tangent,
-             const Vector &binormal,
-             const Vector &normal,
-             const float u0,
-             const float u1,
-             const float u2,
-             Vector &wi,
-             float &pdf,
-             bool &delta,
-             unsigned int &component) const
-{
   delta = true;
   component = 0;
   Spectrum result;
@@ -119,6 +101,24 @@ template<typename V3, typename S3>
   } // end if
 
   return result;
+} // end SpecularTransmissionBase::sample()
+
+template<typename V3, typename S3>
+  S3 SpecularTransmissionBase<V3,S3>
+    ::sample(const Vector &wo,
+             const Vector &point,
+             const Vector &tangent,
+             const Vector &binormal,
+             const Vector &normal,
+             const float u0,
+             const float u1,
+             const float u2,
+             Vector &wi,
+             float &pdf,
+             bool &delta,
+             unsigned int &component) const
+{
+  return sample(wo,normal,wi,pdf,delta,component);
 } // end SpecularTransmissionBase::sample()
 
 template<typename V3, typename S3>
