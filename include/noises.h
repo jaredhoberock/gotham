@@ -32,6 +32,11 @@ inline Vector vsnoise(const Point &x)
                 snoise(x + Point(2,2,2)));
 } // end vsnoise()
 
+inline Vector vsnoise(const float x, const float y = 0, const float z = 0)
+{
+  return vsnoise(Point(x,y,z));
+} // end vsnoise()
+
 #ifndef FILTLOW
 #  define FILTLOW 0.2
 #endif

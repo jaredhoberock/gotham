@@ -54,6 +54,10 @@ class ShadingInterface
     virtual ScatteringDistributionFunction *mirror(const Spectrum &Kr,
                                                    const float eta) = 0;
 
+    virtual ScatteringDistributionFunction *reflection(const Spectrum &Kr,
+                                                       const float etai,
+                                                       const float etat) = 0;
+
     virtual ScatteringDistributionFunction *refraction(const Spectrum &Kt,
                                                        const float etai,
                                                        const float etat) = 0;

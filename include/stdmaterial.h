@@ -60,6 +60,13 @@ inline ScatteringDistributionFunction *mirror(const Spectrum &Kr,
   return gContext->mirror(Kr, eta);
 } // end mirror()
 
+inline ScatteringDistributionFunction *reflection(const Spectrum &Kr,
+                                                  const float etai, 
+                                                  const float etat)
+{
+  return gContext->reflection(Kr,etai,etat);
+} // end reflection()
+
 inline ScatteringDistributionFunction *refraction(const Spectrum &Kr,
                                                   const float etai,
                                                   const float etat)

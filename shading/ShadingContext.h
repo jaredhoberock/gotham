@@ -61,6 +61,10 @@ class ShadingContext
     ScatteringDistributionFunction *mirror(const Spectrum &Kr,
                                            const float eta);
 
+    ScatteringDistributionFunction *reflection(const Spectrum &Kr,
+                                               const float etai,
+                                               const float etat);
+
     ScatteringDistributionFunction *refraction(const Spectrum &Kt,
                                                const float etai,
                                                const float etat);

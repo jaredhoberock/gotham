@@ -102,6 +102,14 @@ ScatteringDistributionFunction *ShadingContext
 } // end ShadingContext::mirror()
 
 ScatteringDistributionFunction *ShadingContext
+  ::reflection(const Spectrum &Kr,
+               const float etai,
+               const float etat)
+{
+  return new(mAllocator) SpecularReflection(Kr, etai, etat, mAllocator);
+} // end ShadingContext::reflection()
+
+ScatteringDistributionFunction *ShadingContext
   ::refraction(const Spectrum &Kt,
                const float etai,
                const float etat)

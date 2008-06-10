@@ -13,11 +13,16 @@
 
 #include "stdmaterial.h"
 #include "noises.h"
-#include "patterns.h"
 
 #ifndef PI
 #define PI 3.14159265f
 #endif // PI
+
+template<typename T>
+  inline T clamp(const T &v, const T &m, const T &M)
+{
+  return v < m ? m : ((v > M) ? M : v);
+} // end clamp()
 
 template<typename T>
   inline T mix(const T &x, const T &y, float alpha)
@@ -59,6 +64,8 @@ inline Spectrum tex2D(const TextureHandle texture,
 {
   return gContext->tex2D(texture, u, v);
 } // end tex2D()
+
+#include "patterns.h"
 
 #endif // STDSHADER_H
 
