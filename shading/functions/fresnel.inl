@@ -14,7 +14,7 @@ float evaluateFresnelDielectric(const float ei,
   // start with sint
   float sint = 1.0f - cosi*cosi;
   sint = sint < 0 ? 0 : sint;
-  sint = (et/ei) * sqrtf(sint);
+  sint = (ei/et) * sqrtf(sint);
 
   // handle total internal reflection
   if(sint > 1) return 1;
@@ -23,7 +23,7 @@ float evaluateFresnelDielectric(const float ei,
   cost = cost < 0 ? 0 : cost;
   cost = sqrtf(cost);
 
-  return evaluateFresnelDielectric(ei,et,cosi,cost);
+  return evaluateFresnelDielectric(ei,et,fabs(cosi),cost);
 } // end evaluateFresnelDielectric()
 
 float evaluateFresnelDielectric(const float ei,
