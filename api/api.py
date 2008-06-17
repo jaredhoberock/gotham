@@ -359,7 +359,6 @@ class PyGotham:
           c[2] + near * look[2] - aspect * right[2] - up[2])
     self.material('perspective',
                   'aspect',aspect,
-                  'fovy',fovyRadians,
                   'lowerLeft', ll)
     # name the camera
     self.attribute("name", "camera")

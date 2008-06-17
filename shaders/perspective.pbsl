@@ -1,4 +1,4 @@
-sensor(float aspect, float fovy, Point lowerLeft, Spectrum response = Spectrum(1,1,1))
+sensor(float aspect, Point lowerLeft, Spectrum response = Spectrum(1,1,1))
 {
   // B is equivalent to a camera's 'right' direction
   // T is equivalent to a camera's 'up' direction

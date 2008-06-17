@@ -15,8 +15,8 @@ template<typename V3, typename S3>
 template<typename V3, typename S3>
   PerspectiveSensorBase<V3,S3>
     ::PerspectiveSensorBase(const Spectrum &response,
-                        const float aspect,
-                        const Point &origin)
+                            const float aspect,
+                            const Point &origin)
     :mAspectRatio(aspect),
      mInverseWindowSurfaceArea(1.0f/(2.0f*2.0f*aspect)),
      mWindowOrigin(origin),

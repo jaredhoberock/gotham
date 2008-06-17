@@ -160,11 +160,6 @@ template<typename V3, typename S3>
                              Point &p,
                              float &pdf) const;
 
-    /*! A PerspectiveSensor has a vertical field of view expressed
-     *  in radians.
-     */
-    float mFovY;
-
     /*! A PerspectiveSensor has an aspect ratio: width / height of the
      *  sensor window.
      */
