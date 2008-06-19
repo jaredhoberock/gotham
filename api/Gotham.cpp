@@ -31,8 +31,8 @@
 #include "../importance/ImportanceApi.h"
 #include "../renderers/RendererApi.h"
 
-#define USE_QGLVIEWER 0
-//#define USE_QGLVIEWER 1
+//#define USE_QGLVIEWER 0
+#define USE_QGLVIEWER 1
 
 // choose which viewer base class to use before this
 // #include
@@ -535,6 +535,10 @@ void Gotham
 
     // transform by the matrix on the top of the stack
     norms.back() = mMatrixStack.back()(norms.back());
+
+    // XXX should the transformation normalize these?
+    //     or should we do this here?
+    norms.back() = norms.back().normalize();
 
     //// XXX do we need to flip these?
     //if(reverse)
