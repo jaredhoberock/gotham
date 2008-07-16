@@ -141,16 +141,23 @@ HaltCriterion *HaltCriterion
     } // end try
     catch(...)
     {
-      // try to convert a single integer
-      size_t xStrata = lexical_cast<size_t>(a->second);
-      spp = tuple<size_t,size_t>(xStrata,xStrata);
+      try
+      {
+        // try to convert a single integer
+        size_t xStrata = lexical_cast<size_t>(a->second);
+        spp = tuple<size_t,size_t>(xStrata,xStrata);
+      } // end try
+      catch(bad_lexical_cast &e)
+      {
+        std::cerr << "HaltCriterion::createCriterion(): Warning: Couldn't interpret " << a->second << " as samples per pixel (xStrata,yStrata)." << std::endl;
+      } // end catch
     } // end catch
 
     // setting samples per pixel automatically overrides the target function
     targetFunctionName = "samples";
 
     // target based on number of strata per pixel
-    target = spp.get<0>() * spp.get<0>() * numPixels;
+    target = spp.get<0>() * spp.get<1>() * numPixels;
   } // end if
 
   HaltCriterion *result = 0;
