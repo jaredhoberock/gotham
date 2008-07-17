@@ -1,5 +1,5 @@
 #!/usr/bin/env gotham
-import api
+from api import *
 
 # set up a unit square we can use for the walls of the box
 # four vertices
@@ -137,7 +137,7 @@ Camera(float(w) / h, 60.0, 0.01)
 PopMatrix()
 
 # use 4x4 samples per pixel
-Attribute("renderer:spp", (4,4))
+Attribute("renderer:spp", 4)
 
 # finally, tell gotham to render
 Render()
