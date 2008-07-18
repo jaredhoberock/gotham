@@ -50,6 +50,9 @@ void Renderer
 void Renderer
   ::preprocess(void)
 {
+  // preprocess the shading context
+  mShadingContext->preprocess();
+
   // preprocess the scene
   // XXX now the design is broken
   //     should we assume a Renderer
