@@ -1,5 +1,6 @@
 scattering(Spectrum Ks, float shininess, Spectrum Kr, float eta)
 {
-  F = uber(Ks, shininess, Kr, eta);
+  F = composite(glossy(Ks, eta, shininess),
+                mirror(Kr, eta));
 } // end scattering
 
