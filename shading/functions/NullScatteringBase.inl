@@ -6,8 +6,8 @@
 #include "NullScatteringBase.h"
 #include "../../geometry/Mappings.h"
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::evaluate(void) const
 {
   S3 result;
@@ -18,8 +18,8 @@ template<typename V3, typename S3>
   return result;
 } // end NullScatteringBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::evaluate(const Vector &wo,
                const Vector &normal,
                const Vector &wi) const
@@ -27,8 +27,8 @@ template<typename V3, typename S3>
   return evaluate();
 } // end NullScatteringBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::evaluate(const Vector &wo,
                const Vector &point,
                const Vector &tangent,
@@ -38,8 +38,8 @@ template<typename V3, typename S3>
   return evaluate();
 } // end NullScatteringBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::sample(const Vector &point,
              const Vector &tangent,
              const Vector &binormal,
@@ -49,15 +49,15 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   component = 0;
   return sample(tangent,binormal,normal,u0,u1,u2,wi,pdf,delta);
 } // end NullScatteringBase::sample()
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &point,
              const Vector &tangent,
@@ -68,14 +68,14 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   return sample(point,tangent,binormal,normal,u0,u1,u2,wi,pdf,delta,component);
 } // end NullScatteringBase::sample()
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::sample(const Vector &tangent,
              const Vector &binormal,
              const Vector &normal,
@@ -84,7 +84,7 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   delta = false;
@@ -93,8 +93,8 @@ template<typename V3, typename S3>
   return evaluate();
 } // end NullScatteringBase::sample()
 
-template<typename V3, typename S3>
-  S3 NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 NullScatteringBase<V3,S3,Boolean>
     ::sample(const Vector &tangent,
              const Vector &binormal,
              const Vector &normal,
@@ -103,15 +103,15 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta) const
+             Boolean &delta) const
 {
   delta = false;
   Mappings<V3>::unitSquareToCosineHemisphere(u0, u1, tangent, binormal, normal, wi, pdf);
   return evaluate();
 } // end NullScatteringBase::sample()
 
-template<typename V3, typename S3>
-  float NullScatteringBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float NullScatteringBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &point,
                   const Vector &tangent,

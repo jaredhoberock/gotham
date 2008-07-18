@@ -12,8 +12,8 @@
 #define INV_TWOPI (1.0f / (2.0f * M_PI))
 #endif // INV_TWOPI
 
-template<typename V3, typename S3>
-  PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  PhongReflectionBase<V3,S3,Boolean>
     ::PhongReflectionBase(const Spectrum &r,
                           const float eta,
                           const float exponent)
@@ -23,8 +23,8 @@ template<typename V3, typename S3>
   ;
 } // end PhongReflectionBase::PhongReflectionBase()
 
-template<typename V3, typename S3>
-  PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  PhongReflectionBase<V3,S3,Boolean>
     ::PhongReflectionBase(const Spectrum &r,
                           const float etai,
                           const float etat,
@@ -34,8 +34,8 @@ template<typename V3, typename S3>
   ;
 } // end PhongReflectionBase::PhongReflectionBase()
 
-template<typename V3, typename S3>
-  S3 PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 PhongReflectionBase<V3,S3,Boolean>
     ::evaluate(const Vector &wo,
                const Vector &normal,
                const Vector &wi) const
@@ -83,8 +83,8 @@ template<typename V3, typename S3>
   return result;
 } // end PhongReflectionBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 PhongReflectionBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &point,
              const Vector &tangent,
@@ -95,14 +95,14 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &index) const
 {
   return sample(wo,tangent,binormal,normal,u0,u1,u2,wi,pdf,delta,index);
 } // end PhongReflection::sample()
 
-template<typename V3, typename S3>
-  S3 PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 PhongReflectionBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &tangent,
              const Vector &binormal,
@@ -112,7 +112,7 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &index) const
 {
   delta = false;
@@ -173,8 +173,8 @@ template<typename V3, typename S3>
   return result;
 } // end PhongReflection::sample()
 
-template<typename V3, typename S3>
-  float PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float PhongReflectionBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &point,
                   const Vector &tangent,
@@ -185,8 +185,8 @@ template<typename V3, typename S3>
   return evaluatePdf(wo,tangent,binormal,normal,wi);
 } // end PhongReflectionBase::evaluatePdf()
 
-template<typename V3, typename S3>
-  float PhongReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float PhongReflectionBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &tangent,
                   const Vector &binormal,

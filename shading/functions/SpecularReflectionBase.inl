@@ -6,8 +6,8 @@
 #include "SpecularReflectionBase.h"
 #include "fresnel.h"
 
-template<typename V3, typename S3>
-  SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  SpecularReflectionBase<V3,S3,Boolean>
     ::SpecularReflectionBase(const Spectrum &r,
                              const float eta)
       :mReflectance(r),mEtai(0),mEtat(eta),
@@ -16,8 +16,8 @@ template<typename V3, typename S3>
   ;
 } // end PhongReflectionBase::PhongReflectionBase()
 
-template<typename V3, typename S3>
-  SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  SpecularReflectionBase<V3,S3,Boolean>
     ::SpecularReflectionBase(const Spectrum &r,
                              const float etai,
                              const float etat)
@@ -26,8 +26,8 @@ template<typename V3, typename S3>
   ;
 } // end PhongReflectionBase::PhongReflectionBase()
 
-template<typename V3, typename S3>
-  S3 SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularReflectionBase<V3,S3,Boolean>
     ::evaluate(void) const
 {
   S3 result;
@@ -37,8 +37,8 @@ template<typename V3, typename S3>
   return result;
 } // end SpecularReflectionBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularReflectionBase<V3,S3,Boolean>
     ::evaluate(const Vector &wo,
                const Vector &normal,
                const Vector &wi) const
@@ -46,13 +46,13 @@ template<typename V3, typename S3>
   return evaluate();
 } // end SpecularReflectionBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularReflectionBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &normal,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   delta = true;
@@ -92,8 +92,8 @@ template<typename V3, typename S3>
   return result / fabs(dot(normal,wi));
 } // end SpecularReflectionBase::sample()
 
-template<typename V3, typename S3>
-  S3 SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularReflectionBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &point,
              const Vector &tangent,
@@ -104,14 +104,14 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   return sample(wo,normal,wi,pdf,delta,component);
 } // end SpecularReflectionBase::sample()
 
-template<typename V3, typename S3>
-  float SpecularReflectionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float SpecularReflectionBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &point,
                   const Vector &tangent,

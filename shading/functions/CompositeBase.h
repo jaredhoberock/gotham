@@ -8,7 +8,7 @@
 #pragma once
 
 template<typename V3, typename S3,
-         typename F0, typename F1>
+         typename F0, typename F1, typename Boolean = bool>
   class CompositeBase
 {
   public:
@@ -45,7 +45,7 @@ template<typename V3, typename S3,
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
   protected:

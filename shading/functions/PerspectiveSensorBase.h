@@ -7,7 +7,7 @@
 
 #pragma once
 
-template<typename V3, typename S3>
+template<typename V3, typename S3, typename Boolean = bool>
   class PerspectiveSensorBase
 {
   public:
@@ -75,7 +75,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &ws,
                            float &pdf,
-                           bool &delta) const;
+                           Boolean &delta) const;
 
     /*! This method which samples this PerspectiveSensor's sensor window
      *  given a DifferentialGeometry, and two numbers.
@@ -103,7 +103,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &ws,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     /*! This method inverts this PerspectiveSensor's mapping

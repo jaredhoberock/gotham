@@ -7,7 +7,7 @@
 
 #pragma once
 
-template<typename V3, typename S3>
+template<typename V3, typename S3, typename Boolean = bool>
   class SpecularTransmissionBase
 {
   public:
@@ -56,7 +56,7 @@ template<typename V3, typename S3>
                            const Vector &normal,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     /*! This method is included to conform to a uniform interface for
@@ -87,7 +87,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     /*! This method returns 0.0f.

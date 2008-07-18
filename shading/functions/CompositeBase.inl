@@ -6,8 +6,9 @@
 #include "CompositeBase.h"
 
 template<typename V3, typename S3,
-         typename F0, typename F1>
-  CompositeBase<V3,S3,F0,F1>
+         typename F0, typename F1,
+         typename Boolean>
+  CompositeBase<V3,S3,F0,F1,Boolean>
     ::CompositeBase(const F0 &c0, const F1 &c1)
       :mComponent0(c0),mComponent1(c1)
 {
@@ -15,8 +16,9 @@ template<typename V3, typename S3,
 } // end CompositeBase::CompositeBase()
 
 template<typename V3, typename S3,
-         typename F0, typename F1>
-  S3 CompositeBase<V3,S3,F0,F1>
+         typename F0, typename F1,
+         typename Boolean>
+  S3 CompositeBase<V3,S3,F0,F1,Boolean>
     ::evaluate(const Vector &wo,
                const Vector &normal,
                const Vector &wi) const
@@ -25,8 +27,9 @@ template<typename V3, typename S3,
 } // end CompositeBase::evaluate()
 
 template<typename V3, typename S3,
-         typename F0, typename F1>
-  S3 CompositeBase<V3,S3,F0,F1>
+         typename F0, typename F1,
+         typename Boolean>
+  S3 CompositeBase<V3,S3,F0,F1,Boolean>
     ::sample(const Vector &wo,
              const Vector &tangent,
              const Vector &binormal,
@@ -36,7 +39,7 @@ template<typename V3, typename S3,
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   // select component

@@ -7,7 +7,7 @@
 
 #pragma once
 
-template<typename V3, typename S3>
+template<typename V3, typename S3, typename Boolean = bool>
   class LambertianBase
 {
   public:
@@ -58,7 +58,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     /*! This method samples this LambertianBase given a Wo,
@@ -86,7 +86,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     /*! This method evaluates the pdf of choosing direction wi

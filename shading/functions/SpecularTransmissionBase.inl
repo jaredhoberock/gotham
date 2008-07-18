@@ -6,8 +6,8 @@
 #include "SpecularTransmissionBase.h"
 #include "fresnel.h"
 
-template<typename V3, typename S3>
-  SpecularTransmissionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  SpecularTransmissionBase<V3,S3,Boolean>
     ::SpecularTransmissionBase(const Spectrum &t,
                                const float etai,
                                const float etat)
@@ -16,8 +16,8 @@ template<typename V3, typename S3>
   ;
 } // end SpecularTransmissionBase::SpecularTransmissionBase()
 
-template<typename V3, typename S3>
-  S3 SpecularTransmissionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularTransmissionBase<V3,S3,Boolean>
     ::evaluate(void) const
 {
   Spectrum result;
@@ -27,8 +27,8 @@ template<typename V3, typename S3>
   return result;
 } // end SpecularTransmissionBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 SpecularTransmissionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularTransmissionBase<V3,S3,Boolean>
     ::evaluate(const Vector &wo,
                const Vector &normal,
                const Vector &wi) const
@@ -36,13 +36,13 @@ template<typename V3, typename S3>
   return evaluate();
 } // end SpecularTransmissionBase::evaluate()
 
-template<typename V3, typename S3>
-  S3 SpecularTransmissionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularTransmissionBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &normal,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   delta = true;
@@ -55,7 +55,7 @@ template<typename V3, typename S3>
   pdf = 1.0f;
 
   float cosi = dot(wo,normal);
-  bool entering = cosi > 0;
+  Boolean entering = cosi > 0;
   float ei = mEtai, et = mEtat;
   if(!entering) 
   {
@@ -103,8 +103,8 @@ template<typename V3, typename S3>
   return result;
 } // end SpecularTransmissionBase::sample()
 
-template<typename V3, typename S3>
-  S3 SpecularTransmissionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 SpecularTransmissionBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &point,
              const Vector &tangent,
@@ -115,14 +115,14 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   return sample(wo,normal,wi,pdf,delta,component);
 } // end SpecularTransmissionBase::sample()
 
-template<typename V3, typename S3>
-  float SpecularTransmissionBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float SpecularTransmissionBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &point,
                   const Vector &tangent,

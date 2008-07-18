@@ -5,15 +5,15 @@
 
 #include "PerspectiveSensorBase.h"
 
-template<typename V3, typename S3>
-  PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  PerspectiveSensorBase<V3,S3,Boolean>
     ::PerspectiveSensorBase(void)
 {
   ;
 } // end PerspectiveSensorBase::PerspectiveSensorBase()
 
-template<typename V3, typename S3>
-  PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  PerspectiveSensorBase<V3,S3,Boolean>
     ::PerspectiveSensorBase(const Spectrum &response,
                             const float aspect,
                             const Point &origin)
@@ -25,8 +25,8 @@ template<typename V3, typename S3>
   ;
 } // end PerspectiveSensorBase::PerspectiveSensorBase()
 
-template<typename V3, typename S3>
-  void PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  void PerspectiveSensorBase<V3,S3,Boolean>
     ::set(const float aspect,
           const Point &origin)
 {
@@ -35,8 +35,8 @@ template<typename V3, typename S3>
   mInverseWindowSurfaceArea = (1.0f/(2.0f*2.0f*mAspectRatio));
 } // end PerspectiveSensorBase::set()
 
-template<typename V3, typename S3>
-  S3 PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 PerspectiveSensorBase<V3,S3,Boolean>
     ::sample(const Point &point,
              const Point &tangent,
              const Point &binormal,
@@ -46,15 +46,15 @@ template<typename V3, typename S3>
              const float u2,
              Vector &ws,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   component = 0;
   return sample(point,tangent,binormal,normal,u0,u1,u2,ws,pdf,delta);
 } // end PerspectiveSensorBase::sample()
 
-template<typename V3, typename S3>
-  S3 PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 PerspectiveSensorBase<V3,S3,Boolean>
     ::sample(const Point &point,
              const Point &tangent,
              const Point &binormal,
@@ -64,7 +64,7 @@ template<typename V3, typename S3>
              const float u2,
              Vector &ws,
              float &pdf,
-             bool &delta) const
+             Boolean &delta) const
 {
   delta = false;
   Point q;
@@ -89,8 +89,8 @@ template<typename V3, typename S3>
   return mResponse;
 } // end PerspectiveSensorBase::sample()
 
-template<typename V3, typename S3>
-  void PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  void PerspectiveSensorBase<V3,S3,Boolean>
     ::sampleWindow(const float u,
                    const float v,
                    const Vector &xAxis,
@@ -105,8 +105,8 @@ template<typename V3, typename S3>
   pdf = mInverseWindowSurfaceArea;
 } // end PerspectiveSensorBase::sampleWindow()
 
-template<typename V3, typename S3>
-  float PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float PerspectiveSensorBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &ws,
                   const Point &point,
                   const Vector &tangent,
@@ -146,8 +146,8 @@ template<typename V3, typename S3>
   return pdf;
 } // end PerspectiveSensorBase::evaluatePdf()
 
-template<typename V3, typename S3>
-  S3 PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 PerspectiveSensorBase<V3,S3,Boolean>
     ::evaluate(const Vector &ws,
                const Point &point,
                const Vector &tangent,
@@ -171,8 +171,8 @@ template<typename V3, typename S3>
   return result;
 } // end PerspectiveSensorBase::evaluate()
 
-template<typename V3, typename S3>
-  void PerspectiveSensorBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  void PerspectiveSensorBase<V3,S3,Boolean>
     ::invert(const Vector &w,
              const Point &point,
              const Vector &tangent,

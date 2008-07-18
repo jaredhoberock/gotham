@@ -6,7 +6,7 @@
 
 #pragma once
 
-template<typename V3, typename S3>
+template<typename V3, typename S3, typename Boolean = bool>
   class NullScatteringBase
 {
   public:
@@ -63,7 +63,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     inline Spectrum sample(const Vector &tangent,
@@ -74,7 +74,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta) const;
+                           Boolean &delta) const;
 
     inline Spectrum sample(const Vector &point,
                            const Vector &tangent,
@@ -85,7 +85,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     inline Spectrum sample(const Vector &wo,
@@ -98,7 +98,7 @@ template<typename V3, typename S3>
                            const float u2,
                            Vector &wi,
                            float &pdf,
-                           bool &delta,
+                           Boolean &delta,
                            unsigned int &component) const;
 
     /*! This method evaluates the pdf of choosing direction wi

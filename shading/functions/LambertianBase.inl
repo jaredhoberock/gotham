@@ -11,8 +11,8 @@
 #define INV_PI 0.318309886f
 #endif // INV_PI
 
-template<typename V3, typename S3>
-  LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  LambertianBase<V3,S3,Boolean>
     ::LambertianBase(const Spectrum &albedo)
       :mAlbedo(albedo)
 {
@@ -23,8 +23,8 @@ template<typename V3, typename S3>
   mAlbedoOverPi.z *= INV_PI;
 } // end LambertianBase::LambertianBase()
 
-template<typename V3, typename S3>
-  S3 LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 LambertianBase<V3,S3,Boolean>
     ::evaluate(const V3 &wo,
                const V3 &normal,
                const V3 &wi) const
@@ -42,15 +42,15 @@ template<typename V3, typename S3>
   return result;
 } // end LambertianBase::evaluate()
 
-template<typename V3, typename S3>
-  const S3 &LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  const S3 &LambertianBase<V3,S3,Boolean>
     ::getAlbedo(void) const
 {
   return mAlbedo;
 } // end LambertianBase::getAlbedo()
 
-template<typename V3, typename S3>
-  S3 LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 LambertianBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &point,
              const Vector &tangent,
@@ -61,14 +61,14 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   return sample(wo,tangent,binormal,normal,u0,u1,u2,wi,pdf,delta,component);
 } // end LambertianBase::sample()
 
-template<typename V3, typename S3>
-  S3 LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  S3 LambertianBase<V3,S3,Boolean>
     ::sample(const Vector &wo,
              const Vector &tangent,
              const Vector &binormal,
@@ -78,7 +78,7 @@ template<typename V3, typename S3>
              const float u2,
              Vector &wi,
              float &pdf,
-             bool &delta,
+             Boolean &delta,
              unsigned int &component) const
 {
   delta = false;
@@ -87,8 +87,8 @@ template<typename V3, typename S3>
   return evaluate(wo, normal, wi);
 } // end LambertianBase::sample()
 
-template<typename V3, typename S3>
-  float LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float LambertianBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &point,
                   const Vector &tangent,
@@ -99,8 +99,8 @@ template<typename V3, typename S3>
   return evaluatePdf(wo,tangent,binormal,normal,wi);
 } // end LambertianBase::evaluatePdf()
 
-template<typename V3, typename S3>
-  float LambertianBase<V3,S3>
+template<typename V3, typename S3, typename Boolean>
+  float LambertianBase<V3,S3,Boolean>
     ::evaluatePdf(const Vector &wo,
                   const Vector &tangent,
                   const Vector &binormal,
