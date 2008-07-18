@@ -237,6 +237,11 @@ class ShadingContext
      */
     const Texture *getTexture(const TextureHandle &h) const;
 
+    /*! This method is called prior to rendering.
+     *  \note Default implementation does nothing.
+     */
+    virtual void preprocess(void);
+
     /*! This method is called after rendering.
      *  \note Default implementation does nothing.
      */

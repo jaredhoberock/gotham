@@ -447,6 +447,12 @@ const Texture *ShadingContext
 } // end ShadingContext::getTexture()
 
 void ShadingContext
+  ::preprocess(void)
+{
+  ;
+} // end ShadingContext::preprocess()
+
+void ShadingContext
   ::postprocess(void)
 {
   ;
