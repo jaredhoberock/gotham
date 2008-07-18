@@ -204,8 +204,8 @@ template<typename S>
      *         to [0,1].
      */
     inline void saturate(void)
-      {x = std::max<Scalar>(0, std::min<Scalar>(1, x));
-       y = std::max<Scalar>(0, std::min<Scalar>(1, y));}
+      {x = __max<Scalar>(0, __min<Scalar>(1, x));
+       y = __max<Scalar>(0, __min<Scalar>(1, y));}
 
     /*! \fn posDot
      *  \brief Dot product where negative values
@@ -214,7 +214,7 @@ template<typename S>
      *  \return max(0, (*this) dot rhs)
      */
     inline Scalar posDot(const This &rhs) const
-      {return std::max<Scalar>(0, dot(rhs));}
+      {return __max<Scalar>(0, dot(rhs));}
 
     /*! \fn operator-
      *  \brief Unary negation.
@@ -284,7 +284,7 @@ template<typename S>
      *  \return The maximum element of this Vector.
      */
     inline Scalar maxElement(void) const
-      {return std::max<Scalar>(x, y);}
+      {return __max<Scalar>(x, y);}
 
     /*! \fn maxElementIndex
      *  \brief This method returns the index of the maximum element
