@@ -10,6 +10,7 @@
 
 class BoundingBox;
 class Ray;
+#include <string>
 #include "../include/DifferentialGeometry.h"
 #include "../include/Spectrum.h"
 #include "../geometry/Transform.h"
