@@ -39,9 +39,14 @@ aspect = float(w) / h
 Camera(aspect, 60.0, 0.0)
 PopMatrix()
 
+Attribute('viewer', False)
+
 Attribute("renderer:algorithm", 'debug')
-#Attribute('viewer', False)
+Attribute('record:outfile', 'testnoise.cpu.exr')
+Render((w,h), 4)
+
 Attribute('renderer:subsystem', 'CudaGotham')
 Attribute('renderer:threads', w*h)
+Attribute('record:outfile', 'testnoise.gpu.exr')
 Render((w,h), 4)
 

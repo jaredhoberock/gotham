@@ -1,0 +1,121 @@
+/////////////////////////////////////////////////////////////////////////////
+// oak.h - contains the oaktexture function, which is common to many
+//         shader which make wood grain patterns.  It looks very much
+//         like oak, and can also pass for ...
+//
+// Much of this is adapted from Apodaca & Gritz, "Advanced RenderMan",
+// Morgan-Kaufmann 1999.
+//
+/////////////////////////////////////////////////////////////////////////////
+// Copyright 2004 NVIDIA Corporation.  All Rights Reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// 
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimer in the
+//   documentation and/or other materials provided with the distribution.
+// * Neither the name of NVIDIA nor the names of its contributors
+//   may be used to endorse or promote products derived from this software
+//   without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// (This is the Modified BSD License)
+/////////////////////////////////////////////////////////////////////////////
+
+scattering (Spectrum Ks = Spectrum(0.25f, 0.25f, 0.25f),
+            float exponent = (1.0f / 0.2f),
+            Spectrum Clightwood = Spectrum(0.5f, 0.2f, 0.067f),
+            Spectrum Cdarkwood  = Spectrum(0.15f, 0.077f, 0.028f),
+            float ringy = 1.0f,
+            float ringfreq = 8.0f,
+            float ringunevenness = 0.3f,
+            float ringnoise = 0.02f,
+            float ringnoisefreq = 1.0f,
+            float trunkwobble = 0.15f,
+            float trunkwobblefreq = 0.025f,
+            float angularwobble = 1.0f,
+            float angularwobblefreq = 1.5f,
+            float grainy = 1.0f,
+            float grainfreq = 25.0f,
+            float shadingfreq = 1.0f)
+{
+  Point Pshad = shadingfreq * P;
+
+  float plank = floorf(Pshad.x / 0.20f);
+  float remainder = (Pshad.x / 0.20f) - plank;
+
+  float wood;
+
+  if(remainder > 0.025 && remainder < 0.975f)
+  {
+    // We shade based on Pshad, but we add several layers of warping:
+    // Some general warping of the domain
+    Vector offset = vectorFbm(Pshad*ringnoisefreq, 2, 4, 0.5f);
+    Point Pring = Pshad + ringnoise*offset;
+    // The trunk isn't totally steady xy as you go up in z
+    Pring += trunkwobble * snoise(Pshad.z*trunkwobblefreq) * Vector(1,1,0);
+
+    // Calculate the radius from the center.
+    float r = sqrtf(Pring.x*Pring.x + Pring.y*Pring.y) * ringfreq;
+    // Add some noise around the trunk
+    r += angularwobble * smoothstep(0.0f,5.0f,r)
+	   * snoise (angularwobblefreq*(Pring)*Vector(1,1,0.1));
+
+    // Now add some noise so all rings are not equal width
+    //float dr = filterwidth(r);
+    //r += ringunevenness*filteredsnoise(r,dr);
+    r += ringunevenness*snoise(r);
+
+    float inring = smoothpulsetrain (.1, .55, .7, .95, 1, r);
+
+    Point Pgrain = Pshad*grainfreq*Vector(1,1,.05);
+    float grain = 0;
+    float i, amp=1;
+    for (i = 0;  i < 2;  i += 1)
+    {
+      float g = snoise (Pgrain);
+      g *= (0.3 + 0.7*inring);
+      g = powf(clamp(0.8f - (g),0.0f,1.0f),2.0f);
+      g = grainy * smoothstep (0.5f, 1.0f, g);
+      if (i == 0) {
+          inring *= 1 - 0.4f;
+      }
+      grain = grain > g ? grain : g;
+      
+      Pgrain *= 2;
+      amp *= 0.5;
+    }
+
+    wood = mix (inring*ringy, 1.0f, grain);
+
+    Spectrum Clightwood1 = Clightwood + 0.2f * vsnoise(plank + 0.1f);
+    Spectrum Cdarkwood2 = Cdarkwood + 0.2f * vsnoise(plank + 0.2f);
+
+    //Spectrum Cwood = mix<Spectrum>(Spectrum(Clightwood, Cdarkwood, wood);
+    Spectrum Cwood = mix<Spectrum>(Clightwood1, Cdarkwood, wood);
+    //F = plastic(Cwood, (1.0f - 0.5f*wood)*Ks, exponent);
+    F = composite(diffuse(Cwood),
+                  glossy((1.0f - 0.5f*wood)*Ks, 1.5f, exponent));
+  }
+  else
+  {
+    F = diffuse(Spectrum(0,0,0));
+  } // end else
+
+} // end scattering()
+
