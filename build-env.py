@@ -31,9 +31,6 @@ def getDebugCPPFLAGS():
     result = ['-fPIC', '-g', '-Wall']
   return result;
 
-def getEmulationNVCCFLAGS():
-  return ['-deviceemu']
-
 def getIncludes():
   result = []
   # figure out the absolute path of this file
@@ -47,8 +44,7 @@ def getIncludes():
               'c:/dev/include/OpenEXR']
   elif os.name == 'posix':
     result = [includeMe0, includeMe1, '/usr/include/python2.5',
-              '/usr/include/OpenEXR',
-              '/usr/local/cuda/include']
+              '/usr/include/OpenEXR']
     result += ['/usr/include/qt4',
               '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',
               '/usr/include/qt4/QtGui', '/usr/include/qt4/QtXml', '/usr/include/qt4/QtOpenGL']
@@ -58,42 +54,20 @@ def GothamReleaseEnvironment(env):
   env.Append(CPPPATH = getIncludes())
   env.Append(CPPFLAGS = getReleaseCPPFLAGS())
 
-def GothamEmuReleaseEnvironment(env):
-  env.Append(CPPPATH = getIncludes())
-  env.Append(CPPFLAGS = getReleaseCPPFLAGS())
-  env.Append(NVCCFLAGS = getEmulationNVCCFLAGS())
-
 def GothamDebugEnvironment(env):
   env.Append(CPPPATH = getIncludes(),
              CPPFLAGS = getDebugCPPFLAGS())
-
-def GothamEmuDebugEnvironment(env):
-  env.Append(CPPPATH = getIncludes(),
-             CPPFLAGS = getDebugCPPFLAGS(),
-             NVCCFLAGS = getEmulationNVCCFLAGS())
 
 def GothamEnvironment():
   mode = 'release'
   env = Environment(tools = getTools())
 
-  # figure out the absolute path of this file
-  thisFile = inspect.getabsfile(GothamEnvironment)
-  # include the directory above the one containing this file
-  path = os.path.dirname(os.path.dirname(thisFile)) + '/cudascons'
-
-  # enable nvcc
-  env.Tool('nvcc', toolpath = [path])
-
   if ARGUMENTS.get('mode'):
     mode = ARGUMENTS['mode']
   if mode == 'release':
     GothamReleaseEnvironment(env)
-  elif mode == 'emurelease':
-    GothamEmuReleaseEnvironment(env)
   elif mode == 'debug':
     GothamDebugEnvironment(env)
-  elif mode == 'emudebug':
-    GothamEmuDebugEnvironment(env)
   else:
     raise ValueError, 'Unknown target mode "%s".' % mode
   return env
