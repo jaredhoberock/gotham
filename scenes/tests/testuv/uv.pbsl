@@ -1,0 +1,4 @@
+scattering(void)
+{
+  F = diffuse(Spectrum(UV.x, UV.y, 0));
+}
