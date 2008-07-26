@@ -18,7 +18,9 @@ template<typename Real, typename Real3>
                Real *pdf)
 {
   p[2] = static_cast<Real>(1.0) - static_cast<Real>(2.0) * u;
-  Real r = sqrt(std::max<Real>(0, static_cast<Real>(1.0) - p[2]*p[2]));
+  Real r = Real(1) - p[2]*p[2];
+  r = (r > 0) ? r : 0;
+  r = sqrt(r);
   Real phi = static_cast<Real>(2.0) * PI * v;
   p[0] = r * cos(phi);
   p[1] = r * sin(phi);

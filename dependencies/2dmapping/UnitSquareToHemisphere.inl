@@ -26,10 +26,10 @@ template<typename Real, typename Point3>
                Point3 &p,
                Real *pdf)
 {
-  // FIXME: kill these floats
-  p[2] = 1.0f - u;
-  Real r = sqrt(std::max<Real>(Real(0.000005), u*(2.0f - u)));
-  Real phi = 2.0f * PI * v;
+  p[2] = Real(1) - u;
+  Real r = u*(Real(2) - u);
+  r = (r > Real(0.000005)) ? r : Real(0.000005);
+  Real phi = Real(2) * PI * v;
   p[0] = r * cos(phi);
   p[1] = r * sin(phi);
 
@@ -45,13 +45,14 @@ template<typename Point3, typename Real>
                Real &u,
                Real &v)
 {
-  u = 1.0f - p[2];
-  float r = sqrt(std::max(0.000005f, 1.0f - u*u));
+  u = Real(1) - p[2];
+  float r = Real(1) - u*u;
+  r = (r > Real(0.000005)) ? r : Real(0.000005);
 
   float phi = atan2(p[1] / r, p[0] / r);
-  if(phi < 0.0f) phi += 2.0f * PI;
+  if(phi < 0) phi += Real(2) * PI;
 
-  v = phi / (2.0f * PI);
+  v = phi / (Real(2) * PI);
 } // end UnitSquareToHemisphere::inverse()
 
 template<typename Real, typename Real3>

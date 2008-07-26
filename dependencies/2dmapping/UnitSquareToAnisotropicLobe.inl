@@ -55,7 +55,7 @@ template<typename Real, typename Real3>
   } // end if
   else if(u < Real(0.5))
   {
-    sampleFirstQuadrant(Real(4) * (Real(0.5f) - u), v, nu, nv, phi, costheta);
+    sampleFirstQuadrant(Real(4) * (Real(0.5) - u), v, nu, nv, phi, costheta);
     phi = PI - phi;
   } // end else if
   else if(u < Real(0.75))
@@ -69,7 +69,8 @@ template<typename Real, typename Real3>
     phi = TWO_PI - phi;
   } // end else
 
-  float sintheta = sqrtf(std::max<Real>(0, Real(1) - costheta*costheta));
+  float sintheta = Real(1) - costheta*costheta;
+  sintheta = (sintheta > 0) ? sintheta : 0;
   p[0] = sintheta * cosf(phi);
   p[1] = sintheta * sinf(phi);
   p[2] = fabsf(costheta);

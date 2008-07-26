@@ -48,7 +48,9 @@ template<typename Real, typename Real3>
   // its important for z to never be exactly zero
   // because then the pdf == 0.0, which is supposed to
   // be impossible
-  p[2] = sqrt(std::max(0.000005f, 1.0f - p[0]*p[0] - p[1]*p[1]));
+  p[2] = Real(1) - p[0]*p[0] - p[1]*p[1];
+  p[2] = (p[2] > Real(0.000005)) ? p[2] : Real(0.000005);
+  p[2] = sqrt(p[2]);
 
   if(pdf != 0)
   {
@@ -85,6 +87,6 @@ template<typename Real, typename Real3>
   Real UnitSquareToCosineHemisphere<Real,Real3>
     ::normalizationConstant(void)
 {
-  return 1.5f * PI;
+  return Real(1.5) * PI;
 } // end UnitSquareToCosineHemisphere<Real,Real3>::normalizationConstant()
 
