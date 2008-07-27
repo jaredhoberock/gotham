@@ -4,6 +4,7 @@
  */
 
 #include "PathSampler.h"
+#include "../numeric/RandomSequence.h"
 
 void PathSampler
   ::constructHyperPoint(RandomSequence &s, HyperPoint &x)

@@ -11,7 +11,7 @@
 #include "../include/Spectrum.h"
 #include <boost/array.hpp>
 #include "Path.h"
-#include "../numeric/RandomSequence.h"
+class RandomSequence;
 
 class PathSampler
 {
