@@ -90,10 +90,12 @@ PopMatrix()
 
 Attribute('viewer', False)
 
-# use the cuda subsystem
-#Attribute("renderer:subsystem", 'CudaGotham')
-#Attribute('renderer:algorithm', 'debug')
+Attribute('record:outfile', 'testmarble.cpu.exr')
+Render()
 
-# finally, tell gotham to render
+# use the cuda subsystem
+Attribute("renderer:subsystem", 'CudaGotham')
+
+Attribute('record:outfile', 'testmarble.gpu.exr')
 Render()
 
