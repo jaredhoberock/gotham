@@ -90,12 +90,12 @@ PopMatrix()
 
 Attribute('viewer', False)
 
-Attribute('record:outfile', 'testmarble.cpu.exr')
+Attribute('record:outfile', 'testoak.cpu.exr')
 Render()
 
 # use the cuda subsystem
 Attribute("renderer:subsystem", 'CudaGotham')
 
-Attribute('record:outfile', 'testmarble.gpu.exr')
+Attribute('record:outfile', 'testoak.gpu.exr')
 Render()
 
