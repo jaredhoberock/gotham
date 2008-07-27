@@ -16,7 +16,6 @@ class ShadingContext;
 #define NOMINMAX
 #endif // WIN32
 
-#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
