@@ -107,7 +107,7 @@ class ShaderCompiler:
 
   def makeShaderStructDefinitionCode(self, componentName, parameters):
     # open the struct
-    result = 'struct %sParameters {\n' % componentName
+    result = 'struct %sParms {\n' % componentName
     # add a member for each parameter
     for parm in parameters:
       result += '  %s %s;\n' % (parm[0],parm[1])
@@ -174,7 +174,7 @@ class ShaderCompiler:
                const Vector &dpdv,
                const float area,
                const float invArea,
-               const %sParameters parms,
+               const %sParms parms,
                %s &%s)
 {
   // unpack parameters
@@ -191,6 +191,15 @@ class ShaderCompiler:
     # substitute
     result = result % (functionQualifiers, name, name, returnType, returnName, unpackParms, body)
     return result
+
+  def createPackParametersCode(self, name, parametersList):
+    # create a string which packs the parameters into a struct
+    packParms = "%sParms parms = {" % name
+    if len(parametersList) != 0:
+      for parm in parametersList:
+        packParms += " " + parm[1] +  ','
+    packParms += '};'
+    return packParms
 
   def createShaderCppCode(self, name, body, returnName, parametersList, type):
     # isolate the body of the shader into its own function
@@ -233,11 +242,7 @@ virtual ScatteringDistributionFunction *evaluate%s(ShadingInterface &context, co
   float invArea = dg.getInverseSurfaceArea();
 '''
     # create a string which packs the parameters into a struct
-    packParms = "%sParameters parms = {" % name
-    if len(parametersList) != 0:
-      for parm in parametersList:
-        packParms += " " + parm[1] +  ','
-    packParms += '};'
+    packParms = self.createPackParametersCode(name, parametersList)
 
     # substitute
     result = result % (name, unpackGeom, returnName, packParms, name, returnName, returnName) 
