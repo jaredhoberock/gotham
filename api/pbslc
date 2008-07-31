@@ -127,6 +127,16 @@ const Vector &dpdv = dg.getDPDV();
     if depth != 0:
       raise ValueError, "Error: EOF reached before end of function '%s'." % name
     return (parametersList, body)
+
+  def makeShaderStructDefinitionCode(self, componentName, parameters):
+    # open the struct
+    result = 'struct %sParameters {\n' % componentName
+    # add a member for each parameter
+    for parm in parameters:
+      result += '  %s %s;\n' % (parm[0],parm[1])
+    # close the struct
+    result += '};\n'
+    return result
   
   def makeShaderParameterCode(self, parameterType, parameterName):
     # declare the parameter
@@ -176,19 +186,86 @@ const Vector &dpdv = dg.getDPDV();
     return stripped
 
   def createShaderCppCode(self, name, globals, body, returnName, parametersList, type):
+    # isolate the body of the shader into its own function
     result = '''
-virtual ScatteringDistributionFunction *evaluate%s(ShadingInterface &context, const DifferentialGeometry &dg) const
+inline static void %sBody(ShadingInterface &context,
+                          const Point &P,
+                          const Normal &N,
+                          const Vector &T,
+                          const Vector &B,
+                          const ParametricCoordinates &UV,
+                          const Vector &dpdu,
+                          const Vector &dpdv,
+                          const float area,
+                          const float invArea,
+                          const %sParameters parms,
+                          ScatteringDistributionFunction *&%s)
 {
-  // globals follow
+  // unpack parameters
   %s
   // body follows
   %s
-  // return follows
+}
+'''
+    # create a string which unpacks the parameters
+    parmUnpack = ''
+    for parm in parametersList:
+      parmUnpack += '  const %s &%s = parms.%s;\n' % (parm[0], parm[1], parm[1])
+
+    # finish the shader body
+    result = result % (name, name, returnName, parmUnpack, body)
+
+    # create a method which unpacks geometry and calls the shader body
+    result += '''
+virtual ScatteringDistributionFunction *evaluate%s(ShadingInterface &context, const DifferentialGeometry &dg) const
+{
+  // set the context
+  gContext = &context;
+
+  // unpack differential geometry
+  %s
+
+  // declare the result
+  ScatteringDistributionFunction *%s;
+
+  // pack up the parameters
+  // XXX remove this step and just pass a member or something
+  %s
+
+  // call the body of the shader
+  %sBody(context, P, N, T, B, UV, dpdu, dpdv, area, invArea, parms, %s);
+
+  // return the result
   return %s;
 }
+'''
+    # create a string which unpacks differential geometry
+    unpackGeom = '''
+  const Point &P = dg.getPoint();
+  const Normal &N = dg.getNormal();
+  const Vector &T = dg.getTangent();
+  const Vector &B = dg.getBinormal();
+  const ParametricCoordinates &UV = dg.getParametricCoordinates();
+  const Vector &dpdu = dg.getDPDU();
+  const Vector &dpdv = dg.getDPDV();
+  float area = dg.getSurfaceArea();
+  float invArea = dg.getInverseSurfaceArea();
+'''
+    # create a string which packs the parameters into a struct
+    packParms = "%sParameters parms = {" % name
+    if len(parametersList) != 0:
+      for parm in parametersList:
+        packParms += " " + parm[1] +  ','
+    packParms += '};'
+
+    # substitute
+    result = result % (name, unpackGeom, returnName, packParms, name, returnName, returnName) 
+
+    # add a line which identifies this shader as its type
+    result += '''
 virtual bool is%s(void) const {return true;}
 '''
-    result = result % (name, globals, body, returnName, type)
+    result = result % (type)
     return result
 
   def createCppIncludeCode(self, scatteringParametersList, emissionParametersList, sensorParametersList):
@@ -270,6 +347,11 @@ ShadingInterface *gContext;
     compileMe += '{\n'
     compileMe += 'public:\n'
     compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % baseName
+    # encapsulate the parameters in structs
+    compileMe += self.makeShaderStructDefinitionCode('Scattering',scatteringParametersList)
+    compileMe += self.makeShaderStructDefinitionCode('Emission',emissionParametersList)
+    compileMe += self.makeShaderStructDefinitionCode('Sensor',sensorParametersList)
+    # add each method for doing the shading computations
     compileMe += scatteringString
     compileMe += emissionString
     compileMe += sensorString
