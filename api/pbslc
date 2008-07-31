@@ -13,29 +13,6 @@ import shutil
 import inspect
 
 class ShaderCompiler:
-  # define some global variables defined in all shaders
-  __globalCppVariables__ = '''
-gContext = &context;
-const Point &P = dg.getPoint();
-const Normal &N = dg.getNormal();
-const Vector &T = dg.getTangent();
-const Vector &B = dg.getBinormal();
-const ParametricCoordinates &UV = dg.getParametricCoordinates();
-const Vector &dpdu = dg.getDPDU();
-const Vector &dpdv = dg.getDPDV();
-      float area = dg.getSurfaceArea();
-      float invArea = dg.getInverseSurfaceArea();
-  '''
-
-  # define some global variables defined in all scattering shaders
-  __globalScatteringCppVariables__ = __globalCppVariables__ + 'ScatteringDistributionFunction *F = 0;'
-
-  # define some global variables defined in all emission shaders
-  __globalEmissionCppVariables__ = __globalCppVariables__ + 'ScatteringDistributionFunction *E = 0;'
-
-  # define some global variables defined in all sensor shaders
-  __globalSensingCppVariables__ = __globalCppVariables__ + 'ScatteringDistributionFunction *S = 0;'
-    
   def parseDeclaration(self, decl):
     # strip leading and ending whitespace
     decl = decl.lstrip()
@@ -185,21 +162,20 @@ const Vector &dpdv = dg.getDPDV();
         stripped += c
     return stripped
 
-  def createShaderCppCode(self, name, globals, body, returnName, parametersList, type):
+  def createShaderBodyCode(self, functionQualifiers, name, returnType, returnName, parametersList, body):
     # isolate the body of the shader into its own function
     result = '''
-inline static void %sBody(ShadingInterface &context,
-                          const Point &P,
-                          const Normal &N,
-                          const Vector &T,
-                          const Vector &B,
-                          const ParametricCoordinates &UV,
-                          const Vector &dpdu,
-                          const Vector &dpdv,
-                          const float area,
-                          const float invArea,
-                          const %sParameters parms,
-                          ScatteringDistributionFunction *&%s)
+%s void %sBody(const Point &P,
+               const Normal &N,
+               const Vector &T,
+               const Vector &B,
+               const ParametricCoordinates &UV,
+               const Vector &dpdu,
+               const Vector &dpdv,
+               const float area,
+               const float invArea,
+               const %sParameters parms,
+               %s &%s)
 {
   // unpack parameters
   %s
@@ -208,12 +184,17 @@ inline static void %sBody(ShadingInterface &context,
 }
 '''
     # create a string which unpacks the parameters
-    parmUnpack = ''
+    unpackParms = ''
     for parm in parametersList:
-      parmUnpack += '  const %s &%s = parms.%s;\n' % (parm[0], parm[1], parm[1])
+      unpackParms += '  const %s &%s = parms.%s;\n' % (parm[0], parm[1], parm[1])
 
-    # finish the shader body
-    result = result % (name, name, returnName, parmUnpack, body)
+    # substitute
+    result = result % (functionQualifiers, name, name, returnType, returnName, unpackParms, body)
+    return result
+
+  def createShaderCppCode(self, name, body, returnName, parametersList, type):
+    # isolate the body of the shader into its own function
+    result = self.createShaderBodyCode("inline static", name, "ScatteringDistributionFunction *", returnName, parametersList, body)
 
     # create a method which unpacks geometry and calls the shader body
     result += '''
@@ -233,7 +214,7 @@ virtual ScatteringDistributionFunction *evaluate%s(ShadingInterface &context, co
   %s
 
   // call the body of the shader
-  %sBody(context, P, N, T, B, UV, dpdu, dpdv, area, invArea, parms, %s);
+  %sBody(P, N, T, B, UV, dpdu, dpdv, area, invArea, parms, %s);
 
   // return the result
   return %s;
@@ -293,7 +274,6 @@ typedef TextureParameter Texture;
     (scatteringParametersList, scatteringBody) = self.parseFunction('scattering', shaderString)
     if scatteringBody != '':
       scatteringString = self.createShaderCppCode('Scattering',
-                                                  self.__globalScatteringCppVariables__,
                                                   scatteringBody,
                                                   'F',
                                                   scatteringParametersList,
@@ -306,7 +286,6 @@ typedef TextureParameter Texture;
     (emissionParametersList, emissionBody) = self.parseFunction('emission', shaderString)
     if emissionBody != '':
       emissionString = self.createShaderCppCode('Emission',
-                                                self.__globalEmissionCppVariables__,
                                                 emissionBody,
                                                 'E',
                                                 emissionParametersList,
@@ -319,7 +298,6 @@ typedef TextureParameter Texture;
     (sensorParametersList, sensorBody) = self.parseFunction('sensor', shaderString)
     if sensorBody != '':
       sensorString = self.createShaderCppCode('Sensor',
-                                              self.__globalSensingCppVariables__,
                                               sensorBody,
                                               'S',
                                               sensorParametersList,
