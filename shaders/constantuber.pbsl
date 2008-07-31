@@ -1,5 +1,5 @@
 scattering(Spectrum Kd, Spectrum Ks, float exponent)
 {
-  return uber(Kd, Ks, exponent);
+  F = uber(Kd, Ks, exponent);
 } // end scattering()
 
