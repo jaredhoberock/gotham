@@ -23,6 +23,48 @@ class Material
     virtual ScatteringDistributionFunction *evaluateSensor(ShadingInterface &context, const DifferentialGeometry &dg) const;
     virtual const char *getName(void) const;
 
+    /*! This method returns the source of this Material.
+     *  \return A string containing the source of the shader describing
+     *          this Material.
+     */
+    virtual const char *getSource(void) const;
+
+    /*! This method returns the size in bytes of this Material's
+     *  parameters.
+     *  \return As above.
+     */
+    virtual size_t getScatteringParametersSize(void) const;
+
+    /*! This method copies this Material's scattering parameters to
+     *  location given by the pointer.
+     *  \param ptr The location to copy to.
+     */
+    virtual void getScatteringParameters(void *ptr) const;
+
+    /*! This method returns the size in bytes of this Material's
+     *  parameters.
+     *  \return As above.
+     */
+    virtual size_t getEmissionParametersSize(void) const;
+
+    /*! This method copies this Material's emission parameters to
+     *  location given by the pointer.
+     *  \param ptr The location to copy to.
+     */
+    virtual void getEmissionParameters(void *ptr) const;
+
+    /*! This method returns the size in bytes of this Material's
+     *  parameters.
+     *  \return As above.
+     */
+    virtual size_t getSensorParametersSize(void) const;
+
+    /*! This method copies this Material's sensor parameters to
+     *  location given by the pointer.
+     *  \param ptr The location to copy to.
+     */
+    virtual void getSensorParameters(void *ptr) const;
+
     /*! XXX Is there a more elegant way to do this?
      *  This method indicates whether or not this Material
      *  implements evaluateEmission() as a hint to importance

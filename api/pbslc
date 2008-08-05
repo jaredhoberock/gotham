@@ -330,10 +330,41 @@ ShadingInterface *gContext;
     compileMe += '{\n'
     compileMe += 'public:\n'
     compileMe += 'virtual const char *getName(void) const{ return "%s";}\n' % baseName
+    # end each line of shaderString with a '\' for the c++ compiler
+    cppShaderString = ''
+    for line in shaderString.split('\n'):
+      if line != '':
+        cppShaderString += line + '\\' + 'n' + '\\' + '\n'
+    compileMe += 'virtual const char *getSource(void) const{ return "%s";}\n' % cppShaderString
     # encapsulate the parameters in structs
     compileMe += self.makeShaderStructDefinitionCode('Scattering',scatteringParametersList)
     compileMe += self.makeShaderStructDefinitionCode('Emission',emissionParametersList)
     compileMe += self.makeShaderStructDefinitionCode('Sensor',sensorParametersList)
+
+    # create methods which report the size of each type of parameters struct
+    for (component, parmsList) in [('Scattering', scatteringParametersList), ('Emission', emissionParametersList), ('Sensor', sensorParametersList)]:
+      compileMe += '''
+virtual size_t get%sParametersSize(void) const {return %s;}
+'''
+      sizeString = '0'
+      if len(parmsList) != 0:
+        sizeString = "sizeof(%s)" % (component + 'Parms')
+      compileMe = compileMe % (component, sizeString)
+
+    # create methods which copy the parameters to a given pointer
+    for (component, parmsList) in [('Scattering', scatteringParametersList), ('Emission', emissionParametersList), ('Sensor', sensorParametersList)]:
+      compileMe += '''
+virtual void get%sParameters(void *ptr) const
+{
+%s
+}
+'''
+      storeParms = ''
+      if len(parmsList) != 0:
+        storeParms = self.createPackParametersCode(component, parmsList)
+        storeParms += '*reinterpret_cast<%sParms*>(ptr) = parms;' % (component)
+      compileMe = compileMe % (component, storeParms)
+
     # add each method for doing the shading computations
     compileMe += scatteringString
     compileMe += emissionString

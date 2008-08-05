@@ -20,6 +20,7 @@ class DefaultMaterial
     typedef Material Parent;
 
     virtual const char *getName(void) const;
+    virtual const char *getSource(void) const;
     virtual ScatteringDistributionFunction *evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const;
 }; // end DefaultMaterial
 

@@ -36,6 +36,48 @@ const char *Material
   return "Material";
 } // end Material::getName()
 
+const char *Material
+  ::getSource(void) const
+{
+  return "";
+} // end Material::getSource()
+
+size_t Material
+  ::getScatteringParametersSize(void) const
+{
+  return 0;
+} // end Material::getScatteringParametersSize(void)
+
+void Material
+  ::getScatteringParameters(void *ptr) const
+{
+  ;
+} // end Material::getScatteringParameters()
+
+size_t Material
+  ::getEmissionParametersSize(void) const
+{
+  return 0;
+} // end Material::getEmissionParametersSize(void)
+
+void Material
+  ::getEmissionParameters(void *ptr) const
+{
+  ;
+} // end Material::getEmissionParameters()
+
+size_t Material
+  ::getSensorParametersSize(void) const
+{
+  return 0;
+} // end Material::getSensorParametersSize(void)
+
+void Material
+  ::getSensorParameters(void *ptr) const
+{
+  ;
+} // end Material::getSensorParameters()
+
 bool Material
   ::isEmitter(void) const
 {

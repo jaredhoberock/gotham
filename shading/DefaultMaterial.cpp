@@ -13,6 +13,16 @@ const char *DefaultMaterial
   return "DefaultMaterial";
 } // end DefaultMaterial::getName()
 
+const char *DefaultMaterial
+  ::getSource(void) const
+{
+  return "\n\
+scattering(void)\n\
+{\n\
+  F = diffuse(Spectrum(1,1,1));\n\
+}\n";
+} // end DefaultMaterial::getSource()
+
 ScatteringDistributionFunction *DefaultMaterial
   ::evaluateScattering(ShadingInterface &context, const DifferentialGeometry &dg) const
 {
