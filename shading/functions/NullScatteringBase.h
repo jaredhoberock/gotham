@@ -118,9 +118,6 @@ template<typename V3, typename S3, typename Boolean = bool>
                              const Vector &normal,
                              const Vector &wi) const;
 
-  protected:
-    Spectrum mAlbedo;
-    Spectrum mAlbedoOverPi;
 }; // end NullScatteringBase
 
 #include "NullScatteringBase.inl"
