@@ -5,13 +5,13 @@
 
 #include "TransparentTransmission.h"
 
-Spectrum TransparentTransmission
-  ::evaluate(const Vector &wo,
-             const DifferentialGeometry &dg,
-             const Vector &wi) const
+TransparentTransmission
+  ::TransparentTransmission(const Spectrum &transmittance)
+    :Parent0(),
+     Parent1(transmittance)
 {
-  return Spectrum::black();
-} // end TransparentTransmission::evaluate()
+  ;
+} // end TransparentTransmission::TransparentTransmission()
 
 Spectrum TransparentTransmission
   ::sample(const Vector &wo,
@@ -24,12 +24,22 @@ Spectrum TransparentTransmission
            bool &delta,
            ComponentIndex &component) const
 {
-  delta = true;
-  component = 0;
-
-  wi = -wo;
-  pdf = 1.0f;
-
-  return mTransmittance / dg.getNormal().absDot(wi);
+  return Parent1::sample(wo,
+                         dg.getPoint(),
+                         dg.getTangent(),
+                         dg.getBinormal(),
+                         dg.getNormal(),
+                         u0, u1, u2,
+                         wi, pdf, delta, component);
 } // end TransparentTransmission::sample()
+
+Spectrum TransparentTransmission
+  ::evaluate(const Vector &wo,
+             const DifferentialGeometry &dg,
+             const Vector &wi) const
+{
+  return Parent1::evaluate(wo,
+                           dg.getNormal(),
+                           wi);
+} // end TransparentTransmission::evaluate()
 

@@ -8,20 +8,27 @@
 #define TRANSPARENT_TRANSMISSION_H
 
 #include "DeltaDistributionFunction.h"
+#include "functions/TransparentTransmissionBase.h"
 
 class TransparentTransmission
-  : public DeltaDistributionFunction
+  : public DeltaDistributionFunction,
+    public TransparentTransmissionBase<Vector,Spectrum>
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef DeltaDistributionFunction Parent;
+    typedef DeltaDistributionFunction Parent0;
+
+    /*! \typedef Parent1
+     *  \brief Shorthand.
+     */
+    typedef TransparentTransmissionBase<Vector,Spectrum> Parent1;
 
     /*! Constructor accepts a transmittance.
      *  \param transmittance Sets mTransmittance.
      */
-    inline TransparentTransmission(const Spectrum &transmittance);
+    TransparentTransmission(const Spectrum &transmittance);
 
     /*! This method evaluates a TransparentTransmission function.
      *  \param wi A vector pointing towards the direction of incoming radiance.
@@ -29,7 +36,7 @@ class TransparentTransmission
      *  \param wo A vector pointing towards the viewing direction.
      *  \return The scattering in direction wo.
      */
-    using Parent::evaluate;
+    using Parent0::evaluate;
     virtual Spectrum evaluate(const Vector &wo,
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;
@@ -47,7 +54,7 @@ class TransparentTransmission
      *  \param component This is set to 0.
      *  \return The bidirectional scattering from wi to wo is returned here.
      */
-    using Parent::sample;
+    using Parent0::sample;
     virtual Spectrum sample(const Vector &wo,
                             const DifferentialGeometry &dg,
                             const float u0,
@@ -57,11 +64,7 @@ class TransparentTransmission
                             float &pdf,
                             bool &delta,
                             ComponentIndex &component) const;
-
-  protected:
-    Spectrum mTransmittance;
 }; // end TransparentTransmission
 
-#include "TransparentTransmission.inl"
-
 #endif // TRANSPARENT_TRANSMISSION_H
+
