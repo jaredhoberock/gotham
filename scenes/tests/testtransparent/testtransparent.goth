@@ -1,0 +1,99 @@
+#!/usr/bin/env gotham
+
+from api import *
+
+import objtogoth
+
+unitSquare = ([-0.5, 0,  0.5,
+                0.5, 0,  0.5,
+                0.5, 0, -0.5,
+               -0.5, 0, -0.5],
+              [   
+                  0, 1,  3,
+                  1, 2,  3
+              ])
+
+Material('cuda_matte', 'Kd', (0.8, 0.8, 0.8))
+PushMatrix()
+Translate(0, 0, -1)
+Rotate(90, 1, 0, 0)
+Scale(2.0,2.0,2.0)
+Mesh(unitSquare[0], unitSquare[1])
+PopMatrix()
+
+# floor
+Material('cuda_matte', 'Kd', (0.8, 0.8, 0.8))
+PushMatrix()
+Translate(0,-1,0)
+Scale(2.0, 2.0, 2.0)
+Mesh(unitSquare[0], unitSquare[1])
+PopMatrix()
+
+# ceiling
+Material('cuda_matte', 'Kd', (0.8, 0.8, 0.8))
+PushMatrix()
+Translate(0,1,0)
+Scale(2.0, 2.0, 2.0)
+Rotate(180.0, 1.0, 0, 0)
+Mesh(unitSquare[0], unitSquare[1])
+PopMatrix()
+
+# left wall
+Material('cuda_matte', 'Kd', (0.8, 0.2, 0.2))
+PushMatrix()
+Translate(-1,0,0)
+Scale(2.0, 2.0, 2.0)
+Rotate(-90, 0, 0, 1)
+Mesh(unitSquare[0], unitSquare[1])
+PopMatrix()
+
+# right wall
+Material('cuda_matte', 'Kd', (0.2, 0.8, 0.2))
+PushMatrix()
+Translate(1,0,0)
+Scale(2.0, 2.0, 2.0)
+Rotate(90, 0, 0, 1)
+Mesh(unitSquare[0], unitSquare[1])
+PopMatrix()
+
+# light
+Material('light', 'power', (20,20,20))
+PushMatrix()
+Translate(0, 0.95, 0)
+Scale(0.5, 0.5, 0.5)
+Rotate(180.0, 1.0, 0, 0)
+Mesh(unitSquare[0], unitSquare[1])
+PopMatrix()
+
+(verts, parms, indices, normals) = objtogoth.objtogoth("/home/jared/dev/data/geometry/obj/bunny.obj")
+PushAttributes()
+PushMatrix()
+Material('transparent')
+Translate(0,-1.2,0)
+Scale(5,5,5)
+Mesh(verts, parms, indices)
+PopMatrix()
+PopAttributes()
+
+# let's render to a 512x512 image
+(w,h) = (512,512)
+Attribute("record:width",  w)
+Attribute("record:height", h)
+Attribute("renderer:threads", w*h)
+Attribute("renderer:spp", (4,4))
+
+PushMatrix()
+LookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
+Camera(float(w) / h, 60.0, 0.01)
+PopMatrix()
+
+Attribute('viewer', False)
+
+Attribute('record:outfile', 'testtransparent.cpu.exr')
+Render()
+
+# use the cuda subsystem
+Attribute("renderer:subsystem", 'CudaGotham')
+Attribute('record:outfile', 'testtransparent.gpu.exr')
+Render()
+
