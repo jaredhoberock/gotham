@@ -1,0 +1,5 @@
+scattering(void)
+{
+  F = thinGlass(1.5f, Spectrum(1,1,1), Spectrum(1,1,1));
+}
+

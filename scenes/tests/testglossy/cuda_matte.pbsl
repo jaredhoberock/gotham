@@ -1,0 +1,6 @@
+scattering(Spectrum Kd = Spectrum::white())
+{
+  F = diffuse(Kd);
+} // end scattering()
+
+

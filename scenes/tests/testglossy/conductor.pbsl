@@ -1,0 +1,7 @@
+scattering(Spectrum Kr = Spectrum::white(),
+           float eta = 2.0f,
+           float exponent = 20.0f)
+{
+  F = glossy(Kr, eta, exponent);
+}
+

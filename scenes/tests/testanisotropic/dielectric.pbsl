@@ -1,0 +1,10 @@
+scattering(Spectrum Kr = Spectrum::white(),
+           float etai = 1.0f,
+           float etat = 2.0f,
+           float uExponent = 20.0f,
+           float vExponent = 100.0f)
+{
+  F = anisotropic(Kr, etai, etat, uExponent, vExponent);
+}
+
+
