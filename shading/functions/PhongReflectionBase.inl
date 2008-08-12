@@ -53,7 +53,8 @@ template<typename V3, typename S3, typename Boolean>
 
   // evaluate the phong distribution
   // XXX hide the phong distribution evaluate somewhere else
-  float D = (mExponent + 2.0f) * powf(dot(normal,m), mExponent) * INV_TWOPI;
+  float nDotM = fabs(dot(normal,m));
+  float D = (mExponent + 2.0f) * powf(nDotM, mExponent) * INV_TWOPI;
 
   // note we can use either wo or wi here, since they are reflections about m
   float cosi = fabs(dot(m,wo));
