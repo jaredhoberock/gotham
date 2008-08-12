@@ -9,16 +9,23 @@
 #define ASHIKHMIN_SHIRLEY_REFLECTION_H
 
 #include "ScatteringDistributionFunction.h"
+#include "functions/AshikhminShirleyReflectionBase.h"
 #include "Fresnel.h"
 
 class AshikhminShirleyReflection
-  : public ScatteringDistributionFunction
+  : public ScatteringDistributionFunction,
+    public AshikhminShirleyReflectionBase<Vector,Spectrum>
 {
   public:
-    /*! \typedef Parent
+    /*! \typedef Parent0
      *  \brief Shorthand.
      */
-    typedef ScatteringDistributionFunction Parent;
+    typedef ScatteringDistributionFunction Parent0;
+
+    /*! \typedef Parent1
+     *  \brief Shorthand.
+     */
+    typedef AshikhminShirleyReflectionBase<Vector,Spectrum> Parent1;
 
     /*! Constructor accepts a reflectance, index of refraction,
      *  and two Ashikhmin-Shirley exponents to create an anisotropic
@@ -33,13 +40,28 @@ class AshikhminShirleyReflection
                                const float uExponent,
                                const float vExponent);
 
+    /*! Constructor accepts a reflectance, two indices of refraction,
+     *  and two Ashikhmin-Shirley exponents to create an anisotropic
+     *  glossy Fresnel dielectric.
+     *  \param r The reflectance of this AshikhminShirleyReflection.
+     *  \param etai Sets the index of refraction of the medium surrounding this Fresnel dielectric.
+     *  \param etat Sets the index of refraction of the Fresnel dielectric.
+     *  \param uExponent The Ashikhmin-Shirley exponent in the u direction.
+     *  \param vExponent The Ashikhmin-Shriley exponent in the v direction.
+     */
+    AshikhminShirleyReflection(const Spectrum &r,
+                               const float etai,
+                               const float etat,
+                               const float uExponent,
+                               const float vExponent);
+
     /*! This method evaluates this AshikhminShirleyReflection function.
      *  \param wi A vector pointing towards the direction of incoming radiance.
      *  \param dg The DifferentialGeometry at the surface point of interest.
      *  \param wo A vector pointing towards the viewing direction.
      *  \return The scattering in direction wo.
      */
-    using Parent::evaluate;
+    using Parent0::evaluate;
     virtual Spectrum evaluate(const Vector &wo,
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;
@@ -76,7 +98,7 @@ class AshikhminShirleyReflection
      *  \param component This is set to 0.
      *  \return The bidirectional scattering from wi to wo is returned here.
      */
-    using Parent::sample;
+    using Parent0::sample;
     virtual Spectrum sample(const Vector &wo,
                             const DifferentialGeometry &dg,
                             const float u0,
@@ -94,24 +116,10 @@ class AshikhminShirleyReflection
      *  \param wi A Vector pointing towards the direction of incidence.
      *  \return The value of the pdf at (wi,dg,wo).
      */
-    using Parent::evaluatePdf;
+    using Parent0::evaluatePdf;
     virtual float evaluatePdf(const Vector &wo,
                               const DifferentialGeometry &dg,
                               const Vector &wi) const;
-
-  protected:
-    /*! The reflectance.
-     */
-    Spectrum mReflectance;
-
-    /*! The exponents.
-     */
-    float mNu;
-    float mNv;
-
-    /*! The Fresnel object.
-     */
-    FresnelConductor mFresnel;
 }; // end AshikhminShirleyReflection
 
 #endif // ASHIKHMIN_SHIRLEY_REFLECTION_H

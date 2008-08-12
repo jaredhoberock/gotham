@@ -53,12 +53,22 @@ ScatteringDistributionFunction *ShadingContext
 } // end ShadingContext::diffuse()
 
 ScatteringDistributionFunction *ShadingContext
-  ::glossy(const Spectrum &Kr,
-           const float eta,
-           const float uExponent,
-           const float vExponent)
+  ::anisotropic(const Spectrum &Kr,
+                const float eta,
+                const float uExponent,
+                const float vExponent)
 {
   return new(mAllocator) AshikhminShirleyReflection(Kr, eta, uExponent, vExponent);
+} // end ShadingContext::glossy()
+
+ScatteringDistributionFunction *ShadingContext
+  ::anisotropic(const Spectrum &Kr,
+                const float etai,
+                const float etat,
+                const float uExponent,
+                const float vExponent)
+{
+  return new(mAllocator) AshikhminShirleyReflection(Kr, etai, etat, uExponent, vExponent);
 } // end ShadingContext::glossy()
 
 ScatteringDistributionFunction *ShadingContext
@@ -67,6 +77,15 @@ ScatteringDistributionFunction *ShadingContext
            const float exponent)
 {
   return new(mAllocator) PhongReflection(Kr, eta, exponent);
+} // end ShadingContext::glossy()
+
+ScatteringDistributionFunction *ShadingContext
+  ::glossy(const Spectrum &Kr,
+           const float etai,
+           const float etat,
+           const float exponent)
+{
+  return new(mAllocator) PhongReflection(Kr, etai, etat, exponent);
 } // end ShadingContext::glossy()
 
 ScatteringDistributionFunction *ShadingContext

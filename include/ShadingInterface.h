@@ -33,9 +33,20 @@ class ShadingInterface
                                                    float exponent) = 0;
 
     virtual ScatteringDistributionFunction *glossy(const Spectrum &Kr,
-                                                   const float eta,
-                                                   float uExponent,
-                                                   float vExponent) = 0;
+                                                   const float etai,
+                                                   const float etat,
+                                                   float exponent) = 0;
+
+    virtual ScatteringDistributionFunction *anisotropic(const Spectrum &Kr,
+                                                        const float eta,
+                                                        float uExponent,
+                                                        float vExponent) = 0;
+
+    virtual ScatteringDistributionFunction *anisotropic(const Spectrum &Kr,
+                                                        const float etai,
+                                                        const float etat,
+                                                        float uExponent,
+                                                        float vExponent) = 0;
 
     virtual ScatteringDistributionFunction *glossyRefraction(const Spectrum &Kt,
                                                              const float etai,

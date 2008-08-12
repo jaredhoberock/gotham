@@ -11,7 +11,20 @@ AshikhminShirleyReflection
                                const float eta,
                                const float uExponent,
                                const float vExponent)
-    :mReflectance(r),mNu(uExponent),mNv(vExponent),mFresnel(mReflectance, Spectrum(eta,eta,eta))
+    :Parent0(),
+     Parent1(r,eta,uExponent,vExponent)
+{
+  ;
+} // end AshikhminShirleyReflection::AshikhminShirleyReflection()
+
+AshikhminShirleyReflection
+  ::AshikhminShirleyReflection(const Spectrum &r,
+                               const float etai,
+                               const float etat,
+                               const float uExponent,
+                               const float vExponent)
+    :Parent0(),
+     Parent1(r,etai,etat,uExponent,vExponent)
 {
   ;
 } // end AshikhminShirleyReflection::AshikhminShirleyReflection()
@@ -27,42 +40,12 @@ Spectrum AshikhminShirleyReflection
            bool &delta,
            ComponentIndex &index) const
 {
-  delta = false;
-  index = 0;
-
-  // sample a microfacet normal
-  Vector wh;
-  Mappings<Vector>::unitSquareToAnisotropicPhongLobe(u0, u1,
-                                                     mNu, mNv,
-                                                     dg.getTangent(), dg.getBinormal(), dg.getNormal(),
-                                                     wh, pdf);
-
-  // we are able to sample the Ashikhmin-Shirley distribution exactly
-  float D = pdf;
-
-  // reflect wo about the microfacet normal
-  wi = wh.reflect(wo).normalize();
-
-  // wo & wi must lie in the same hemisphere
-  if(!areSameHemisphere(wi,dg.getNormal(),wo)) return Spectrum::black();
-
-  // compute the geometry term
-  float nDotWo = dg.getNormal().absDot(wo);
-  float nDotWi = dg.getNormal().absDot(wi);
-  float woDotWh = wh.absDot(wo);
-  //float nDotWh = dg.getNormal().absDot(wh);
-  //float G = evaluateGeometricTerm(nDotWo, nDotWi, nDotWh, woDotWh);
-  float G = 1.0f;
-
-  pdf *= (0.25f / woDotWh);
-
-  // Walter et al, 2007, equation 20
-  // note we can use either wi or wo here because they are reflections about wh
-  float whDotWi = wh.dot(wi);
-  Spectrum result = mReflectance * mFresnel.evaluate(whDotWi) * G * D;
-  result /= (4.0f * nDotWo * nDotWi);
-
-  return result;
+  return Parent1::sample(wo,
+                         dg.getTangent(),
+                         dg.getBinormal(),
+                         dg.getNormal(),
+                         u0,u1,u2,
+                         wi,pdf,delta,index);
 } // end AshikhminShirleyReflection::sample()
 
 Spectrum AshikhminShirleyReflection
@@ -73,40 +56,8 @@ Spectrum AshikhminShirleyReflection
              const ComponentIndex component,
              float &pdf) const
 {
-  // wo & wi must lie in the same hemisphere
-  pdf = 0;
-  if(!areSameHemisphere(wi,dg.getNormal(),wo)) return Spectrum::black();
-
-  // compute the microfacet normal (half-vector)
-  Vector wh = (wo + wi).normalize();
-
-  // compute cos theta wh
-  // note we can use either wi or wo here because they are reflections about wh
-  float cosThetaH = wh.absDot(wi);
-
-  // evaluate the Ashikhmin-Shirley distribution
-  float D = Mappings<Vector>::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
-                                                              dg.getTangent(),
-                                                              dg.getBinormal(),
-                                                              dg.getNormal());
-
-  // Walter et al, 2007, equation 14
-  float J = 0.25f / wh.absDot(wi);
-  pdf = D * J;
-
-  // compute the geometry term
-  float nDotWo = dg.getNormal().absDot(wo);
-  float nDotWi = dg.getNormal().absDot(wi);
-  //float woDotWh = wh.absDot(wo);
-  //float nDotWh = dg.getNormal().absDot(wh);
-  //float G = evaluateGeometricTerm(nDotWo, nDotWi, nDotWh, woDotWh);
-  float G = 1.0f;
-
-  // Walter et al, 2007, equation 20
-  Spectrum result = mReflectance * mFresnel.evaluate(cosThetaH) * G * D;
-  result /= (4.0f * nDotWo * nDotWi);
-
-  return result;
+  pdf = evaluatePdf(wo,dg,wi);
+  return Parent1::evaluate(wo,dg.getTangent(),dg.getBinormal(),dg.getNormal(),wi);
 } // end AshikhminShirleyReflection::evaluate()
 
 Spectrum AshikhminShirleyReflection
@@ -114,35 +65,7 @@ Spectrum AshikhminShirleyReflection
              const DifferentialGeometry &dg,
              const Vector &wi) const
 {
-  // wo & wi must lie in the same hemisphere
-  if(!areSameHemisphere(wi,dg.getNormal(),wo)) return Spectrum::black();
-
-  // compute the microfacet normal (half-vector)
-  Vector wh = (wo + wi).normalize();
-
-  // compute cos theta wh
-  // note we can use either wi or wo here because they are reflections about wh
-  float cosThetaH = wh.absDot(wi);
-
-  // evaluate the Ashikhmin-Shirley distribution
-  float D = Mappings<Vector>::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
-                                                              dg.getTangent(),
-                                                              dg.getBinormal(),
-                                                              dg.getNormal());
-
-  // compute the geometry term
-  float nDotWo = dg.getNormal().absDot(wo);
-  float nDotWi = dg.getNormal().absDot(wi);
-  //float woDotWh = wh.absDot(wo);
-  //float nDotWh = dg.getNormal().absDot(wh);
-  //float G = evaluateGeometricTerm(nDotWo, nDotWi, nDotWh, woDotWh);
-  float G = 1.0f;
-
-  // Walter et al, 2007, equation 20
-  Spectrum result = mReflectance * mFresnel.evaluate(cosThetaH) * G * D;
-  result /= (4.0f * nDotWo * nDotWi);
-
-  return result;
+  return Parent1::evaluate(wo,dg.getTangent(),dg.getBinormal(),dg.getNormal(),wi);
 } // end AshikhminShirleyReflection::evaluate()
 
 float AshikhminShirleyReflection
@@ -150,17 +73,6 @@ float AshikhminShirleyReflection
                 const DifferentialGeometry &dg,
                 const Vector &wi) const
 {
-  // wo & wi must lie in the same hemisphere
-  if(!areSameHemisphere(wi,dg.getNormal(),wo)) return 0;
-
-  // compute the microfacet normal (half-vector)
-  Vector wh = (wo + wi).normalize();
-
-  // Walter et al, 2007, equation 14
-  float J = 0.25f / wh.absDot(wi);
-
-  // evaluate the AshikhminShirley distribution and multiply by the Jacobian
-  return J * Mappings<Vector>::evaluateAnisotropicPhongLobePdf(wh, mNu, mNv,
-                                                               dg.getTangent(), dg.getBinormal(), dg.getNormal());
+  return Parent1::evaluatePdf(wo,dg.getTangent(),dg.getBinormal(),dg.getNormal(),wi);
 } // end AshikhminShirleyReflection::evaluatePdf()
 

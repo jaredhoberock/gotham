@@ -40,9 +40,20 @@ class ShadingContext
                                            float exponent);
 
     ScatteringDistributionFunction *glossy(const Spectrum &Kr,
-                                           const float eta,
-                                           float uExponent,
-                                           float vExponent);
+                                           const float etai,
+                                           const float etat,
+                                           float exponent);
+
+    ScatteringDistributionFunction *anisotropic(const Spectrum &Kr,
+                                                const float eta,
+                                                float uExponent,
+                                                float vExponent);
+
+    ScatteringDistributionFunction *anisotropic(const Spectrum &Kr,
+                                                const float etai,
+                                                const float etat,
+                                                float uExponent,
+                                                float vExponent);
 
     ScatteringDistributionFunction *glossyRefraction(const Spectrum &Kt,
                                                      const float etai,

@@ -223,7 +223,7 @@ template<typename V3>
 {
   // generate a random vector on the +z hemisphere
   Vector temp;
-  UnitSquareToAnisotropicLobe::evaluate<float, Vector>(u0,u1,nu,nv,temp,&pdf);
+  UnitSquareToAnisotropicLobe<float,Vector>::evaluate(u0,u1,nu,nv,temp,&pdf);
 
   alignVector(xAxis, yAxis, xAxis, temp, w);
 } // end Mappings::unitSquareToPhongLobe()

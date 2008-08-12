@@ -7,7 +7,8 @@
 #ifndef UNIT_SQUARE_TO_ANISOTROPIC_LOBE_H
 #define UNIT_SQUARE_TO_ANISOTROPIC_LOBE_H
 
-class UnitSquareToAnisotropicLobe
+template<typename Real, typename Real3>
+  class UnitSquareToAnisotropicLobe
 {
   public:
     /*! This method maps points in the unit square
@@ -23,13 +24,12 @@ class UnitSquareToAnisotropicLobe
      *  \param pdf The value of the distribution function over the hemisphere
      *             is returned here if this is not 0.
      */
-    template<typename Real, typename Real3>
-      static void evaluate(const Real &u,
-                           const Real &v,
-                           const Real &nu,
-                           const Real &nv,
-                           Real3 &p,
-                           Real *pdf = 0);
+    inline static void evaluate(Real u,
+                                Real v,
+                                Real nu,
+                                Real nv,
+                                Real3 &p,
+                                Real *pdf = 0);
 
     /*! This method evaluates the probability density
      *  function of this mapping at the given point
@@ -40,18 +40,16 @@ class UnitSquareToAnisotropicLobe
      *  \param nv The second exponent of the distribution.
      *  \return The value of the pdf at p.
      */
-    template<typename Real, typename Real3>
-      static Real evaluatePdf(const Real3 &p,
-                              const Real &nu,
-                              const Real &nv);
+    inline static Real evaluatePdf(const Real3 &p,
+                                   const Real &nu,
+                                   const Real &nv);
 
-    template<typename Real>
-      static void sampleFirstQuadrant(const Real &u,
-                                      const Real &v,
-                                      const Real &nu,
-                                      const Real &nv,
-                                      Real &phi,
-                                      Real &costheta);
+    inline static void sampleFirstQuadrant(const Real &u,
+                                           const Real &v,
+                                           const Real &nu,
+                                           const Real &nv,
+                                           Real &phi,
+                                           Real &costheta);
 }; // end UnitSquareToAnisotropicLobe
 
 #include "UnitSquareToAnisotropicLobe.inl"

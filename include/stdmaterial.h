@@ -25,11 +25,28 @@ inline ScatteringDistributionFunction *glossy(const Spectrum &Kr,
 } // end ScatteringDistributionFunction::glossy()
 
 inline ScatteringDistributionFunction *glossy(const Spectrum &Kr,
-                                              const float eta,
-                                              const float uExponent,
-                                              const float vExponent)
+                                              const float etai,
+                                              const float etat,
+                                              const float exponent)
 {
-  return gContext->glossy(Kr, eta, uExponent, vExponent);
+  return gContext->glossy(Kr, etai, etat, exponent);
+} // end ScatteringDistributionFunction::glossy()
+
+inline ScatteringDistributionFunction *anisotropic(const Spectrum &Kr,
+                                                   const float eta,
+                                                   const float uExponent,
+                                                   const float vExponent)
+{
+  return gContext->anisotropic(Kr, eta, uExponent, vExponent);
+} // end ScatteringDistributionFunction::glossy()
+
+inline ScatteringDistributionFunction *anisotropic(const Spectrum &Kr,
+                                                   const float etai,
+                                                   const float etat,
+                                                   const float uExponent,
+                                                   const float vExponent)
+{
+  return gContext->anisotropic(Kr, etai, etat, uExponent, vExponent);
 } // end ScatteringDistributionFunction::glossy()
 
 inline ScatteringDistributionFunction *glossyRefraction(const Spectrum &Kt,
