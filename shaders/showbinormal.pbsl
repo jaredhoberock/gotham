@@ -1,6 +1,6 @@
 scattering(void)
 {
-  Spectrum b(fabs(B[0]), fabs(B[1]), fabs(B[2]));
+  Spectrum b(fabs(B.x), fabs(B.y), fabs(B.z));
   F = diffuse(b);
 } // end scattering()
 

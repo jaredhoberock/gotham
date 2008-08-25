@@ -1,8 +1,8 @@
 scattering(void)
 {
-  float r = N[0] > 0 ? N[0] : 0;
-  float g = N[1] > 0 ? N[1] : 0;
-  float b = N[2] > 0 ? N[2] : 0;
+  float r = N.x > 0 ? N.x : 0;
+  float g = N.y > 0 ? N.y : 0;
+  float b = N.z > 0 ? N.z : 0;
 
   Spectrum n(r, g, b);
   F = diffuse(n);
