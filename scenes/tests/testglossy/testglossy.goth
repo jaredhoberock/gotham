@@ -92,7 +92,6 @@ Camera(float(w) / h, 60.0, 0.01)
 PopMatrix()
 
 Attribute('viewer', False)
-#Attribute('renderer:algorithm', 'debug')
 
 Attribute('record:outfile', 'testglossy.cpu.exr')
 Render()

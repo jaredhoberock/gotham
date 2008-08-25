@@ -95,7 +95,6 @@ Render()
 
 # use the cuda subsystem
 Attribute("renderer:subsystem", 'CudaGotham')
-
 Attribute('record:outfile', 'testmarble.gpu.exr')
 Render()
 

@@ -26,7 +26,7 @@ Mesh(unitSquare[0], unitSquare[1], unitSquare[2])
 PopMatrix()
 
 # floor
-Material('checker', 'stilesize', 0.15, 'ttilesize', 0.15)
+Material('cuda_matte', 'Kd', (0.8, 0.8, 0.8))
 PushMatrix()
 Translate(0,-1,0)
 Scale(2.0, 2.0, 2.0)
@@ -69,16 +69,6 @@ Rotate(180.0, 1.0, 0, 0)
 Mesh(unitSquare[0], unitSquare[1], unitSquare[2])
 PopMatrix()
 
-(verts, parms, indices, normals) = objtogoth.objtogoth("/home/jared/dev/data/geometry/obj/bunny.obj")
-PushAttributes()
-PushMatrix()
-Material('mirror')
-Translate(0,-1.2,0)
-Scale(5,5,5)
-Mesh(verts, parms, indices)
-PopMatrix()
-PopAttributes()
-
 # let's render to a 512x512 image
 (w,h) = (512,512)
 Attribute("record:width",  w)
@@ -93,13 +83,11 @@ PopMatrix()
 
 Attribute('viewer', False)
 
-# render on cpu
-Attribute("record:outfile", "testchecker.cpu.exr")
+Attribute('record:outfile', 'testshadercache.cpu.exr')
 Render()
 
 # use the cuda subsystem
 Attribute("renderer:subsystem", 'CudaGotham')
-
-Attribute("record:outfile", "testchecker.gpu.exr")
+Attribute('record:outfile', 'testshadercache.gpu.exr')
 Render()
 

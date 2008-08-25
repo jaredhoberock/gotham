@@ -88,11 +88,14 @@ LookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
 Camera(float(w) / h, 60.0, 0.01)
 PopMatrix()
 
+Attribute('viewer', False)
+
+# render on cpu
+Attribute('record:outfile', 'testmirror.cpu.exr')
+Render()
+
 # use the cuda subsystem
 Attribute("renderer:subsystem", 'CudaGotham')
-#Attribute('renderer:algorithm', 'debug')
-#Attribute('viewer', False)
-
-# finally, tell gotham to render
+Attribute('record:outfile', 'testmirro.gpu.exr')
 Render()
 

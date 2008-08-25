@@ -92,8 +92,8 @@ Camera(float(w) / h, 60.0, 0.01)
 PopMatrix()
 
 Attribute('viewer', False)
-#Attribute('renderer:algorithm', 'debug')
 
+# render on cpu
 Attribute('record:outfile', 'testanisotropic.cpu.exr')
 Render()
 

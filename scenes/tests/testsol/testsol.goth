@@ -73,6 +73,8 @@ PopMatrix()
 (w,h) = (512,512)
 Attribute("record:width",  w)
 Attribute("record:height", h)
+Attribute("renderer:threads", w*h)
+Attribute("renderer:spp", (4,4))
 
 PushMatrix()
 LookAt( (0,0,3.0), (0,0,-1), (0,1,0) )
@@ -82,11 +84,10 @@ PopMatrix()
 Attribute('viewer', False)
 
 Attribute('record:outfile', 'testsol.cpu.exr')
-Render((w,h), 4)
+Render()
 
 # use the cuda subsystem
 Attribute("renderer:subsystem", 'CudaGotham')
-Attribute("renderer:threads", w*h)
 Attribute('record:outfile', 'testsol.gpu.exr')
-Render((w,h), 4)
+Render()
 

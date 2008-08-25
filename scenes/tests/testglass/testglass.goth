@@ -94,7 +94,6 @@ Render()
 
 # use the cuda subsystem
 Attribute("renderer:subsystem", 'CudaGotham')
-
 Attribute('record:outfile', 'testglass.gpu.exr')
 Render()
 
