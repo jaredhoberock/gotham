@@ -8,7 +8,7 @@
 
 RenderFilm
   ::RenderFilm(void)
-    :Parent0(),Parent1(),mFilename(""),mApplyTonemap(false)
+    :Parent0(),Parent1(),mFilename(""),mApplyTonemap(false),mSilentPostprocess(false)
 {
   ;
 } // end RenderFilm::RenderFilm()
@@ -16,8 +16,13 @@ RenderFilm
 RenderFilm
   ::RenderFilm(const unsigned int width,
                const unsigned int height,
-               const std::string &filename)
-    :Parent0(),Parent1(width,height),mFilename(filename),mApplyTonemap(false)
+               const std::string &filename,
+               const bool silent)
+    :Parent0(),
+     Parent1(width,height),
+     mFilename(filename),
+     mApplyTonemap(false),
+     mSilentPostprocess(silent)
 {
   reset();
 } // end RenderFilm::RenderFilm()
@@ -191,7 +196,10 @@ void RenderFilm
   if(mFilename != "")
   {
     writeEXR(mFilename.c_str());
-    std::cout << "Wrote result to: " << getFilename() << std::endl;
+    if(!mSilentPostprocess)
+    {
+      std::cout << "Wrote result to: " << getFilename() << std::endl;
+    } // end if
   } // end if
 } // end RenderFilm::postprocess()
 
@@ -218,6 +226,12 @@ void RenderFilm
 {
   mApplyTonemap = a;
 } // end RenderFilm::setApplyTonemap()
+
+void RenderFilm
+  ::setSilentPostprocess(const bool s)
+{
+  mSilentPostprocess = s;
+} // end RenderFilm::setSilentPostprocess()
 
 void RenderFilm
   ::record(const float w,

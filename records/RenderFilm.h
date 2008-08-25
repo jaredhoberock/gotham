@@ -34,10 +34,12 @@ class RenderFilm
      *  \param width The new width of this RenderFilm.
      *  \param height The new height of this RenderFilm.
      *  \param filename A filename to write to post-rendering.
+     *  \param silent Whether or not to report to stdout during postprocess().
      */
     inline RenderFilm(const unsigned int width,
                       const unsigned int height,
-                      const std::string &filename = "");
+                      const std::string &filename = "",
+                      const bool silent = false);
 
     /*! This method records the given Path by repeatedly calling
      *  deposit() for each Result in results.
@@ -194,6 +196,11 @@ class RenderFilm
      */
     inline void setApplyTonemap(const bool a);
 
+    /*! This method sets mSilentPostprocess.
+     *  \param s Sets mSilentPostprocess.
+     */
+    inline void setSilentPostprocess(const bool s);
+
   protected:
     /*! Hide access to non-const pixel().
      */
@@ -234,6 +241,10 @@ class RenderFilm
     /*! Whether or not to apply the Reinhard tonemap on postprocess.
      */
     bool mApplyTonemap;
+
+    /*! Whether or not to silence the postprocess.
+     */
+    bool mSilentPostprocess;
 }; // end RenderFilm
 
 #include "RenderFilm.inl"
