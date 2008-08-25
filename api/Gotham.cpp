@@ -315,15 +315,25 @@ void Gotham
   return;
 } // end Gotham::render()
 
-void Gotham
+MaterialHandle Gotham
   ::material(Material *m)
 {
   // add m to mMaterials
   mMaterials->push_back(shared_ptr<Material>(m));
 
-  // note the current material
-  mAttributeStack.back()["material"] = lexical_cast<std::string>(mMaterials->size() - 1);
+  MaterialHandle result = mMaterials->size() - 1;
+
+  // set the current material
+  material(result);
+
+  return result;
 } // end Gotham::material)
+
+void Gotham
+  ::material(const MaterialHandle m)
+{
+  mAttributeStack.back()["material"] = lexical_cast<std::string>(m);
+} // end Gotham::material()
 
 TextureHandle Gotham
   ::texture(const std::string &filename)

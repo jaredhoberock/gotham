@@ -103,11 +103,19 @@ class Gotham
      */
     virtual void render(void);
 
-    /*! This method sets the given Material
+    /*! This method adds a new Material to mMaterials and sets it
      *  as the current Material.
      *  \param m The Material.
+     *  \return The MaterialHandle of the newly added Material in
+     *          mMaterials.
      */
-    virtual void material(Material *m);
+    virtual MaterialHandle material(Material *m);
+
+    /*! This method sets the current material to point to the
+     *  Material referred to by the given MaterialHandle.
+     *  \param m The MaterialHandle referring to the Material of interest.
+     */
+    virtual void material(const MaterialHandle m);
 
     /*! This method creates a new 2D rgb Texture
      *  from an image file on disk.

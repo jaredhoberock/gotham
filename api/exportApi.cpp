@@ -12,11 +12,18 @@ using namespace boost::python;
 
 // wrapper for Gotham::material()
 // see http://www.boost.org/libs/python/doc/v2/faq.html#ownership
-void Gotham_material(Gotham &g, std::auto_ptr<Material> m)
+MaterialHandle Gotham_material_ptr(Gotham &g, std::auto_ptr<Material> m)
 {
-  g.material(m.get());
+  MaterialHandle result = g.material(m.get());
   m.release();
-} // end Gotham_material()
+
+  return result;
+} // end Gotham_material_ptr()
+
+void Gotham_material_handle(Gotham &g, const MaterialHandle m)
+{
+  g.material(m);
+} // end Gotham_material_handle()
 
 // tell boost which multMatrix we mean
 typedef void (Gotham::*multMatrix_vector)(const std::vector<float>&);
@@ -69,7 +76,8 @@ void exportGotham(void)
     .def("mesh", mesh4)
     .def("sphere", &Gotham::sphere)
     .def("render", &Gotham::render)
-    .def("material", Gotham_material)
+    .def("material", Gotham_material_ptr)
+    .def("material", Gotham_material_handle)
     .def("texture", texture1)
     .def("texture", texture3)
     .def("attribute", &Gotham::attribute)

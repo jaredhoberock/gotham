@@ -47,6 +47,9 @@ class PyGotham:
   # map texture aliases to texture handles
   __textureMap = {}
 
+  # cache (shader, parameters) so as not to instantiate redundant shader objects
+  __shaderCache = {}
+
   def __init__(self):
     # by default, the subsystem is plain old Gotham
     self.__subsystem = self.__createSubsystem("Gotham")
@@ -123,17 +126,7 @@ class PyGotham:
     return self.__subsystem.getAttribute(name)
 
   def material(self, name, *parms):
-    # XXX this is getting ugly
-    # add shaderpaths to os.path temporarily
-    oldpath = sys.path
-    sys.path += self.shaderpaths
-
-    #try:
-    # import the material
-    module = __import__(name)
-    # create a new material
-    m = module.createMaterial()
-
+    # pack parameters into a dictionary if necessary
     parmDict = {}
     if len(parms) > 1:
       for i in range(0, len(parms), 2):
@@ -141,9 +134,31 @@ class PyGotham:
     elif len(parms) == 1:
       parmDict = parms[0]
 
-    # set each parameter
-    if parmDict != {}:
-      for p, val in parmDict.iteritems():
+    # get the parameters and values into a hashable tuple
+    parmsTuple = tuple(zip(parmDict.keys(), parmDict.values()))
+
+    # first look in the cache
+    shaderHash = (name,parmsTuple).__hash__()
+
+    if self.__shaderCache.has_key(shaderHash):
+      # there's a hit, simply refer to the cached shader
+      handle = self.__shaderCache[shaderHash]
+      self.__subsystem.material(handle)
+      return True
+    else:
+      # XXX this is getting ugly
+      # add shaderpaths to os.path temporarily
+      oldpath = sys.path
+      sys.path += self.shaderpaths
+
+      #try:
+      # import the material
+      module = __import__(name)
+      # create a new material
+      m = module.createMaterial()
+
+      # set each parameter
+      for (p, val) in parmsTuple:
         try:
           setMethod = getattr(m, 'set_' + p)
           try:
@@ -158,30 +173,34 @@ class PyGotham:
         except:
           print 'Warning: "%s" is not a parameter of material "%s"!' % (p, name)
 
-    # bind any dangling texture references
-    for member in dir(m): 
-      handle = 0
-      alias = ''
-      try:
-        exec 'alias = m.%s.mAlias' % member
-        exec 'handle = m.%s.mHandle' % member
-      except:
-        continue;
-      if handle == 0 and alias != '':
-        # create the texture
-        exec 'm.%s.mHandle = self.texture(alias)' % member
+      # bind any dangling texture references
+      for member in dir(m): 
+        handle = 0
+        alias = ''
+        try:
+          exec 'alias = m.%s.mAlias' % member
+          exec 'handle = m.%s.mHandle' % member
+        except:
+          continue;
+        if handle == 0 and alias != '':
+          # create the texture
+          exec 'm.%s.mHandle = self.texture(alias)' % member
 
-    del module
+      del module
 
-    # send the material to the subsystem
-    self.__subsystem.material(m)
-    result = True
-    #except:
-    #  print "Unable to find material '%s'." % name
-    #  result = False
-    # restore paths
-    sys.path = oldpath
-    return result
+      # send the material to the subsystem
+      materialHandle = self.__subsystem.material(m)
+
+      # cache the material
+      self.__shaderCache[shaderHash] = materialHandle
+
+      result = True
+      #except:
+      #  print "Unable to find material '%s'." % name
+      #  result = False
+      # restore paths
+      sys.path = oldpath
+      return result
 
   def texture(self, *args):
     # validate arguments
@@ -317,7 +336,12 @@ class PyGotham:
   def pointlight(self, position, power, radius = 0.0005):
     self.pushAttributes()
     self.material('light', 'power', power)
-    self.sphere(position[0], position[1], position[2], radius)
+    #self.sphere(position[0], position[1], position[2], radius)
+    self.pushMatrix()
+    self.translate(position[0], position[1], position[2])
+    self.scale(2.0 * radius, 2.0 * radius, 2.0 * radius)
+    self.unitcube()
+    self.popMatrix()
     self.popAttributes()
 
   def camera(self, aspect, fovy, apertureRadius):
