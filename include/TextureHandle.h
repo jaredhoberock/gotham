@@ -21,7 +21,7 @@ struct TextureParameter
   inline TextureParameter(const TextureHandle &h)
     :mHandle(h),mAlias(""){}
 
-  operator TextureHandle (void) const {return mHandle;}
+  inline operator TextureHandle (void) const {return mHandle;}
 
   TextureHandle mHandle;
 
