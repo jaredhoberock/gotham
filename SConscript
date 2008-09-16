@@ -27,12 +27,12 @@ env.Append(LIBS = ['GL'])
 env.Append(LIBS = ['GLU'])
 env.Append(LIBS = ['GLEW'])
 
-# qtviewer libraries
-env.Append(LIBS = ['QtCore'])
-env.Append(LIBS = ['QtXml'])
-env.Append(LIBS = ['QtGui'])
-env.Append(LIBS = ['QtOpenGL'])
-env.Append(LIBS = ['QGLViewer'])
+## qtviewer libraries
+#env.Append(LIBS = ['QtCore'])
+#env.Append(LIBS = ['QtXml'])
+#env.Append(LIBS = ['QtGui'])
+#env.Append(LIBS = ['QtOpenGL'])
+#env.Append(LIBS = ['qglviewer'])
 
 # aggregate shared objects from each child directory
 subdirectories = ['geometry',
