@@ -28,11 +28,20 @@ sudo apt-get install libboost-date-time-dev
 sudo apt-get install libboost-thread-dev
 sudo apt-get install libboost-python-dev
 
-# install glew for OpenGL extensions
-sudo apt-get install libglew1.4-dev
+# install glut
+sudo apt-get install libglut-dev
 
-# install openexr for floating point images
+# install glew for OpenGL extensions
+sudo apt-get install libglew1.5-dev
+
+# install openexr for .exr images
 sudo apt-get install libopenexr-dev
+
+# install libjpeg for .jpeg images
+sudo apt-get install libjpeg-dev
+
+# install libpng for .png images
+sudo apt-get install libpng-dev
 
 # build gotham
 cd $GOTHAMHOME
