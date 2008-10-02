@@ -7,8 +7,10 @@
 #include "MonteCarloRenderer.h"
 #include "../primitives/Scene.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/python/exec.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/python/exec.hpp>
+#include <boost/python/extract.hpp>
+#include <boost/python/tuple.hpp>
 using namespace boost;
 using namespace boost::python;
 
@@ -131,7 +133,7 @@ HaltCriterion *HaltCriterion
 
   // check if we specified spp
   // this automatically overrides the function name
-  tuple<size_t,size_t> spp(2,2);
+  boost::tuple<size_t,size_t> spp(2,2);
   a = attr.find("renderer:spp");
   if(a != attr.end())
   {
@@ -139,7 +141,10 @@ HaltCriterion *HaltCriterion
     try
     {
       // try to convert a tuple by evaluating the python expression
-      spp = extract< tuple<size_t,size_t> >(eval(a->second.c_str()));
+      python::tuple temp = extract<python::tuple>(eval(a->second.c_str()));
+      size_t sx = extract<size_t>(temp[0]);
+      size_t sy = extract<size_t>(temp[1]);
+      spp = boost::make_tuple(sx,sy);
     } // end try
     catch(...)
     {
@@ -147,7 +152,7 @@ HaltCriterion *HaltCriterion
       {
         // try to convert a single integer
         size_t xStrata = lexical_cast<size_t>(a->second);
-        spp = tuple<size_t,size_t>(xStrata,xStrata);
+        spp = boost::tuple<size_t,size_t>(xStrata,xStrata);
       } // end try
       catch(bad_lexical_cast &e)
       {
