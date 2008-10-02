@@ -7,8 +7,10 @@
 #include "MonteCarloRenderer.h"
 #include "../primitives/Scene.h"
 #include <boost/lexical_cast.hpp>
-#include "string_to_tuple.h"
+#include <boost/python/exec.hpp>
+#include <boost/tuple/tuple.hpp>
 using namespace boost;
+using namespace boost::python;
 
 void HaltCriterion
   ::init(const MonteCarloRenderer *r,
@@ -136,8 +138,8 @@ HaltCriterion *HaltCriterion
     any val = a->second;
     try
     {
-      // try to convert a tuple
-      spp = lexical_cast<tuple<size_t, size_t> >(a->second);
+      // try to convert a tuple by evaluating the python expression
+      spp = extract< tuple<size_t,size_t> >(eval(a->second.c_str()));
     } // end try
     catch(...)
     {

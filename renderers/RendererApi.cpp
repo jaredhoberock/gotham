@@ -18,9 +18,10 @@
 #include "../importance/ImportanceApi.h"
 #include "../importance/LuminanceImportance.h"
 #include "HaltCriterion.h"
-#include "string_to_tuple.h"
+#include <boost/python/exec.hpp>
 
 using namespace boost;
+using namespace boost::python;
 
 void RendererApi
   ::getDefaultAttributes(Gotham::AttributeMap &attr)
@@ -160,7 +161,8 @@ Renderer *RendererApi
     {
       try
       {
-        spp = lexical_cast<tuple<size_t,size_t> >(a->second);
+        // try to convert a tuple by evaluating the python expression
+        spp = extract< tuple<size_t,size_t> >(eval(a->second.c_str()));
       } // end try
       catch(...)
       {
