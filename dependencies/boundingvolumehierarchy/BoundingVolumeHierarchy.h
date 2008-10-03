@@ -20,7 +20,7 @@ template<typename PrimitiveType, typename PointType, typename RealType = float>
 
     typedef unsigned int NodeIndex;
     static const NodeIndex NULL_NODE;
-    static const float EPS = 0.00005f;
+    static const float EPS;
 
     template<typename Bounder>
       void build(const std::vector<Primitive> &primitives,

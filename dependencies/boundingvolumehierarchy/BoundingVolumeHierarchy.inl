@@ -17,6 +17,11 @@ template<typename PrimitiveType,
 template<typename PrimitiveType,
          typename PointType,
          typename RealType>
+  const float BoundingVolumeHierarchy<PrimitiveType,PointType,RealType>::EPS = 0.00005f;
+
+template<typename PrimitiveType,
+         typename PointType,
+         typename RealType>
   typename BoundingVolumeHierarchy<PrimitiveType, PointType, RealType>::NodeIndex
     BoundingVolumeHierarchy<PrimitiveType, PointType, RealType>
       ::addNode(const NodeIndex parent)

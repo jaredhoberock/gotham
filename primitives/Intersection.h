@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "../include/DifferentialGeometry.h"
+#include "../include/detail/DifferentialGeometry.h"
 #include "PrimitiveHandle.h"
 
 /*! \class IntersectionBase

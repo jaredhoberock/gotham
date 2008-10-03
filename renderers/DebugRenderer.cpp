@@ -4,8 +4,8 @@
  */
 
 #include "DebugRenderer.h"
-#include "../include/Point.h"
-#include "../include/Vector.h"
+#include "../include/detail/Point.h"
+#include "../include/detail/Vector.h"
 #include "../geometry/Ray.h"
 #include "../primitives/Scene.h"
 #include "../records/RenderFilm.h"

@@ -433,25 +433,28 @@ virtual void get%sParameters(void *ptr) const
     return compileMe
 
   def createMakefileString(self, sources, baseName):
-    # XXX fix this include ugliness
-    #     ideally, there's a canonical installation of gotham somewhere
-    #     with an include directory. point to that.
     makefile = '''
 import os
-includes = [os.environ['GOTHAMHOME'] + '/include']
+homedir = os.environ['GOTHAMHOME']
+includes = [os.path.join(homedir, 'include')]
 if os.name == 'posix':
   includes += ['/usr/include/python2.5']
 elif os.name == 'nt':
-  includes += ['c:/Python25/include']
-libpath = os.environ["GOTHAMHOME"] + '/lib'
+  # XXX scons doesn't correctly find this sdk include path
+  sdkInclude = "c:/Program Files/Microsoft SDKs/Windows/v6.0A/Include"
+  includes += [sdkInclude,
+               os.path.join(homedir, 'include/detail'),
+               os.path.join(homedir, 'include/detail/python2.5')]
+libpath = [os.environ["GOTHAMHOME"] + '/lib']
 if os.name == 'posix':
   libs = [File(libpath + '/libgotham.so'), 'boost_python']
 elif os.name == 'nt':
   # on windows, we need to link to the import library
   libs = ['gotham']
-# XXX TODO fix these path issues
 if os.name == 'nt':
-  libpath += ['c:/dev/lib', 'c:/Python25/libs']
+  # XXX scons doesn't correctly find this sdk lib path
+  sdkLib = "c:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
+  libpath += [sdkLib]
 env = None
 if os.name == 'posix':
   env = Environment(CPPPATH = includes,
@@ -479,7 +482,8 @@ result = env.SharedLibrary('%s', sources)
 if os.name == 'nt':
   # we must explicitly embed the "manifest" after building the dll
   # from http://www.scons.org/wiki/EmbedManifestIntoTarget 
-  env.AddPostAction(result, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+  # XXX fix this issue where mt.exe cannot be found without an absolute path
+  env.AddPostAction(result, '"C:/Program Files/Microsoft SDKs/Windows/v6.0A/bin/mt.exe" -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
   # delete the manifest file
   env.AddPostAction(result, 'del.exe ${TARGET}.manifest')
   # delete the import library - we don't need it
@@ -539,13 +543,10 @@ if os.name == 'nt':
     #     fix this nonsense
     pathToScons = ''
     if os.name == 'posix':
-      pathToScons = 'scons'
       command = 'scons -Q -f %s' % dir + '/' + 'SConstruct' 
     elif os.name == 'nt':
-      pathToScons = 'c:/Python25/scons.bat'
-      command = 'c:/Python25/scons.bat -Q -f %s' % dir + '/' + 'SConstruct' 
+      command = 'c:/Python25/scripts/scons.bat -Q -f %s' % dir + '/' + 'SConstruct' 
     os.system(command)
-    #os.execl(pathToScons, '-Q', '-f', dir + '/SConstruct')
     
     # kill the tempfiles
     #shutil.rmtree(dir, True)

@@ -5,7 +5,7 @@
 
 #include "BoundingBox.h"
 #include "Ray.h"
-#include "../include/Normal.h"
+#include "../include/detail/Normal.h"
 
 bool BoundingBox
   ::intersect(const Ray &r, float &t0, float &t1) const

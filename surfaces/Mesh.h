@@ -7,10 +7,10 @@
 #define MESH_H
 
 #include <mesh/TriangleMesh.h>
-#include "../include/Point.h"
-#include "../include/Normal.h"
-#include "../include/ParametricCoordinates.h"
-#include "../include/DifferentialGeometry.h"
+#include "../include/detail/Point.h"
+#include "../include/detail/Normal.h"
+#include "../include/detail/ParametricCoordinates.h"
+#include "../include/detail/DifferentialGeometry.h"
 #include "../geometry/Ray.h"
 #include "../geometry/BoundingBox.h"
 #include <rayCaster/bsp.h>

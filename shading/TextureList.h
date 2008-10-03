@@ -8,7 +8,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "Texture.h"
-#include "../include/TextureHandle.h"
+#include "../include/detail/TextureHandle.h"
 
 class TextureList
   : public std::vector<boost::shared_ptr<Texture> >

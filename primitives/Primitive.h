@@ -11,8 +11,8 @@
 class BoundingBox;
 class Ray;
 #include <string>
-#include "../include/DifferentialGeometry.h"
-#include "../include/Spectrum.h"
+#include "../include/detail/DifferentialGeometry.h"
+#include "../include/detail/Spectrum.h"
 #include "../geometry/Transform.h"
 #include <boost/functional/hash.hpp>
 #include "Intersection.h"

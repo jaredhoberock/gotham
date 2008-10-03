@@ -5,7 +5,7 @@
 
 #include "DefaultMaterial.h"
 #include "Lambertian.h"
-#include "../include/ShadingInterface.h"
+#include "../include/detail/ShadingInterface.h"
 
 const char *DefaultMaterial
   ::getName(void) const

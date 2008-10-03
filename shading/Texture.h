@@ -7,7 +7,7 @@
 #pragma once
 
 #include <array2/Array2.h>
-#include "../include/Spectrum.h"
+#include "../include/detail/Spectrum.h"
 
 class Texture
   : protected Array2<Spectrum>

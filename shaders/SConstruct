@@ -1,15 +1,22 @@
 import os
 import glob
 
-bld = Builder(action = 'pbslc $SOURCE')
+if os.name == 'nt':
+  bld = Builder(action = 'pbslc.bat $SOURCE')
+else:
+  bld = Builder(action = 'pbslc $SOURCE')
+
 env = Environment(BUILDERS = {'Material' : bld},
                   suffix = '.so',
                   src_suffix = '.pbsl')
 
 # set GOTHAMHOME in the scons environment
 env['ENV']['GOTHAMHOME'] = os.environ['GOTHAMHOME']
-# add the bin directory to the path
-env['ENV']['PATH'] += ':' + env['ENV']['GOTHAMHOME'] + '/bin'
+
+# add the GOTHAM bin directory to the path
+env.AppendENVPath('PATH', os.path.join(env['ENV']['GOTHAMHOME'], 'bin'))
+
+print env['ENV']['PATH']
 
 # find all .pbsls in the current directory
 sources = []

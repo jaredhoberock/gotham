@@ -3,11 +3,13 @@
  *  \brief Implementation of Texture class.
  */
 
-#include "Texture.h" 
-
 #ifdef WIN32
 #define OPENEXR_DLL
+#define NOMINMAX
 #endif // WIN32
+
+#include "Texture.h" 
+#include <numeric>
 
 #include <halfLimits.h>
 #include <ImfRgbaFile.h>
@@ -49,8 +51,6 @@ Texture
 template<typename T>
   inline static float gammaInversion(const T x)
 {
-  //static float lut[256];
-  //static float lut[std::numeric_limits<T>::max() + 1];
   static std::vector<float> lut(std::numeric_limits<T>::max() + 1);
 
   static bool firstTime = true;

@@ -8,7 +8,7 @@
 
 float tvi(const float Y)
 {
-  float logY = log10f(std::max(0.0f,Y));
+  float logY = log10f(std::max<float>(0.0f,Y));
   float logResult = 0;
 
   if(logY < -3.94f)

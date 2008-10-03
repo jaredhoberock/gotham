@@ -8,7 +8,7 @@
 #include <boost/spirit/core.hpp>
 #include <boost/spirit/actor/push_back_actor.hpp>
 
-#include "../include/exportShading.h"
+#include "../include/detail/exportShading.h"
 #include "../shading/DefaultMaterial.h"
 #include "../surfaces/Mesh.h"
 #include "../surfaces/SmallMesh.h"

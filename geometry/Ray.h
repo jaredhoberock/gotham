@@ -6,8 +6,8 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "../include/Vector.h"
-#include "../include/Point.h"
+#include "../include/detail/Vector.h"
+#include "../include/detail/Point.h"
 
 /*! \class Ray
  *  \brief A Ray is a semi-infinite line, with an anchor and direction.

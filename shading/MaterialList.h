@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include "../include/Material.h"
+#include "../include/detail/Material.h"
 #include "MaterialHandle.h"
 
 class MaterialList

@@ -8,7 +8,7 @@
 #ifndef DEFAULT_MATERIAL_H
 #define DEFAULT_MATERIAL_H
 
-#include "../include/Material.h"
+#include "../include/detail/Material.h"
 
 class DefaultMaterial
   : public Material

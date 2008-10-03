@@ -7,11 +7,11 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include "../include/Point.h"
-#include "../include/Normal.h"
-#include "../include/Vector.h"
-#include "../include/DifferentialGeometry.h"
-#include "../include/Spectrum.h"
+#include "../include/detail/Point.h"
+#include "../include/detail/Normal.h"
+#include "../include/detail/Vector.h"
+#include "../include/detail/DifferentialGeometry.h"
+#include "../include/detail/Spectrum.h"
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../shading/ShadingContext.h"
 #include <boost/array.hpp>

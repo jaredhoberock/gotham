@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <vector>
 
+#ifndef PI
+#define PI 3.14159265
+#endif // PI
+
 GlutViewer* GlutViewer::viewer = 0;
 
 GlutViewer
@@ -33,7 +37,7 @@ GlutViewer
   mCamera.setPosition(gpcpu::float3(0,0,0));
   mCamera.setUpVector(gpcpu::float3(0,1,0));
   mCamera.setViewDirection(gpcpu::float3(0,0,-1));
-  mCamera.setFieldOfView(M_PI * 45.0f / 180.0f);
+  mCamera.setFieldOfView(PI * 45.0f / 180.0f);
   mCamera.setAspectRatio(static_cast<float>(width()) / height());
 
   // animation
@@ -245,7 +249,7 @@ void GlutViewer
   glMatrixMode(GL_PROJECTION);
 
   glLoadIdentity();
-  gluPerspective(180.0f * camera()->fieldOfView() / M_PI,
+  gluPerspective(180.0f * camera()->fieldOfView() / PI,
                  camera()->aspectRatio(),
                  camera()->zNear(),
                  1000.0f);

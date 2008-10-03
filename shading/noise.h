@@ -7,7 +7,7 @@
 #ifndef NOISE_H
 #define NOISE_H
 
-#include "../include/exportShading.h"
+#include "../include/detail/exportShading.h"
 
 /*! This function takes the three coordinates of a Point
  *  and returns the value of the signed Perlin noise function

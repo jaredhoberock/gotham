@@ -8,7 +8,7 @@
 #define PATH_SAMPLER_H
 
 #include <vector>
-#include "../include/Spectrum.h"
+#include "../include/detail/Spectrum.h"
 #include <boost/array.hpp>
 #include "Path.h"
 class RandomSequence;

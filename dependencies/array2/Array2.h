@@ -118,7 +118,7 @@ template<typename Type>
      *           is returned here.
      *  \param frac The fractional part of t's mapping is returned here.
      */
-    inline void column(float t, size_t &t, float &frac) const;
+    inline void column(float t, size_t &i, float &frac) const;
 
     /*! This method maps the given real number in [0,1)
      *  to a row in this RandomAccessFilm.
@@ -135,7 +135,7 @@ template<typename Type>
      *           is returned here.
      *  \param frac The fractional part of t's mapping is returned here.
      */
-    inline void row(float t, size_t &t, float &frac) const;
+    inline void row(float t, size_t &i, float &frac) const;
 
     /*! \typedef
      *  \brief Shorthand.

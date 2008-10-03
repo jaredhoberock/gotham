@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../include/exportShading.h"
-#include "../include/ShadingInterface.h"
+#include "../include/detail/exportShading.h"
+#include "../include/detail/ShadingInterface.h"
 
 #ifdef WIN32
 class DLLAPI ShadingContext;

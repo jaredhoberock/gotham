@@ -4,7 +4,7 @@
  */
 
 #include "RasterizableScene.h"
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 template<typename SceneParentType>
   RasterizableScene<SceneParentType>

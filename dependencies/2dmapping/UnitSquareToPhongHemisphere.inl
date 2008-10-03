@@ -28,7 +28,10 @@ template<typename Real, typename Real3>
 {
   Real cosAlpha = pow(Real(1) - u,Real(1) / (k + Real(1)));
 
-  float sinAlpha = sqrtf(fmaxf(Real(0), Real(1) - cosAlpha*cosAlpha));
+  float sinAlpha = Real(1) - cosAlpha*cosAlpha;
+  sinAlpha = sinAlpha > 0 ? sinAlpha : Real(0);
+  sinAlpha = sqrtf(sinAlpha);
+
   p.x = sinAlpha * cosf(Real(2) * PI * v);
   p.y = sinAlpha * sinf(Real(2) * PI * v);
   p.z = cosAlpha;

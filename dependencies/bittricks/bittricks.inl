@@ -29,13 +29,13 @@ int ifloor(double t)
   return static_cast<int>(floorf(t));
 } // end ifloor()
 
-template<typename OUT, typename IN>
-  OUT reinterpretWord(const IN &word)
+template<typename OUT_TYPE, typename IN_TYPE>
+  OUT_TYPE reinterpretWord(const IN_TYPE &word)
 {
   // XXX hack around reinterpret_cast not working correctly on gcc 4.1
   //     \see http://gcc.gnu.org/ml/gcc-help/2006-06/msg00100.html
   //     This is also similar to CUDA's implementation of __float_as_int()
-  union {IN i; OUT o;} u;
+  union {IN_TYPE i; OUT_TYPE o;} u;
   u.i = word;
   return u.o;
 } // end reinterpretWord()

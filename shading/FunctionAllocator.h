@@ -9,7 +9,7 @@
 #define FUNCTION_ALLOCATOR_H
 
 #include <vector>
-#include "../include/exportShading.h"
+#include "../include/detail/exportShading.h"
 #include "ScatteringFunctionBlock.h"
 
 // XXX this is nasty: kill it

@@ -13,7 +13,7 @@
 #include "../primitives/PrimitiveList.h"
 #include "../primitives/SurfacePrimitiveList.h"
 #include "../shading/MaterialList.h"
-#include "../include/TextureHandle.h"
+#include "../include/detail/TextureHandle.h"
 #include "../shading/TextureList.h"
 #include "../renderers/Renderer.h"
 #include "../records/PhotonMap.h"

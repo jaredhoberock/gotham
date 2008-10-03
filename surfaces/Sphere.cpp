@@ -4,8 +4,8 @@
  */
 
 #include "Sphere.h"
-#include "../include/Vector.h"
-#include "../include/DifferentialGeometry.h"
+#include "../include/detail/Vector.h"
+#include "../include/detail/DifferentialGeometry.h"
 #include <quadratic/Quadratic.h>
 #include "../geometry/BoundingBox.h"
 #include "../geometry/Ray.h"

@@ -1,6 +1,6 @@
-/*! \file Vector3.h
+/*! \file Vector2.h
  *  \author Jared Hoberock
- *  \brief Defines the interface to a N=3 specialization
+ *  \brief Defines the interface to a N=2 specialization
  *         of Vector.
  */
 
@@ -12,13 +12,13 @@ namespace gpcpu
 {
 
 template<typename S>
-  class Vector<S,3>
+  class Vector<S,2>
 {
   public:
     /*! \typedef This
      *  \brief Shorthand.
      */
-    typedef Vector<S,3> This;
+    typedef Vector<S,2> This;
 
     /*! \typedef Scalar
      *  \brief Shorthand.
@@ -37,16 +37,16 @@ template<typename S>
      */
     template<typename CopyFromType>
       inline Vector(const CopyFromType &v)
-        :x(v[0]),y(v[1]),z(v[2]){}
+        :x(v[0]),y(v[1]){}
 
     /*! \fn Vector
      *  \brief Constructor takes a const pointer to
-     *         an 3-length array of Scalars.
+     *         an 2-length array of Scalars.
      *  \param v A pointer to an N-length array of
      *           Scalars to copy from.
      */
     inline Vector(const Scalar *v)
-      :x(v[0]),y(v[1]),z(v[2]){}
+      :x(v[0]),y(v[1]){}
 
     /*! \fn Vector
      *  \brief This method sets every element of this Vector
@@ -54,7 +54,7 @@ template<typename S>
      *  \param v The fill value.
      */
     inline Vector(const Scalar v)
-      :x(v),y(v),z(v){}
+      :x(v),y(v){}
 
     /*! \fn Vector
      *  \brief Special constructor for 3-vectors.
@@ -63,19 +63,8 @@ template<typename S>
      *  \param s2 The third element.
      */
     inline Vector(const Scalar &v0,
-                  const Scalar &v1,
-                  const Scalar &v2)
-      :x(v0),y(v1),z(v2){}
-
-    /*! \fn Vector
-     *  \brief Constructor accepts a smaller Vector
-     *         and a final Scalar.
-     *  \param v The first N-1 Scalars.
-     *  \param s The Nth Scalar.
-     */
-    inline Vector(const Vector<Scalar,3-1> &v,
-                  const Scalar &s)
-      :x(v[0]),y(v[1]),z(s){}
+                  const Scalar &v1)
+      :x(v0),y(v1){}
 
     /*! \fn operator Scalar *
      *  \brief Cast to Scalar * operator.
@@ -97,7 +86,7 @@ template<typename S>
      */
     template<typename IndexType>
       inline Scalar &operator[](const IndexType &i)
-      {return i == 0 ? x : i == 1 ? y : z;}
+      {return i == 0 ? x : y;}
 
     /*! \fn operator[]
      *  \brief This method provides const access to the ith element.
@@ -105,22 +94,22 @@ template<typename S>
      */
     template<typename IndexType>
       inline const Scalar &operator[](const IndexType &i) const
-      {return i == 0 ? x : i == 1 ? y : z;}
+      {return i == 0 ? x : y;}
 
     template<size_t i>
       inline Scalar &get(void)
-      {return i == 0 ? x : i == 1 ? y : z;}
+      {return i == 0 ? x : y;}
 
     template<size_t i>
       inline const Scalar &get(void) const
-      {return i == 0 ? x : i == 1 ? y : z;}
+      {return i == 0 ? x : y;}
 
     /*! \fn operator+
      *  \brief Addition operator.
      *  \return Returns (*this) + rhs
      */
     inline This operator+(const This &rhs) const
-      {return This(x + rhs.x, y + rhs.y, z + rhs.z);}
+      {return This(x + rhs.x, y + rhs.y);}
 
     /*! \fn operator+=
      *  \brief Plus equal operator.
@@ -128,7 +117,7 @@ template<typename S>
      *  \return *this
      */
     inline This &operator+=(const This &rhs)
-      {x += rhs.x; y += rhs.y; z += rhs.z; return *this;}
+      {x += rhs.x; y += rhs.y; return *this;}
 
     /*! \fn operator*=
      *  \brief Scalar times equal.
@@ -136,7 +125,7 @@ template<typename S>
      *  \return *this.
      */
     inline This &operator*=(const Scalar &s)
-      {x *= s; y *= s; z *= s; return *this;}
+      {x *= s; y *= s; return *this;}
 
     /*! \fn operator/
      *  \brief Scalar divide.
@@ -144,7 +133,7 @@ template<typename S>
      *  \return (*this) / s
      */
     inline This operator/(const Scalar &rhs) const
-      {return This(x / rhs, y / rhs, z / rhs);}
+      {return This(x / rhs, y / rhs);}
 
     /*! \fn operator/=
      *  \brief Scalar divide equal.
@@ -152,7 +141,7 @@ template<typename S>
      *  \return (*this)
      */
     inline This &operator/=(const Scalar &rhs)
-      {x /= rhs; y /= rhs; z /= rhs; return *this;}
+      {x /= rhs; y /= rhs; return *this;}
 
     /*! \fn operator/=
      *  \brief Vector component-wise divide equal.
@@ -160,7 +149,7 @@ template<typename S>
      *  \return (*this) / rhs
      */
     inline This &operator/=(const Vector &rhs)
-      {x /= rhs.x; y /= rhs.y; z /= rhs.z; return *this;}
+      {x /= rhs.x; y /= rhs.y; return *this;}
 
     /*! \fn operator/
      *  \brief Vector component-wise divide.
@@ -168,7 +157,7 @@ template<typename S>
      *  \return (*this) / rhs
      */
     inline This operator/(const Vector &rhs) const
-      {return This(x / rhs.x, y / rhs.y, z / rhs.z);}
+      {return This(x / rhs.x, y / rhs.y);}
 
     /*! \fn operator*
      *  \brief Vector component-wise mutliply
@@ -176,7 +165,7 @@ template<typename S>
      *  \return (*this) * rhs
      */
     inline This operator*(const This &rhs) const
-      {return This(x * rhs.x, y * rhs.y, z * rhs.z);}
+      {return This(x * rhs.x, y * rhs.y);}
 
     /*! \fn operator*
      *  \brief Scalar multiply.
@@ -184,7 +173,7 @@ template<typename S>
      *  \return (*this) * rhs
      */
     inline This operator*(const Scalar &rhs) const
-      {return This(x * rhs, y * rhs, z * rhs);}
+      {return This(x * rhs, y * rhs);}
 
     /*! \fn operator*
      *  \brief Vector component-wise mutliply equal.
@@ -192,7 +181,7 @@ template<typename S>
      *  \return *this. 
      */
     inline This &operator*=(const This &rhs)
-      {x *= rhs.x; y *= rhs.y; z *= rhs.z; return *this;}
+      {x *= rhs.x; y *= rhs.y; return *this;}
 
     /*! \fn dot
      *  \brief Dot product
@@ -200,7 +189,7 @@ template<typename S>
      *  \return (*this) dot rhs
      */
     inline Scalar dot(const This &rhs) const
-      {return x*rhs.x + y*rhs.y + z*rhs.z;}
+      {return x*rhs.x + y*rhs.y;}
 
     /*! \fn absDot
      *  \brief Absolute value of dot product.
@@ -216,8 +205,7 @@ template<typename S>
      */
     inline void saturate(void)
       {x = __max<Scalar>(0, __min<Scalar>(1, x));
-       y = __max<Scalar>(0, __min<Scalar>(1, y));
-       z = __max<Scalar>(0, __min<Scalar>(1, z));}
+       y = __max<Scalar>(0, __min<Scalar>(1, y));}
 
     /*! \fn posDot
      *  \brief Dot product where negative values
@@ -228,35 +216,12 @@ template<typename S>
     inline Scalar posDot(const This &rhs) const
       {return __max<Scalar>(0, dot(rhs));}
 
-    /*! \fn cross
-     *  \brief Cross product
-     *  \param rhs The rhs of the operation.
-     *  \return (*this) cross rhs
-     *  \note This in only implemented for 3-vectors.
-     */
-    inline This cross(const This &rhs) const
-    {
-      This result;
-      const This &lhs = *this;
-
-      This subtractMe(lhs.z*rhs.y, lhs.x*rhs.z, lhs.y*rhs.x);
-
-      result.x = (lhs.y * rhs.z);
-      result.x -= subtractMe.x;
-      result.y = (lhs.z * rhs.x);
-      result.y -= subtractMe.y;
-      result.z = (lhs.x * rhs.y);
-      result.z -= subtractMe.z;
-
-      return result;
-    } // end cross()
-
     /*! \fn operator-
      *  \brief Unary negation.
      *  \return -(*this)
      */
     inline This operator-(void) const
-      {return This(-x,-y,-z);}
+      {return This(-x,-y);}
 
     /*! \fn operator-
      *  \brief Binary minus.
@@ -264,7 +229,7 @@ template<typename S>
      *  \return (*this) - rhs
      */
     inline This operator-(const This &rhs) const
-      {return This(x - rhs.x, y - rhs.y, z - rhs.z);}
+      {return This(x - rhs.x, y - rhs.y);}
 
     /*! \fn operator-=
      *  \brief Decrement equal.
@@ -272,7 +237,7 @@ template<typename S>
      *  \return *this
      */
     inline This &operator-=(const This &rhs)
-      {x -= rhs.x; y -= rhs.y; z -= rhs.z; return *this;}
+      {x -= rhs.x; y -= rhs.y; return *this;}
 
     /*! \fn norm
      *  \brief This method returns the 2-norm of this
@@ -303,7 +268,7 @@ template<typename S>
      *  \return As above.
      */
     inline Scalar sum(void) const
-      {return x + y + z;}
+      {return x + y;}
 
     /*! \fn product
      *  \brief This method returns the product of elements of
@@ -311,7 +276,7 @@ template<typename S>
      *  \return As above.
      */
     inline Scalar product(void) const
-      {return x * y * z;}
+      {return x * y;}
 
     /*! \fn max
      *  \brief This method returns the maximum element of this
@@ -319,7 +284,7 @@ template<typename S>
      *  \return The maximum element of this Vector.
      */
     inline Scalar maxElement(void) const
-      {return __max<Scalar>(x, __max<Scalar>(y, z));}
+      {return __max<Scalar>(x, y);}
 
     /*! \fn maxElementIndex
      *  \brief This method returns the index of the maximum element
@@ -330,11 +295,10 @@ template<typename S>
     {
       if(x > y)
       {
-        if(x > z) return 0;
-        else return 2;
+        return 0;
       } // end if
-      else if(y > z) return 1;
-      return 2;
+
+      return 1;
     } // end maxElementIndex()
 
     /*! \fn mean
@@ -343,7 +307,7 @@ template<typename S>
      *  \return The mean of this Vector's elements.
      */
     inline Scalar mean(void) const
-      {return (x + y + z) * mOneOverN;}
+      {return (x + y) * mOneOverN;}
 
     /*! \fn normalize
      *  \brief This method returns a normalized version
@@ -357,60 +321,7 @@ template<typename S>
      *  \return N
      */
     inline static size_t numElements(void)
-      {return 3;}
-
-    /*! This method returns a Vector orthogonal to this
-     *  Vector
-     *  \return A Vector v such that this->dot(v) is small.
-     */
-    This orthogonalVector(void) const
-    {
-      int i = -1, j = -1, k = -1;
-
-      // choose the minimal element
-      if(fabs(x) <= fabs(y))
-      {
-        if(fabs(x) <= fabs(y))
-        {
-          // x is min
-          k = 0;
-          i = 1;
-          j = 2;
-        } // end if
-        else
-        {
-          // z is min
-          k = 2;
-          i = 0;
-          j = 1;
-        } // end else
-      } // end if
-      else if(fabs(y) <= fabs(z))
-      {
-        // y is min
-        k = 1;
-        i = 0;
-        j = 2;
-      } // end else if
-      else
-      {
-        // z is min
-        k = 2;
-        i = 0;
-        j = 1;
-      } // end else
-
-      // supposing that y was the min, result would look like:
-      // result = (z / sqrt(1.0 - y*y), 0, -x / sqrt(1.0 - y*y))
-      Scalar denom = Sqrt<Scalar>()(Scalar(1.0)- (*this)[k]*(*this)[k]);
-
-      This result;
-      result[i] =  (*this)[j] / denom;
-      result[j] = -(*this)[i] / denom;
-      result[k] = 0;
-
-      return result;
-    } // end orthogonalVector()
+      {return 2;}
 
     /*! This method reflects this Vector about another.
      *  \param v The Vector about which to reflect.
@@ -424,22 +335,13 @@ template<typename S>
 
     Scalar x;
     Scalar y;
-    Scalar z;
 
-    const static Scalar mOneOverN = Scalar(1.0f) / 3;
+    const static Scalar mOneOverN;
 }; // end Vector
 
-/*! \fn cross
- *  \brief cross product for Vector3s.
- *  \param lhs The left hand side of the cross product.
- *  \param rhs The right hand side of the cross product.
- *  \return lhs x rhs
- */
-template<typename Scalar>
-  inline Vector<Scalar,3> cross(const Vector<Scalar,3> &lhs, const Vector<Scalar,3> &rhs)
-{
-  return lhs.cross(rhs);
-} // end cross()
+// initialize the const static member outside the class
+template<typename S>
+  const S Vector<S,2>::mOneOverN = S(1) / 2;
 
 } // end gpcpu
 

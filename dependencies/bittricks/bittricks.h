@@ -24,8 +24,8 @@ inline int iround(const double t);
  *  \param word The word to interpret.
  *  \note assert(sizeof(IN) == sizeof(OUT))
  *  */
-template<typename OUT, typename IN>
-  inline OUT reinterpretWord(const IN &word);
+template<typename OUT_TYPE, typename IN_TYPE>
+  inline OUT_TYPE reinterpretWord(const IN_TYPE &word);
 
 #include "bittricks.inl"
 

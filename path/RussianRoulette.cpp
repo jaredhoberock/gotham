@@ -4,9 +4,9 @@
  */
 
 #include "RussianRoulette.h"
-#include "../include/Spectrum.h"
-#include "../include/DifferentialGeometry.h"
-#include "../include/Vector.h"
+#include "../include/detail/Spectrum.h"
+#include "../include/detail/DifferentialGeometry.h"
+#include "../include/detail/Vector.h"
 
 float RussianRoulette
   ::operator()(void) const

@@ -8,7 +8,7 @@
 #define RANDOM_ACCESS_FILM_H
 
 #include <vector>
-#include "../include/Spectrum.h"
+#include "../include/detail/Spectrum.h"
 #include "Film.h"
 #include <array2/Array2.h>
 

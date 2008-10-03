@@ -7,10 +7,10 @@
 #ifndef SCATTERING_DISTRIBUTION_FUNCTION_H
 #define SCATTERING_DISTRIBUTION_FUNCTION_H
 
-#include "../include/Vector.h"
-#include "../include/Normal.h"
-#include "../include/DifferentialGeometry.h"
-#include "../include/Spectrum.h"
+#include "../include/detail/Vector.h"
+#include "../include/detail/Normal.h"
+#include "../include/detail/DifferentialGeometry.h"
+#include "../include/detail/Spectrum.h"
 #include "FunctionAllocator.h"
 
 #ifndef PI

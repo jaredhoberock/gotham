@@ -11,16 +11,16 @@ namespace gpcpu
 {
 
 template<typename T>
-  inline T __max(const T &lhs, const T &rhs)
+  inline T __gpcpu_max(const T &lhs, const T &rhs)
 {
   return lhs > rhs ? lhs : rhs;
-} // end __max()
+} // end __gpcpu_max()
 
 template<typename T>
-  inline T __min(const T &lhs, const T &rhs)
+  inline T __gpcpu_min(const T &lhs, const T &rhs)
 {
   return lhs < rhs ? lhs : rhs;
-} // end __min()
+} // end __gpcpu_min()
 
 template<typename Scalar, size_t N>
   Vector<Scalar, N>
@@ -208,7 +208,7 @@ template<typename Scalar, size_t N>
   Scalar Vector<Scalar, N>
     ::posDot(const This &rhs) const
 {
-  return __max<Scalar>(0, dot(rhs));
+  return __gpcpu_max<Scalar>(0, dot(rhs));
 } // end Vector::posDot()
 
 template<typename Scalar, size_t N>
@@ -217,7 +217,7 @@ template<typename Scalar, size_t N>
 {
   for(size_t i = 0; i != N; ++i)
   {
-    (*this)[i] = __max<Scalar>(0, __min<Scalar>(1, (*this)[i]));
+    (*this)[i] = __gpcpu_max<Scalar>(0, __gpcpu_min<Scalar>(1, (*this)[i]));
   } // end for i
 } // end Vector::saturate()
 

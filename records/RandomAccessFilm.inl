@@ -3,12 +3,14 @@
  *  \brief Implementation of RandomAccessFilm class.
  */
 
-#include "RandomAccessFilm.h"
-#include <thresholdversusintensity/thresholdVersusIntensity.h>
-
 #ifdef WIN32
 #define OPENEXR_DLL
+#define NOMINMAX
 #endif // WIN32
+
+#include "RandomAccessFilm.h"
+#include <thresholdversusintensity/thresholdVersusIntensity.h>
+#include <algorithm>
 
 #include <halfLimits.h>
 #include <ImfRgbaFile.h>

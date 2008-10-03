@@ -5,7 +5,7 @@
 
 #include "exportApi.h"
 #include "Gotham.h"
-#include "../include/TextureHandle.h"
+#include "../include/detail/TextureHandle.h"
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;

@@ -28,8 +28,8 @@ class StratifiedSequence
                               const size_t xStrata,
                               const size_t yStrata);
 
-    inline virtual void reset(const float xStrata, const float xEnd,
-                              const float yStrata, const float yEnd,
+    inline virtual void reset(const float xStart, const float xEnd,
+                              const float yStart, const float yEnd,
                               const size_t xStrata,
                               const size_t yStrata);
 

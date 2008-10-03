@@ -8,7 +8,9 @@
 import sys
 import os
 import math
+
 from libgotham import *
+
 import inspect
 
 def normalize(x):

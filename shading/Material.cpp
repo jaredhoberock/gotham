@@ -3,8 +3,8 @@
  *  \brief Implementation of Material class.
  */
 
-#include "../include/Material.h"
-#include "../include/ShadingInterface.h"
+#include "../include/detail/Material.h"
+#include "../include/detail/ShadingInterface.h"
 
 Material
   ::~Material(void)
