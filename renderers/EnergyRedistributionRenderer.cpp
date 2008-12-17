@@ -41,6 +41,12 @@ void EnergyRedistributionRenderer
 
   unsigned int totalPixels = film->getWidth() * film->getHeight();
   const TargetPixelSampleCount *halt = dynamic_cast<const TargetPixelSampleCount*>(mHalt.get());
+  if(!halt)
+  {
+    std::cerr << "EnergyRedistributionRenderer::kernel(): This Renderer requires a HaltCriterion of type TargetPixelSampleCount." << std::endl;
+    exit(-1);
+  } // end if
+
   size_t xStrata = halt->getXStrata();
   size_t yStrata = halt->getYStrata();
   size_t totalSamples = (xStrata * yStrata) * totalPixels;
