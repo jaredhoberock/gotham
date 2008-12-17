@@ -45,8 +45,11 @@ template<typename V3, typename S3, typename Boolean>
   result.y = 0;
   result.z = 0;
 
+  float nDotWo = dot(normal,wo);
+  float nDotWi = dot(normal,wi);
+
   // wo & wi must lie in the same hemisphere
-  if(!areSameHemisphere(wi,normal,wo)) return result;
+  if(!areSameHemisphere(nDotWo,nDotWi)) return result;
 
   // compute the microfacet normal (half-vector)
   Vector m = normalize(wo + wi);
@@ -79,7 +82,19 @@ template<typename V3, typename S3, typename Boolean>
 
   // Walter et al, 2007, equation 20
   result = mReflectance * F * G * D;
-  result /= (4.0f * fabs(dot(normal,wo) * dot(normal,wi)));
+  result /= (4.0f * fabs(nDotWo * nDotWi));
+
+  // it may be the case that either nDowWo or nDowWi is very close to
+  // zero, making result either NaN or inf
+  // in this limiting case, D is zero, so detect it and set result to black
+  // since D is in the numerator
+  // XXX catch this earlier, before we evaluate Fresnel
+  if(!isfinite(result.x))
+  {
+    result.x = 0;
+    result.y = 0;
+    result.z = 0;
+  } // end if
 
   return result;
 } // end PhongReflectionBase::evaluate()
