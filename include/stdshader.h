@@ -5,11 +5,11 @@
 #ifndef STDSHADER_H
 #define STDSHADER_H
 
-#include "exportShading.h"
+#include "detail/exportShading.h"
 
-#include "Spectrum.h"
-#include "Point.h"
-#include "Vector.h"
+#include "detail/Spectrum.h"
+#include "detail/Point.h"
+#include "detail/Vector.h"
 
 #include "stdmaterial.h"
 #include "noises.h"

@@ -7,8 +7,8 @@
 #define NOISES_H
 
 #include "stdshader.h"
-#include "ShadingInterface.h"
-#include "Point.h"
+#include "detail/ShadingInterface.h"
+#include "detail/Point.h"
 
 // A hook into the ShadingInterface
 // XXX This is probably not reentrant

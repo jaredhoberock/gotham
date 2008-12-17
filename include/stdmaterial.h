@@ -3,7 +3,7 @@
  *  \brief Thunk functions for hiding ShadingInterface nastiness from shaders.
  */
 
-#include "ShadingInterface.h"
+#include "detail/ShadingInterface.h"
 
 // The idea here is that we need an allocator for the different
 // ScatteringDistributionFunctions
