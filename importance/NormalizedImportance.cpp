@@ -35,6 +35,7 @@ void NormalizedImportance
   MetropolisRenderer tempRenderer(r, mutator, luminance);
   tempRenderer.setScene(scene);
   tempRenderer.setRecord(dynamic_pointer_cast<Record,RenderFilm>(estimate));
+  tempRenderer.setShadingContext(context);
   shared_ptr<HaltCriterion> halt(new TargetRayCount(1000000));
   tempRenderer.setHaltCriterion(halt);
   
