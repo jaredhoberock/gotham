@@ -64,11 +64,6 @@ class MultiStageMetropolisRenderer
 
     // The recursion scale.
     float mRecursionScale;
-
-    FunctionAllocator mSeedPool;
-    std::vector<PathSampler::HyperPoint> mSeedPoints;
-    std::vector<Path> mSeedPaths;
-    std::vector<PathSampler::ResultList> mSeedResults;
 }; // end MultiStageMetropolisRenderer
 
 #endif // MULTI_STAGE_METROPOLIS_RENDERER_H

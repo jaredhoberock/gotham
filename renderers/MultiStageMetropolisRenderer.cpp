@@ -19,7 +19,7 @@ MultiStageMetropolisRenderer
   ::MultiStageMetropolisRenderer(const boost::shared_ptr<RandomSequence> &sequence,
                                  const boost::shared_ptr<PathMutator> &m,
                                  const boost::shared_ptr<ScalarImportance> &importance)
-    :Parent(sequence,m,importance),mRecursionScale(0.5f),mSeedPool(10000 * 10000)
+    :Parent(sequence,m,importance),mRecursionScale(0.5f)
 {
   ;
 } // end MultiStageMetropolisRenderer::MultiStageMetropolisRenderer()
@@ -239,16 +239,8 @@ void MultiStageMetropolisRenderer
   // pay back the rays we owe
   mScene->setRaysCast(mScene->getRaysCast() + owedRays);
 
-  // kill the seeds
-  mSeedPoints.clear();
-  mSeedPaths.clear();
-  mSeedPaths.clear();
-
   // purge the local store
   mLocalPool.freeAll();
-
-  // purge the seed store
-  mSeedPool.freeAll();
 } // end TargetRaysRenderer::kernel()
 
 float MultiStageMetropolisRenderer
