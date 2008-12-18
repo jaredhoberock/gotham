@@ -6,6 +6,10 @@
 #include "Matrix.h"
 #include <algorithm>
 
+#ifdef minor
+#undef minor
+#endif // minor
+
 namespace gpcpu
 {
 
