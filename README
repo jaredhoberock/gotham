@@ -22,11 +22,8 @@ sudo apt-get install scons
 sudo apt-get install g++
 
 # dependencies:
-# install boost
-sudo apt-get install libboost-dev
-sudo apt-get install libboost-date-time-dev
-sudo apt-get install libboost-thread-dev
-sudo apt-get install libboost-python-dev
+# install boost version 1.35
+sudo apt-get install libboost-dev1.35
 
 # install glut
 sudo apt-get install libglut-dev

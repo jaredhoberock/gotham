@@ -20,6 +20,10 @@
 
 #undef BOOST_NO_EXCEPTIONS
 
+// boost/gil seems to have forgotten to #include <typeinfo>, so do it for them
+// XXX remove this when they get their act together
+#include <typeinfo>
+
 #include <boost/gil/image.hpp>
 #include <boost/gil/typedefs.hpp>
 #include <boost/gil/extension/io/jpeg_io.hpp>
