@@ -15,6 +15,7 @@
 #include "../shading/ScatteringDistributionFunction.h"
 #include "../shading/ShadingContext.h"
 #include <boost/array.hpp>
+#include <limits.h>
 
 class FunctionAllocator;
 class SurfacePrimitive;
