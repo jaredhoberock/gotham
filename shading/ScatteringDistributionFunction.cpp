@@ -5,6 +5,7 @@
 
 #include "ScatteringDistributionFunction.h"
 #include "../geometry/Mappings.h"
+#include <string.h>
 
 Spectrum ScatteringDistributionFunction
   ::evaluate(const Vector &wo,
