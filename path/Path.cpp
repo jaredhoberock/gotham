@@ -10,6 +10,7 @@
 #include "../geometry/Ray.h"
 #include "RussianRoulette.h"
 #include <typeinfo>
+#include <string.h>
 
 // XXX refactor this method and the next
 unsigned int Path
