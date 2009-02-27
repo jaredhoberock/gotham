@@ -51,5 +51,5 @@ scons
 # render a simple scene
 # press 'r' to start the render
 cd $GOTHAMHOME/scenes
-./cornellbox.py
+./cornellbox.goth
 
