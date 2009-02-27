@@ -12,6 +12,11 @@
 #define INV_TWOPI (1.0f / (2.0f * M_PI))
 #endif // INV_TWOPI
 
+#ifndef isfinite
+#define isfinite(X) _finite(X)
+#define UNDEF_ISFINITE
+#endif // isfinite
+
 template<typename V3, typename S3, typename Boolean>
   PhongReflectionBase<V3,S3,Boolean>
     ::PhongReflectionBase(const Spectrum &r,
@@ -222,4 +227,8 @@ template<typename V3, typename S3, typename Boolean>
   // XXX hide the phong distribution evaluation somewhere else
   return (mExponent + 2.0f) * powf(fabs(dot(normal,m)), mExponent) * INV_TWOPI * J;
 } // end PhongReflectionBase::evaluatePdf()
+
+#ifdef UNDEF_ISFINITE
+#undef isfinite
+#endif // UNDEF_ISFINITE
 
