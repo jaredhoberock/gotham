@@ -5,12 +5,12 @@
 sudo apt-get install subversion
 
 # checkout the code from the repository
-svn checkout http://graphics.cs.uiuc.edu/svn/jared/src dev/src
+svn checkout http://schwanz.org/svn/jared/src/gotham gotham
 
 # set the environment variable GOTHAMHOME to point to the gotham directory under src/
 # for example, on my machine it is /home/jared/dev/src/gotham
 # you may want to put this in your .bashrc or similar script
-export GOTHAMHOME=<absolute root here>/src/gotham
+export GOTHAMHOME=<absolute root here>/gotham
 
 # update PATH to point to gotham's bin directory
 export PATH=$PATH:$GOTHAMHOME/bin
