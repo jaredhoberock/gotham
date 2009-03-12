@@ -29,17 +29,26 @@ variableName = {'posix'  : 'LD_LIBRARY_PATH',
 pathSeparator = {'posix'  : ':',
                  'darwin' : ':',
                  'nt'     : ';'}
+
 try:
-  oldPath = os.environ[variableName[os.name]]
-  # is it set correctly?
-  if string.split(oldPath,pathSeparator[os.name])[0] != dir:
-    path = dir + pathSeparator[os.name] + oldPath
-    os.environ[variableName[os.name]] = path
-    # recurse with the new environment
-    os.execvp("gotham",sys.argv)
+  varName = variableName[os.name]
 except:
   # continue and hope for the best
   print 'Warning: unknown OS. Could not set shared library path.'
+
+oldPath = ''
+try:
+  oldPath = os.environ[varName]
+except:
+  # shared lib path not defined, treat it as empty
+  pass
+
+# is it set correctly?
+if string.split(oldPath,pathSeparator[os.name])[0] != dir:
+  path = dir + pathSeparator[os.name] + oldPath
+  os.environ[variableName[os.name]] = path
+  # recurse with the new environment
+  os.execvp("gotham",sys.argv)
 
 # Python's path must also include this directory
 sys.path += [dir]

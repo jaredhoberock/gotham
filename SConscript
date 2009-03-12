@@ -4,6 +4,13 @@ import glob
 Import('env')
 
 # add dependencies
+
+# linking to libstdc++ first worksaround
+# a bug which occurs on some 64b Linux systems
+# see http://wiki.fifengine.de/Segfault_in_cxa_allocate_exception
+if os.name == 'posix':
+  env.Append(LIBS = ['stdc++'])
+
 # with msvc, boost figures out which libraries to link
 if os.name == 'posix':
   env.Append(LIBS = ['boost_python'])
