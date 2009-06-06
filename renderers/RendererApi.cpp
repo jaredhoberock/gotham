@@ -38,7 +38,7 @@ void RendererApi
   attr["renderer:energyredistribution:chainlength"] = "100";
   attr["renderer:batchmeans:batches"] = "2";
   attr["renderer:noiseawaremetropolis:varianceexponent"] = "0.5";
-  attr["renderer:seed"] = 13;
+  attr["renderer:seed"] = "13";
 } // end RendererApi::getDefaultAttributes()
 
 Renderer *RendererApi
