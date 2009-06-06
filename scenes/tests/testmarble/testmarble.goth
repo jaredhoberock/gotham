@@ -22,7 +22,6 @@ Mesh(unitSquare[0], unitSquare[1])
 PopMatrix()
 
 # floor
-#Material('cuda_matte', 'Kd', (0.8, 0.8, 0.8))
 Material('veinedmarble')
 PushMatrix()
 Translate(0,-1,0)
