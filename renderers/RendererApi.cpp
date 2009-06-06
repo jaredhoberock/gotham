@@ -38,6 +38,7 @@ void RendererApi
   attr["renderer:energyredistribution:chainlength"] = "100";
   attr["renderer:batchmeans:batches"] = "2";
   attr["renderer:noiseawaremetropolis:varianceexponent"] = "0.5";
+  attr["renderer:seed"] = 13;
 } // end RendererApi::getDefaultAttributes()
 
 Renderer *RendererApi
@@ -45,7 +46,8 @@ Renderer *RendererApi
              const Gotham::PhotonMaps &photonMaps)
 {
   // create a RandomSequence
-  shared_ptr<RandomSequence> z(new RandomSequence());
+  unsigned int seed = lexical_cast<unsigned int>(attr["renderer:seed"]);
+  shared_ptr<RandomSequence> z(new RandomSequence(seed));
 
   // create a new Renderer
   Renderer *result = 0;
