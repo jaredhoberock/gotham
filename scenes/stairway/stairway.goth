@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+from api import *
+import objtogoth
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./glassParts.obj")
+PushAttributes()
+Material("perfectglass", "Kt", (0.9,1.0,0.9), "Kr", (1,1,1), "eta", 1.33)
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices,normals) = objtogoth.objtogoth("./redParts.obj")
+PushAttributes()
+Material("plastic", "Kd", (0.8,0.22,0.22), "Ks", (1,1,1), "exponent", 20)
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./steelParts.obj")
+PushAttributes()
+# this likely won't look like steel
+Material("plastic", "Kd", (0.26,0.26,0.26), "Ks", (1,1,1), "exponent", 80)
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./brickParts.obj")
+PushAttributes()
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./marbleParts.obj")
+PushAttributes()
+Material("veinedmarble",
+         "specularcolor", (1,1,1),
+         "veinfreq", 2.0,
+         "veinlevels", 8,
+         # dark turquoise
+         "basecolor", (0.09, 0.09, 0.1),
+         # dark magenta
+         "veincolor", (11.90/255.0, 2.10/255.0, 6.30/255.0),
+         "sharpness", 2.0,
+         "shadingfreq", 1.0,
+         "exponent", 1.0 / 0.075)
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./copperParts_parameterized.obj")
+PushAttributes()
+# 54 planks in u
+# 5 planks in v
+Material('copper', 'uFreq', 54.0, 'vFreq', 5.0)
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./perforatedCopperParts.obj")
+PushAttributes()
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./overheadLight.obj")
+PushAttributes()
+Material('light', 'power', (100,100,100))
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+(vertices, parms, indices, normals) = objtogoth.objtogoth("./sideLight.obj")
+PushAttributes()
+Material('light', 'power', (10,10,10))
+Mesh(vertices, parms, indices)
+PopAttributes()
+
+#(vertices, parms, indices, normals) = objtogoth.objtogoth("./lightParts.obj")
+#PushAttributes()
+#Material('light', 'power', (5000,5000,5000))
+#Mesh(vertices, parms, indices)
+#PopAttributes()
+
+## orthographic
+#LookAt([-99.7128,9.51601,145.209],
+#       [12.7157,9.516,9.27275],
+#       [1.94926e-09,1,-5.75064e-08])
+#Camera(1,10,0.005)
+#PopMatrix()
+
+## orthographic 2
+#LookAt([-72.1207,89.297,151.18],
+#       [14.7608,5.42967,4.7265],
+#       [0.212567,0.896999,-0.387568])
+#Camera(1,10,0.005)
+#PopMatrix()
+
+# perspective
+PushMatrix()
+LookAt([0.159734,15.088,27.4703],
+       [17.1869,15.088,1.15746],
+       [-1.94007e-09,1,1.51449e-09])
+Camera(1,60,0.005)
+PopMatrix()
+
+
+sampler = 'simplebidirectionalrussianroulette'
+Attribute('path:sampler', sampler)
+Attribute('path:russianroulette:function', 'modifiedkelemen')
+Attribute('path:russianroulette:continueprobability', 0.95)
+Attribute('path:maxlength', 20)
+
+algorithm = 'noiseawaremetropolis'
+Attribute('renderer:algorithm', algorithm)
+largestep = 0.001
+Attribute('mutator:largestep', largestep)
+Attribute('renderer:targetrays', 50000000)
+#Attribute('renderer:targetrays', 5000000000)
+#Attribute('renderer:spp', 5)
+Attribute('renderer:seed', 13)
+
+filename = 'stairway.' + sampler + '.' + algorithm + '.p' + str(largestep) + '.exr'
+Attribute('record:outfile', filename)
+
+Attribute('viewer:exposure', 11.0)
+Attribute('viewer', True)
+
+Render()
+

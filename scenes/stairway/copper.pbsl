@@ -1,0 +1,64 @@
+scattering(Spectrum patina0 = Spectrum(0.672, 0.780, 0.573),
+           Spectrum patina1 = Spectrum(0.498, 0.682, 0.670),
+           Spectrum copper = Spectrum(0.306, 0.204, 0.075),
+           Spectrum Ks = Spectrum(1.0f, 1.0f, 1.0f),
+           float exponent = (1.0f / 0.2f),
+           float uFreq, float vFreq)
+{
+  ParametricCoordinates plankSpace = ParametricCoordinates(uFreq * UV.x, vFreq * UV.y);
+
+  int uPlank = floorf(plankSpace.x);
+  plankSpace.x -= uPlank;
+
+  // the odd planks are offset by 0.5
+  float vOffset = 0.0f;
+  if(uPlank & 1 == 1)
+  {
+    vOffset = 0.5f;
+  } // end if
+
+  plankSpace.y += vOffset;
+  int vPlank = floorf(plankSpace.y);
+  plankSpace.y -= vPlank;
+
+  ParametricCoordinates grout(0.05f, 0.05f * vFreq / uFreq);
+
+  if(plankSpace.x > grout.x && plankSpace.y > grout.y)
+  {
+    // vertical grain
+    Point pgrain = Point(plankSpace.x + uPlank, plankSpace.y + vPlank, 0);
+    pgrain.x *= 100.0f;
+    pgrain.y *= 4.0f * snoise(vPlank + 0.1f);
+
+    float grain = 0.5f * (snoise(pgrain) + 1.0f);
+    grain += 0.5f * (snoise(pgrain) + 1.0f);
+
+    // low frequency blotchiness
+    Vector fbm3 = vectorFbm(Point(plankSpace.x + uPlank, plankSpace.y + vPlank, 0),
+                            1.0f + 0.75 * snoise(uPlank + vPlank + 0.1f),
+                            3, 1.0f);
+    fbm3 += Vector(1,1,1);
+    fbm3 *= 0.5f;
+
+    // horizontal stripes
+    Vector fbm2 = vectorFbm(Point(plankSpace.y + uPlank, 0, 0),
+                            3, 3, 1.0f);
+    float pulseGain = (0.20 + 0.10f * snoise(uPlank + vPlank + 0.2f)) * fbm2.x;
+    float pulse = pulsetrain(0.025f, 0.05f, plankSpace.y + fbm2.y);
+    float stripes = pulseGain * (pulse);
+
+    float s = grain * fbm3.x;
+    s -= stripes;
+    s = clamp(s, 0.0f, 1.0f);
+
+    Spectrum patina = mix(patina0, patina1, 0.5f * (snoise(uPlank + vPlank + 0.3f) + 1.0f));
+    Spectrum Kd = mix(copper, patina, s);
+    F = diffuse(Kd);
+    //F = composite(diffuse(Kd), glossy(s * Ks, 1.5f, exponent));
+  } // end if
+  else
+  {
+    F = diffuse(Spectrum(0,0,0));
+  } // end else
+} // end scattering()
+
