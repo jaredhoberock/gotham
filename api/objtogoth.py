@@ -199,11 +199,11 @@ def objtogothWithMaterials(filename):
       gothamParms['Kd'] = Kd
       gothamParms['map_Kd'] = map_Kd
     elif hasDiffuse and not hasTransmission and hasSpecular:
-      gothamName = 'uber'
+      gothamName = 'plastic'
       gothamParms['Kd'] = Kd
-      gothamParms['map_Kd'] = map_Kd
+      #gothamParms['map_Kd'] = map_Kd
       gothamParms['Ks'] = Ks
-      gothamParms['map_Ks'] = map_Ks
+      #gothamParms['map_Ks'] = map_Ks
       gothamParms['exponent'] = exponent
     elif hasDiffuse and hasTransmission and not hasSpecular:
       print "Warning: objtogoth::objtogothWithMaterials(): material '%s' with diffuse and transmission has no Gotham analogue." % material
