@@ -30,6 +30,12 @@ void ShadingContext
   *mMaterials = *materials;
 } // end ShadingContext::setMaterials()
 
+size_t ShadingContext
+  ::getNumMaterials(void) const
+{
+  return mMaterials->size();
+} // end ShadingContext::getNumMaterials()
+
 void ShadingContext
   ::setTextures(const boost::shared_ptr<TextureList> &textures)
 {

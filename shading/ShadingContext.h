@@ -231,6 +231,11 @@ class ShadingContext
      */
     virtual void setMaterials(const boost::shared_ptr<MaterialList> &materials);
 
+    /*! This method returns the number of Materials owned by this ShadingContext.
+     *  \return mMaterials.size()
+     */
+    size_t getNumMaterials(void) const;
+
     /*! This method returns a const pointer to the Material of interest.
      *  \param h The MaterialHandle of the Material of interest.
      *  \return mMaterials[h].get()
