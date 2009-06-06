@@ -264,6 +264,7 @@ void Gotham
 
     v.setRenderer(mRenderer);
 
+    v.setExposure(lexical_cast<float>(attr["viewer:exposure"]));
     v.setGamma(lexical_cast<float>(attr["viewer:gamma"]));
 
     // try to tell the viewer where to look
@@ -602,6 +603,7 @@ void Gotham
   // set miscellaneous attributes that don't belong
   // elsewhere
   attr["viewer"] = "true";
+  attr["viewer:exposure"] = "1.0";
   attr["viewer:gamma"] = "2.2";
   attr["name"] = "";
   attr["material"] = "0";

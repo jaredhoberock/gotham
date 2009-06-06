@@ -228,7 +228,7 @@ void RenderViewer
       } // end if
       else
       {
-        mExposure -= 1.0f;
+        setExposure(mExposure - 1.0f);
 
         sprintf(msg, "Exposure: %f", mExposure);
       } // end else
@@ -249,7 +249,7 @@ void RenderViewer
       } // end if
       else
       {
-        mExposure -= 0.1f;
+        setExposure(mExposure - 0.1f);
 
         sprintf(msg, "Exposure: %f", mExposure);
       } // end else
@@ -271,7 +271,7 @@ void RenderViewer
       } // end if
       else
       {
-        mExposure += 1.0f;
+        setExposure(mExposure + 1.0f);
 
         sprintf(msg, "Exposure: %f", mExposure);
       } // end else
@@ -293,7 +293,7 @@ void RenderViewer
       } // end if
       else
       {
-        mExposure += 0.1f;
+        setExposure(mExposure + 0.1f);
 
         sprintf(msg, "Exposure: %f", mExposure);
       } // end else
@@ -387,6 +387,12 @@ void RenderViewer
   // update the frame automatically
   startAnimation();
 } // end RenderViewer::startRender()
+
+void RenderViewer
+  ::setExposure(float e)
+{
+  mExposure = e;
+} // end RenderViewer::setExposure()
 
 void RenderViewer
   ::setGamma(const float g)
