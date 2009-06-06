@@ -92,7 +92,7 @@ eye    = [0.159734,15.088,27.4703]
 center = [17.1869,15.088,1.15746]
 up     = [0, 1, 0]
 
-cropped = True
+cropped = False
 
 width = height = 512
 
@@ -124,6 +124,9 @@ else:
   width = 600
   height = 800
 
+width  *= 2
+height *= 2
+
 Attribute('record:width',  width)
 Attribute('record:height', height)
 
@@ -145,8 +148,8 @@ algorithm = 'noiseawaremetropolis'
 Attribute('renderer:algorithm', algorithm)
 largestep = 0.001
 Attribute('mutator:largestep', largestep)
-Attribute('renderer:targetrays', 50000000)
-#Attribute('renderer:targetrays', 5000000000)
+#Attribute('renderer:targetrays', 50000000)
+Attribute('renderer:targetrays', 5000000000)
 
 seed = 13
 Attribute('renderer:seed', seed)
