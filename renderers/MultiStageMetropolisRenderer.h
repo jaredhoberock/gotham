@@ -61,6 +61,10 @@ class MultiStageMetropolisRenderer
                                    float &ix,
                                    float &xPdf);
 
+    /*! This method outputs the current partial result from mRecord.
+     */
+    virtual void recordPartialResult(void);
+
 
     // The recursion scale.
     float mRecursionScale;

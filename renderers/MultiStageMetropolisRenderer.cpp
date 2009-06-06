@@ -115,6 +115,9 @@ void MultiStageMetropolisRenderer
 
   size_t currentEstimate = 0;
 
+  size_t numSamplesStepSize = 1000000;
+  size_t numSamplesAtWhichToRecordPartialResult = numSamplesStepSize;
+
   // main loop
   while(!(*mHalt)())
   {
@@ -234,6 +237,13 @@ void MultiStageMetropolisRenderer
 
     // update the number of samples we've taken so far
     ++mNumSamples;
+
+    // output a partial solution every 10M samples
+    if(mNumSamples > numSamplesAtWhichToRecordPartialResult)
+    {
+      recordPartialResult();
+      numSamplesAtWhichToRecordPartialResult += numSamplesStepSize;
+    } // end if
   } // end for i
 
   // pay back the rays we owe
@@ -296,4 +306,30 @@ float MultiStageMetropolisRenderer
 
   return invB;
 } // end MultiStageMetropolisRenderer::updateImportance()
+
+void MultiStageMetropolisRenderer
+  ::recordPartialResult(void)
+{
+  // estimate the canonical normalization constant
+  LuminanceImportance luminance;
+
+  // rescale the current image so that it has b mean luminance
+  RenderFilm *film = dynamic_cast<RenderFilm*>(mRecord.get());
+  if(film)
+  {
+    RenderFilm partialResult = *film;
+    partialResult.setFilename(film->getFilename() + std::string("partial_result.exr"));
+    partialResult.setSilentPostprocess(true);
+
+    // use our own random sequence so we always get the same result here
+    // this is particularly important for difficult scenes where it is hard
+    // to agree on an estimate
+    RandomSequence seq(13u);
+
+    float b = luminance.estimateNormalizationConstant(seq, mScene, mShadingContext, mMutator, 10000);
+    float s = b / film->computeMean().luminance();
+    partialResult.scale(Spectrum(s,s,s));
+    partialResult.postprocess();
+  } // end if
+} // end MultiStageMetropolisRenderer::recordPartialResult()
 
