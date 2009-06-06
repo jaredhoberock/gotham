@@ -88,14 +88,38 @@ PopAttributes()
 #Camera(1,10,0.005)
 #PopMatrix()
 
+eye    = [0.159734,15.088,27.4703]
+center = [17.1869,15.088,1.15746]
+up     = [0, 1, 0]
+
+cropped = false
+
+width = height = 512
+
+if not cropped:
+  width  = 256
+  height = 512
+
+  # move the eye down to center on the middle of the staircase
+  center[1] -= 5
+  eye[1]    -= 5
+  
+  look = [center[0] - eye[0], center[1] - eye[1], center[2] - eye[2]]
+  
+  # move the eye back to fit the whole thing in the image
+  eye[0] -= 0.42 * look[0]
+  eye[1] -= 0.42 * look[1]
+  eye[2] -= 0.42 * look[2]
+
+Attribute('record:width',  width)
+Attribute('record:height', height)
+
 # perspective
 PushMatrix()
-LookAt([0.159734,15.088,27.4703],
-       [17.1869,15.088,1.15746],
-       [-1.94007e-09,1,1.51449e-09])
-Camera(1,60,0.005)
+LookAt(eye, center, up)
+aspect = float(width) / float(height)
+Camera(aspect,60,0.005)
 PopMatrix()
-
 
 sampler = 'simplebidirectionalrussianroulette'
 Attribute('path:sampler', sampler)
@@ -109,9 +133,11 @@ largestep = 0.001
 Attribute('mutator:largestep', largestep)
 Attribute('renderer:targetrays', 50000000)
 #Attribute('renderer:targetrays', 5000000000)
-Attribute('renderer:seed', 13)
 
-filename = 'stairway.' + sampler + '.' + algorithm + '.p' + str(largestep) + '.exr'
+seed = 13
+Attribute('renderer:seed', seed)
+
+filename = 'stairway.' + sampler + '.' + algorithm + '.p' + str(largestep) + '.seed' + str(seed) + '.exr'
 Attribute('record:outfile', filename)
 
 Attribute('viewer:exposure', 11.0)
