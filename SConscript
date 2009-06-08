@@ -141,6 +141,11 @@ env.Program('imgclean', 'api/imgclean.cpp')
 dir = homedir + '/bin'
 Default(env.Install(dir, source = 'imgclean'))
 
+# build imgaccum
+env.Program('imgaccum', 'api/imgaccum.cpp')
+dir = homedir + '/bin'
+Default(env.Install(dir, source = 'imgaccum'))
+
 # build test if it exists
 if os.path.exists('test.cpp'):
   env.Program('test', 'test.cpp')
