@@ -1,14 +1,14 @@
-# These instructions assume a fresh install of Ubuntu or similar OS environment
+# These instructions assume a fresh install of Ubuntu 11.12 or similar OS environment
 # some of these install lines may be redundant on well lived-in systems
 
-# install subversion for access to the source code repository
-sudo apt-get install subversion
+# install git for access to the source code repository
+sudo apt-get install git
 
-# checkout the code from the repository
-svn checkout http://schwanz.org/svn/jared/src/gotham gotham
+# get the code from the repository
+git clone git@github.com:jaredhoberock/gotham.git gotham
 
-# set the environment variable GOTHAMHOME to point to the gotham directory under src/
-# for example, on my machine it is /home/jared/dev/src/gotham
+# set the environment variable GOTHAMHOME to point to the gotham directory
+# for example, on my machine it is /home/jared/dev/git/gotham
 # you may want to put this in your .bashrc or similar script
 export GOTHAMHOME=<absolute root here>/gotham
 
@@ -22,11 +22,14 @@ sudo apt-get install scons
 sudo apt-get install g++
 
 # dependencies:
-# install boost version 1.35
-sudo apt-get install libboost-dev1.35
+# install boost version >= 1.35
+sudo apt-get install libboost-dev
+
+# install python2.7
+sudo apt-get install python2.7
 
 # install glut
-sudo apt-get install libglut-dev
+sudo apt-get install freeglut3-dev
 
 # install glew for OpenGL extensions
 sudo apt-get install libglew1.5-dev
