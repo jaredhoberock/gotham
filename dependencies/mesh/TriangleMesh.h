@@ -8,6 +8,7 @@
 #define TRIANGLE_MESH_H
 
 #include <vector>
+#include <cstddef>
 
 template<typename P3D, typename P2D, typename N3D = P3D>
   class TriangleMesh

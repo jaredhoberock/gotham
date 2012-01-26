@@ -11,6 +11,7 @@
 #include <vector>
 #include "../include/detail/exportShading.h"
 #include "ScatteringFunctionBlock.h"
+#include <cstddef>
 
 // XXX this is nasty: kill it
 #ifndef WIN32
