@@ -438,13 +438,13 @@ import os
 homedir = os.environ['GOTHAMHOME']
 includes = [os.path.join(homedir, 'include')]
 if os.name == 'posix':
-  includes += ['/usr/include/python2.5']
+  includes += ['/usr/include/python2.7']
 elif os.name == 'nt':
   # XXX scons doesn't correctly find this sdk include path
   sdkInclude = "c:/Program Files/Microsoft SDKs/Windows/v6.0A/Include"
   includes += [sdkInclude,
                os.path.join(homedir, 'include/detail'),
-               os.path.join(homedir, 'include/detail/python2.5')]
+               os.path.join(homedir, 'include/detail/python2.7')]
 libpath = os.path.join(os.environ["GOTHAMHOME"], 'lib')
 if os.name == 'posix':
   libs = [File(os.path.join(libpath, 'libgotham.so')), 'boost_python']

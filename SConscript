@@ -17,9 +17,9 @@ if os.name == 'posix':
   env.Append(LIBS = ['boost_thread'])
 
 if os.name == 'nt':
-  env.Append(LIBS = ['python25'])
+  env.Append(LIBS = ['python27'])
 else:
-  env.Append(LIBS = ['python2.5'])
+  env.Append(LIBS = ['python2.7'])
 
 # image format libraries
 env.Append(LIBS = ['jpeg'])

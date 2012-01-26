@@ -60,9 +60,9 @@ def getIncludes():
               windowsInclude,
               sdkInclude,
               os.path.join(windowsInclude, 'OpenEXR'),
-              os.path.join(windowsInclude, 'python2.5')]
+              os.path.join(windowsInclude, 'python2.7')]
   elif os.name == 'posix':
-    result = [includeMe0, includeMe1, includeMe2, '/usr/include/python2.5',
+    result = [includeMe0, includeMe1, includeMe2, '/usr/include/python2.7',
               '/usr/include/OpenEXR']
     result += ['/usr/include/qt4',
               '/usr/include/qt4/Qt',    '/usr/include/qt4/QtCore',
