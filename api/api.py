@@ -482,7 +482,7 @@ class PyGotham:
 
 def __copyright():
   print 'Gotham 0.1'
-  print '(c) Copyright 2007-2008 Jared Hoberock. All Rights Reserved.'
+  print '(c) Copyright 2007-2012 Jared Hoberock. All Rights Reserved.'
 
 # print copyright info as soon as this is imported
 __copyright()
