@@ -5,8 +5,8 @@
 
 #include "Gotham.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/spirit/core.hpp>
-#include <boost/spirit/actor/push_back_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
+#include <boost/spirit/include/classic_push_back_actor.hpp>
 
 #include "../include/detail/exportShading.h"
 #include "../shading/DefaultMaterial.h"
@@ -46,7 +46,7 @@
 #endif // USE_QGLVIEWER
 
 using namespace boost;
-using namespace boost::spirit;
+using namespace boost::spirit::classic;
 
 Gotham
   ::Gotham(void)
